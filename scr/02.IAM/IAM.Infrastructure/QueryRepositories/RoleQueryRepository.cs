@@ -8,38 +8,38 @@ public class RoleQueryRepository(IamDbContext context) : IRoleQueryRepository
 {
    private readonly IamDbContext _context = context;
 
-   public async Task<Role?> GetByIdAsync(Guid id)
+   public async Task<Role?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
    {
       return await _context.Roles
          .AsNoTracking()
          .Include(r => r.RolePermissions)
             .ThenInclude(rf => rf.Permission)
-         .FirstOrDefaultAsync(r => r.Id == id);
+         .FirstOrDefaultAsync(r => r.Id == id, cancellationToken);
    }
 
-   public async Task<IEnumerable<Role>> GetAllAsync(Guid customerId)
+   public async Task<IEnumerable<Role>> GetAllAsync(Guid customerId, CancellationToken cancellationToken = default)
    {
       return await _context.Roles
          .AsNoTracking()
          .Where(r => r.CustomerId == null || r.CustomerId == customerId)
          .Include(r => r.RolePermissions)
             .ThenInclude(rf => rf.Permission)
-         .ToListAsync();
+         .ToListAsync(cancellationToken);
    }
 
-   public async Task<bool> NameExistsAsync(string name, Guid? customerId)
+   public async Task<bool> NameExistsAsync(string name, Guid? customerId, CancellationToken cancellationToken = default)
    {
       return await _context.Roles
-         .AnyAsync(r => r.Name == name && r.CustomerId == customerId);
+         .AnyAsync(r => r.Name == name && r.CustomerId == customerId, cancellationToken);
    }
 
-   public async Task<IEnumerable<Permission>> GetUserPermissionsAsync(Guid userId)
+   public async Task<IEnumerable<Permission>> GetUserPermissionsAsync(Guid userId, CancellationToken cancellationToken = default)
    {
        return await _context.UserRoles
            .AsNoTracking()
            .Where(ur => ur.UserId == userId)
            .SelectMany(ur => ur.Role.RolePermissions.Select(rf => rf.Permission))
            .Distinct()
-           .ToListAsync();
+           .ToListAsync(cancellationToken);
    }
 }

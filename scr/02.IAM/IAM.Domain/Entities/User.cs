@@ -21,7 +21,6 @@ public class User : EntityAudited
 
    public static User Create(string name, string email, string passwordHash, DateTime passwordExpiresAt, Guid customerId)
    {
-      var id = Guid.CreateVersion7();
       return new User
       {
          Id = Guid.CreateVersion7(),

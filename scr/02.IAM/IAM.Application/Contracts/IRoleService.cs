@@ -6,9 +6,9 @@ namespace IAM.Application.Contracts;
 
 public interface IRoleService
 {
-   Task<Result<RoleDto>> CreateAsync(RoleCreateRequest request);
-   Task<Result> UpdateAsync(Guid id, RoleUpdateRequest request);
-   Task<Result> AssignToUserAsync(RoleAssignRequest request);
-   Task<Result<IEnumerable<RoleDto>>> GetAllAsync();
-   Task<Result<IEnumerable<PermissionDto>>> GetUserPermissionsAsync(Guid userId);
+   Task<Result<RoleDto>> CreateAsync(RoleCreateRequest request, CancellationToken cancellationToken = default);
+   Task<Result> UpdateAsync(Guid id, RoleUpdateRequest request, CancellationToken cancellationToken = default);
+   Task<Result> AssignToUserAsync(RoleAssignRequest request, CancellationToken cancellationToken = default);
+   Task<Result<IEnumerable<RoleDto>>> GetAllAsync(CancellationToken cancellationToken = default);
+   Task<Result<IEnumerable<PermissionDto>>> GetUserPermissionsAsync(Guid userId, CancellationToken cancellationToken = default);
 }
