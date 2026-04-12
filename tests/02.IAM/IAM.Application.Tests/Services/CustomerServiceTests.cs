@@ -1,4 +1,4 @@
-﻿using IAM.Application.Contracts;
+using IAM.Application.Contracts;
 using IAM.Application.Services;
 using IAM.Domain.DTOs.Requests;
 using IAM.Domain.DTOs.Responses;
@@ -45,10 +45,10 @@ public class CustomerServiceTests
    {
       var request = GetCustomerCreateRequest(CustomerType.Company, "Customer Name", "Code1");
 
-      _customerQueryRepository.ExistsByCodeAsync(request.Code).Returns(false);
+      _customerQueryRepository.ExistsByCodeAsync(request.Code, Arg.Any<CancellationToken>()).Returns(false);
       _customerValidator.ValidateCreate(request, false).Returns(Result.Success());
 
-      var result = await _service.ValidateCreateCustomerAsync(request);
+      var result = await _service.ValidateCreateCustomerAsync(request, TestContext.Current.CancellationToken);
 
       Assert.True(result.IsSuccess);
    }
@@ -58,10 +58,10 @@ public class CustomerServiceTests
    {
       var request = GetCustomerCreateRequest(CustomerType.Company, "Customer Name", "Code1");
 
-      _customerQueryRepository.ExistsByCodeAsync(request.Code).Returns(true);
+      _customerQueryRepository.ExistsByCodeAsync(request.Code, Arg.Any<CancellationToken>()).Returns(true);
       _customerValidator.ValidateCreate(request, true).Returns(Result.Failure(new DuplicateCustomerCodeError(request.Code)));
 
-      var result = await _service.ValidateCreateCustomerAsync(request);
+      var result = await _service.ValidateCreateCustomerAsync(request, TestContext.Current.CancellationToken);
 
       Assert.False(result.IsSuccess);
    }
@@ -72,9 +72,9 @@ public class CustomerServiceTests
       var id = Guid.NewGuid();
       var expected = new CustomerDto(Id: id, Type: CustomerType.Company, Code: "ABC", Name: "Test", Description: null, IsActive: true);
 
-      _customerQueryRepository.GetByIdAsync(id).Returns(expected);
+      _customerQueryRepository.GetByIdAsync(id, Arg.Any<CancellationToken>()).Returns(expected);
 
-      var result = await _service.GetByIdAsync(id);
+      var result = await _service.GetByIdAsync(id, TestContext.Current.CancellationToken);
 
       Assert.Equal(expected, result);
    }
@@ -97,9 +97,9 @@ public class CustomerServiceTests
          new(Id: Guid.Empty, Type: CustomerType.Company, Code: "ABC", Name: name, Description: null, IsActive: true) 
       };
 
-      _customerQueryRepository.GetByNameAsync(name).Returns(expected);
+      _customerQueryRepository.GetByNameAsync(name, Arg.Any<CancellationToken>()).Returns(expected);
 
-      var result = await _service.GetByNameAsync(name);
+      var result = await _service.GetByNameAsync(name, TestContext.Current.CancellationToken);
 
       Assert.Equal(expected, result);
    }
@@ -113,14 +113,14 @@ public class CustomerServiceTests
       var customer = Customer.Create(CustomerType.Company, "OriginalCode", "Original Name", "description");
 
       _userContext.UserOwnerId.Returns(id);
-      _customerRepository.GetByIdAsync(id).Returns(customer);
+      _customerRepository.GetByIdAsync(id, Arg.Any<CancellationToken>()).Returns(customer);
       _customerValidator.ValidateUpdate(request, true).Returns(Result.Success());
 
-      var result = await _service.UpdateAsync(id, request);
+      var result = await _service.UpdateAsync(id, request, TestContext.Current.CancellationToken);
 
       Assert.True(result.IsSuccess);
       _unitOfWork.Customers.Received(1).Update(customer);
-      await _unitOfWork.Received(1).SaveChangesAsync();
+      await _unitOfWork.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
    }
 
    [Fact]
@@ -131,10 +131,10 @@ public class CustomerServiceTests
       var customer = Customer.Create(CustomerType.Company, "OriginalCode", "Original Name", "description");
 
       _userContext.UserOwnerId.Returns(id);
-      _customerRepository.GetByIdAsync(id).Returns(customer);
+      _customerRepository.GetByIdAsync(id, Arg.Any<CancellationToken>()).Returns(customer);
       _customerValidator.ValidateUpdate(request, true).Returns(Result.Failure(new NotFoundError()));
 
-      var result = await _service.UpdateAsync(id, request);
+      var result = await _service.UpdateAsync(id, request, TestContext.Current.CancellationToken);
 
       Assert.False(result.IsSuccess);
    }
@@ -147,11 +147,11 @@ public class CustomerServiceTests
       var customer = Customer.Create(CustomerType.Company, "OriginalCode", "Original Name", "description");
 
       _userContext.UserOwnerId.Returns(id);
-      _customerRepository.GetByCodeAsync(request.Code).Returns((Customer)null);
+      _customerRepository.GetByCodeAsync(request.Code, Arg.Any<CancellationToken>()).Returns((Customer)null);
       _customerValidator.ValidateUpdateCode(request, false).Returns(Result.Success());
-      _customerRepository.GetByIdAsync(id).Returns(customer);
+      _customerRepository.GetByIdAsync(id, Arg.Any<CancellationToken>()).Returns(customer);
 
-      var result = await _service.UpdateCodeAsync(id, request);
+      var result = await _service.UpdateCodeAsync(id, request, TestContext.Current.CancellationToken);
 
       Assert.True(result.IsSuccess);
       Assert.Equal("NEWCODE", customer.Code);
@@ -165,10 +165,10 @@ public class CustomerServiceTests
       var existingCustomer = Customer.Create(CustomerType.Company, "EXISTING", "Original Name", "description");
 
       _userContext.UserOwnerId.Returns(id);
-      _customerRepository.GetByCodeAsync(request.Code).Returns(existingCustomer);
+      _customerRepository.GetByCodeAsync(request.Code, Arg.Any<CancellationToken>()).Returns(existingCustomer);
       _customerValidator.ValidateUpdateCode(request, true).Returns(Result.Failure(new DuplicateCustomerCodeError(request.Code)));
 
-      var result = await _service.UpdateCodeAsync(id, request);
+      var result = await _service.UpdateCodeAsync(id, request, TestContext.Current.CancellationToken);
 
       Assert.False(result.IsSuccess);
    }

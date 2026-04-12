@@ -18,17 +18,4 @@ public abstract class BaseController : ControllerBase
 
       return value is Result ? Ok(value) : Ok(Result<T>.Success(value));
    }
-
-   protected async Task<IActionResult> ExecuteIfExistsAsync<T>(
-       Func<Task<T?>> getEntityAsync,
-       Func<T, Task> actionAsync)
-   {
-      var entity = await getEntityAsync();
-
-      if (entity == null)
-         return NotFound(Result.Failure(new NotFoundError()));
-
-      await actionAsync(entity);
-      return Ok(Result.Success("Operation executed successfully."));
-   }
 }

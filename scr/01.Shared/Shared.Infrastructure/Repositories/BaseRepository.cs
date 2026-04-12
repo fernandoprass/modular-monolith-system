@@ -25,6 +25,7 @@ public class BaseRepository<T, TId>(DbContext context) : IBaseRepository<T, TId>
 
    public virtual Task AddAsync(T entity, CancellationToken cancellationToken = default)
    {
+      cancellationToken.ThrowIfCancellationRequested();
       return _dbSet.AddAsync(entity, cancellationToken).AsTask();
    }
 

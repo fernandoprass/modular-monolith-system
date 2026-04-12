@@ -17,48 +17,48 @@ public class CustomerController(
 
    [HttpGet("{id:guid}")]
    [Authorize]
-   public async Task<IActionResult> GetById(Guid id)
+   public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
    {
-      var customer = await _customerService.GetByIdAsync(id);
+      var customer = await _customerService.GetByIdAsync(id, cancellationToken);
       return OkOrNotFound(customer);
    }
 
    [HttpGet()]
    [Authorize]
-   public async Task<IActionResult> GetByName(string name)
+   public async Task<IActionResult> GetByName(string name, CancellationToken cancellationToken)
    {
-      var customer = await _customerService.GetByNameAsync(name);
+      var customer = await _customerService.GetByNameAsync(name, cancellationToken);
       return OkOrNotFound(customer);
    }
 
    [HttpPost]
-   public async Task<IActionResult> Create([FromBody] CustomerCreateRequest customer)
+   public async Task<IActionResult> Create([FromBody] CustomerCreateRequest customer, CancellationToken cancellationToken)
    {
-      var result = await _registerOrchestrator.RegisterCustomerAsync(customer);
+      var result = await _registerOrchestrator.RegisterCustomerAsync(customer, cancellationToken);
       return OkOrNotFound(result);
    }
 
    [HttpPut("{id:guid}")]
    [Authorize]
-   public async Task<IActionResult> Update(Guid id, [FromBody] CustomerUpdateRequest customer)
+   public async Task<IActionResult> Update(Guid id, [FromBody] CustomerUpdateRequest customer, CancellationToken cancellationToken)
    {
-      var result = await _customerService.UpdateAsync(id, customer);
+      var result = await _customerService.UpdateAsync(id, customer, cancellationToken);
       return OkOrNotFound(result);
    }
 
    [HttpPatch("{id:guid}/code")]
    [Authorize]
-   public async Task<IActionResult> UpdateCode(Guid id, [FromBody] CustomerUpdateCodeRequest customer)
+   public async Task<IActionResult> UpdateCode(Guid id, [FromBody] CustomerUpdateCodeRequest customer, CancellationToken cancellationToken)
    {
-      var result = await _customerService.UpdateCodeAsync(id, customer);
+      var result = await _customerService.UpdateCodeAsync(id, customer, cancellationToken);
       return OkOrNotFound(result);
    }
 
    [HttpDelete("{id:guid}")]
    [Authorize]
-   public async Task<IActionResult> Delete(Guid id)
+   public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
    {
-      var result = await _registerOrchestrator.DeleteCustomerAsync(id);
+      var result = await _registerOrchestrator.DeleteCustomerAsync(id, cancellationToken);
       return OkOrNotFound(result);
    }
 }
