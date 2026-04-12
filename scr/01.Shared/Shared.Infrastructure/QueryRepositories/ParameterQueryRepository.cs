@@ -13,15 +13,15 @@ internal class ParameterQueryRepository(SharedDbContext dbContext) : IParameterQ
 {
    private readonly SharedDbContext _dbContext = dbContext;
 
-   public async Task<ParameterDto?> GetByIdAsync(Guid id)
+   public async Task<ParameterDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
    {
       var parameter = await _dbContext.Parameters
          .AsNoTracking()
-         .SingleOrDefaultAsync(p => p.Id == id);
+         .SingleOrDefaultAsync(p => p.Id == id, cancellationToken);
       return parameter?.ToParameterDto();
    }
 
-   public async Task<IEnumerable<ParameterLiteDto>> GetAllAsync(ParameterSearchRequestInternal request)
+   public async Task<IEnumerable<ParameterLiteDto>> GetAllAsync(ParameterSearchRequestInternal request, CancellationToken cancellationToken = default)
    {
       var query = from param in _dbContext.Parameters.AsNoTracking()
                   join paramOverride in _dbContext.ParameterOverrides on new
@@ -68,18 +68,18 @@ internal class ParameterQueryRepository(SharedDbContext dbContext) : IParameterQ
          Value = x.paramOverride != null ? x.paramOverride.Value : x.param.Value,
          OverrideType = x.param.OverrideType,
          IsOverridden = x.paramOverride != null
-      }).ToListAsync();
+      }).ToListAsync(cancellationToken);
    }
 
-   public async Task<ParameterDto?> GetByModuleGroupAndKeyAsync(string module, string group, string name)
+   public async Task<ParameterDto?> GetByModuleGroupAndKeyAsync(string module, string group, string name, CancellationToken cancellationToken = default)
    {
       var parameter = await _dbContext.Parameters
          .AsNoTracking()
-         .SingleOrDefaultAsync(p => p.Module == module && p.Group == group && p.Name == name);
+         .SingleOrDefaultAsync(p => p.Module == module && p.Group == group && p.Name == name, cancellationToken);
       return parameter?.ToParameterDto();
    }
 
-   public async Task<ParameterValueDto?> GetValueAsync(string key, Guid userOwnerId, Guid userId)
+   public async Task<ParameterValueDto?> GetValueAsync(string key, Guid userOwnerId, Guid userId, CancellationToken cancellationToken = default)
    {
       return await _dbContext.Parameters
               .AsNoTracking()
@@ -94,6 +94,6 @@ internal class ParameterQueryRepository(SharedDbContext dbContext) : IParameterQ
                       .Select(o => o.Value)
                       .FirstOrDefault() ?? p.Value
               })
-              .SingleOrDefaultAsync();
+              .SingleOrDefaultAsync(cancellationToken);
    }
 }

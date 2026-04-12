@@ -7,9 +7,9 @@ namespace Shared.Infrastructure.Repositories;
 internal class ParameterOverrideRepository(SharedDbContext dbContext) 
    : BaseRepository<ParameterOverride>(dbContext), IParameterOverrideRepository
 {
-   public async Task<ParameterOverride?> GetByParameterIdAndOwnerIdAsync(Guid parameterId, Guid ownerId)
+   public async Task<ParameterOverride?> GetByParameterIdAndOwnerIdAsync(Guid parameterId, Guid ownerId, CancellationToken cancellationToken = default)
    {
       return await _dbSet.FirstOrDefaultAsync(pc => pc.ParameterId == parameterId && 
-                                                    pc.OwnerId == ownerId);
+                                                    pc.OwnerId == ownerId, cancellationToken);
    }
 }

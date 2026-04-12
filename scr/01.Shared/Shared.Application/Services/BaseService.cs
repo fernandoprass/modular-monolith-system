@@ -1,4 +1,4 @@
-﻿using Myce.Response;
+using Myce.Response;
 using Shared.Application.Contracts;
 using Shared.Domain.Messages;
 
@@ -22,14 +22,14 @@ public class BaseService
    /// A <see cref="Result"/> indicating success and executing the action, 
    /// or a failure result containing an <see cref="UnauthorizedAccessError"/> if validation fails.
    /// </returns>
-   protected async Task<Result> ExecuteIfUserOwnsAsync(Guid? resourceOwnerId, Func<Task<Result>> actionAsync)
+   protected async Task<Result> ExecuteIfUserOwnsAsync(Guid? resourceOwnerId, Func<CancellationToken, Task<Result>> actionAsync, CancellationToken cancellationToken = default)
    {
       if (!IsUserAlllowedToAccess(resourceOwnerId))
       {
          return Result.Failure(new UnauthorizedAccessError());
       }
 
-      return await actionAsync();
+      return await actionAsync(cancellationToken);
    }
 
    /// <summary>
@@ -42,7 +42,7 @@ public class BaseService
    /// The <typeparamref name="TResult"/> produced by the action, 
    /// or a new instance of <typeparamref name="TResult"/> with an <see cref="UnauthorizedAccessError"/> message if validation fails.
    /// </returns>
-   protected async Task<TResult> ExecuteIfUserOwnsAsync<TResult>(Guid? resourceOwnerId, Func<Task<TResult>> actionAsync) where TResult : Result
+   protected async Task<TResult> ExecuteIfUserOwnsAsync<TResult>(Guid? resourceOwnerId, Func<CancellationToken, Task<TResult>> actionAsync, CancellationToken cancellationToken = default) where TResult : Result
    {
       if (!IsUserAlllowedToAccess(resourceOwnerId))
       {
@@ -53,7 +53,7 @@ public class BaseService
          return result;
       }
 
-      return await actionAsync();
+      return await actionAsync(cancellationToken);
    }
 
    private bool IsUserAlllowedToAccess(Guid? resourceOwnerId)
