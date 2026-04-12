@@ -50,14 +50,14 @@ public class UserServiceTests
    {
       var request = new UserCreateRequest(string.Empty, "test@test.com" , string.Empty, Guid.NewGuid());
 
-      _parameterServiceMock.GetShortIntAsync(Arg.Any<string>()).Returns((short)30);
+      _parameterServiceMock.GetShortIntAsync(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns((short)30);
 
-      var result = await _userService.CreateUserAsync(request, true);
+      var result = await _userService.CreateUserAsync(request, true, TestContext.Current.CancellationToken);
 
       result.IsSuccess.Should().BeFalse();
       result.Messages.Should().ContainSingle(m => m is UnauthorizedAccessError);
 
-      await _unitOfWorkMock.DidNotReceive().SaveChangesAsync();
+      await _unitOfWorkMock.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
    }
 
    [Fact]
@@ -65,18 +65,18 @@ public class UserServiceTests
    {
       var request = new UserCreateRequest("John Smith", "test@test.com", string.Empty, _userContextMock.UserOwnerId);
 
-      _userQueryRepositoryMock.GetIdByEmailAsync(request.Email).Returns(Guid.NewGuid());
+      _userQueryRepositoryMock.GetIdByEmailAsync(request.Email, Arg.Any<CancellationToken>()).Returns(Guid.NewGuid());
 
-      _parameterServiceMock.GetShortIntAsync(Arg.Any<string>()).Returns((short)30);
+      _parameterServiceMock.GetShortIntAsync(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns((short)30);
 
       _userValidatorMock.ValidateCreate(request,customerExists: true, emailAlreadyExists: true)
           .Returns(Result.Failure(new EmailAlreadyExistError(request.Email)));
 
-      var result = await _userService.CreateUserAsync(request, true);
+      var result = await _userService.CreateUserAsync(request, true, TestContext.Current.CancellationToken);
 
       result.IsSuccess.Should().BeFalse();
       result.Messages.Should().Contain(m => m is EmailAlreadyExistError);
-      await _unitOfWorkMock.DidNotReceive().SaveChangesAsync();
+      await _unitOfWorkMock.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
    }
 
    [Fact]
@@ -84,32 +84,32 @@ public class UserServiceTests
    {
       var request = new UserCreateRequest("John Doe", "new@test.com", "SecurePassword123", _userContextMock.UserOwnerId);
 
-      _userQueryRepositoryMock.GetIdByEmailAsync(request.Email).Returns(Guid.Empty);
+      _userQueryRepositoryMock.GetIdByEmailAsync(request.Email, Arg.Any<CancellationToken>()).Returns(Guid.Empty);
 
-      _parameterServiceMock.GetShortIntAsync(Arg.Any<string>()).Returns((short)30);
+      _parameterServiceMock.GetShortIntAsync(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns((short)30);
 
       _userValidatorMock.ValidateCreate(request, customerExists: true, emailAlreadyExists: false).Returns(Result.Success());
 
-      var result = await _userService.CreateUserAsync(request, true);
+      var result = await _userService.CreateUserAsync(request, true, TestContext.Current.CancellationToken);
 
       result.IsSuccess.Should().BeTrue();
 
-      await _unitOfWorkMock.Users.Received(1).AddAsync(Arg.Any<User>());
-      await _unitOfWorkMock.Received(1).SaveChangesAsync();
+      await _unitOfWorkMock.Users.Received(1).AddAsync(Arg.Any<User>(), Arg.Any<CancellationToken>());
+      await _unitOfWorkMock.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
    }
 
    [Fact]
    public async Task DeleteAsync_ShouldReturnForbiddenCustomerError_EvenWhenUserDoesNotExist()
    {
       var userId = Guid.NewGuid();
-      _userRepositoryMock.GetByIdAsync(userId).Returns((User)null);
+      _userRepositoryMock.GetByIdAsync(userId, Arg.Any<CancellationToken>()).Returns((User)null);
 
-      var result = await _userService.DeleteAsync(userId);
+      var result = await _userService.DeleteAsync(userId, TestContext.Current.CancellationToken);
 
       result.IsSuccess.Should().BeFalse();
       result.Messages.Should().ContainSingle(m => m is UnauthorizedAccessError);
 
-      await _unitOfWorkMock.Users.DidNotReceive().DeleteAsync(Arg.Any<Guid>());
+      await _unitOfWorkMock.Users.DidNotReceive().DeleteAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>());
    }
 
    [Fact]
@@ -119,15 +119,15 @@ public class UserServiceTests
       var user = User.Create("Name", "test@test.com", "OldHash", DateTime.UtcNow, _userContextMock.UserOwnerId);
 
       _userContextMock.UserId.Returns(user.Id);
-      _userRepositoryMock.GetByIdAsync(user.Id).Returns(user);
-      _parameterServiceMock.GetShortIntAsync(Arg.Any<string>()).Returns((short)90); // 90 days
+      _userRepositoryMock.GetByIdAsync(user.Id, Arg.Any<CancellationToken>()).Returns(user);
+      _parameterServiceMock.GetShortIntAsync(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns((short)90); // 90 days
       _userValidatorMock.ValidateUpdatePassword(user, user.Id, request).Returns(Result.Success());
 
-      var result = await _userService.UpdatePasswordAsync(user.Id, request);
+      var result = await _userService.UpdatePasswordAsync(user.Id, request, TestContext.Current.CancellationToken);
 
       result.IsSuccess.Should().BeTrue();
       user.PasswordExpiresAt.Should().BeCloseTo(DateTime.UtcNow.AddDays(90), TimeSpan.FromSeconds(5));
-      await _unitOfWorkMock.Received(1).SaveChangesAsync();
+      await _unitOfWorkMock.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
    }
 
 
@@ -138,15 +138,15 @@ public class UserServiceTests
       var user = User.Create("Name", "test@test.com", "OldHash", DateTime.UtcNow, _userContextMock.UserOwnerId);
 
       _userContextMock.UserId.Returns(Guid.NewGuid());
-      _userRepositoryMock.GetByIdAsync(user.Id).Returns(user);
-      _parameterServiceMock.GetShortIntAsync(Arg.Any<string>()).Returns((short)90); // 90 days
+      _userRepositoryMock.GetByIdAsync(user.Id, Arg.Any<CancellationToken>()).Returns(user);
+      _parameterServiceMock.GetShortIntAsync(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns((short)90); // 90 days
       _userValidatorMock.ValidateUpdatePassword(user, _userContextMock.UserId, request).Returns(Result.Failure(new UnauthorizedAccessError()));
 
-      var result = await _userService.UpdatePasswordAsync(user.Id, request);
+      var result = await _userService.UpdatePasswordAsync(user.Id, request, TestContext.Current.CancellationToken);
 
       result.IsSuccess.Should().BeFalse();
       result.Messages.Should().ContainSingle(m => m is UnauthorizedAccessError);
-      await _unitOfWorkMock.DidNotReceive().SaveChangesAsync();
+      await _unitOfWorkMock.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
    }
 
    [Fact]
@@ -155,15 +155,15 @@ public class UserServiceTests
       var request = new UserUpdateRequest("Updated Name", false);
       var user = User.Create("Original Name", "test@test.com", "hash", DateTime.UtcNow, _userContextMock.UserOwnerId);
 
-      _userRepositoryMock.GetByIdAsync(user.Id).Returns(user);
+      _userRepositoryMock.GetByIdAsync(user.Id, Arg.Any<CancellationToken>()).Returns(user);
       _userValidatorMock.ValidateUpdate(user.Id, request).Returns(Result.Success());
 
-      var result = await _userService.UpdateAsync(user.Id, request);
+      var result = await _userService.UpdateAsync(user.Id, request, TestContext.Current.CancellationToken);
 
       result.IsSuccess.Should().BeTrue();
       user.Name.Should().Be("Updated Name");
       user.IsActive.Should().BeFalse();
-      await _unitOfWorkMock.Received(1).SaveChangesAsync();
+      await _unitOfWorkMock.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
    }
 
    [Fact]
@@ -173,13 +173,13 @@ public class UserServiceTests
       var request = new UserUpdateRequest("Name", true);
       var user = User.Create("Name", "test@test.com", "hash", DateTime.UtcNow, differentCustomerId);
 
-      _userRepositoryMock.GetByIdAsync(user.Id).Returns(user);
+      _userRepositoryMock.GetByIdAsync(user.Id, Arg.Any<CancellationToken>()).Returns(user);
 
-      var result = await _userService.UpdateAsync(user.Id, request);
+      var result = await _userService.UpdateAsync(user.Id, request, TestContext.Current.CancellationToken);
 
       result.IsSuccess.Should().BeFalse();
       result.Messages.Should().ContainSingle(m => m is UnauthorizedAccessError);
-      await _unitOfWorkMock.DidNotReceive().SaveChangesAsync();
+      await _unitOfWorkMock.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
    }
 
    [Fact]
@@ -189,25 +189,25 @@ public class UserServiceTests
       var user = User.Create("Name", "test@test.com", "hash", DateTime.UtcNow, _userContextMock.UserOwnerId);
       var initialLastLogin = user.LastLoginAt;
 
-      _userRepositoryMock.GetByIdAsync(userId).Returns(user);
+      _userRepositoryMock.GetByIdAsync(userId, Arg.Any<CancellationToken>()).Returns(user);
 
-      var result = await _userService.UpdateLastLoginAsync(userId);
+      var result = await _userService.UpdateLastLoginAsync(userId, TestContext.Current.CancellationToken);
 
       result.IsSuccess.Should().BeTrue();
       user.LastLoginAt.Should().BeAfter(initialLastLogin ?? DateTime.MinValue);
-      await _unitOfWorkMock.Received(1).SaveChangesAsync();
+      await _unitOfWorkMock.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
    }
 
    [Fact]
    public async Task ValidateUserForNewCustomerAsync_ShouldReturnError_WhenEmailAlreadyExists()
    {
       var request = new CustomerUserCreateRequest("John Admas", "exists@test.com","Str0ngP4ssw0d!" );
-      _userQueryRepositoryMock.GetIdByEmailAsync(request.Email).Returns(Guid.NewGuid()); // Email exists
+      _userQueryRepositoryMock.GetIdByEmailAsync(request.Email, Arg.Any<CancellationToken>()).Returns(Guid.NewGuid()); // Email exists
 
       _userValidatorMock.ValidateCreateForNewCustomer(request, true)
           .Returns(Result.Failure(new EmailAlreadyExistError(request.Email)));
 
-      var result = await _userService.ValidateUserForNewCustomerAsync(request);
+      var result = await _userService.ValidateUserForNewCustomerAsync(request, TestContext.Current.CancellationToken);
 
       result.IsSuccess.Should().BeFalse();
       result.Messages.Should().ContainSingle(m => m is EmailAlreadyExistError);

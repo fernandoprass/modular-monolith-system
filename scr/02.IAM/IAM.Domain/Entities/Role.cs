@@ -2,54 +2,59 @@ using Shared.Domain.Entities;
 
 namespace IAM.Domain.Entities;
 
-public class Role : Entity
+public class Role : EntityAudited
 {
    public string Name { get; private set; }
+   public string Description { get; private set; }
+   public bool IsDefault { get; private set; } = false; // Indicates if this is a default role assigned to new users
+   public bool IsActive { get; private set; } = true;
    public Guid? CustomerId { get; private set; } // Roles can be global or specific to a Customer
-   public bool IsDefault { get; private set; }
 
-   private readonly List<RoleFeature> _roleFeatures = new();
-   public IReadOnlyCollection<RoleFeature> RoleFeatures => _roleFeatures.AsReadOnly();
+   private readonly List<RolePermission> _rolePermissions = new();
+   public IReadOnlyCollection<RolePermission> RolePermissions => _rolePermissions.AsReadOnly();
 
    private readonly List<UserRole> _userRoles = new();
    public IReadOnlyCollection<UserRole> UserRoles => _userRoles.AsReadOnly();
 
    private Role() { }
 
-   public static Role Create(string name, Guid? customerId, bool isDefault = false)
+   public static Role Create(string name, string description, bool isDefault, bool isActive, Guid? customerId)
    {
       return new Role
       {
          Id = Guid.CreateVersion7(),
          Name = name,
-         CustomerId = customerId,
+         Description = description,
          IsDefault = isDefault,
-         CreatedAt = DateTime.UtcNow
+         IsActive = isActive,
+         CustomerId = customerId
       };
    }
 
-   public void Update(string name)
+   public void Update(string name, string description, bool isDefault, bool isActive)
    {
       Name = name;
-      UpdatedAt = DateTime.UtcNow;
+      Description = description; 
+      IsDefault = isDefault;
+      IsActive = isActive;
    }
 
-   public void AddFeature(Guid featureId)
+   public void AddFeature(Guid permissionId)
    {
-      if (!_roleFeatures.Any(rf => rf.FeatureId == featureId))
+      if (!_rolePermissions.Any(rf => rf.PermissionId == permissionId))
       {
-         _roleFeatures.Add(new RoleFeature(Id, featureId));
+         _rolePermissions.Add(new RolePermission(Id, permissionId));
       }
    }
 
-   public void RemoveFeature(Guid featureId)
+   public void RemoveFeature(Guid permissionId)
    {
-       var feature = _roleFeatures.FirstOrDefault(rf => rf.FeatureId == featureId);
+       var feature = _rolePermissions.FirstOrDefault(rf => rf.PermissionId == permissionId);
        if (feature != null)
        {
-           _roleFeatures.Remove(feature);
+           _rolePermissions.Remove(feature);
        }
    }
 
-   public void ClearFeatures() => _roleFeatures.Clear();
+   public void ClearFeatures() => _rolePermissions.Clear();
 }

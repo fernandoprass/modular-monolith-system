@@ -2,7 +2,7 @@ using Shared.Domain.Enums;
 
 namespace Shared.Domain.Entities;
 
-public class Parameter : Entity
+public class Parameter : EntityAudited
 {
    public string Module { get; private set; }
    public string Group { get; private set; }

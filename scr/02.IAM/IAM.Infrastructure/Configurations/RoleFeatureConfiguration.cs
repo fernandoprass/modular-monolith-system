@@ -4,18 +4,18 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace IAM.Infrastructure.Configurations;
 
-public class RoleFeatureConfiguration : IEntityTypeConfiguration<RoleFeature>
+public class RoleFeatureConfiguration : IEntityTypeConfiguration<RolePermission>
 {
-   public void Configure(EntityTypeBuilder<RoleFeature> builder)
+   public void Configure(EntityTypeBuilder<RolePermission> builder)
    {
-      builder.HasKey(rf => new { rf.RoleId, rf.FeatureId });
+      builder.HasKey(rf => new { rf.RoleId, rf.PermissionId });
 
       builder.HasOne(rf => rf.Role)
-         .WithMany(r => r.RoleFeatures)
+         .WithMany(r => r.RolePermissions)
          .HasForeignKey(rf => rf.RoleId);
 
-      builder.HasOne(rf => rf.Feature)
+      builder.HasOne(rf => rf.Permission)
          .WithMany(f => f.RoleFeatures)
-         .HasForeignKey(rf => rf.FeatureId);
+         .HasForeignKey(rf => rf.PermissionId);
    }
 }

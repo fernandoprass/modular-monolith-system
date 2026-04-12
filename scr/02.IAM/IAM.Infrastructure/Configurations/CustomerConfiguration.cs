@@ -5,7 +5,7 @@ using Shared.Infrastructure.Configurations;
 
 namespace IAM.Infrastructure.Configurations;
 
-public class CustomerConfiguration : BaseConfiguration<Customer>
+public class CustomerConfiguration : BaseAuditedConfiguration<Customer>
 {
    public override void Configure(EntityTypeBuilder<Customer> builder)
    {

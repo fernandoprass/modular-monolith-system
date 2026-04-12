@@ -1,4 +1,4 @@
-﻿using IAM.Application.Contracts;
+using IAM.Application.Contracts;
 using IAM.Domain;
 using IAM.Domain.DTOs.Requests;
 using IAM.Domain.DTOs.Responses;
@@ -30,13 +30,13 @@ public class ResgisterOrchestrator(
    private readonly IUserService _userService = userService;
    private readonly IIamUnitOfWork _iamUnitOfWork = iamUnitOfWork;
 
-   public async Task<Result<UserDto>> RegisterUserAsync(UserCreateRequest request)
+   public async Task<Result<UserDto>> RegisterUserAsync(UserCreateRequest request, CancellationToken cancellationToken = default)
    {
-      var customerDto = await _customerQueryRepository.GetByIdAsync(request.CustomerId);
+      var customerDto = await _customerQueryRepository.GetByIdAsync(request.CustomerId, cancellationToken);
 
       var customerExists = customerDto is not null;
 
-      var result = await _userService.CreateUserAsync(request, customerExists);
+      var result = await _userService.CreateUserAsync(request, customerExists, cancellationToken);
 
       if (result.IsSuccess) { 
          result.Data.CustomerName = customerDto.Name; 
@@ -44,10 +44,10 @@ public class ResgisterOrchestrator(
       
       return result;
    }
-   public async Task<Result<CustomerDto>> RegisterCustomerAsync(CustomerCreateRequest customerCreate)
+   public async Task<Result<CustomerDto>> RegisterCustomerAsync(CustomerCreateRequest customerCreate, CancellationToken cancellationToken = default)
    {   
-      var customerValidateResult = await _customerService.ValidateCreateCustomerAsync(customerCreate);
-      var userValidateResult = await _userService.ValidateUserForNewCustomerAsync(customerCreate.User);
+      var customerValidateResult = await _customerService.ValidateCreateCustomerAsync(customerCreate, cancellationToken);
+      var userValidateResult = await _userService.ValidateUserForNewCustomerAsync(customerCreate.User, cancellationToken);
 
       var result = Result.Merge(customerValidateResult, userValidateResult);
 
@@ -72,34 +72,34 @@ public class ResgisterOrchestrator(
 
       customer.CreatedBy = user.Id;
 
-      await _iamUnitOfWork.Customers.AddAsync(customer);
-      await _iamUnitOfWork.Users.AddAsync(user);
-      await _iamUnitOfWork.SaveChangesAsync();
+      await _iamUnitOfWork.Customers.AddAsync(customer, cancellationToken);
+      await _iamUnitOfWork.Users.AddAsync(user, cancellationToken);
+      await _iamUnitOfWork.SaveChangesAsync(cancellationToken);
 
       return Result<CustomerDto>.Success(customer.ToCustomerDto());
    }
 
-   public async Task<Result> DeleteCustomerAsync(Guid id)
+   public async Task<Result> DeleteCustomerAsync(Guid id, CancellationToken cancellationToken = default)
    {
-      return await ExecuteIfUserOwnsAsync(id, async () =>
+      return await ExecuteIfUserOwnsAsync(id, async (ct) =>
       {
-         var customer = await _iamUnitOfWork.Customers.GetByIdAsync(id);
+         var customer = await _iamUnitOfWork.Customers.GetByIdAsync(id, ct);
          if (customer == null)
          {
             return Result.Failure(new NotFoundError(IamConst.Entity.Customer));
          }
 
-         await _iamUnitOfWork.Customers.DeleteAsync(id);
+         await _iamUnitOfWork.Customers.DeleteAsync(id, ct);
 
-         var users = await _userRepository.GetByCustomerIdAsync(id);
-         foreach(var user in users)
+         var users = await _userRepository.GetByCustomerIdAsync(id, ct);
+         foreach(var u in users)
          {
-            await _iamUnitOfWork.Users.DeleteAsync(user.Id);
+            await _iamUnitOfWork.Users.DeleteAsync(u.Id, ct);
          }
 
-         await _iamUnitOfWork.SaveChangesAsync();
+         await _iamUnitOfWork.SaveChangesAsync(ct);
 
          return Result.Success(new SuccessInfo());
-      });
+      }, cancellationToken);
    }
 }

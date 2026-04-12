@@ -1,7 +1,7 @@
 using Shared.Domain.Entities;
 
 namespace IAM.Domain.Entities;
-public class User : Entity
+public class User : EntityAudited
 {
    public string Name { get; set; } = string.Empty;
    public string Email { get; set; } = string.Empty;
@@ -21,7 +21,6 @@ public class User : Entity
 
    public static User Create(string name, string email, string passwordHash, DateTime passwordExpiresAt, Guid customerId)
    {
-      var id = Guid.CreateVersion7();
       return new User
       {
          Id = Guid.CreateVersion7(),
@@ -53,11 +52,11 @@ public class User : Entity
       LastLoginAt = DateTime.UtcNow;
    }
 
-   public void AddRole(Guid roleId)
+   public void AddRole(Guid roleId, DateTime? expiresAt)
    {
       if (!_userRoles.Any(ur => ur.RoleId == roleId))
       {
-         _userRoles.Add(new UserRole(Id, roleId));
+         _userRoles.Add(new UserRole(Id, roleId, expiresAt));
       }
    }
 

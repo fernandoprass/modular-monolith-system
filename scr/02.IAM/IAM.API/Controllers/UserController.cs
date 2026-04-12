@@ -20,61 +20,60 @@ public class UserController(
 
    [HttpGet("{id:guid}")]
    [Authorize]
-   public async Task<IActionResult> GetById(Guid id)
+   public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
    {
-      var user = await _userService.GetByIdAsync(id);
+      var user = await _userService.GetByIdAsync(id, cancellationToken);
       return OkOrNotFound(user);
    }
 
    [HttpGet("by-customer/{customerId:guid}")]
    [Authorize]
-   public async Task<IActionResult> GetByCustomerId(Guid customerId)
+   public async Task<IActionResult> GetByCustomerId(Guid customerId, CancellationToken cancellationToken)
    {
-      var users = await _userService.GetByCustomerIdAsync(customerId);
+      var users = await _userService.GetByCustomerIdAsync(customerId, cancellationToken);
 
       return OkOrNotFound(users);
    }
 
    [HttpPost("")]
    [Authorize]
-   public async Task<IActionResult> Create([FromBody] UserCreateRequest request)
+   public async Task<IActionResult> Create([FromBody] UserCreateRequest request, CancellationToken cancellationToken)
    {
-      var user = await _registerOrchestrator.RegisterUserAsync(request);
-
+      var user = await _registerOrchestrator.RegisterUserAsync(request, cancellationToken);
       return OkOrNotFound(user);
    }
 
    [HttpPut("{id:guid}")]
    [Authorize]
-   public async Task<IActionResult> Update(Guid id, [FromBody] UserUpdateRequest user)
+   public async Task<IActionResult> Update(Guid id, [FromBody] UserUpdateRequest user, CancellationToken cancellationToken)
    {
-      var response = await _userService.UpdateAsync(id, user);
+      var response = await _userService.UpdateAsync(id, user, cancellationToken);
 
       return OkOrNotFound(response);
    }
 
    [HttpPatch("{id:guid}/password")]
    [Authorize]
-   public async Task<IActionResult> UpdatePassword(Guid id, [FromBody] UserUpdatePasswordRequest request)
+   public async Task<IActionResult> UpdatePassword(Guid id, [FromBody] UserUpdatePasswordRequest request, CancellationToken cancellationToken)
    {
-      var result = await _userService.UpdatePasswordAsync(id, request);
+      var result = await _userService.UpdatePasswordAsync(id, request, cancellationToken);
 
       return OkOrNotFound(result);
    }
 
    [HttpDelete("{id:guid}")]
    [Authorize]
-   public async Task<IActionResult> Delete(Guid id)
+   public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
    {
-      var response = await _userService.DeleteAsync(id);
+      var response = await _userService.DeleteAsync(id, cancellationToken);
 
       return OkOrNotFound(response);
    }
 
    [HttpPost("login")]
-   public async Task<IActionResult> Login([FromBody] UserLoginRequest request)
+   public async Task<IActionResult> Login([FromBody] UserLoginRequest request, CancellationToken cancellationToken)
    {
-      var response = await _authService.LoginAsync(request);
+      var response = await _authService.LoginAsync(request, cancellationToken);
 
       return response.IsSuccess ? OkOrNotFound(response) : Unauthorized(response);
 

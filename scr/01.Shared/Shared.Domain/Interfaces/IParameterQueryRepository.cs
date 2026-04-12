@@ -5,8 +5,8 @@ namespace Shared.Domain.Interfaces;
 
 internal interface IParameterQueryRepository
 {
-   Task<ParameterDto?> GetByIdAsync(Guid id);
-   Task<IEnumerable<ParameterLiteDto>> GetAllAsync(ParameterSearchRequestInternal request);
-   Task<ParameterDto?> GetByModuleGroupAndKeyAsync(string module, string group, string name);
-   Task<ParameterValueDto?> GetValueAsync(string key, Guid userOwnerId, Guid userId);
+   Task<ParameterDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+   Task<IEnumerable<ParameterLiteDto>> GetAllAsync(ParameterSearchRequestInternal request, CancellationToken cancellationToken = default);
+   Task<ParameterDto?> GetByModuleGroupAndKeyAsync(string module, string group, string name, CancellationToken cancellationToken = default);
+   Task<ParameterValueDto?> GetValueAsync(string key, Guid userOwnerId, Guid userId, CancellationToken cancellationToken = default);
 }

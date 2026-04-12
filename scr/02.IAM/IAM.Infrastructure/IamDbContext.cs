@@ -8,9 +8,9 @@ namespace IAM.Infrastructure;
 public class IamDbContext(DbContextOptions<IamDbContext> options) : DbContext(options)
 {
    public DbSet<Customer> Customers { get; set; }
-   public DbSet<Feature> Features { get; set; }
+   public DbSet<Permission> Permissions { get; set; }
    public DbSet<Role> Roles { get; set; }
-   public DbSet<RoleFeature> RoleFeatures { get; set; }
+   public DbSet<RolePermission> RolePermissions { get; set; }
    public DbSet<User> Users { get; set; }
    public DbSet<UserRole> UserRoles { get; set; }
 
@@ -22,7 +22,7 @@ public class IamDbContext(DbContextOptions<IamDbContext> options) : DbContext(op
       modelBuilder.ApplyConfiguration(new CustomerConfiguration());
       modelBuilder.ApplyConfiguration(new UserConfiguration());
       modelBuilder.ApplyConfiguration(new RoleConfiguration());
-      modelBuilder.ApplyConfiguration(new FeatureConfiguration());
+      modelBuilder.ApplyConfiguration(new PermissionConfiguration());
       modelBuilder.ApplyConfiguration(new RoleFeatureConfiguration());
       modelBuilder.ApplyConfiguration(new UserRoleConfiguration());
    }

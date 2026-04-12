@@ -38,7 +38,7 @@ public class RoleValidator : IRoleValidator
       var validator = new FluentValidator<RoleAssignRequest>()
          .RuleForValue(userExists).IsTrue(new NotFoundError(IamConst.Entity.User))
          .RuleForValue(allRolesExist).IsTrue(new NotFoundError(IamConst.Entity.Role))
-         .RuleFor(x => x.RoleIds).IsRequired();
+         .RuleFor(x => x.Roles).IsNotNull();
 
       var isValid = validator.Validate(request);
 

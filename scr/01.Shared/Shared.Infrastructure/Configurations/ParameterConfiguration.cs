@@ -6,7 +6,7 @@ using Shared.Domain.Enums;
 
 namespace Shared.Infrastructure.Configurations;
 
-public class ParameterConfiguration : BaseConfiguration<Parameter>
+public class ParameterConfiguration : BaseAuditedConfiguration<Parameter>
 {
    public override void Configure(EntityTypeBuilder<Parameter> builder)
    {

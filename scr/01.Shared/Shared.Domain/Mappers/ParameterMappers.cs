@@ -4,7 +4,7 @@ using Shared.Domain.Entities;
 
 namespace Shared.Domain.Mappers
 {
-   public static class ParameterMapper
+   public static class ParameterMappers
    {
       public static ParameterDto ToParameterDto(this Parameter parameter)
       {

@@ -1,4 +1,4 @@
-﻿using Myce.Response;
+using Myce.Response;
 using NSubstitute;
 using Shared.Application.Contracts;
 using Shared.Application.Services;
@@ -10,11 +10,11 @@ public class TestService : BaseService
 {
    public TestService(IUserContext userContext) : base(userContext) { }
 
-   public async Task<Result> TestExecuteIfUserOwnsAsync(Guid? resourceCustomerId, Func<Task<Result>> action)
-       => await ExecuteIfUserOwnsAsync(resourceCustomerId, action);
+   public async Task<Result> TestExecuteIfUserOwnsAsync(Guid? resourceCustomerId, Func<CancellationToken, Task<Result>> action, CancellationToken cancellationToken = default)
+       => await ExecuteIfUserOwnsAsync(resourceCustomerId, action, cancellationToken);
 
-   public async Task<TResult> TestExecuteIfUserOwnsAsyncGeneric<TResult>(Guid? resourceCustomerId, Func<Task<TResult>> action) where TResult : Result
-       => await ExecuteIfUserOwnsAsync<TResult>(resourceCustomerId, action);
+   public async Task<TResult> TestExecuteIfUserOwnsAsyncGeneric<TResult>(Guid? resourceCustomerId, Func<CancellationToken, Task<TResult>> action, CancellationToken cancellationToken = default) where TResult : Result
+       => await ExecuteIfUserOwnsAsync<TResult>(resourceCustomerId, action, cancellationToken);
 }
 
 public class BaseServiceTests
@@ -35,11 +35,11 @@ public class BaseServiceTests
       var resourceCustomerId = Guid.NewGuid();
       var actionCalled = false;
 
-      var result = await _service.TestExecuteIfUserOwnsAsync(resourceCustomerId, () =>
+      var result = await _service.TestExecuteIfUserOwnsAsync(resourceCustomerId, (ct) =>
       {
          actionCalled = true;
          return Task.FromResult(Result.Success());
-      });
+      }, TestContext.Current.CancellationToken);
 
       Assert.True(result.IsSuccess);
       Assert.True(actionCalled);
@@ -54,11 +54,11 @@ public class BaseServiceTests
 
       var actionCalled = false;
 
-      var result = await _service.TestExecuteIfUserOwnsAsync(myCustomerId, () =>
+      var result = await _service.TestExecuteIfUserOwnsAsync(myCustomerId, (ct) =>
       {
          actionCalled = true;
          return Task.FromResult(Result.Success());
-      });
+      }, TestContext.Current.CancellationToken);
 
       Assert.True(result.IsSuccess);
       Assert.True(actionCalled);
@@ -73,11 +73,11 @@ public class BaseServiceTests
       var targetOwnerId = Guid.NewGuid(); // Different id
       var actionCalled = false;
 
-      var result = await _service.TestExecuteIfUserOwnsAsync(targetOwnerId, () =>
+      var result = await _service.TestExecuteIfUserOwnsAsync(targetOwnerId, (ct) =>
       {
          actionCalled = true;
          return Task.FromResult(Result.Success());
-      });
+      }, TestContext.Current.CancellationToken);
 
       Assert.False(result.IsSuccess);
       Assert.False(actionCalled);
@@ -90,8 +90,8 @@ public class BaseServiceTests
       _userContextMock.IsSystemAdmin.Returns(false);
       _userContextMock.UserOwnerId.Returns(Guid.NewGuid());
 
-      var result = await _service.TestExecuteIfUserOwnsAsyncGeneric<Result<string>>(Guid.NewGuid(), () =>
-          Task.FromResult(Result<string>.Success("Should not be called")));
+      var result = await _service.TestExecuteIfUserOwnsAsyncGeneric<Result<string>>(Guid.NewGuid(), (ct) =>
+          Task.FromResult(Result<string>.Success("Should not be called")), TestContext.Current.CancellationToken);
 
       Assert.False(result.IsSuccess);
       Assert.IsType<Result<string>>(result);

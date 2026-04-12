@@ -24,9 +24,9 @@ public class CustomerService(
    private readonly ICustomerValidator _customerValidator = customerValidator;   
    private readonly IIamUnitOfWork _iamUnitOfWork = iamUnitOfWork;
 
-   public async Task<Result> ValidateCreateCustomerAsync(CustomerCreateRequest request)
+   public async Task<Result> ValidateCreateCustomerAsync(CustomerCreateRequest request, CancellationToken cancellationToken = default)
    {
-      var codeExists = await _customerQueryRepository.ExistsByCodeAsync(request.Code);
+      var codeExists = await _customerQueryRepository.ExistsByCodeAsync(request.Code, cancellationToken);
 
       var validation = _customerValidator.ValidateCreate(request, codeExists);
       if (validation.HasError)
@@ -37,9 +37,9 @@ public class CustomerService(
       return Result.Success();
    }
 
-   public async Task<CustomerDto?> GetByIdAsync(Guid id)
+   public async Task<CustomerDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
    {
-      return await _customerQueryRepository.GetByIdAsync(id);
+      return await _customerQueryRepository.GetByIdAsync(id, cancellationToken);
    }
 
    public string GetRandomCode()
@@ -50,16 +50,16 @@ public class CustomerService(
           .Select(s => s[random.Next(s.Length)]).ToArray());
    }
 
-   public async Task<IEnumerable<CustomerDto>> GetByNameAsync(string name)
+   public async Task<IEnumerable<CustomerDto>> GetByNameAsync(string name, CancellationToken cancellationToken = default)
    {
-      return await _customerQueryRepository.GetByNameAsync(name);
+      return await _customerQueryRepository.GetByNameAsync(name, cancellationToken);
    }
 
-   public async Task<Result> UpdateAsync(Guid id, CustomerUpdateRequest request)
+   public async Task<Result> UpdateAsync(Guid id, CustomerUpdateRequest request, CancellationToken cancellationToken = default)
    {
-      return await ExecuteIfUserOwnsAsync(id, async () =>
+      return await ExecuteIfUserOwnsAsync(id, async (ct) =>
       {
-         var customer = await _customerRepository.GetByIdAsync(id);
+         var customer = await _customerRepository.GetByIdAsync(id, ct);
          var customerExists = customer is not null;
 
          var validation = _customerValidator.ValidateUpdate(request, customerExists);
@@ -70,15 +70,15 @@ public class CustomerService(
 
          customer.Update(request.Name, request.Description, request.IsActive);
 
-         return await CommitUpdateAsync(customer);
-      });
+         return await CommitUpdateAsync(customer, ct);
+      }, cancellationToken);
    }
 
-   public async Task<Result> UpdateCodeAsync(Guid id, CustomerUpdateCodeRequest request)
+   public async Task<Result> UpdateCodeAsync(Guid id, CustomerUpdateCodeRequest request, CancellationToken cancellationToken = default)
    {
-      return await ExecuteIfUserOwnsAsync(id, async () =>
+      return await ExecuteIfUserOwnsAsync(id, async (ct) =>
       {
-         var customer = await _customerRepository.GetByCodeAsync(request.Code);
+         var customer = await _customerRepository.GetByCodeAsync(request.Code, ct);
          var newCodeExists = customer is not null;
 
          var validation = _customerValidator.ValidateUpdateCode(request, newCodeExists);
@@ -87,17 +87,17 @@ public class CustomerService(
             return Result.Failure(validation.Messages);
          }
          
-         customer = await _customerRepository.GetByIdAsync(id);
+         customer = await _customerRepository.GetByIdAsync(id, ct);
          customer.Update(request.Code);
 
-         return await CommitUpdateAsync(customer);
-      });
+         return await CommitUpdateAsync(customer, ct);
+      }, cancellationToken);
    }
 
-   private async Task<Result> CommitUpdateAsync(Domain.Entities.Customer customer)
+   private async Task<Result> CommitUpdateAsync(Domain.Entities.Customer customer, CancellationToken cancellationToken)
    {
       _iamUnitOfWork.Customers.Update(customer);
-      await _iamUnitOfWork.SaveChangesAsync();
+      await _iamUnitOfWork.SaveChangesAsync(cancellationToken);
 
       return Result.Success(new SuccessInfo());
    }

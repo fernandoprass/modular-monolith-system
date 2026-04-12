@@ -1,6 +1,6 @@
 namespace Shared.Domain.Entities;
 
-public class ParameterOverride : Entity
+public class ParameterOverride : EntityAudited
 {
    public string Value { get; set; }
    public Guid OwnerId { get; set; }

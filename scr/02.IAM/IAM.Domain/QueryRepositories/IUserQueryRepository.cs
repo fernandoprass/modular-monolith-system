@@ -6,9 +6,9 @@ namespace IAM.Domain.QueryRepositories;
 
 public interface IUserQueryRepository
 {
-   Task<UserDto?> GetByIdAsync(Guid id);
-   Task<Guid> GetIdByEmailAsync(string email);
-   Task<IEnumerable<UserLiteDto>> GetByCustomerIdAsync(Guid customerId);
-   Task<User?> GetByEmailAsync(string email);
-   Task<UserPasswordDto?> GetByEmailWithPasswordAsync(string email);
+   Task<UserDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+   Task<Guid> GetIdByEmailAsync(string email, CancellationToken cancellationToken = default);
+   Task<IEnumerable<UserLiteDto>> GetByCustomerIdAsync(Guid customerId, CancellationToken cancellationToken = default);
+   Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default);
+   Task<UserPasswordDto?> GetByEmailWithPasswordAsync(string email, CancellationToken cancellationToken = default);
 }

@@ -1,4 +1,4 @@
-﻿using IAM.Application.Contracts;
+using IAM.Application.Contracts;
 using IAM.Application.Services;
 using IAM.Domain.DTOs;
 using IAM.Domain.DTOs.Requests;
@@ -35,24 +35,24 @@ public class AuthServiceTests
       var password = "StrongPassword123!";
       var user = CreateValidUser(password, isUserAtive: true, isCustumerActive: true);
 
-      _userQueryRepositoryMock.GetByEmailWithPasswordAsync(user.Email).Returns(user);
+      _userQueryRepositoryMock.GetByEmailWithPasswordAsync(user.Email, Arg.Any<CancellationToken>()).Returns(user);
       var request = new UserLoginRequest(user.Email, password);
 
-      var result = await _authService.LoginAsync(request);
+      var result = await _authService.LoginAsync(request, TestContext.Current.CancellationToken);
 
       Assert.True(result.IsSuccess);
       Assert.NotNull(result.Data?.Token);
       Assert.Equal(user.Email, result.Data.User.Email);
-      await _userServiceMock.Received(1).UpdateLastLoginAsync(user.Id);
+      await _userServiceMock.Received(1).UpdateLastLoginAsync(user.Id, Arg.Any<CancellationToken>());
    }
 
    [Fact]
    public async Task LoginAsync_InvalidEmail_ShouldReturnUnauthorized()
    {
-      _userQueryRepositoryMock.GetByEmailWithPasswordAsync(Arg.Any<string>()).Returns((UserPasswordDto)null!);
+      _userQueryRepositoryMock.GetByEmailWithPasswordAsync(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns((UserPasswordDto)null!);
       var request = new UserLoginRequest("nonexistent@email.com", "anyPassword");
 
-      var result = await _authService.LoginAsync(request);
+      var result = await _authService.LoginAsync(request, TestContext.Current.CancellationToken);
 
       Assert.False(result.IsSuccess);
       Assert.IsType<UnauthorizedError>(result.Messages.First());
@@ -65,10 +65,10 @@ public class AuthServiceTests
       var wrongPassword = "WrongPassword123!";
       var user = CreateValidUser(correctPassword, isUserAtive: true, isCustumerActive: true);
 
-      _userQueryRepositoryMock.GetByEmailWithPasswordAsync(user.Email).Returns(user);
+      _userQueryRepositoryMock.GetByEmailWithPasswordAsync(user.Email, Arg.Any<CancellationToken>()).Returns(user);
       var request = new UserLoginRequest(user.Email, wrongPassword);
 
-      var result = await _authService.LoginAsync(request);
+      var result = await _authService.LoginAsync(request, TestContext.Current.CancellationToken);
 
       Assert.False(result.IsSuccess);
       Assert.IsType<UnauthorizedError>(result.Messages.First());
@@ -80,10 +80,10 @@ public class AuthServiceTests
       var password = "Password123!";
       var user = CreateValidUser(password , isUserAtive: false, isCustumerActive: true);
 
-      _userQueryRepositoryMock.GetByEmailWithPasswordAsync(user.Email).Returns(user);
+      _userQueryRepositoryMock.GetByEmailWithPasswordAsync(user.Email, Arg.Any<CancellationToken>()).Returns(user);
       var request = new UserLoginRequest(user.Email, password);
 
-      var result = await _authService.LoginAsync(request);
+      var result = await _authService.LoginAsync(request, TestContext.Current.CancellationToken);
 
       Assert.False(result.IsSuccess);
       Assert.IsType<UnauthorizedError>(result.Messages.First());
@@ -95,10 +95,10 @@ public class AuthServiceTests
       var password = "Password123!";
       var user = CreateValidUser(password, isUserAtive: true, isCustumerActive: false);
 
-      _userQueryRepositoryMock.GetByEmailWithPasswordAsync(user.Email).Returns(user);
+      _userQueryRepositoryMock.GetByEmailWithPasswordAsync(user.Email, Arg.Any<CancellationToken>()).Returns(user);
       var request = new UserLoginRequest(user.Email, password);
 
-      var result = await _authService.LoginAsync(request);
+      var result = await _authService.LoginAsync(request, TestContext.Current.CancellationToken);
 
       Assert.False(result.IsSuccess);
       Assert.IsType<UnauthorizedError>(result.Messages.First());

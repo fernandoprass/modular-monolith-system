@@ -8,38 +8,38 @@ public class RoleQueryRepository(IamDbContext context) : IRoleQueryRepository
 {
    private readonly IamDbContext _context = context;
 
-   public async Task<Role?> GetByIdAsync(Guid id)
+   public async Task<Role?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
    {
       return await _context.Roles
          .AsNoTracking()
-         .Include(r => r.RoleFeatures)
-            .ThenInclude(rf => rf.Feature)
-         .FirstOrDefaultAsync(r => r.Id == id);
+         .Include(r => r.RolePermissions)
+            .ThenInclude(rf => rf.Permission)
+         .FirstOrDefaultAsync(r => r.Id == id, cancellationToken);
    }
 
-   public async Task<IEnumerable<Role>> GetAllAsync(Guid customerId)
+   public async Task<IEnumerable<Role>> GetAllAsync(Guid customerId, CancellationToken cancellationToken = default)
    {
       return await _context.Roles
          .AsNoTracking()
          .Where(r => r.CustomerId == null || r.CustomerId == customerId)
-         .Include(r => r.RoleFeatures)
-            .ThenInclude(rf => rf.Feature)
-         .ToListAsync();
+         .Include(r => r.RolePermissions)
+            .ThenInclude(rf => rf.Permission)
+         .ToListAsync(cancellationToken);
    }
 
-   public async Task<bool> NameExistsAsync(string name, Guid? customerId)
+   public async Task<bool> NameExistsAsync(string name, Guid? customerId, CancellationToken cancellationToken = default)
    {
       return await _context.Roles
-         .AnyAsync(r => r.Name == name && r.CustomerId == customerId);
+         .AnyAsync(r => r.Name == name && r.CustomerId == customerId, cancellationToken);
    }
 
-   public async Task<IEnumerable<Feature>> GetUserFeaturesAsync(Guid userId)
+   public async Task<IEnumerable<Permission>> GetUserPermissionsAsync(Guid userId, CancellationToken cancellationToken = default)
    {
        return await _context.UserRoles
            .AsNoTracking()
            .Where(ur => ur.UserId == userId)
-           .SelectMany(ur => ur.Role.RoleFeatures.Select(rf => rf.Feature))
+           .SelectMany(ur => ur.Role.RolePermissions.Select(rf => rf.Permission))
            .Distinct()
-           .ToListAsync();
+           .ToListAsync(cancellationToken);
    }
 }

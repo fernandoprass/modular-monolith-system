@@ -1,3 +1,8 @@
 namespace IAM.Domain.DTOs.Requests;
 
-public record RoleCreateRequest(string Name, Guid? CustomerId, bool IsDefault = false);
+public record RoleCreateRequest(
+   string Name, 
+   string Description, 
+   bool IsDefault, 
+   bool IsActive, 
+   Guid? CustomerId);

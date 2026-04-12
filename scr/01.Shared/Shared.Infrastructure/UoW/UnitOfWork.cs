@@ -23,7 +23,7 @@ public class UnitOfWork<TContext>(TContext dbContext, IUserContext userContext)
    public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         var userId = _userContext.UserId;
-        var entries = _dbContext.ChangeTracker.Entries<Entity>();
+        var entries = _dbContext.ChangeTracker.Entries<EntityAudited>();
 
         foreach (var entry in entries)
         {

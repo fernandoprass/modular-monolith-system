@@ -17,7 +17,7 @@ namespace IAM.Application.Services;
 
 public interface IAuthService
 {
-   Task<Result<LoginResponse?>> LoginAsync(UserLoginRequest request);
+   Task<Result<LoginResponse?>> LoginAsync(UserLoginRequest request, CancellationToken cancellationToken = default);
 }
 
 public class AuthService(IUserQueryRepository userQueryRepository,
@@ -29,9 +29,9 @@ public class AuthService(IUserQueryRepository userQueryRepository,
    private readonly string _jwtSecret = configuration["Jwt:Secret"] ?? "your-super-secret-jwt-key-here-make-it-long-and-secure";
    private readonly int _jwtExpirationHours = int.Parse(configuration["Jwt:ExpirationHours"] ?? "24");
 
-   public async Task<Result<LoginResponse?>> LoginAsync(UserLoginRequest request)
+   public async Task<Result<LoginResponse?>> LoginAsync(UserLoginRequest request, CancellationToken cancellationToken = default)
    {
-      var user = await _userQueryRepository.GetByEmailWithPasswordAsync(request.Email);
+      var user = await _userQueryRepository.GetByEmailWithPasswordAsync(request.Email, cancellationToken);
 
       var dummyHash = "$argon2id$v=19$m=65536,t=2,p=1$" 
                       + Convert.ToBase64String(Encoding.UTF8.GetBytes("fake-salt")) 
@@ -49,7 +49,7 @@ public class AuthService(IUserQueryRepository userQueryRepository,
       var userDto = user.ToUserDto();
       var (token, expiresAt) = GenerateJwtToken(userDto);
 
-      await _userService.UpdateLastLoginAsync(user.Id);
+      await _userService.UpdateLastLoginAsync(user.Id, cancellationToken);
 
       var response = new LoginResponse(token, expiresAt, userDto);
 

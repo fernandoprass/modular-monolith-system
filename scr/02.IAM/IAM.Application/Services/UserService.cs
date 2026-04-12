@@ -29,22 +29,22 @@ public class UserService(
    private readonly IUserRepository _userRepository = userRepository;
    private readonly IUserQueryRepository _userQueryRepository = userQueryRepository;
 
-   public async Task<UserDto?> GetByIdAsync(Guid id)
+   public async Task<UserDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
    {
-      return await _userQueryRepository.GetByIdAsync(id);
+      return await _userQueryRepository.GetByIdAsync(id, cancellationToken);
    }
 
-   public async Task<IEnumerable<UserLiteDto>> GetByCustomerIdAsync(Guid customerId)
+   public async Task<IEnumerable<UserLiteDto>> GetByCustomerIdAsync(Guid customerId, CancellationToken cancellationToken = default)
    {
-      return await _userQueryRepository.GetByCustomerIdAsync(customerId);
+      return await _userQueryRepository.GetByCustomerIdAsync(customerId, cancellationToken);
    }
 
    public async Task<Result<UserDto>> CreateUserAsync(UserCreateRequest request,
-                                                      bool customerExists)
+                                                      bool customerExists, CancellationToken cancellationToken = default)
    {
-      return await ExecuteIfUserOwnsAsync(request.CustomerId, async () =>
+      return await ExecuteIfUserOwnsAsync(request.CustomerId, async (ct) =>
       {
-         bool emailExists = await EmailExistsAsync(request.Email);
+         bool emailExists = await EmailExistsAsync(request.Email, ct);
 
          var validation = _userValidator.ValidateCreate(request, customerExists, emailExists);
          if (validation.HasError)
@@ -52,7 +52,7 @@ public class UserService(
             return Result<UserDto>.Failure(validation.Messages);
          }
 
-         var passwordExpiresAt = await GetPasswordExpiresAt();
+         var passwordExpiresAt = await GetPasswordExpiresAt(ct);
 
          var user = User.Create(
              request.Name,
@@ -61,17 +61,17 @@ public class UserService(
              passwordExpiresAt,
              request.CustomerId);
 
-         await _iamUnitOfWork.Users.AddAsync(user);
-         await _iamUnitOfWork.SaveChangesAsync();
+         await _iamUnitOfWork.Users.AddAsync(user, ct);
+         await _iamUnitOfWork.SaveChangesAsync(ct);
 
          return Result<UserDto>.Success(user.ToUserDto());
-      });
+      }, cancellationToken);
    }
 
-   public async Task<Result> UpdateAsync(Guid id, UserUpdateRequest request)
+   public async Task<Result> UpdateAsync(Guid id, UserUpdateRequest request, CancellationToken cancellationToken = default)
    {
-      var user = await _userRepository.GetByIdAsync(id);
-      return await ExecuteIfUserOwnsAsync(user?.CustomerId, async () =>
+      var user = await _userRepository.GetByIdAsync(id, cancellationToken);
+      return await ExecuteIfUserOwnsAsync(user?.CustomerId, async (ct) =>
       {    
          var validator = _userValidator.ValidateUpdate(user?.Id, request);
          if (validator.HasError)
@@ -81,13 +81,13 @@ public class UserService(
 
          user.Update(request.Name, request.IsActive);
 
-         return await CommitUpdateAsync(user);
-      });
+         return await CommitUpdateAsync(user, ct);
+      }, cancellationToken);
    }
 
-   public async Task<Result> UpdatePasswordAsync(Guid id, UserUpdatePasswordRequest request)
+   public async Task<Result> UpdatePasswordAsync(Guid id, UserUpdatePasswordRequest request, CancellationToken cancellationToken = default)
    {
-      var user = await _userRepository.GetByIdAsync(id);
+      var user = await _userRepository.GetByIdAsync(id, cancellationToken);
 
       var validator = _userValidator.ValidateUpdatePassword(user, _userContext.UserId, request);
       if (validator.HasError)
@@ -95,66 +95,66 @@ public class UserService(
          return Result.Failure(validator.Messages);
       }
 
-      var passwordExpiresAt = await GetPasswordExpiresAt();
+      var passwordExpiresAt = await GetPasswordExpiresAt(cancellationToken);
 
       user.UpdatePassword(Argon2.Hash(request.PasswordNew), passwordExpiresAt);
 
-      return await CommitUpdateAsync(user);
+      return await CommitUpdateAsync(user, cancellationToken);
    }
 
-   private async Task<DateTime> GetPasswordExpiresAt()
+   private async Task<DateTime> GetPasswordExpiresAt(CancellationToken cancellationToken)
    {
-      short numberOfDay = await _parameterService.GetShortIntAsync(IamParam.Security.PasswordExpireTime);
+      short numberOfDay = await _parameterService.GetShortIntAsync(IamParam.Security.PasswordExpireTime, cancellationToken);
 
       var passwordExpiresAt = DateTime.UtcNow.AddDays(numberOfDay);
       return passwordExpiresAt;
    }
 
-   public async Task<Result> DeleteAsync(Guid id)
+   public async Task<Result> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
    {
-      var user = await _userRepository.GetByIdAsync(id);
+      var user = await _userRepository.GetByIdAsync(id, cancellationToken);
 
-      return await ExecuteIfUserOwnsAsync(user?.CustomerId, async () =>
+      return await ExecuteIfUserOwnsAsync(user?.CustomerId, async (ct) =>
       {
          if (user == null)
          {
             return Result.Failure(new NotFoundError(IamConst.Entity.User));
          }
 
-         await _iamUnitOfWork.Users.DeleteAsync(id);
-         await _iamUnitOfWork.SaveChangesAsync();
+         await _iamUnitOfWork.Users.DeleteAsync(id, ct);
+         await _iamUnitOfWork.SaveChangesAsync(ct);
          return Result.Success(new SuccessInfo());
-      });
+      }, cancellationToken);
    }
 
-   public async Task<Result> UpdateLastLoginAsync(Guid id)
+   public async Task<Result> UpdateLastLoginAsync(Guid id, CancellationToken cancellationToken = default)
    {
-      var user = await _userRepository.GetByIdAsync(id);
+      var user = await _userRepository.GetByIdAsync(id, cancellationToken);
 
       user.UpdateLastLogin();
 
-      return await CommitUpdateAsync(user);
+      return await CommitUpdateAsync(user, cancellationToken);
    }
 
-   public async Task<Result> ValidateUserForNewCustomerAsync(CustomerUserCreateRequest request)
+   public async Task<Result> ValidateUserForNewCustomerAsync(CustomerUserCreateRequest request, CancellationToken cancellationToken = default)
    {
-      bool emailExists = await EmailExistsAsync(request.Email);
+      bool emailExists = await EmailExistsAsync(request.Email, cancellationToken);
 
       return _userValidator.ValidateCreateForNewCustomer(request, emailExists);
    }
 
-   private async Task<bool> EmailExistsAsync(string email)
+   private async Task<bool> EmailExistsAsync(string email, CancellationToken cancellationToken)
    {
-      var userId = await _userQueryRepository.GetIdByEmailAsync(email);
+      var userId = await _userQueryRepository.GetIdByEmailAsync(email, cancellationToken);
 
       var emailExists = userId != Guid.Empty;
       return emailExists;
    }
 
-   private async Task<Result> CommitUpdateAsync(User user)
+   private async Task<Result> CommitUpdateAsync(User user, CancellationToken cancellationToken)
    {
       _iamUnitOfWork.Users.Update(user);
-      await _iamUnitOfWork.SaveChangesAsync();
+      await _iamUnitOfWork.SaveChangesAsync(cancellationToken);
 
       return Result.Success(new SuccessInfo());
    }

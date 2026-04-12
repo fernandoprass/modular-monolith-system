@@ -3,7 +3,7 @@ using IAM.Domain.Entities;
 
 namespace IAM.Domain.Mappers;
 
-public static class CustomerMapper
+public static class CustomerMappers
 {
    public static CustomerDto ToCustomerDto(this Customer customer)
    {

@@ -5,7 +5,7 @@ using Shared.Domain.Entities;
 
 namespace Shared.Infrastructure.Configurations;
 
-public class ParameterOverrideConfiguration : BaseConfiguration<ParameterOverride>
+public class ParameterOverrideConfiguration : BaseAuditedConfiguration<ParameterOverride>
 {
    public override void Configure(EntityTypeBuilder<ParameterOverride> builder)
    {

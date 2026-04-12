@@ -11,46 +11,46 @@ public class UserQueryRepository(IamDbContext context) : IUserQueryRepository
 {
    private readonly IamDbContext _context = context;
 
-   public async Task<UserDto?> GetByIdAsync(Guid id)
+   public async Task<UserDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
    {
       return await _context.Users
           .AsNoTracking()
           .Include(u => u.Customer)
           .Where(u => u.Id == id)
           .Select(u => u.ToUserDto())
-          .SingleOrDefaultAsync();
+          .SingleOrDefaultAsync(cancellationToken);
    }
 
-   public async Task<User?> GetByEmailAsync(string email)
+   public async Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
    {
       return await _context.Users
           .AsNoTracking()
           .Include(u => u.Customer)
           .Where(u => u.Email == email)
           .Select(u => u)
-          .SingleOrDefaultAsync();
+          .SingleOrDefaultAsync(cancellationToken);
    }
 
-   public Task<Guid> GetIdByEmailAsync(string email)
+   public Task<Guid> GetIdByEmailAsync(string email, CancellationToken cancellationToken = default)
    {
       return _context.Users
           .AsNoTracking()
           .Where(u => u.Email == email)
           .Select(u => u.Id)
-          .SingleOrDefaultAsync();
+          .SingleOrDefaultAsync(cancellationToken);
    }
 
-   public async Task<UserPasswordDto?> GetByEmailWithPasswordAsync(string email)
+   public async Task<UserPasswordDto?> GetByEmailWithPasswordAsync(string email, CancellationToken cancellationToken = default)
    {
       return await _context.Users
           .AsNoTracking()
           .Include(u => u.Customer)
           .Where(u => u.Email == email)
           .Select(u => u.ToUserPasswordDto())
-          .SingleOrDefaultAsync();
+          .SingleOrDefaultAsync(cancellationToken);
    }
 
-   public async Task<IEnumerable<UserLiteDto>> GetByCustomerIdAsync(Guid customerId)
+   public async Task<IEnumerable<UserLiteDto>> GetByCustomerIdAsync(Guid customerId, CancellationToken cancellationToken = default)
    {
       return await _context.Users
           .AsNoTracking()
@@ -62,6 +62,6 @@ public class UserQueryRepository(IamDbContext context) : IUserQueryRepository
              Email = u.Email,
              IsActive = u.IsActive
           })
-          .ToListAsync();
+          .ToListAsync(cancellationToken);
    }
 }

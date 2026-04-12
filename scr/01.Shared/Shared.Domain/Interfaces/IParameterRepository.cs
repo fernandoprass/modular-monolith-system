@@ -5,12 +5,12 @@ namespace Shared.Domain.Interfaces;
 
 internal interface IParameterRepository
 {
-   Task<Parameter?> GetByIdAsync(Guid id);
-   Task AddAsync(Parameter parameter);
+   Task<Parameter?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+   Task AddAsync(Parameter parameter, CancellationToken cancellationToken = default);
    void Update(Parameter parameter);
-   Task DeleteAsync(Guid id);
-   Task<bool> ExistsAsync(Guid id);
-   Task<bool> ExistsAsync(string key);
+   Task DeleteAsync(Guid id, CancellationToken cancellationToken = default);
+   Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken = default);
+   Task<bool> ExistsAsync(string key, CancellationToken cancellationToken = default);
 
-   Task<Parameter?> GetByKeyAsync(string key);
+   Task<Parameter?> GetByKeyAsync(string key, CancellationToken cancellationToken = default);
  }

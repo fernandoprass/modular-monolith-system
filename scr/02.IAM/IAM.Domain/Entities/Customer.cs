@@ -3,7 +3,7 @@ using Shared.Domain.Entities;
 
 namespace IAM.Domain.Entities;
 
-public class Customer : Entity
+public class Customer : EntityAudited
 {
    public CustomerType Type { get; set; }
    public string Code { get; set; }

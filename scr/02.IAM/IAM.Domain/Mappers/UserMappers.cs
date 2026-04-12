@@ -4,7 +4,7 @@ using IAM.Domain.Entities;
 
 namespace IAM.Domain.Mappers;
 
-public static class UserMapper
+public static class UserMappers
 {
    public static UserDto ToUserDto(this User user)
    {
