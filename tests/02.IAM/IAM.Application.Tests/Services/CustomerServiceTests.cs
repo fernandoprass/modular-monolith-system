@@ -92,9 +92,9 @@ public class CustomerServiceTests
    public async Task GetByNameAsync_WhenCalled_ReturnsIEnumerableCustomerDto()
    {
       var name = "SearchName";
-      var expected = new List<CustomerDto> 
-      { 
-         new(Id: Guid.Empty, Type: CustomerType.Company, Code: "ABC", Name: name, Description: null, IsActive: true) 
+      var expected = new List<CustomerDto>
+      {
+         new(Id: Guid.Empty, Type: CustomerType.Company, Code: "ABC", Name: name, Description: null, IsActive: true)
       };
 
       _customerQueryRepository.GetByNameAsync(name, Arg.Any<CancellationToken>()).Returns(expected);

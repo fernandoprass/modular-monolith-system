@@ -4,17 +4,17 @@ namespace IAM.Domain.Messages.Errors;
 
 public class DuplicateCustomerCodeError : ErrorMessage
 {
-    public DuplicateCustomerCodeError(string code)
-        : base("DuplicateCodeError", "The customer code '{code}' already exists.")
-    {
-        AddVariable("code", code);
-    }
+   public DuplicateCustomerCodeError(string code)
+       : base("DuplicateCodeError", "The customer code '{code}' already exists.")
+   {
+      AddVariable("code", code);
+   }
 }
 
 public class InvalidCustomerCodeFormatError : ErrorMessage
 {
-    public InvalidCustomerCodeFormatError()
-        : base("InvalidCodeFormatError", "Code must contain only letters and number.") { }
+   public InvalidCustomerCodeFormatError()
+       : base("InvalidCodeFormatError", "Code must contain only letters and number.") { }
 }
 
 public class InvalidCustomerTypeError : ErrorMessage

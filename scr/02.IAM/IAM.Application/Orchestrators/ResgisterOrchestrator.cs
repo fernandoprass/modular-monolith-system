@@ -38,14 +38,15 @@ public class ResgisterOrchestrator(
 
       var result = await _userService.CreateUserAsync(request, customerExists, cancellationToken);
 
-      if (result.IsSuccess) { 
-         result.Data.CustomerName = customerDto.Name; 
+      if (result.IsSuccess)
+      {
+         result.Data.CustomerName = customerDto.Name;
       }
-      
+
       return result;
    }
    public async Task<Result<CustomerDto>> RegisterCustomerAsync(CustomerCreateRequest customerCreate, CancellationToken cancellationToken = default)
-   {   
+   {
       var customerValidateResult = await _customerService.ValidateCreateCustomerAsync(customerCreate, cancellationToken);
       var userValidateResult = await _userService.ValidateUserForNewCustomerAsync(customerCreate.User, cancellationToken);
 
@@ -58,8 +59,9 @@ public class ResgisterOrchestrator(
          customerCreate.Description
       );
 
-      if (result.HasError) { 
-         return Result<CustomerDto>.Failure(result.Messages); 
+      if (result.HasError)
+      {
+         return Result<CustomerDto>.Failure(result.Messages);
       }
 
       var user = User.Create(
@@ -92,7 +94,7 @@ public class ResgisterOrchestrator(
          await _iamUnitOfWork.Customers.DeleteAsync(id, ct);
 
          var users = await _userRepository.GetByCustomerIdAsync(id, ct);
-         foreach(var u in users)
+         foreach (var u in users)
          {
             await _iamUnitOfWork.Users.DeleteAsync(u.Id, ct);
          }

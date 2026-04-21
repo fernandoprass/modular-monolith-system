@@ -7,7 +7,7 @@ namespace Shared.Infrastructure.UoW;
 /// <summary>
 /// SharedUnitOfWork is a concrete implementation of the ISharedUnitOfWork interface, which extends the generic UnitOfWork class.
 /// </summary>
-internal class SharedUnitOfWork(SharedDbContext dbContext, IUserContext userContext) 
+internal class SharedUnitOfWork(SharedDbContext dbContext, IUserContext userContext)
    : UnitOfWork<SharedDbContext>(dbContext, userContext), ISharedUnitOfWork
 {
    private readonly SharedDbContext _dbContext = dbContext;

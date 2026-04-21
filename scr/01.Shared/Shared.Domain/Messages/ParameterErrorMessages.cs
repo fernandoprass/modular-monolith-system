@@ -14,24 +14,24 @@ public class ParameterDuplicatedError : ErrorMessage
 
 public class ParameterNotOwnerEditableError : ErrorMessage
 {
-   public ParameterNotOwnerEditableError() 
+   public ParameterNotOwnerEditableError()
       : base("ParameterNotOwnerEditableError", "This parameter is not editable by owners.") { }
 }
 
 public class ParameterInvalidValueFormatError : ErrorMessage
 {
-   public ParameterInvalidValueFormatError(string typeName) 
+   public ParameterInvalidValueFormatError(string typeName)
       : base("ParameterInvalidValueFormatError", "The value provided is not in a valid format for type '{typeName}'.")
    {
       AddVariable(nameof(typeName), typeName);
    }
 }
-public class ParameterInvalidValueError(string message) : ErrorMessage("ParameterInvalidValueError", message) {}
+public class ParameterInvalidValueError(string message) : ErrorMessage("ParameterInvalidValueError", message) { }
 
 public class ParameterInvalidKeyFormatError : ErrorMessage
 {
    public ParameterInvalidKeyFormatError()
-      : base("ParameterInvalidKeyFormatError", "Invalid Parameter Key format. The key must follow the pattern 'Module.Group.Name', where each segment contains at least 2 alphanumeric characters.") {}
+      : base("ParameterInvalidKeyFormatError", "Invalid Parameter Key format. The key must follow the pattern 'Module.Group.Name', where each segment contains at least 2 alphanumeric characters.") { }
 }
 
 

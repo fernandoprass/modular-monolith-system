@@ -57,7 +57,7 @@ public class CustomerValidatorTests
    [InlineData("Ab", true, false)] // Assuming min length 3 in NameRules
    public void ValidateUpdate_ShouldValidateName(string name, bool customerExists, bool expectedSuccess)
    {
-      var request = new CustomerUpdateRequest(name, string.Empty, IsActive : true);
+      var request = new CustomerUpdateRequest(name, string.Empty, IsActive: true);
 
       var result = _validator.ValidateUpdate(request, customerExists);
 
@@ -68,7 +68,7 @@ public class CustomerValidatorTests
 
    #region ValidateUpdateCode Tests
 
-   [Theory]     
+   [Theory]
    [InlineData("NEW123", false, true)] // Valid & New    
    [InlineData("OLD123", true, false)] // Duplicate   
    [InlineData("X1", false, false)]    // Invalid: Format (too short)     

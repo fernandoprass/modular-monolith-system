@@ -51,7 +51,7 @@ public class ValidatorTemplateTests
 
    #region PasswordRules Tests
 
-   [Theory]   
+   [Theory]
    [InlineData("Pass123!", true, null)]// Valid: Meets all 5 criteria   
    [InlineData("P1s!", false, typeof(PasswordMinLengthError))]            // Invalid: Too short (< 8)  
    [InlineData("pass123!", false, typeof(PasswordMissingUppercaseError))] // Invalid: Missing Uppercase  

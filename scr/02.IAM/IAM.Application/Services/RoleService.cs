@@ -69,7 +69,7 @@ public class RoleService(
    public async Task<Result> AssignToUserAsync(RoleAssignRequest request, CancellationToken cancellationToken = default)
    {
       var user = await _iamUnitOfWork.Users.GetByIdAsync(request.UserId, cancellationToken);
-      
+
       if (user == null)
          return Result.Failure(new NotFoundError(IamConst.Entity.User));
 
@@ -101,10 +101,10 @@ public class RoleService(
    {
       var roles = await _roleQueryRepository.GetAllAsync(_userContext.UserOwnerId, cancellationToken);
       var dtos = roles.Select(r => new RoleDto(
-         r.Id, 
-         r.Name, 
-         r.CustomerId, 
-         r.IsDefault, 
+         r.Id,
+         r.Name,
+         r.CustomerId,
+         r.IsDefault,
          r.RolePermissions.Select(rp => rp.Permission.ToPermissionDto())
       ));
 

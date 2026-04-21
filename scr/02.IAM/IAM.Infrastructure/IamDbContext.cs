@@ -1,7 +1,7 @@
-using IAM.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
-using IAM.Infrastructure.Configurations;
 using IAM.Domain;
+using IAM.Domain.Entities;
+using IAM.Infrastructure.Configurations;
+using Microsoft.EntityFrameworkCore;
 
 namespace IAM.Infrastructure;
 

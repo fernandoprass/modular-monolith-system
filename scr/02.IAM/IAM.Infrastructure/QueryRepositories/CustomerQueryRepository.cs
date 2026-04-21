@@ -22,7 +22,7 @@ public class CustomerQueryRepository(IamDbContext context) : ICustomerQueryRepos
       return await _context.Customers
           .AsNoTracking()
           .Where(c => c.Name.Contains(name, StringComparison.InvariantCultureIgnoreCase))
-          .Select(c => new CustomerDto(c.Id, c.Type,c.Code, c.Name, c.Description, c.IsActive))
+          .Select(c => new CustomerDto(c.Id, c.Type, c.Code, c.Name, c.Description, c.IsActive))
           .ToListAsync(cancellationToken);
    }
 

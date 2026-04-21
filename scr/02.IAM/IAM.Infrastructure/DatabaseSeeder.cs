@@ -64,7 +64,7 @@ public class DatabaseSeeder : IDatabaseSeeder
       await _iamUnitOfWork.Users.AddAsync(User.Create("Internal Support", "support@saas.com", passwordHash, DateTime.UtcNow.AddDays(30), customerId));
       await _iamUnitOfWork.SaveChangesAsync();
    }
-    
+
    private async Task SeedScientistsCustomerAsync()
    {
       var customerId = Guid.CreateVersion7();

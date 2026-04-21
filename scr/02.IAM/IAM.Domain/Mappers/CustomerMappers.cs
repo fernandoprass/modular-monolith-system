@@ -9,12 +9,12 @@ public static class CustomerMappers
    {
       return new CustomerDto
       (
-         Id : customer.Id,
-         Type : customer.Type,
-         Code : customer.Code,
-         Name : customer.Name,
-         Description : customer.Description,
-         IsActive : customer.IsActive
+         Id: customer.Id,
+         Type: customer.Type,
+         Code: customer.Code,
+         Name: customer.Name,
+         Description: customer.Description,
+         IsActive: customer.IsActive
       );
    }
 }

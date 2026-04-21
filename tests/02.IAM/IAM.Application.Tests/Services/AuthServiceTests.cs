@@ -78,7 +78,7 @@ public class AuthServiceTests
    public async Task LoginAsync_InactiveUser_ShouldReturnUnauthorized()
    {
       var password = "Password123!";
-      var user = CreateValidUser(password , isUserAtive: false, isCustumerActive: true);
+      var user = CreateValidUser(password, isUserAtive: false, isCustumerActive: true);
 
       _userQueryRepositoryMock.GetByEmailWithPasswordAsync(user.Email, Arg.Any<CancellationToken>()).Returns(user);
       var request = new UserLoginRequest(user.Email, password);

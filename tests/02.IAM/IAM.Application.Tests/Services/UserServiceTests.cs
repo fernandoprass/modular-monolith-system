@@ -32,7 +32,7 @@ public class UserServiceTests
       _userValidatorMock = Substitute.For<IUserValidator>();
       _userRepositoryMock = Substitute.For<IUserRepository>();
       _userQueryRepositoryMock = Substitute.For<IUserQueryRepository>();
-      
+
       _unitOfWorkMock.Users.Returns(_userRepositoryMock);
       _userContextMock.UserOwnerId.Returns(Guid.CreateVersion7());
 
@@ -48,7 +48,7 @@ public class UserServiceTests
    [Fact]
    public async Task CreateUserAsync_ShouldReturnForbiddenCustomerError_WhenOperatorIdDoesNotMatch()
    {
-      var request = new UserCreateRequest(string.Empty, "test@test.com" , string.Empty, Guid.NewGuid());
+      var request = new UserCreateRequest(string.Empty, "test@test.com", string.Empty, Guid.NewGuid());
 
       _parameterServiceMock.GetShortIntAsync(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns((short)30);
 
@@ -69,7 +69,7 @@ public class UserServiceTests
 
       _parameterServiceMock.GetShortIntAsync(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns((short)30);
 
-      _userValidatorMock.ValidateCreate(request,customerExists: true, emailAlreadyExists: true)
+      _userValidatorMock.ValidateCreate(request, customerExists: true, emailAlreadyExists: true)
           .Returns(Result.Failure(new EmailAlreadyExistError(request.Email)));
 
       var result = await _userService.CreateUserAsync(request, true, TestContext.Current.CancellationToken);
@@ -201,7 +201,7 @@ public class UserServiceTests
    [Fact]
    public async Task ValidateUserForNewCustomerAsync_ShouldReturnError_WhenEmailAlreadyExists()
    {
-      var request = new CustomerUserCreateRequest("John Admas", "exists@test.com","Str0ngP4ssw0d!" );
+      var request = new CustomerUserCreateRequest("John Admas", "exists@test.com", "Str0ngP4ssw0d!");
       _userQueryRepositoryMock.GetIdByEmailAsync(request.Email, Arg.Any<CancellationToken>()).Returns(Guid.NewGuid()); // Email exists
 
       _userValidatorMock.ValidateCreateForNewCustomer(request, true)

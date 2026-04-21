@@ -21,7 +21,7 @@ public class CustomerService(
 {
    private readonly ICustomerQueryRepository _customerQueryRepository = customerQueryRepository;
    private readonly ICustomerRepository _customerRepository = customerRepository;
-   private readonly ICustomerValidator _customerValidator = customerValidator;   
+   private readonly ICustomerValidator _customerValidator = customerValidator;
    private readonly IIamUnitOfWork _iamUnitOfWork = iamUnitOfWork;
 
    public async Task<Result> ValidateCreateCustomerAsync(CustomerCreateRequest request, CancellationToken cancellationToken = default)
@@ -86,7 +86,7 @@ public class CustomerService(
          {
             return Result.Failure(validation.Messages);
          }
-         
+
          customer = await _customerRepository.GetByIdAsync(id, ct);
          customer.Update(request.Code);
 

@@ -1,5 +1,4 @@
 ﻿using FluentAssertions;
-using Shared.Domain;
 
 namespace Shared.Domain.Tests;
 

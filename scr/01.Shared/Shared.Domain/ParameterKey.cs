@@ -24,7 +24,7 @@ public class ParameterKey
       Module = module;
       Group = group;
       Name = name;
-      Key = $"{module}.{group}.{name}"; 
+      Key = $"{module}.{group}.{name}";
    }
 
    public static implicit operator ParameterKey(string key) => new(key);

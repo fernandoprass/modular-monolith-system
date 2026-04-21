@@ -9,7 +9,7 @@ namespace IAM.Domain.Messages.Errors
 
    public class DuplicateRoleNameError : ErrorMessage
    {
-      public DuplicateRoleNameError(string name) : base("DuplicateRoleNameError", "A role with the name '{name}' already exists.") 
+      public DuplicateRoleNameError(string name) : base("DuplicateRoleNameError", "A role with the name '{name}' already exists.")
       {
          AddVariable("name", name);
       }

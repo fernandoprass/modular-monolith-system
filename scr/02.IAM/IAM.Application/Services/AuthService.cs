@@ -33,15 +33,15 @@ public class AuthService(IUserQueryRepository userQueryRepository,
    {
       var user = await _userQueryRepository.GetByEmailWithPasswordAsync(request.Email, cancellationToken);
 
-      var dummyHash = "$argon2id$v=19$m=65536,t=2,p=1$" 
-                      + Convert.ToBase64String(Encoding.UTF8.GetBytes("fake-salt")) 
+      var dummyHash = "$argon2id$v=19$m=65536,t=2,p=1$"
+                      + Convert.ToBase64String(Encoding.UTF8.GetBytes("fake-salt"))
                       + "$" + Convert.ToBase64String(Encoding.UTF8.GetBytes(Guid.NewGuid().ToString()));
 
       // Use the dummy hash for timing attack prevention even if the user is not found
       var passwordHash = user?.PasswordHash ?? dummyHash;
       var isPasswordCorrect = Argon2.Verify(passwordHash, request.Password);
 
-      if (user is null || !user.IsActive|| !user.CustomerIsActive || !isPasswordCorrect)
+      if (user is null || !user.IsActive || !user.CustomerIsActive || !isPasswordCorrect)
       {
          return Result<LoginResponse?>.Failure(new UnauthorizedError());
       }

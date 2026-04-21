@@ -48,7 +48,7 @@ public static class DependencyInjection
 
    private static void RegisterServices(WebApplicationBuilder builder)
    {
-      builder.Services.AddScoped<IAuthService, AuthService>(); 
+      builder.Services.AddScoped<IAuthService, AuthService>();
       builder.Services.AddScoped<ICustomerService, CustomerService>();
       builder.Services.AddScoped<IDatabaseSeeder, DatabaseSeeder>();
       builder.Services.AddScoped<IRoleService, RoleService>();

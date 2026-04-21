@@ -35,11 +35,11 @@ public class RoleQueryRepository(IamDbContext context) : IRoleQueryRepository
 
    public async Task<IEnumerable<Permission>> GetUserPermissionsAsync(Guid userId, CancellationToken cancellationToken = default)
    {
-       return await _context.UserRoles
-           .AsNoTracking()
-           .Where(ur => ur.UserId == userId)
-           .SelectMany(ur => ur.Role.RolePermissions.Select(rf => rf.Permission))
-           .Distinct()
-           .ToListAsync(cancellationToken);
+      return await _context.UserRoles
+          .AsNoTracking()
+          .Where(ur => ur.UserId == userId)
+          .SelectMany(ur => ur.Role.RolePermissions.Select(rf => rf.Permission))
+          .Distinct()
+          .ToListAsync(cancellationToken);
    }
 }

@@ -27,8 +27,8 @@ public class ParameterConfiguration : BaseAuditedConfiguration<Parameter>
       builder.Property(p => p.OverrideType).IsRequired().HasDefaultValue(ParameterOverrideType.None);
       builder.Property(p => p.IsVisible).IsRequired().HasDefaultValue(true);
 
-      builder.HasIndex(p => new {p.Module, p.Group, p.Name }).IsUnique();
+      builder.HasIndex(p => new { p.Module, p.Group, p.Name }).IsUnique();
 
-      builder.HasIndex(p => new {p.Key }).IsUnique();
+      builder.HasIndex(p => new { p.Key }).IsUnique();
    }
 }

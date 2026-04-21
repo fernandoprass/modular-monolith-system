@@ -72,7 +72,7 @@ public class UserService(
    {
       var user = await _userRepository.GetByIdAsync(id, cancellationToken);
       return await ExecuteIfUserOwnsAsync(user?.CustomerId, async (ct) =>
-      {    
+      {
          var validator = _userValidator.ValidateUpdate(user?.Id, request);
          if (validator.HasError)
          {

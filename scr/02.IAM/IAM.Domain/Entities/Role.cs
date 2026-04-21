@@ -34,7 +34,7 @@ public class Role : EntityAudited
    public void Update(string name, string description, bool isDefault, bool isActive)
    {
       Name = name;
-      Description = description; 
+      Description = description;
       IsDefault = isDefault;
       IsActive = isActive;
    }
@@ -49,11 +49,11 @@ public class Role : EntityAudited
 
    public void RemoveFeature(Guid permissionId)
    {
-       var feature = _rolePermissions.FirstOrDefault(rf => rf.PermissionId == permissionId);
-       if (feature != null)
-       {
-           _rolePermissions.Remove(feature);
-       }
+      var feature = _rolePermissions.FirstOrDefault(rf => rf.PermissionId == permissionId);
+      if (feature != null)
+      {
+         _rolePermissions.Remove(feature);
+      }
    }
 
    public void ClearFeatures() => _rolePermissions.Clear();

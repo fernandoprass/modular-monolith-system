@@ -4,7 +4,6 @@ using IAM.Domain;
 using IAM.Domain.DTOs.Requests;
 using IAM.Domain.Entities;
 using IAM.Domain.Messages;
-using IAM.Domain.Messages.Errors;
 using Isopoh.Cryptography.Argon2;
 using Shared.Domain.Messages;
 
@@ -112,7 +111,7 @@ public class UserValidatorTests
       Assert.Contains(result.Messages, m => m is NotFoundError);
    }
 
-   [Theory]   
+   [Theory]
    [InlineData("Valid User", "test@domain.com", "Pass123!", false, true)]      // Case 1: Everything is valid and email is unique 
    [InlineData("Valid User", "duplicate@domain.com", "Pass123!", true, false)] // Case 2: Data is valid but email ALREADY exists in the database
    [InlineData("Ab", "test@domain.com", "Pass123!", false, false)]             // Case 3: Email is unique but Title fails template validation (too short)

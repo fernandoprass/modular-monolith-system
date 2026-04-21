@@ -164,7 +164,7 @@ internal class ParameterService(
    {
       var parameter = await _parameterRepository.GetByIdAsync(id, cancellationToken);
 
-      if(parameter == null) return Result.Failure(new NotFoundError(SharedConst.Entity.Parameter));
+      if (parameter == null) return Result.Failure(new NotFoundError(SharedConst.Entity.Parameter));
 
       await _unitOfWork.Parameters.DeleteAsync(id, cancellationToken);
       await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -231,7 +231,7 @@ internal class ParameterService(
       return parameter.Value;
    }
 
-   private Guid GetOwnerId(ParameterOverrideType overrideType) 
+   private Guid GetOwnerId(ParameterOverrideType overrideType)
    {
       return overrideType switch
       {

@@ -28,7 +28,7 @@ public class AspNetUserContext(IHttpContextAccessor accessor) : IUserContext
 
    private Guid GetUserId()
    {
-      var value = _accessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
+      var value = _accessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
                   ?? _accessor.HttpContext?.User.FindFirst("sub")?.Value;
 
       return Guid.TryParse(value, out var id) ? id : Guid.Empty;
