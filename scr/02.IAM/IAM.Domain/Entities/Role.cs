@@ -8,7 +8,7 @@ public class Role : EntityAudited
    public string Description { get; private set; }
    public bool IsDefault { get; private set; } = false; // Indicates if this is a default role assigned to new users
    public bool IsActive { get; private set; } = true;
-   public Guid? CustomerId { get; private set; } // Roles can be global or specific to a Customer
+   public Guid? OrganizationId { get; private set; } // Roles can be global or specific to a Organization
 
    private readonly List<RolePermission> _rolePermissions = new();
    public IReadOnlyCollection<RolePermission> RolePermissions => _rolePermissions.AsReadOnly();
@@ -18,7 +18,7 @@ public class Role : EntityAudited
 
    private Role() { }
 
-   public static Role Create(string name, string description, bool isDefault, bool isActive, Guid? customerId)
+   public static Role Create(string name, string description, bool isDefault, bool isActive, Guid? organizationId)
    {
       return new Role
       {
@@ -27,7 +27,7 @@ public class Role : EntityAudited
          Description = description,
          IsDefault = isDefault,
          IsActive = isActive,
-         CustomerId = customerId
+         OrganizationId = organizationId
       };
    }
 

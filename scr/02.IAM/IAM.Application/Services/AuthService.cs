@@ -41,7 +41,7 @@ public class AuthService(IUserQueryRepository userQueryRepository,
       var passwordHash = user?.PasswordHash ?? dummyHash;
       var isPasswordCorrect = Argon2.Verify(passwordHash, request.Password);
 
-      if (user is null || !user.IsActive || !user.CustomerIsActive || !isPasswordCorrect)
+      if (user is null || !user.IsActive || !user.OrganizationIsActive || !isPasswordCorrect)
       {
          return Result<LoginResponse?>.Failure(new UnauthorizedError());
       }
@@ -64,7 +64,7 @@ public class AuthService(IUserQueryRepository userQueryRepository,
             new Claim(JwtRegisteredClaimNames.Email, user.Email),
             new Claim(JwtRegisteredClaimNames.Name, user.Name),
             new Claim(IamConst.Security.Claim.IsSystemAdmin, user.IsSystemAdmin.ToString()),
-            new Claim(IamConst.Security.Claim.UserOwnerId, user.CustomerId.ToString()),
+            new Claim(IamConst.Security.Claim.UserOwnerId, user.OrganizationId.ToString()),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
 

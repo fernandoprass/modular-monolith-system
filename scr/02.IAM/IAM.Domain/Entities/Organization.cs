@@ -3,9 +3,9 @@ using Shared.Domain.Entities;
 
 namespace IAM.Domain.Entities;
 
-public class Customer : EntityAudited
+public class Organization : EntityAudited
 {
-   public CustomerType Type { get; set; }
+   public OrganizationType Type { get; set; }
    public string Code { get; set; }
    public string Name { get; set; }
    public string? Description { get; set; }
@@ -15,9 +15,9 @@ public class Customer : EntityAudited
    // Navigation property
    public ICollection<User> Users { get; set; } = new List<User>();
 
-   public static Customer Create(CustomerType type, string code, string name, string? description)
+   public static Organization Create(OrganizationType type, string code, string name, string? description)
    {
-      return new Customer
+      return new Organization
       {
          Id = Guid.CreateVersion7(),
          Type = type,

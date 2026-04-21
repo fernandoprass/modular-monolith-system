@@ -24,7 +24,7 @@ public class UserValidatorTests
    {
       var request = new UserCreateRequest("Dev Senior", "test@example.com", "Strong#Pass123", Guid.NewGuid());
 
-      var result = _validator.ValidateCreate(request, emailAlreadyExists: false, customerExists: true);
+      var result = _validator.ValidateCreate(request, emailAlreadyExists: false, organizationExists: true);
 
       Assert.True(result.IsSuccess);
    }
@@ -34,21 +34,21 @@ public class UserValidatorTests
    {
       var request = new UserCreateRequest("Dev Senior", "exists@example.com", "Strong#Pass123", Guid.NewGuid());
 
-      var result = _validator.ValidateCreate(request, emailAlreadyExists: true, customerExists: true);
+      var result = _validator.ValidateCreate(request, emailAlreadyExists: true, organizationExists: true);
 
       Assert.False(result.IsSuccess);
       Assert.Contains(result.Messages, m => m is EmailAlreadyExistError);
    }
 
    [Fact]
-   public void ValidateCreate_ShouldHaveError_WhenCustomerDoesNotExist()
+   public void ValidateCreate_ShouldHaveError_WhenOrganizationDoesNotExist()
    {
       var request = new UserCreateRequest("Dev Senior", "test@example.com", "Strong#Pass123", Guid.NewGuid());
 
-      var result = _validator.ValidateCreate(request, emailAlreadyExists: false, customerExists: false);
+      var result = _validator.ValidateCreate(request, emailAlreadyExists: false, organizationExists: false);
 
       Assert.False(result.IsSuccess);
-      Assert.Contains(result.Messages, m => m is NotFoundError && m.Show().Contains(IamConst.Entity.Customer));
+      Assert.Contains(result.Messages, m => m is NotFoundError && m.Show().Contains(IamConst.Entity.Organization));
    }
 
    [Fact]
@@ -116,16 +116,16 @@ public class UserValidatorTests
    [InlineData("Valid User", "duplicate@domain.com", "Pass123!", true, false)] // Case 2: Data is valid but email ALREADY exists in the database
    [InlineData("Ab", "test@domain.com", "Pass123!", false, false)]             // Case 3: Email is unique but Title fails template validation (too short)
    [InlineData("Valid User", "test@domain.com", "Password!", false, false)]    // Case 4: Email is unique but Password fails template validation (no digit)
-   public void ValidateCreateForNewCustomer_ShouldHandleValidationFlow(
+   public void ValidateCreateForNewOrganization_ShouldHandleValidationFlow(
         string name,
         string email,
         string password,
         bool emailAlreadyExists,
         bool expectedSuccess)
    {
-      var request = new CustomerUserCreateRequest(name, email, password);
+      var request = new OrganizationUserCreateRequest(name, email, password);
 
-      var result = _validator.ValidateCreateForNewCustomer(request, emailAlreadyExists);
+      var result = _validator.ValidateCreateForNewOrganization(request, emailAlreadyExists);
 
       result.IsSuccess.Should().Be(expectedSuccess);
 
@@ -137,12 +137,12 @@ public class UserValidatorTests
    }
 
    [Fact]
-   public void ValidateCreateForNewCustomer_ShouldIncludeEmailInDuplicateError()
+   public void ValidateCreateForNewOrganization_ShouldIncludeEmailInDuplicateError()
    {
       var email = "existing@domain.com";
-      var request = new CustomerUserCreateRequest("Valid Name", email, "Pass123!");
+      var request = new OrganizationUserCreateRequest("Valid Name", email, "Pass123!");
 
-      var result = _validator.ValidateCreateForNewCustomer(request, emailAlreadyExists: true);
+      var result = _validator.ValidateCreateForNewOrganization(request, emailAlreadyExists: true);
 
       result.IsSuccess.Should().BeFalse();
       var error = result.Messages.OfType<EmailAlreadyExistError>().FirstOrDefault();

@@ -2,11 +2,11 @@ using IAM.Domain.Enums;
 
 namespace IAM.Domain.DTOs.Requests;
 
-public sealed record CustomerCreateRequest
+public sealed record OrganizationCreateRequest
 (
-    CustomerType Type,
+    OrganizationType Type,
     string Name,
     string Code,
     string Description,
-    CustomerUserCreateRequest User
+    OrganizationUserCreateRequest User
 );

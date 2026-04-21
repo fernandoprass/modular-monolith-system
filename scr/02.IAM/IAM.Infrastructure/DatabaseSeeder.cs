@@ -31,56 +31,56 @@ public class DatabaseSeeder : IDatabaseSeeder
 
    public async Task SeedAsync()
    {
-      //await SeedAdminCustomerAsync();
-      //await SeedScientistsCustomerAsync();
+      //await SeedAdminOrganizationAsync();
+      //await SeedScientistsOrganizationAsync();
 
       await SeedParamentersAsync();
    }
 
-   private async Task SeedAdminCustomerAsync()
+   private async Task SeedAdminOrganizationAsync()
    {
-      var customerId = Guid.CreateVersion7();
-      if (await _iamUnitOfWork.Customers.ExistsAsync(customerId)) return;
+      var organizationId = Guid.CreateVersion7();
+      if (await _iamUnitOfWork.Organizations.ExistsAsync(organizationId)) return;
 
-      var customer = new Customer
+      var organization = new Organization
       {
-         Id = customerId,
+         Id = organizationId,
          Name = "SaaS Internal Administration",
          Code = "SAASADMIN",
-         Type = CustomerType.Company,
+         Type = OrganizationType.Company,
          Description = "Internal system management and support",
-         IsMaster = true, // Following our Master Customer rule
+         IsMaster = true, // Following our Master Organization rule
          CreatedAt = DateTime.UtcNow
       };
 
       var passwordHash = Argon2.Hash(DefaultPassword);
 
-      var superUser = User.Create("System Root", "admin@saas.com", passwordHash, DateTime.UtcNow.AddDays(30), customerId);
+      var superUser = User.Create("System Root", "admin@saas.com", passwordHash, DateTime.UtcNow.AddDays(30), organizationId);
       superUser.IsSystemAdmin = true;
-      customer.CreatedBy = superUser.Id;
+      organization.CreatedBy = superUser.Id;
 
-      await _iamUnitOfWork.Customers.AddAsync(customer);
+      await _iamUnitOfWork.Organizations.AddAsync(organization);
       await _iamUnitOfWork.Users.AddAsync(superUser);
-      await _iamUnitOfWork.Users.AddAsync(User.Create("Internal Support", "support@saas.com", passwordHash, DateTime.UtcNow.AddDays(30), customerId));
+      await _iamUnitOfWork.Users.AddAsync(User.Create("Internal Support", "support@saas.com", passwordHash, DateTime.UtcNow.AddDays(30), organizationId));
       await _iamUnitOfWork.SaveChangesAsync();
    }
 
-   private async Task SeedScientistsCustomerAsync()
+   private async Task SeedScientistsOrganizationAsync()
    {
-      var customerId = Guid.CreateVersion7();
-      if (await _iamUnitOfWork.Customers.ExistsAsync(customerId)) return;
+      var organizationId = Guid.CreateVersion7();
+      if (await _iamUnitOfWork.Organizations.ExistsAsync(organizationId)) return;
 
-      var customer = new Customer
+      var organization = new Organization
       {
-         Id = customerId,
+         Id = organizationId,
          Name = "Computing Pioneers Society",
          Code = "SCIENTISTS",
-         Type = CustomerType.Company,
+         Type = OrganizationType.Company,
          Description = "Foundation of modern Computer Science",
          CreatedAt = DateTime.UtcNow
       };
 
-      await _iamUnitOfWork.Customers.AddAsync(customer);
+      await _iamUnitOfWork.Organizations.AddAsync(organization);
 
       var passwordHash = Argon2.Hash(DefaultPassword);
       var members = new[]
@@ -94,7 +94,7 @@ public class DatabaseSeeder : IDatabaseSeeder
 
       foreach (var (name, email) in members)
       {
-         await _iamUnitOfWork.Users.AddAsync(User.Create(name, email, passwordHash, DateTime.UtcNow.AddDays(30), customerId));
+         await _iamUnitOfWork.Users.AddAsync(User.Create(name, email, passwordHash, DateTime.UtcNow.AddDays(30), organizationId));
       }
       await _iamUnitOfWork.SaveChangesAsync();
    }

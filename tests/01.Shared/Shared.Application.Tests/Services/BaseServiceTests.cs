@@ -10,11 +10,11 @@ public class TestService : BaseService
 {
    public TestService(IUserContext userContext) : base(userContext) { }
 
-   public async Task<Result> TestExecuteIfUserOwnsAsync(Guid? resourceCustomerId, Func<CancellationToken, Task<Result>> action, CancellationToken cancellationToken = default)
-       => await ExecuteIfUserOwnsAsync(resourceCustomerId, action, cancellationToken);
+   public async Task<Result> TestExecuteIfUserOwnsAsync(Guid? resourceOrganizationId, Func<CancellationToken, Task<Result>> action, CancellationToken cancellationToken = default)
+       => await ExecuteIfUserOwnsAsync(resourceOrganizationId, action, cancellationToken);
 
-   public async Task<TResult> TestExecuteIfUserOwnsAsyncGeneric<TResult>(Guid? resourceCustomerId, Func<CancellationToken, Task<TResult>> action, CancellationToken cancellationToken = default) where TResult : Result
-       => await ExecuteIfUserOwnsAsync<TResult>(resourceCustomerId, action, cancellationToken);
+   public async Task<TResult> TestExecuteIfUserOwnsAsyncGeneric<TResult>(Guid? resourceOrganizationId, Func<CancellationToken, Task<TResult>> action, CancellationToken cancellationToken = default) where TResult : Result
+       => await ExecuteIfUserOwnsAsync<TResult>(resourceOrganizationId, action, cancellationToken);
 }
 
 public class BaseServiceTests
@@ -29,13 +29,13 @@ public class BaseServiceTests
    }
 
    [Fact]
-   public async Task ExecuteIfUserOwnsAsync_ShouldAllowForDifferentCustomer_WhenUserIsSystemAdmin()
+   public async Task ExecuteIfUserOwnsAsync_ShouldAllowForDifferentOrganization_WhenUserIsSystemAdmin()
    {
       _userContextMock.IsSystemAdmin.Returns(true);
-      var resourceCustomerId = Guid.NewGuid();
+      var resourceOrganizationId = Guid.NewGuid();
       var actionCalled = false;
 
-      var result = await _service.TestExecuteIfUserOwnsAsync(resourceCustomerId, (ct) =>
+      var result = await _service.TestExecuteIfUserOwnsAsync(resourceOrganizationId, (ct) =>
       {
          actionCalled = true;
          return Task.FromResult(Result.Success());
@@ -48,13 +48,13 @@ public class BaseServiceTests
    [Fact]
    public async Task ExecuteIfUserOwnsAsync_ShouldAllow_WhenUserOwnsTheResource()
    {
-      var myCustomerId = Guid.NewGuid();
+      var myOrganizationId = Guid.NewGuid();
       _userContextMock.IsSystemAdmin.Returns(false);
-      _userContextMock.UserOwnerId.Returns(myCustomerId);
+      _userContextMock.UserOwnerId.Returns(myOrganizationId);
 
       var actionCalled = false;
 
-      var result = await _service.TestExecuteIfUserOwnsAsync(myCustomerId, (ct) =>
+      var result = await _service.TestExecuteIfUserOwnsAsync(myOrganizationId, (ct) =>
       {
          actionCalled = true;
          return Task.FromResult(Result.Success());

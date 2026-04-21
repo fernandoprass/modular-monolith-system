@@ -7,7 +7,7 @@ namespace IAM.Infrastructure;
 
 public class IamDbContext(DbContextOptions<IamDbContext> options) : DbContext(options)
 {
-   public DbSet<Customer> Customers { get; set; }
+   public DbSet<Organization> Organizations { get; set; }
    public DbSet<Permission> Permissions { get; set; }
    public DbSet<Role> Roles { get; set; }
    public DbSet<RolePermission> RolePermissions { get; set; }
@@ -19,7 +19,7 @@ public class IamDbContext(DbContextOptions<IamDbContext> options) : DbContext(op
       base.OnModelCreating(modelBuilder);
       modelBuilder.HasDefaultSchema(IamConst.Database.Schema);
 
-      modelBuilder.ApplyConfiguration(new CustomerConfiguration());
+      modelBuilder.ApplyConfiguration(new OrganizationConfiguration());
       modelBuilder.ApplyConfiguration(new UserConfiguration());
       modelBuilder.ApplyConfiguration(new RoleConfiguration());
       modelBuilder.ApplyConfiguration(new PermissionConfiguration());

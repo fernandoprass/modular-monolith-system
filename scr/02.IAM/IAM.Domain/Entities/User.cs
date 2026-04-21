@@ -8,18 +8,18 @@ public class User : EntityAudited
    public string PasswordHash { get; set; } = string.Empty;
    public bool IsActive { get; set; } = true;
    public bool IsSystemAdmin { get; set; } = false;
-   public Guid CustomerId { get; set; }
+   public Guid OrganizationId { get; set; }
    public DateTime? EmailVerifiedAt { get; set; }
    public DateTime? LastLoginAt { get; set; }
    public DateTime? PasswordExpiresAt { get; set; }
-   public Customer Customer { get; set; } = null!;
+   public Organization Organization { get; set; } = null!;
 
    private readonly List<UserRole> _userRoles = new();
    public IReadOnlyCollection<UserRole> UserRoles => _userRoles.AsReadOnly();
 
    private User() { }
 
-   public static User Create(string name, string email, string passwordHash, DateTime passwordExpiresAt, Guid customerId)
+   public static User Create(string name, string email, string passwordHash, DateTime passwordExpiresAt, Guid organizationId)
    {
       return new User
       {
@@ -30,7 +30,7 @@ public class User : EntityAudited
          PasswordExpiresAt = passwordExpiresAt,
          IsActive = true,
          IsSystemAdmin = false,
-         CustomerId = customerId
+         OrganizationId = organizationId
       };
    }
 

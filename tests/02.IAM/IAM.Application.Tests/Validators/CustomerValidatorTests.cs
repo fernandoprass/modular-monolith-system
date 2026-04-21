@@ -6,35 +6,35 @@ using IAM.Domain.Messages.Errors;
 
 namespace IAM.Application.Tests.Validators;
 
-public class CustomerValidatorTests
+public class OrganizationValidatorTests
 {
-   private readonly CustomerValidator _validator;
+   private readonly OrganizationValidator _validator;
 
-   public CustomerValidatorTests()
+   public OrganizationValidatorTests()
    {
-      _validator = new CustomerValidator();
+      _validator = new OrganizationValidator();
    }
 
    #region ValidateCreate Tests
 
    [Theory]
-   [InlineData(CustomerType.Company, "Valid Company Name", "ABC123", false, true)] // Valid Company
-   [InlineData(CustomerType.Individual, "Valid Individual", "1", false, true)]    // Valid Individual (Code rules are ignored)
-   [InlineData(CustomerType.Company, "Valid Name", "DUP123", true, false)]    // Invalid: Duplicate Code  
-   [InlineData(CustomerType.Company, "Valid Name", "AB", false, false)]       // Invalid: Company Code too short 
-   [InlineData(CustomerType.Company, "Valid Name", "A_1", false, false)]      // Invalid: Company Code not alphanumeric    
-   [InlineData(CustomerType.Company, "", "ABC123", false, false)]             // Invalid: Title empty (Assuming ValidatorTemplate.NameRules requires it)
+   [InlineData(OrganizationType.Company, "Valid Company Name", "ABC123", false, true)] // Valid Company
+   [InlineData(OrganizationType.Individual, "Valid Individual", "1", false, true)]    // Valid Individual (Code rules are ignored)
+   [InlineData(OrganizationType.Company, "Valid Name", "DUP123", true, false)]    // Invalid: Duplicate Code  
+   [InlineData(OrganizationType.Company, "Valid Name", "AB", false, false)]       // Invalid: Company Code too short 
+   [InlineData(OrganizationType.Company, "Valid Name", "A_1", false, false)]      // Invalid: Company Code not alphanumeric    
+   [InlineData(OrganizationType.Company, "", "ABC123", false, false)]             // Invalid: Title empty (Assuming ValidatorTemplate.NameRules requires it)
    public void ValidateCreate_ShouldProcessAllRules(
-       CustomerType type,
+       OrganizationType type,
        string name,
        string code,
        bool codeExists,
        bool expectedSuccess)
    {
       //just to provid a user, validation is done in UserValidator
-      var user = new CustomerUserCreateRequest(string.Empty, string.Empty, string.Empty);
+      var user = new OrganizationUserCreateRequest(string.Empty, string.Empty, string.Empty);
 
-      var request = new CustomerCreateRequest(type, name, code, "description", user);
+      var request = new OrganizationCreateRequest(type, name, code, "description", user);
 
       var result = _validator.ValidateCreate(request, codeExists);
 
@@ -42,7 +42,7 @@ public class CustomerValidatorTests
 
       if (!expectedSuccess && codeExists)
       {
-         result.Messages.Should().Contain(m => m is DuplicateCustomerCodeError);
+         result.Messages.Should().Contain(m => m is OrganizationDuplicateCodeError);
       }
    }
 
@@ -55,11 +55,11 @@ public class CustomerValidatorTests
    [InlineData("Valid Name", false, false)]
    [InlineData("", true, false)]
    [InlineData("Ab", true, false)] // Assuming min length 3 in NameRules
-   public void ValidateUpdate_ShouldValidateName(string name, bool customerExists, bool expectedSuccess)
+   public void ValidateUpdate_ShouldValidateName(string name, bool organizationExists, bool expectedSuccess)
    {
-      var request = new CustomerUpdateRequest(name, string.Empty, IsActive: true);
+      var request = new OrganizationUpdateRequest(name, string.Empty, IsActive: true);
 
-      var result = _validator.ValidateUpdate(request, customerExists);
+      var result = _validator.ValidateUpdate(request, organizationExists);
 
       result.IsSuccess.Should().Be(expectedSuccess);
    }
@@ -78,7 +78,7 @@ public class CustomerValidatorTests
        bool newCodeExists,
        bool expectedSuccess)
    {
-      var request = new CustomerUpdateCodeRequest(code);
+      var request = new OrganizationUpdateCodeRequest(code);
 
       var result = _validator.ValidateUpdateCode(request, newCodeExists);
 
@@ -86,7 +86,7 @@ public class CustomerValidatorTests
 
       if (!expectedSuccess && newCodeExists)
       {
-         result.Messages.Should().Contain(m => m is DuplicateCustomerCodeError);
+         result.Messages.Should().Contain(m => m is OrganizationDuplicateCodeError);
       }
    }
 

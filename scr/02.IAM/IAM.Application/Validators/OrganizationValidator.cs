@@ -9,41 +9,41 @@ using Shared.Domain.Messages;
 
 namespace IAM.Application.Validators;
 
-public class CustomerValidator : ICustomerValidator
+public class OrganizationValidator : IOrganizationValidator
 {
    private static void CodeRules<T>(RuleBuilder<T, string> rb) where T : class
                            => rb.IsRequired().MinLength(3).IsAlphaNumeric();
 
-   public Result ValidateCreate(CustomerCreateRequest request, bool newCodeExists)
+   public Result ValidateCreate(OrganizationCreateRequest request, bool newCodeExists)
    {
-      var validator = new FluentValidator<CustomerCreateRequest>()
-          .RuleFor(x => x.Type).IsInEnum(new InvalidCustomerTypeError())
+      var validator = new FluentValidator<OrganizationCreateRequest>()
+          .RuleFor(x => x.Type).IsInEnum(new OrganizationInvalidTypeError())
           .RuleFor(x => x.Name).ApplyTemplate(ValidatorTemplate.NameRules)
-          .RuleFor(x => x.Code).If(x => x.Type.Equals(CustomerType.Company), x => x.ApplyTemplate(CodeRules))
+          .RuleFor(x => x.Code).If(x => x.Type.Equals(OrganizationType.Company), x => x.ApplyTemplate(CodeRules))
           .RuleFor(x => x.User).IsNotNull() //just to ensure the user object is provided, validation is done in UserValidator
-          .RuleForValue(newCodeExists).IsFalse(new DuplicateCustomerCodeError(request.Code));
+          .RuleForValue(newCodeExists).IsFalse(new OrganizationDuplicateCodeError(request.Code));
 
       var isValid = validator.Validate(request);
 
       return isValid ? Result.Success() : Result.Failure(validator.Messages);
    }
 
-   public Result ValidateUpdate(CustomerUpdateRequest request, bool customerExists)
+   public Result ValidateUpdate(OrganizationUpdateRequest request, bool organizationExists)
    {
-      var validator = new FluentValidator<CustomerUpdateRequest>()
+      var validator = new FluentValidator<OrganizationUpdateRequest>()
           .RuleFor(x => x.Name).ApplyTemplate(ValidatorTemplate.NameRules)
-          .RuleForValue(customerExists).IsTrue(new NotFoundError(IamConst.Entity.Customer));
+          .RuleForValue(organizationExists).IsTrue(new NotFoundError(IamConst.Entity.Organization));
 
       var isValid = validator.Validate(request);
 
       return isValid ? Result.Success() : Result.Failure(validator.Messages);
    }
 
-   public Result ValidateUpdateCode(CustomerUpdateCodeRequest request, bool newCodeExists)
+   public Result ValidateUpdateCode(OrganizationUpdateCodeRequest request, bool newCodeExists)
    {
-      var validator = new FluentValidator<CustomerUpdateCodeRequest>()
+      var validator = new FluentValidator<OrganizationUpdateCodeRequest>()
           .RuleFor(x => x.Code).ApplyTemplate(CodeRules)
-          .RuleForValue(newCodeExists).IsFalse(new DuplicateCustomerCodeError(request.Code));
+          .RuleForValue(newCodeExists).IsFalse(new OrganizationDuplicateCodeError(request.Code));
 
       var isValid = validator.Validate(request);
 

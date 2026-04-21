@@ -11,9 +11,9 @@ public class EmailAlreadyExistError : ErrorMessage
    }
 }
 
-public class ForbiddenCustomerError : ErrorMessage
+public class OrganizationForbiddenError : ErrorMessage
 {
-   public ForbiddenCustomerError() : base("ForbiddenCustomerError", "The informing customer is different from the logged-in customer.") { }
+   public OrganizationForbiddenError() : base("OrganizationForbiddenError", "The informing organization is different from the logged-in organization.") { }
 }
 
 public class PasswordNotValidError : ErrorMessage

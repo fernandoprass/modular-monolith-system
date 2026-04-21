@@ -17,20 +17,20 @@ public class RoleQueryRepository(IamDbContext context) : IRoleQueryRepository
          .FirstOrDefaultAsync(r => r.Id == id, cancellationToken);
    }
 
-   public async Task<IEnumerable<Role>> GetAllAsync(Guid customerId, CancellationToken cancellationToken = default)
+   public async Task<IEnumerable<Role>> GetAllAsync(Guid organizationId, CancellationToken cancellationToken = default)
    {
       return await _context.Roles
          .AsNoTracking()
-         .Where(r => r.CustomerId == null || r.CustomerId == customerId)
+         .Where(r => r.OrganizationId == null || r.OrganizationId == organizationId)
          .Include(r => r.RolePermissions)
             .ThenInclude(rf => rf.Permission)
          .ToListAsync(cancellationToken);
    }
 
-   public async Task<bool> NameExistsAsync(string name, Guid? customerId, CancellationToken cancellationToken = default)
+   public async Task<bool> NameExistsAsync(string name, Guid? organizationId, CancellationToken cancellationToken = default)
    {
       return await _context.Roles
-         .AnyAsync(r => r.Name == name && r.CustomerId == customerId, cancellationToken);
+         .AnyAsync(r => r.Name == name && r.OrganizationId == organizationId, cancellationToken);
    }
 
    public async Task<IEnumerable<Permission>> GetUserPermissionsAsync(Guid userId, CancellationToken cancellationToken = default)

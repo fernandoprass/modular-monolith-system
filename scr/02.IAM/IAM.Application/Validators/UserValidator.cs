@@ -14,24 +14,24 @@ public class UserValidator : IUserValidator
 {
    public UserValidator() { }
 
-   public Result ValidateCreate(UserCreateRequest request, bool customerExists, bool emailAlreadyExists)
+   public Result ValidateCreate(UserCreateRequest request, bool organizationExists, bool emailAlreadyExists)
    {
       var validator = new FluentValidator<UserCreateRequest>()
             .RuleFor(x => x.Name).ApplyTemplate(ValidatorTemplate.NameRules)
             .RuleFor(x => x.Email).ApplyTemplate(ValidatorTemplate.EmailRules)
             .RuleFor(x => x.Password).ApplyTemplate(ValidatorTemplate.PasswordRules)
-            .RuleFor(x => x.CustomerId).IsRequired()
+            .RuleFor(x => x.OrganizationId).IsRequired()
             .RuleForValue(emailAlreadyExists).IsFalse(new EmailAlreadyExistError(request.Email))
-            .RuleForValue(customerExists).IsTrue(new NotFoundError(IamConst.Entity.Customer));
+            .RuleForValue(organizationExists).IsTrue(new NotFoundError(IamConst.Entity.Organization));
 
       var isValid = validator.Validate(request);
 
       return isValid ? Result.Success() : Result.Failure(validator.Messages);
    }
 
-   public Result ValidateCreateForNewCustomer(CustomerUserCreateRequest request, bool emailAlreadyExists)
+   public Result ValidateCreateForNewOrganization(OrganizationUserCreateRequest request, bool emailAlreadyExists)
    {
-      var validator = new FluentValidator<CustomerUserCreateRequest>()
+      var validator = new FluentValidator<OrganizationUserCreateRequest>()
             .RuleFor(x => x.Name).ApplyTemplate(ValidatorTemplate.NameRules)
             .RuleFor(x => x.Email).ApplyTemplate(ValidatorTemplate.EmailRules)
             .RuleFor(x => x.Password).ApplyTemplate(ValidatorTemplate.PasswordRules)

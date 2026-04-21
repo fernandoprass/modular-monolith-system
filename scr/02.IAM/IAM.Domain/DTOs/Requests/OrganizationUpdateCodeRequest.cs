@@ -1,6 +1,6 @@
 namespace IAM.Domain.DTOs.Requests;
 
-public sealed record CustomerUpdateCodeRequest
+public sealed record OrganizationUpdateCodeRequest
 (
     string Code
 );

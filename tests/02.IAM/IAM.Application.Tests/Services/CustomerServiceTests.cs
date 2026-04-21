@@ -15,64 +15,64 @@ using Shared.Domain.Messages;
 
 namespace IAM.Application.Tests.Services;
 
-public class CustomerServiceTests
+public class OrganizationServiceTests
 {
-   private readonly ICustomerQueryRepository _customerQueryRepository;
-   private readonly ICustomerRepository _customerRepository;
-   private readonly ICustomerValidator _customerValidator;
+   private readonly IOrganizationQueryRepository _organizationQueryRepository;
+   private readonly IOrganizationRepository _organizationRepository;
+   private readonly IOrganizationValidator _organizationValidator;
    private readonly IIamUnitOfWork _unitOfWork;
    private readonly IUserContext _userContext;
-   private readonly CustomerService _service;
+   private readonly OrganizationService _service;
 
-   public CustomerServiceTests()
+   public OrganizationServiceTests()
    {
-      _customerQueryRepository = Substitute.For<ICustomerQueryRepository>();
-      _customerRepository = Substitute.For<ICustomerRepository>();
-      _customerValidator = Substitute.For<ICustomerValidator>();
+      _organizationQueryRepository = Substitute.For<IOrganizationQueryRepository>();
+      _organizationRepository = Substitute.For<IOrganizationRepository>();
+      _organizationValidator = Substitute.For<IOrganizationValidator>();
       _unitOfWork = Substitute.For<IIamUnitOfWork>();
       _userContext = Substitute.For<IUserContext>();
 
-      _service = new CustomerService(
-          _customerQueryRepository,
-          _customerRepository,
-          _customerValidator,
+      _service = new OrganizationService(
+          _organizationQueryRepository,
+          _organizationRepository,
+          _organizationValidator,
           _unitOfWork,
           _userContext);
    }
 
    [Fact]
-   public async Task ValidateCreateCustomerAsync_WhenValidatorSucceeds_ReturnsSuccess()
+   public async Task ValidateCreateOrganizationAsync_WhenValidatorSucceeds_ReturnsSuccess()
    {
-      var request = GetCustomerCreateRequest(CustomerType.Company, "Customer Name", "Code1");
+      var request = GetOrganizationCreateRequest(OrganizationType.Company, "Organization Name", "Code1");
 
-      _customerQueryRepository.ExistsByCodeAsync(request.Code, Arg.Any<CancellationToken>()).Returns(false);
-      _customerValidator.ValidateCreate(request, false).Returns(Result.Success());
+      _organizationQueryRepository.ExistsByCodeAsync(request.Code, Arg.Any<CancellationToken>()).Returns(false);
+      _organizationValidator.ValidateCreate(request, false).Returns(Result.Success());
 
-      var result = await _service.ValidateCreateCustomerAsync(request, TestContext.Current.CancellationToken);
+      var result = await _service.ValidateCreateOrganizationAsync(request, TestContext.Current.CancellationToken);
 
       Assert.True(result.IsSuccess);
    }
 
    [Fact]
-   public async Task ValidateCreateCustomerAsync_WhenValidatorFails_ReturnsFailure()
+   public async Task ValidateCreateOrganizationAsync_WhenValidatorFails_ReturnsFailure()
    {
-      var request = GetCustomerCreateRequest(CustomerType.Company, "Customer Name", "Code1");
+      var request = GetOrganizationCreateRequest(OrganizationType.Company, "Organization Name", "Code1");
 
-      _customerQueryRepository.ExistsByCodeAsync(request.Code, Arg.Any<CancellationToken>()).Returns(true);
-      _customerValidator.ValidateCreate(request, true).Returns(Result.Failure(new DuplicateCustomerCodeError(request.Code)));
+      _organizationQueryRepository.ExistsByCodeAsync(request.Code, Arg.Any<CancellationToken>()).Returns(true);
+      _organizationValidator.ValidateCreate(request, true).Returns(Result.Failure(new OrganizationDuplicateCodeError(request.Code)));
 
-      var result = await _service.ValidateCreateCustomerAsync(request, TestContext.Current.CancellationToken);
+      var result = await _service.ValidateCreateOrganizationAsync(request, TestContext.Current.CancellationToken);
 
       Assert.False(result.IsSuccess);
    }
 
    [Fact]
-   public async Task GetByIdAsync_WhenCustomerExists_ReturnsCustomerDto()
+   public async Task GetByIdAsync_WhenOrganizationExists_ReturnsOrganizationDto()
    {
       var id = Guid.NewGuid();
-      var expected = new CustomerDto(Id: id, Type: CustomerType.Company, Code: "ABC", Name: "Test", Description: null, IsActive: true);
+      var expected = new OrganizationDto(Id: id, Type: OrganizationType.Company, Code: "ABC", Name: "Test", Description: null, IsActive: true);
 
-      _customerQueryRepository.GetByIdAsync(id, Arg.Any<CancellationToken>()).Returns(expected);
+      _organizationQueryRepository.GetByIdAsync(id, Arg.Any<CancellationToken>()).Returns(expected);
 
       var result = await _service.GetByIdAsync(id, TestContext.Current.CancellationToken);
 
@@ -89,15 +89,15 @@ public class CustomerServiceTests
    }
 
    [Fact]
-   public async Task GetByNameAsync_WhenCalled_ReturnsIEnumerableCustomerDto()
+   public async Task GetByNameAsync_WhenCalled_ReturnsIEnumerableOrganizationDto()
    {
       var name = "SearchName";
-      var expected = new List<CustomerDto>
+      var expected = new List<OrganizationDto>
       {
-         new(Id: Guid.Empty, Type: CustomerType.Company, Code: "ABC", Name: name, Description: null, IsActive: true)
+         new(Id: Guid.Empty, Type: OrganizationType.Company, Code: "ABC", Name: name, Description: null, IsActive: true)
       };
 
-      _customerQueryRepository.GetByNameAsync(name, Arg.Any<CancellationToken>()).Returns(expected);
+      _organizationQueryRepository.GetByNameAsync(name, Arg.Any<CancellationToken>()).Returns(expected);
 
       var result = await _service.GetByNameAsync(name, TestContext.Current.CancellationToken);
 
@@ -108,18 +108,18 @@ public class CustomerServiceTests
    public async Task UpdateAsync_WhenOwnershipAndValidatorSucceed_ReturnsSuccess()
    {
       var id = Guid.NewGuid();
-      var request = GetCustomerUpdateRequest("New Customer Name", "description", true);
+      var request = GetOrganizationUpdateRequest("New Organization Name", "description", true);
 
-      var customer = Customer.Create(CustomerType.Company, "OriginalCode", "Original Name", "description");
+      var organization = Organization.Create(OrganizationType.Company, "OriginalCode", "Original Name", "description");
 
       _userContext.UserOwnerId.Returns(id);
-      _customerRepository.GetByIdAsync(id, Arg.Any<CancellationToken>()).Returns(customer);
-      _customerValidator.ValidateUpdate(request, true).Returns(Result.Success());
+      _organizationRepository.GetByIdAsync(id, Arg.Any<CancellationToken>()).Returns(organization);
+      _organizationValidator.ValidateUpdate(request, true).Returns(Result.Success());
 
       var result = await _service.UpdateAsync(id, request, TestContext.Current.CancellationToken);
 
       Assert.True(result.IsSuccess);
-      _unitOfWork.Customers.Received(1).Update(customer);
+      _unitOfWork.Organizations.Received(1).Update(organization);
       await _unitOfWork.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
    }
 
@@ -127,12 +127,12 @@ public class CustomerServiceTests
    public async Task UpdateAsync_WhenValidatorFails_ReturnsFailure()
    {
       var id = Guid.NewGuid();
-      var request = GetCustomerUpdateRequest(string.Empty, "description", true);
-      var customer = Customer.Create(CustomerType.Company, "OriginalCode", "Original Name", "description");
+      var request = GetOrganizationUpdateRequest(string.Empty, "description", true);
+      var organization = Organization.Create(OrganizationType.Company, "OriginalCode", "Original Name", "description");
 
       _userContext.UserOwnerId.Returns(id);
-      _customerRepository.GetByIdAsync(id, Arg.Any<CancellationToken>()).Returns(customer);
-      _customerValidator.ValidateUpdate(request, true).Returns(Result.Failure(new NotFoundError()));
+      _organizationRepository.GetByIdAsync(id, Arg.Any<CancellationToken>()).Returns(organization);
+      _organizationValidator.ValidateUpdate(request, true).Returns(Result.Failure(new NotFoundError()));
 
       var result = await _service.UpdateAsync(id, request, TestContext.Current.CancellationToken);
 
@@ -143,46 +143,46 @@ public class CustomerServiceTests
    public async Task UpdateCodeAsync_WhenOwnershipAndValidatorSucceed_ReturnsSuccess()
    {
       var id = Guid.NewGuid();
-      var request = new CustomerUpdateCodeRequest("NEWCODE");
-      var customer = Customer.Create(CustomerType.Company, "OriginalCode", "Original Name", "description");
+      var request = new OrganizationUpdateCodeRequest("NEWCODE");
+      var organization = Organization.Create(OrganizationType.Company, "OriginalCode", "Original Name", "description");
 
       _userContext.UserOwnerId.Returns(id);
-      _customerRepository.GetByCodeAsync(request.Code, Arg.Any<CancellationToken>()).Returns((Customer)null);
-      _customerValidator.ValidateUpdateCode(request, false).Returns(Result.Success());
-      _customerRepository.GetByIdAsync(id, Arg.Any<CancellationToken>()).Returns(customer);
+      _organizationRepository.GetByCodeAsync(request.Code, Arg.Any<CancellationToken>()).Returns((Organization)null);
+      _organizationValidator.ValidateUpdateCode(request, false).Returns(Result.Success());
+      _organizationRepository.GetByIdAsync(id, Arg.Any<CancellationToken>()).Returns(organization);
 
       var result = await _service.UpdateCodeAsync(id, request, TestContext.Current.CancellationToken);
 
       Assert.True(result.IsSuccess);
-      Assert.Equal("NEWCODE", customer.Code);
+      Assert.Equal("NEWCODE", organization.Code);
    }
 
    [Fact]
    public async Task UpdateCodeAsync_WhenNewCodeAlreadyExists_ReturnsFailure()
    {
       var id = Guid.NewGuid();
-      var request = new CustomerUpdateCodeRequest("EXISTING");
-      var existingCustomer = Customer.Create(CustomerType.Company, "EXISTING", "Original Name", "description");
+      var request = new OrganizationUpdateCodeRequest("EXISTING");
+      var existingOrganization = Organization.Create(OrganizationType.Company, "EXISTING", "Original Name", "description");
 
       _userContext.UserOwnerId.Returns(id);
-      _customerRepository.GetByCodeAsync(request.Code, Arg.Any<CancellationToken>()).Returns(existingCustomer);
-      _customerValidator.ValidateUpdateCode(request, true).Returns(Result.Failure(new DuplicateCustomerCodeError(request.Code)));
+      _organizationRepository.GetByCodeAsync(request.Code, Arg.Any<CancellationToken>()).Returns(existingOrganization);
+      _organizationValidator.ValidateUpdateCode(request, true).Returns(Result.Failure(new OrganizationDuplicateCodeError(request.Code)));
 
       var result = await _service.UpdateCodeAsync(id, request, TestContext.Current.CancellationToken);
 
       Assert.False(result.IsSuccess);
    }
 
-   private static CustomerCreateRequest GetCustomerCreateRequest(CustomerType type, string name, string code)
+   private static OrganizationCreateRequest GetOrganizationCreateRequest(OrganizationType type, string name, string code)
    {
-      var user = new CustomerUserCreateRequest(string.Empty, string.Empty, string.Empty);
-      var request = new CustomerCreateRequest(type, name, code, "some description", user);
+      var user = new OrganizationUserCreateRequest(string.Empty, string.Empty, string.Empty);
+      var request = new OrganizationCreateRequest(type, name, code, "some description", user);
       return request;
    }
 
-   private static CustomerUpdateRequest GetCustomerUpdateRequest(string name, string description, bool isActive)
+   private static OrganizationUpdateRequest GetOrganizationUpdateRequest(string name, string description, bool isActive)
    {
-      var request = new CustomerUpdateRequest(name, description, isActive);
+      var request = new OrganizationUpdateRequest(name, description, isActive);
       return request;
    }
 }

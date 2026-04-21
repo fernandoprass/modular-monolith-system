@@ -90,7 +90,7 @@ public class AuthServiceTests
    }
 
    [Fact]
-   public async Task LoginAsync_InactiveCustomer_ShouldReturnUnauthorized()
+   public async Task LoginAsync_InactiveOrganization_ShouldReturnUnauthorized()
    {
       var password = "Password123!";
       var user = CreateValidUser(password, isUserAtive: true, isCustumerActive: false);
@@ -113,8 +113,8 @@ public class AuthServiceTests
          Email = "test@example.com",
          PasswordHash = Argon2.Hash(password),
          IsActive = isUserAtive,
-         CustomerIsActive = isCustumerActive,
-         CustomerId = Guid.NewGuid(),
+         OrganizationIsActive = isCustumerActive,
+         OrganizationId = Guid.NewGuid(),
          IsSystemAdmin = false
       };
    }

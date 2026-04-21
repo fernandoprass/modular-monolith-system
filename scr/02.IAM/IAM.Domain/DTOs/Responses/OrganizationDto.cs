@@ -2,10 +2,10 @@ using IAM.Domain.Enums;
 
 namespace IAM.Domain.DTOs.Responses;
 
-public sealed record CustomerDto
+public sealed record OrganizationDto
 (
    Guid Id,
-   CustomerType Type,
+   OrganizationType Type,
    string Code,
    string Name,
    string? Description,

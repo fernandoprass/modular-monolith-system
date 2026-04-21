@@ -18,8 +18,8 @@ public static class UserMappers
          CreatedAt = user.CreatedAt,
          EmailVerifiedAt = user.EmailVerifiedAt,
          LastLoginAt = user.LastLoginAt,
-         CustomerId = user.CustomerId,
-         CustomerName = user.Customer?.Name ?? string.Empty
+         OrganizationId = user.OrganizationId,
+         OrganizationName = user.Organization?.Name ?? string.Empty
       };
    }
 
@@ -35,8 +35,8 @@ public static class UserMappers
          CreatedAt = user.CreatedAt,
          EmailVerifiedAt = user.EmailVerifiedAt,
          LastLoginAt = user.LastLoginAt,
-         CustomerId = user.CustomerId,
-         CustomerName = user.CustomerName
+         OrganizationId = user.OrganizationId,
+         OrganizationName = user.OrganizationName
       };
    }
 
@@ -53,9 +53,9 @@ public static class UserMappers
          CreatedAt = user.CreatedAt,
          EmailVerifiedAt = user.EmailVerifiedAt,
          LastLoginAt = user.LastLoginAt,
-         CustomerId = user.CustomerId,
-         CustomerName = user.Customer?.Name ?? string.Empty,
-         CustomerIsActive = user.Customer?.IsActive ?? false
+         OrganizationId = user.OrganizationId,
+         OrganizationName = user.Organization?.Name ?? string.Empty,
+         OrganizationIsActive = user.Organization?.IsActive ?? false
       };
    }
 }

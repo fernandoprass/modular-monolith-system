@@ -4,5 +4,5 @@ public sealed record UserCreateRequest(
     string Name,
     string Email,
     string Password,
-    Guid CustomerId
+    Guid OrganizationId
 );

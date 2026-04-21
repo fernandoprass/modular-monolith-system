@@ -16,10 +16,10 @@ public class RoleConfiguration : BaseAuditedConfiguration<Role>
       builder.Property(r => r.Description).IsRequired().HasColumnType(SharedConst.Database.TextType);
       builder.Property(r => r.IsDefault).IsRequired().HasDefaultValue(false);
       builder.Property(r => r.IsActive).IsRequired().HasDefaultValue(true);
-      builder.Property(r => r.CustomerId).IsRequired(false);
+      builder.Property(r => r.OrganizationId).IsRequired(false);
 
 
-      builder.HasIndex(r => new { r.Name, r.CustomerId }).IsUnique();
+      builder.HasIndex(r => new { r.Name, r.OrganizationId }).IsUnique();
 
       builder.HasMany(r => r.RolePermissions)
          .WithOne(rf => rf.Role)
@@ -32,9 +32,9 @@ public class RoleConfiguration : BaseAuditedConfiguration<Role>
          .OnDelete(DeleteBehavior.Restrict);
 
       //todo fix it
-      //builder.HasOne(r => r.Customer)
+      //builder.HasOne(r => r.Organization)
       // .WithMany(c => c.Users)
-      // .HasForeignKey(u => u.CustomerId)
+      // .HasForeignKey(u => u.OrganizationId)
       // .OnDelete(DeleteBehavior.NoAction);
    }
 }

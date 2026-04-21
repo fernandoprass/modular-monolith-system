@@ -19,14 +19,14 @@ public class UserConfiguration : BaseAuditedConfiguration<User>
       builder.Property(u => u.IsSystemAdmin).IsRequired().HasDefaultValue(false);
       builder.Property(u => u.EmailVerifiedAt);
       builder.Property(u => u.LastLoginAt);
-      builder.Property(u => u.CustomerId).IsRequired();
+      builder.Property(u => u.OrganizationId).IsRequired();
 
-      builder.HasIndex(u => new { u.CustomerId, u.Email }).IsUnique();
+      builder.HasIndex(u => new { u.OrganizationId, u.Email }).IsUnique();
 
       // Foreign key
-      builder.HasOne(u => u.Customer)
+      builder.HasOne(u => u.Organization)
              .WithMany(c => c.Users)
-             .HasForeignKey(u => u.CustomerId)
+             .HasForeignKey(u => u.OrganizationId)
              .OnDelete(DeleteBehavior.NoAction);
    }
 }

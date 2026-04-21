@@ -5,7 +5,7 @@ namespace IAM.Domain.Interfaces;
 
 public interface IIamUnitOfWork : IUnitOfWork
 {
-   ICustomerRepository Customers { get; }
+   IOrganizationRepository Organizations { get; }
    IRoleRepository Roles { get; }
    IUserRepository Users { get; }
 }

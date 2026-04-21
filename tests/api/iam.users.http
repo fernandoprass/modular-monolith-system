@@ -12,6 +12,6 @@ Content-Type: application/json
 GET {{server}}/api/{{version}}/iam/users/019d6932-e551-783b-a408-f6ee1e041e96
 Authorization: Bearer {{token}}
 
-### Get Users by CustomerId
-GET {{server}}/api/{{version}}/iam/users/by-customer/00000000-0000-0000-0000-000000000001
+### Get Users by OrganizationId
+GET {{server}}/api/{{version}}/iam/users/by-organization/00000000-0000-0000-0000-000000000001
 Authorization: Bearer {{token}}

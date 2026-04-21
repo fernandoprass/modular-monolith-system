@@ -26,11 +26,11 @@ public class UserController(
       return OkOrNotFound(user);
    }
 
-   [HttpGet("by-customer/{customerId:guid}")]
+   [HttpGet("by-organization/{organizationId:guid}")]
    [Authorize]
-   public async Task<IActionResult> GetByCustomerId(Guid customerId, CancellationToken cancellationToken)
+   public async Task<IActionResult> GetByOrganizationId(Guid organizationId, CancellationToken cancellationToken)
    {
-      var users = await _userService.GetByCustomerIdAsync(customerId, cancellationToken);
+      var users = await _userService.GetByOrganizationIdAsync(organizationId, cancellationToken);
 
       return OkOrNotFound(users);
    }

@@ -1,6 +1,6 @@
 namespace IAM.Domain.DTOs.Requests;
 
-public sealed record CustomerUserCreateRequest
+public sealed record OrganizationUserCreateRequest
 (
     string Name,
     string Email,

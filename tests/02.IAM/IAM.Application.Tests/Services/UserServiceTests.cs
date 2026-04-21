@@ -46,7 +46,7 @@ public class UserServiceTests
    }
 
    [Fact]
-   public async Task CreateUserAsync_ShouldReturnForbiddenCustomerError_WhenOperatorIdDoesNotMatch()
+   public async Task CreateUserAsync_ShouldReturnForbiddenOrganizationError_WhenOperatorIdDoesNotMatch()
    {
       var request = new UserCreateRequest(string.Empty, "test@test.com", string.Empty, Guid.NewGuid());
 
@@ -69,7 +69,7 @@ public class UserServiceTests
 
       _parameterServiceMock.GetShortIntAsync(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns((short)30);
 
-      _userValidatorMock.ValidateCreate(request, customerExists: true, emailAlreadyExists: true)
+      _userValidatorMock.ValidateCreate(request, organizationExists: true, emailAlreadyExists: true)
           .Returns(Result.Failure(new EmailAlreadyExistError(request.Email)));
 
       var result = await _userService.CreateUserAsync(request, true, TestContext.Current.CancellationToken);
@@ -88,7 +88,7 @@ public class UserServiceTests
 
       _parameterServiceMock.GetShortIntAsync(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns((short)30);
 
-      _userValidatorMock.ValidateCreate(request, customerExists: true, emailAlreadyExists: false).Returns(Result.Success());
+      _userValidatorMock.ValidateCreate(request, organizationExists: true, emailAlreadyExists: false).Returns(Result.Success());
 
       var result = await _userService.CreateUserAsync(request, true, TestContext.Current.CancellationToken);
 
@@ -99,7 +99,7 @@ public class UserServiceTests
    }
 
    [Fact]
-   public async Task DeleteAsync_ShouldReturnForbiddenCustomerError_EvenWhenUserDoesNotExist()
+   public async Task DeleteAsync_ShouldReturnForbiddenOrganizationError_EvenWhenUserDoesNotExist()
    {
       var userId = Guid.NewGuid();
       _userRepositoryMock.GetByIdAsync(userId, Arg.Any<CancellationToken>()).Returns((User)null);
@@ -167,11 +167,11 @@ public class UserServiceTests
    }
 
    [Fact]
-   public async Task UpdateAsync_ShouldReturnForbidden_WhenUserBelongsToAnotherCustomer()
+   public async Task UpdateAsync_ShouldReturnForbidden_WhenUserBelongsToAnotherOrganization()
    {
-      var differentCustomerId = Guid.NewGuid();
+      var differentOrganizationId = Guid.NewGuid();
       var request = new UserUpdateRequest("Name", true);
-      var user = User.Create("Name", "test@test.com", "hash", DateTime.UtcNow, differentCustomerId);
+      var user = User.Create("Name", "test@test.com", "hash", DateTime.UtcNow, differentOrganizationId);
 
       _userRepositoryMock.GetByIdAsync(user.Id, Arg.Any<CancellationToken>()).Returns(user);
 
@@ -199,15 +199,15 @@ public class UserServiceTests
    }
 
    [Fact]
-   public async Task ValidateUserForNewCustomerAsync_ShouldReturnError_WhenEmailAlreadyExists()
+   public async Task ValidateUserForNewOrganizationAsync_ShouldReturnError_WhenEmailAlreadyExists()
    {
-      var request = new CustomerUserCreateRequest("John Admas", "exists@test.com", "Str0ngP4ssw0d!");
+      var request = new OrganizationUserCreateRequest("John Admas", "exists@test.com", "Str0ngP4ssw0d!");
       _userQueryRepositoryMock.GetIdByEmailAsync(request.Email, Arg.Any<CancellationToken>()).Returns(Guid.NewGuid()); // Email exists
 
-      _userValidatorMock.ValidateCreateForNewCustomer(request, true)
+      _userValidatorMock.ValidateCreateForNewOrganization(request, true)
           .Returns(Result.Failure(new EmailAlreadyExistError(request.Email)));
 
-      var result = await _userService.ValidateUserForNewCustomerAsync(request, TestContext.Current.CancellationToken);
+      var result = await _userService.ValidateUserForNewOrganizationAsync(request, TestContext.Current.CancellationToken);
 
       result.IsSuccess.Should().BeFalse();
       result.Messages.Should().ContainSingle(m => m is EmailAlreadyExistError);

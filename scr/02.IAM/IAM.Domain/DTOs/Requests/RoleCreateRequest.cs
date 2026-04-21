@@ -5,4 +5,4 @@ public record RoleCreateRequest(
    string Description,
    bool IsDefault,
    bool IsActive,
-   Guid? CustomerId);
+   Guid? OrganizationId);

@@ -2,7 +2,7 @@ namespace IAM.Domain;
 
 public static partial class IamConst
 {
-   public static class Customer
+   public static class Organization
    {
       public const byte RandomCodeSize = 10;
    }
@@ -18,7 +18,7 @@ public static partial class IamConst
 
    public static class Entity
    {
-      public const string Customer = nameof(Entities.Customer);
+      public const string Organization = nameof(Entities.Organization);
       public const string User = nameof(Entities.User);
       public const string Role = nameof(Entities.Role);
       public const string Feature = nameof(Entities.Permission);
