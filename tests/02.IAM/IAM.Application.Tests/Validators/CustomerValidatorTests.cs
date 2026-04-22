@@ -2,7 +2,7 @@
 using IAM.Application.Validators;
 using IAM.Domain.DTOs.Requests;
 using IAM.Domain.Enums;
-using IAM.Domain.Messages.Errors;
+using IAM.Domain.Messages;
 
 namespace IAM.Application.Tests.Validators;
 

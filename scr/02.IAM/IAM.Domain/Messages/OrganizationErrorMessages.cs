@@ -1,6 +1,6 @@
 using Myce.Response.Messages;
 
-namespace IAM.Domain.Messages.Errors;
+namespace IAM.Domain.Messages;
 
 public class OrganizationDuplicateCodeError : ErrorMessage
 {

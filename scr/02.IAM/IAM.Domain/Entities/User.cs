@@ -8,10 +8,13 @@ public class User : EntityAudited
    public string PasswordHash { get; set; } = string.Empty;
    public bool IsActive { get; set; } = true;
    public bool IsSystemAdmin { get; set; } = false;
-   public Guid OrganizationId { get; set; }
+   public bool IsOrganizationAdmin { get; set; } = false;
+   public int NumFailedLoginAttempts { get; set; } = 0;
    public DateTime? EmailVerifiedAt { get; set; }
    public DateTime? LastLoginAt { get; set; }
    public DateTime? PasswordExpiresAt { get; set; }
+   public DateTime? LockedOutUntil { get; set; }
+   public Guid OrganizationId { get; set; }
    public Organization Organization { get; set; } = null!;
 
    private readonly List<UserRole> _userRoles = new();
@@ -30,6 +33,7 @@ public class User : EntityAudited
          PasswordExpiresAt = passwordExpiresAt,
          IsActive = true,
          IsSystemAdmin = false,
+         NumFailedLoginAttempts = 0,
          OrganizationId = organizationId
       };
    }
@@ -50,6 +54,14 @@ public class User : EntityAudited
    public void UpdateLastLogin()
    {
       LastLoginAt = DateTime.UtcNow;
+      NumFailedLoginAttempts = 0;
+      LockedOutUntil = null;
+   }
+
+   public void UpdateFailedLogin(DateTime lockedOutUntil)
+   {
+      NumFailedLoginAttempts++;
+      LockedOutUntil = lockedOutUntil;
    }
 
    public void AddRole(Guid roleId, DateTime? expiresAt)

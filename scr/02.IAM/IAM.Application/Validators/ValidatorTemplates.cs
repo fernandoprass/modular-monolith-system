@@ -3,7 +3,7 @@ using Myce.FluentValidator;
 
 namespace IAM.Application.Validators;
 
-public static class ValidatorTemplate
+public static class ValidatorTemplates
 {
    public static void NameRules<T>(RuleBuilder<T, string> rb) where T : class
       => rb.IsRequired().MinLength(3);

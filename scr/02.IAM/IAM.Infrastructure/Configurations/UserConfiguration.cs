@@ -17,8 +17,11 @@ public class UserConfiguration : BaseAuditedConfiguration<User>
       builder.Property(u => u.PasswordExpiresAt);
       builder.Property(u => u.IsActive).IsRequired().HasDefaultValue(true);
       builder.Property(u => u.IsSystemAdmin).IsRequired().HasDefaultValue(false);
+      builder.Property(u => u.IsOrganizationAdmin).IsRequired().HasDefaultValue(false);
       builder.Property(u => u.EmailVerifiedAt);
       builder.Property(u => u.LastLoginAt);
+      builder.Property(u => u.LockedOutUntil);
+      builder.Property(u => u.NumFailedLoginAttempts).IsRequired().HasDefaultValue(0);
       builder.Property(u => u.OrganizationId).IsRequired();
 
       builder.HasIndex(u => new { u.OrganizationId, u.Email }).IsUnique();

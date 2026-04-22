@@ -53,6 +53,8 @@ public static class UserMappers
          CreatedAt = user.CreatedAt,
          EmailVerifiedAt = user.EmailVerifiedAt,
          LastLoginAt = user.LastLoginAt,
+         LockedOutUntil = user.LockedOutUntil,
+         FailedLoginAttempts = user.NumFailedLoginAttempts,
          OrganizationId = user.OrganizationId,
          OrganizationName = user.Organization?.Name ?? string.Empty,
          OrganizationIsActive = user.Organization?.IsActive ?? false

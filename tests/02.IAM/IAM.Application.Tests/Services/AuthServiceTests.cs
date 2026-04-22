@@ -2,7 +2,7 @@ using IAM.Application.Contracts;
 using IAM.Application.Services;
 using IAM.Domain.DTOs;
 using IAM.Domain.DTOs.Requests;
-using IAM.Domain.Messages.Errors;
+using IAM.Domain.Messages;
 using IAM.Domain.QueryRepositories;
 using Isopoh.Cryptography.Argon2;
 using Microsoft.Extensions.Configuration;

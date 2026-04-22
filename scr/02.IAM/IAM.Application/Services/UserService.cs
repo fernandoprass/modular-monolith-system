@@ -104,7 +104,7 @@ public class UserService(
 
    private async Task<DateTime> GetPasswordExpiresAt(CancellationToken cancellationToken)
    {
-      short numberOfDay = await _parameterService.GetShortIntAsync(IamParam.Security.PasswordExpireTime, cancellationToken);
+      short numberOfDay = await _parameterService.GetShortIntAsync(IamParam.Security.MaxPasswordAgeInDays, cancellationToken);
 
       var passwordExpiresAt = DateTime.UtcNow.AddDays(numberOfDay);
       return passwordExpiresAt;
@@ -131,7 +131,23 @@ public class UserService(
    {
       var user = await _userRepository.GetByIdAsync(id, cancellationToken);
 
+      if (user == null) return Result.Failure(new NotFoundError(IamConst.Entity.User));
+
       user.UpdateLastLogin();
+
+      return await CommitUpdateAsync(user, cancellationToken);
+   }
+
+   public async Task<Result> UpdateFailedLoginAsync(Guid id, CancellationToken cancellationToken = default)
+   {
+      var user = await _userRepository.GetByIdAsync(id, cancellationToken);
+
+      if (user == null) return Result.Failure(new NotFoundError(IamConst.Entity.User));
+
+      int lockedOutMinutes = await _parameterService.GetIntAsync(IamParam.Security.LockoutDurationInMins);
+      var lockedOutUntil = DateTime.UtcNow.AddMinutes(lockedOutMinutes);
+
+      user.UpdateFailedLogin(lockedOutUntil);
 
       return await CommitUpdateAsync(user, cancellationToken);
    }
