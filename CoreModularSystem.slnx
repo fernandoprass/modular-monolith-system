@@ -23,6 +23,7 @@
   </Folder>
   <Folder Name="/infra/">
     <File Path="infra/.env" />
+    <File Path="infra/clean-database.sql" />
     <File Path="infra/create-module-shared.ps1" />
     <File Path="infra/create-module.ps1" />
     <File Path="infra/iam.db-backup.ps1" />

@@ -2,6 +2,7 @@ using IAM.Domain;
 using IAM.Domain.Entities;
 using IAM.Domain.Enums;
 using IAM.Domain.Interfaces;
+using IAM.Domain.QueryRepositories;
 using Isopoh.Cryptography.Argon2;
 using Shared.Application.Contracts;
 using Shared.Domain;
@@ -15,24 +16,20 @@ public interface IDatabaseSeeder
    Task SeedAsync();
 }
 
-public class DatabaseSeeder : IDatabaseSeeder
+public class DatabaseSeeder(
+   IOrganizationQueryRepository organizationQueryRepository,
+   IParameterService parameterService,
+   IIamUnitOfWork iamUnitOfWork) : IDatabaseSeeder
 {
-   private readonly IIamUnitOfWork _iamUnitOfWork;
-   private readonly IParameterService _parameterService;
+   private readonly IIamUnitOfWork _iamUnitOfWork = iamUnitOfWork;
+   private readonly IOrganizationQueryRepository _organizationQueryRepository = organizationQueryRepository;
+   private readonly IParameterService _parameterService = parameterService;
    private const string DefaultPassword = "Password123!";
-
-   public DatabaseSeeder(
-      IParameterService parameterService,
-      IIamUnitOfWork iamUnitOfWork)
-   {
-      _parameterService = parameterService;
-      _iamUnitOfWork = iamUnitOfWork;
-   }
 
    public async Task SeedAsync()
    {
-      //await SeedAdminOrganizationAsync();
-      //await SeedScientistsOrganizationAsync();
+      await SeedAdminOrganizationAsync();
+      await SeedScientistsOrganizationAsync();
 
       await SeedParamentersAsync();
    }
@@ -40,13 +37,15 @@ public class DatabaseSeeder : IDatabaseSeeder
    private async Task SeedAdminOrganizationAsync()
    {
       var organizationId = Guid.CreateVersion7();
-      if (await _iamUnitOfWork.Organizations.ExistsAsync(organizationId)) return;
+      var organizationCode = "SAASADMIN";
+
+      if (await _organizationQueryRepository.ExistsByCodeAsync(organizationCode)) return;
 
       var organization = new Organization
       {
          Id = organizationId,
          Name = "SaaS Internal Administration",
-         Code = "SAASADMIN",
+         Code = organizationCode,
          Type = OrganizationType.Company,
          Description = "Internal system management and support",
          IsMaster = true, // Following our Master Organization rule
@@ -68,7 +67,9 @@ public class DatabaseSeeder : IDatabaseSeeder
    private async Task SeedScientistsOrganizationAsync()
    {
       var organizationId = Guid.CreateVersion7();
-      if (await _iamUnitOfWork.Organizations.ExistsAsync(organizationId)) return;
+      var organizationCode = "SCIENTISTS";
+
+      if (await _organizationQueryRepository.ExistsByCodeAsync(organizationCode)) return;
 
       var organization = new Organization
       {
@@ -101,9 +102,6 @@ public class DatabaseSeeder : IDatabaseSeeder
 
    private async Task SeedParamentersAsync()
    {
-      await AddParameter(SharedParam.System.DateFormat, "Date Format", "The Date Format, accepted characters: 'dd' for the day, 'MM' for the month, 'yyyy' for the year, and '-' or '/' as a separator.",
-                         ParameterType.Integer, "60", ParameterOverrideType.None, false);
-
       await AddParameter(IamParam.Security.PasswordExpireTime, "Password expiration time", "Password expiration time, in days.",
                          ParameterType.String, "dd/MM/yyyy", ParameterOverrideType.UserOwnerId, true);
    }
@@ -133,28 +131,25 @@ public class DatabaseSeeder : IDatabaseSeeder
       string? listItems,
       string? externalListEndpoint)
    {
-      var paramExists = await _parameterService.ExistsAsync(key);
+      if (await _parameterService.ExistsAsync(key)) return;
 
-      if (!paramExists)
-      {
-         var parameterKey = new ParameterKey(key);
+      var parameterKey = new ParameterKey(key);
 
-         var parameter = new ParameterCreateRequest(
-                                 parameterKey.Module,
-                                 parameterKey.Group,
-                                 parameterKey.Name,
-                                 title,
-                                 description,
-                                 type,
-                                 value,
-                                 overrideType,
-                                 isVisible,
-                                 validationRegex,
-                                 validationErrorCustomMessage,
-                                 listItems,
-                                 externalListEndpoint);
+      var parameter = new ParameterCreateRequest(
+                              parameterKey.Module,
+                              parameterKey.Group,
+                              parameterKey.Name,
+                              title,
+                              description,
+                              type,
+                              value,
+                              overrideType,
+                              isVisible,
+                              validationRegex,
+                              validationErrorCustomMessage,
+                              listItems,
+                              externalListEndpoint);
 
-         await _parameterService.CreateAsync(parameter);
-      }
+      await _parameterService.CreateAsync(parameter);
    }
 }

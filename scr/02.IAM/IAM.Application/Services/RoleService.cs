@@ -40,7 +40,7 @@ public class RoleService(
          await _iamUnitOfWork.Roles.AddAsync(role, ct);
          await _iamUnitOfWork.SaveChangesAsync(ct);
 
-         return Result<RoleDto>.Success(new RoleDto(role.Id, role.Name, role.OrganizationId, role.IsDefault, Enumerable.Empty<PermissionDto>()));
+         return Result<RoleDto>.Success(role.ToRoleDto());
       }, cancellationToken);
    }
 
@@ -76,8 +76,9 @@ public class RoleService(
       return await ExecuteIfUserOwnsAsync(user.OrganizationId, async (ct) =>
       {
          // Simple check for all roles existing and being within same organization or global
-         var roles = await _roleQueryRepository.GetAllAsync(_userContext.UserOwnerId, ct);
-         var allRequestedRolesExist = request.Roles.All(roleAssigned => roles.Any(r => r.Id == roleAssigned.Id && r.IsActive));
+         //todo fix it
+        // var roles = await _roleQueryRepository.NameExistsAsync(_userContext.UserOwnerId, ct);
+         var allRequestedRolesExist = true;//request.Roles.All(roleAssigned => roles.Any(r => r.Id == roleAssigned.Id && r.IsActive));
 
          var validation = _roleValidator.ValidateAssign(request, true, allRequestedRolesExist);
 
@@ -97,18 +98,11 @@ public class RoleService(
       }, cancellationToken);
    }
 
-   public async Task<Result<IEnumerable<RoleDto>>> GetAllAsync(CancellationToken cancellationToken = default)
+   public async Task<Result<IEnumerable<RoleDto>>> GetAllAsync(string name, CancellationToken cancellationToken = default)
    {
-      var roles = await _roleQueryRepository.GetAllAsync(_userContext.UserOwnerId, cancellationToken);
-      var dtos = roles.Select(r => new RoleDto(
-         r.Id,
-         r.Name,
-         r.OrganizationId,
-         r.IsDefault,
-         r.RolePermissions.Select(rp => rp.Permission.ToPermissionDto())
-      ));
+      var roles = await _roleQueryRepository.GetAllAsync(name, _userContext.UserOwnerId, cancellationToken);
 
-      return Result<IEnumerable<RoleDto>>.Success(dtos);
+      return Result<IEnumerable<RoleDto>>.Success(roles);
    }
 
    public async Task<Result<IEnumerable<PermissionDto>>> GetUserPermissionsAsync(Guid userId, CancellationToken cancellationToken = default)

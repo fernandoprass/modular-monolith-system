@@ -3,6 +3,7 @@ namespace IAM.Domain.DTOs.Responses;
 public record RoleDto(
    Guid Id,
    string Name,
-   Guid? OrganizationId,
+   bool IsActive,
    bool IsDefault,
+   Guid? OrganizationId,
    IEnumerable<PermissionDto> Features);
