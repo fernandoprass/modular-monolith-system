@@ -1,0 +1,27 @@
+meta {
+  name: assign
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{server}}/api/{{version}}/iam/roles/assign
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "userId": "019db54c-943e-7a36-ac30-32b1aef823b8",
+    "roles": [
+      {
+        "id": "019db57d-5204-754d-917a-3070a6e01348",
+        "expiresAt": "2026-10-22T14:01:44.167Z"
+      }
+    ]
+  }
+}
