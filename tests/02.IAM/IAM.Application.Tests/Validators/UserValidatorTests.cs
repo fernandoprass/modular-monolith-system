@@ -97,7 +97,7 @@ public class UserValidatorTests
       var result = _validator.ValidateUpdatePassword(user, Guid.NewGuid(), request);
 
       Assert.False(result.IsSuccess);
-      Assert.Contains(result.Messages, m => m is UnauthorizedAccessError);
+      Assert.Contains(result.Messages, m => m is Shared.Domain.Messages.UnauthorizedAccessError);
    }
 
    [Fact]

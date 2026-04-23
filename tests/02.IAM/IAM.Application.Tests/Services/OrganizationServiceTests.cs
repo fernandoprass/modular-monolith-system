@@ -5,7 +5,7 @@ using IAM.Domain.DTOs.Responses;
 using IAM.Domain.Entities;
 using IAM.Domain.Enums;
 using IAM.Domain.Interfaces;
-using IAM.Domain.Messages.Errors;
+using IAM.Domain.Messages;
 using IAM.Domain.QueryRepositories;
 using IAM.Domain.Repositories;
 using Myce.Response;

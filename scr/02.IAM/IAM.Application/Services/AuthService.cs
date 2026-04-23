@@ -10,7 +10,6 @@ using Isopoh.Cryptography.Argon2;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Myce.Response;
-using Myce.Response.Messages;
 using Shared.Application.Contracts;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -50,31 +49,31 @@ public class AuthService(
 
    private async Task<Result> Validate(UserPasswordDto? user, string password, CancellationToken cancellationToken)
    {
+      // 1. Check lockout FIRST (before password verification)
+      if (user?.LockedOutUntil.HasValue == true && DateTime.UtcNow < user.LockedOutUntil.Value)
+      {
+         int minutesRemaining = (int)Math.Ceiling((user.LockedOutUntil.Value - DateTime.UtcNow).TotalMinutes);
+         return Result.Failure(new AccountLockedError(minutesRemaining));
+      }
+
       var passwordHash = user?.PasswordHash ?? GetDummyHash();
       var isPasswordCorrect = Argon2.Verify(passwordHash, password);
 
-      if (user is null || !isPasswordCorrect)
+      // 2. Then verify password
+      if (user == null || !isPasswordCorrect)
       {
-         if (user.LockedOutUntil.HasValue && DateTime.UtcNow < user.LockedOutUntil.Value)
+         if (user != null)
          {
-            int minutesRemaining = (int)((user?.LockedOutUntil - DateTime.UtcNow)?.TotalMinutes ?? 0);
-            return Result.Failure(new AccountLockedError(minutesRemaining));
+            await _userService.UpdateFailedLoginAsync(user.Id, cancellationToken);
          }
 
-         int maxFailedAttempts = await _parameterService.GetIntAsync(IamParam.Security.MaxFailedLoginAttempts, cancellationToken);
-         int remainingAttempts = maxFailedAttempts - 1 - (user?.FailedLoginAttempts ?? 0);
-
-         if (user is not null && remainingAttempts <= 0)
-         {
-            await _userService.UpdateFailedLoginAsync(user.Id);
-         }
-
-         return Result.Failure(new UnauthorizedError(remainingAttempts));
+         return Result.Failure(new InvalidEmailPasswordError());
       }
 
+      //3. Finally, check if user and organization are active
       if (!user.IsActive || !user.OrganizationIsActive)
       {
-         return Result.Failure(new UnauthorizedError());
+         return Result.Failure(new UnauthorizedAccessError());
       }
 
       return Result.Success();

@@ -133,7 +133,7 @@ public class UserService(
 
       if (user == null) return Result.Failure(new NotFoundError(IamConst.Entity.User));
 
-      user.UpdateLastLogin();
+      user.RegisterLastSuccessfullyLogin();
 
       return await CommitUpdateAsync(user, cancellationToken);
    }
@@ -144,10 +144,11 @@ public class UserService(
 
       if (user == null) return Result.Failure(new NotFoundError(IamConst.Entity.User));
 
-      int lockedOutMinutes = await _parameterService.GetIntAsync(IamParam.Security.LockoutDurationInMins);
-      var lockedOutUntil = DateTime.UtcNow.AddMinutes(lockedOutMinutes);
-
-      user.UpdateFailedLogin(lockedOutUntil);
+      int maxFailedAttempts = await _parameterService.GetIntAsync(IamParam.Security.MaxFailedLoginAttempts, cancellationToken);
+     
+      int lockedOutMinutes = await _parameterService.GetIntAsync(IamParam.Security.LockoutDurationInMins, cancellationToken);
+      
+      user.RegisterFailedLoginAttempt(maxFailedAttempts, lockedOutMinutes);
 
       return await CommitUpdateAsync(user, cancellationToken);
    }

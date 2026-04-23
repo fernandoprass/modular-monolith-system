@@ -7,6 +7,7 @@ using IAM.Domain.QueryRepositories;
 using Isopoh.Cryptography.Argon2;
 using Microsoft.Extensions.Configuration;
 using NSubstitute;
+using Shared.Application.Contracts;
 
 namespace IAM.Application.Tests.Services;
 
@@ -14,6 +15,7 @@ public class AuthServiceTests
 {
    private readonly IUserQueryRepository _userQueryRepositoryMock;
    private readonly IUserService _userServiceMock;
+   private readonly IParameterService _parameterServiceMock;
    private readonly IConfiguration _configurationMock;
    private readonly AuthService _authService;
 
@@ -22,11 +24,13 @@ public class AuthServiceTests
       _userQueryRepositoryMock = Substitute.For<IUserQueryRepository>();
       _userServiceMock = Substitute.For<IUserService>();
       _configurationMock = Substitute.For<IConfiguration>();
+      _parameterServiceMock = Substitute.For<IParameterService>();
 
       _configurationMock["Jwt:Secret"].Returns("dummy-secret-key-with-at-least-32-characters-used-only-for-test");
       _configurationMock["Jwt:ExpirationHours"].Returns("24");
+      
 
-      _authService = new AuthService(_userQueryRepositoryMock, _userServiceMock, _configurationMock);
+      _authService = new AuthService(_userQueryRepositoryMock, _userServiceMock, _parameterServiceMock, _configurationMock);
    }
 
    [Fact]
@@ -55,7 +59,7 @@ public class AuthServiceTests
       var result = await _authService.LoginAsync(request, TestContext.Current.CancellationToken);
 
       Assert.False(result.IsSuccess);
-      Assert.IsType<UnauthorizedError>(result.Messages.First());
+      Assert.IsType<UnauthorizedAccessError>(result.Messages.First());
    }
 
    [Fact]
@@ -71,7 +75,7 @@ public class AuthServiceTests
       var result = await _authService.LoginAsync(request, TestContext.Current.CancellationToken);
 
       Assert.False(result.IsSuccess);
-      Assert.IsType<UnauthorizedError>(result.Messages.First());
+      Assert.IsType<UnauthorizedAccessError>(result.Messages.First());
    }
 
    [Fact]
@@ -86,7 +90,7 @@ public class AuthServiceTests
       var result = await _authService.LoginAsync(request, TestContext.Current.CancellationToken);
 
       Assert.False(result.IsSuccess);
-      Assert.IsType<UnauthorizedError>(result.Messages.First());
+      Assert.IsType<UnauthorizedAccessError>(result.Messages.First());
    }
 
    [Fact]
@@ -101,7 +105,7 @@ public class AuthServiceTests
       var result = await _authService.LoginAsync(request, TestContext.Current.CancellationToken);
 
       Assert.False(result.IsSuccess);
-      Assert.IsType<UnauthorizedError>(result.Messages.First());
+      Assert.IsType<UnauthorizedAccessError>(result.Messages.First());
    }
 
    private UserPasswordDto CreateValidUser(string password, bool isUserAtive, bool isCustumerActive)

@@ -11,9 +11,23 @@ public class EmailAlreadyExistError : ErrorMessage
    }
 }
 
-public class OrganizationForbiddenError : ErrorMessage
+public class UnauthorizedAccessError : ErrorMessage
 {
-   public OrganizationForbiddenError() : base("OrganizationForbiddenError", "The informing organization is different from the logged-in organization.") { }
+   public UnauthorizedAccessError() : base("UnauthorizedAccessError", "Unauthorized access.") { }
+}
+
+public class InvalidEmailPasswordError : ErrorMessage
+{
+   public InvalidEmailPasswordError() : base("InvalidEmailPasswordError", "Invalid email or password.") { }
+}
+
+public class AccountLockedError : ErrorMessage
+{
+   public AccountLockedError(int minutesRemaining) :
+      base("AccountLockedError", "Account is locked due to too many failed login attempts. Try again in {MinutesRemaining} minute(s).")
+   {
+      AddVariable("MinutesRemaining", minutesRemaining.ToString());
+   }
 }
 
 public class PasswordNotValidError : ErrorMessage
@@ -43,5 +57,5 @@ public class PasswordMissingDigitError : ErrorMessage
 
 public class PasswordMissingSpecialError : ErrorMessage
 {
-   public PasswordMissingSpecialError() : base("UserPasswordMinLengthError", "Password must contain at least one special character (#?!@$%^&*-_.).") { }
+   public PasswordMissingSpecialError() : base("PasswordMissingSpecialError", "Password must contain at least one special character (#?!@$%^&*-_.).") { }
 }

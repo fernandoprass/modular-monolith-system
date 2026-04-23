@@ -11,6 +11,11 @@ public class OrganizationDuplicateCodeError : ErrorMessage
    }
 }
 
+public class OrganizationForbiddenError : ErrorMessage
+{
+   public OrganizationForbiddenError() : base("OrganizationForbiddenError", "The informing organization is different from the logged-in organization.") { }
+}
+
 public class OrganizationInvalidCodeFormatError : ErrorMessage
 {
    public OrganizationInvalidCodeFormatError()

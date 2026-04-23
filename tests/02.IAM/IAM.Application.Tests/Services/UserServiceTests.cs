@@ -55,7 +55,7 @@ public class UserServiceTests
       var result = await _userService.CreateUserAsync(request, true, TestContext.Current.CancellationToken);
 
       result.IsSuccess.Should().BeFalse();
-      result.Messages.Should().ContainSingle(m => m is UnauthorizedAccessError);
+      result.Messages.Should().ContainSingle(m => m is Shared.Domain.Messages.UnauthorizedAccessError);
 
       await _unitOfWorkMock.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
    }
@@ -107,7 +107,7 @@ public class UserServiceTests
       var result = await _userService.DeleteAsync(userId, TestContext.Current.CancellationToken);
 
       result.IsSuccess.Should().BeFalse();
-      result.Messages.Should().ContainSingle(m => m is UnauthorizedAccessError);
+      result.Messages.Should().ContainSingle(m => m is Shared.Domain.Messages.UnauthorizedAccessError);
 
       await _unitOfWorkMock.Users.DidNotReceive().DeleteAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>());
    }
@@ -140,12 +140,12 @@ public class UserServiceTests
       _userContextMock.UserId.Returns(Guid.NewGuid());
       _userRepositoryMock.GetByIdAsync(user.Id, Arg.Any<CancellationToken>()).Returns(user);
       _parameterServiceMock.GetShortIntAsync(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns((short)90); // 90 days
-      _userValidatorMock.ValidateUpdatePassword(user, _userContextMock.UserId, request).Returns(Result.Failure(new UnauthorizedAccessError()));
+      _userValidatorMock.ValidateUpdatePassword(user, _userContextMock.UserId, request).Returns(Result.Failure(new Shared.Domain.Messages.UnauthorizedAccessError()));
 
       var result = await _userService.UpdatePasswordAsync(user.Id, request, TestContext.Current.CancellationToken);
 
       result.IsSuccess.Should().BeFalse();
-      result.Messages.Should().ContainSingle(m => m is UnauthorizedAccessError);
+      result.Messages.Should().ContainSingle(m => m is Shared.Domain.Messages.UnauthorizedAccessError);
       await _unitOfWorkMock.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
    }
 
@@ -178,7 +178,7 @@ public class UserServiceTests
       var result = await _userService.UpdateAsync(user.Id, request, TestContext.Current.CancellationToken);
 
       result.IsSuccess.Should().BeFalse();
-      result.Messages.Should().ContainSingle(m => m is UnauthorizedAccessError);
+      result.Messages.Should().ContainSingle(m => m is Shared.Domain.Messages.UnauthorizedAccessError);
       await _unitOfWorkMock.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
    }
 

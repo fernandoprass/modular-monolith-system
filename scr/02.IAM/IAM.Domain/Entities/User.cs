@@ -51,17 +51,21 @@ public class User : EntityAudited
       PasswordExpiresAt = expiresAt;
    }
 
-   public void UpdateLastLogin()
+   public void RegisterLastSuccessfullyLogin()
    {
       LastLoginAt = DateTime.UtcNow;
       NumFailedLoginAttempts = 0;
       LockedOutUntil = null;
    }
 
-   public void UpdateFailedLogin(DateTime lockedOutUntil)
+   public void RegisterFailedLoginAttempt(int maxFailedAttempts, int lockoutMinutes)
    {
       NumFailedLoginAttempts++;
-      LockedOutUntil = lockedOutUntil;
+
+      if (NumFailedLoginAttempts >= maxFailedAttempts)
+      {
+         LockedOutUntil = DateTime.UtcNow.AddMinutes(lockoutMinutes);
+      }
    }
 
    public void AddRole(Guid roleId, DateTime? expiresAt)
