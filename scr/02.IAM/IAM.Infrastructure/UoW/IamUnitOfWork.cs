@@ -19,7 +19,7 @@ public class IamUnitOfWork : UnitOfWork<IamDbContext>, IIamUnitOfWork
       _dbContext = dbContext;
    }
 
-   public ICustomerRepository Customers => new CustomerRepository(_dbContext);
+   public IOrganizationRepository Organizations => new OrganizationRepository(_dbContext);
    public IRoleRepository Roles => new RoleRepository(_dbContext);
    public IUserRepository Users => new UserRepository(_dbContext);
 }

@@ -1,8 +1,0 @@
-namespace IAM.Domain.DTOs.Requests;
-
-public sealed record CustomerUserCreateRequest
-(
-    string Name,
-    string Email,
-    string Password
-);

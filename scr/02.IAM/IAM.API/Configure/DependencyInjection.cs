@@ -33,8 +33,8 @@ public static class DependencyInjection
    {
       builder.Services.AddScoped<IIamUnitOfWork, IamUnitOfWork>();
 
-      builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
-      builder.Services.AddScoped<ICustomerQueryRepository, CustomerQueryRepository>();
+      builder.Services.AddScoped<IOrganizationRepository, OrganizationRepository>();
+      builder.Services.AddScoped<IOrganizationQueryRepository, OrganizationQueryRepository>();
       builder.Services.AddScoped<IRoleRepository, RoleRepository>();
       builder.Services.AddScoped<IRoleQueryRepository, RoleQueryRepository>();
       builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -48,8 +48,8 @@ public static class DependencyInjection
 
    private static void RegisterServices(WebApplicationBuilder builder)
    {
-      builder.Services.AddScoped<IAuthService, AuthService>(); 
-      builder.Services.AddScoped<ICustomerService, CustomerService>();
+      builder.Services.AddScoped<IAuthService, AuthService>();
+      builder.Services.AddScoped<IOrganizationService, OrganizationService>();
       builder.Services.AddScoped<IDatabaseSeeder, DatabaseSeeder>();
       builder.Services.AddScoped<IRoleService, RoleService>();
       builder.Services.AddScoped<IUserService, UserService>();
@@ -57,7 +57,7 @@ public static class DependencyInjection
 
    private static void RegisterValidators(WebApplicationBuilder builder)
    {
-      builder.Services.AddScoped<ICustomerValidator, CustomerValidator>();
+      builder.Services.AddScoped<IOrganizationValidator, OrganizationValidator>();
       builder.Services.AddScoped<IUserValidator, UserValidator>();
       builder.Services.AddScoped<IRoleValidator, RoleValidator>();
    }

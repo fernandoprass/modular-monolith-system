@@ -77,7 +77,7 @@ public class UnitOfWorkTests
    {
       using var context = new TestDbContext(_options);
       var uow = new UnitOfWork<TestDbContext>(context, _userContextMock);
-      
+
       // Add something to ensure the context has changes
       context.TestEntities.Add(new TestAuditedEntity { Name = "To be cancelled" });
 

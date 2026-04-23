@@ -1,5 +1,4 @@
 using Shared.Domain.Entities;
-using System.Security.Cryptography;
 
 namespace Shared.Domain.Interfaces;
 
@@ -13,4 +12,4 @@ internal interface IParameterRepository
    Task<bool> ExistsAsync(string key, CancellationToken cancellationToken = default);
 
    Task<Parameter?> GetByKeyAsync(string key, CancellationToken cancellationToken = default);
- }
+}

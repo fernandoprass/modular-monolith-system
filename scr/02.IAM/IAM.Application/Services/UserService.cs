@@ -34,19 +34,19 @@ public class UserService(
       return await _userQueryRepository.GetByIdAsync(id, cancellationToken);
    }
 
-   public async Task<IEnumerable<UserLiteDto>> GetByCustomerIdAsync(Guid customerId, CancellationToken cancellationToken = default)
+   public async Task<IEnumerable<UserLiteDto>> GetByOrganizationIdAsync(Guid organizationId, CancellationToken cancellationToken = default)
    {
-      return await _userQueryRepository.GetByCustomerIdAsync(customerId, cancellationToken);
+      return await _userQueryRepository.GetByOrganizationIdAsync(organizationId, cancellationToken);
    }
 
    public async Task<Result<UserDto>> CreateUserAsync(UserCreateRequest request,
-                                                      bool customerExists, CancellationToken cancellationToken = default)
+                                                      bool organizationExists, CancellationToken cancellationToken = default)
    {
-      return await ExecuteIfUserOwnsAsync(request.CustomerId, async (ct) =>
+      return await ExecuteIfUserOwnsAsync(request.OrganizationId, async (ct) =>
       {
          bool emailExists = await EmailExistsAsync(request.Email, ct);
 
-         var validation = _userValidator.ValidateCreate(request, customerExists, emailExists);
+         var validation = _userValidator.ValidateCreate(request, organizationExists, emailExists);
          if (validation.HasError)
          {
             return Result<UserDto>.Failure(validation.Messages);
@@ -59,7 +59,7 @@ public class UserService(
              request.Email,
              Argon2.Hash(request.Password),
              passwordExpiresAt,
-             request.CustomerId);
+             request.OrganizationId);
 
          await _iamUnitOfWork.Users.AddAsync(user, ct);
          await _iamUnitOfWork.SaveChangesAsync(ct);
@@ -71,8 +71,8 @@ public class UserService(
    public async Task<Result> UpdateAsync(Guid id, UserUpdateRequest request, CancellationToken cancellationToken = default)
    {
       var user = await _userRepository.GetByIdAsync(id, cancellationToken);
-      return await ExecuteIfUserOwnsAsync(user?.CustomerId, async (ct) =>
-      {    
+      return await ExecuteIfUserOwnsAsync(user?.OrganizationId, async (ct) =>
+      {
          var validator = _userValidator.ValidateUpdate(user?.Id, request);
          if (validator.HasError)
          {
@@ -104,7 +104,7 @@ public class UserService(
 
    private async Task<DateTime> GetPasswordExpiresAt(CancellationToken cancellationToken)
    {
-      short numberOfDay = await _parameterService.GetShortIntAsync(IamParam.Security.PasswordExpireTime, cancellationToken);
+      short numberOfDay = await _parameterService.GetShortIntAsync(IamParam.Security.MaxPasswordAgeInDays, cancellationToken);
 
       var passwordExpiresAt = DateTime.UtcNow.AddDays(numberOfDay);
       return passwordExpiresAt;
@@ -114,7 +114,7 @@ public class UserService(
    {
       var user = await _userRepository.GetByIdAsync(id, cancellationToken);
 
-      return await ExecuteIfUserOwnsAsync(user?.CustomerId, async (ct) =>
+      return await ExecuteIfUserOwnsAsync(user?.OrganizationId, async (ct) =>
       {
          if (user == null)
          {
@@ -131,16 +131,33 @@ public class UserService(
    {
       var user = await _userRepository.GetByIdAsync(id, cancellationToken);
 
-      user.UpdateLastLogin();
+      if (user == null) return Result.Failure(new NotFoundError(IamConst.Entity.User));
+
+      user.RegisterLastSuccessfullyLogin();
 
       return await CommitUpdateAsync(user, cancellationToken);
    }
 
-   public async Task<Result> ValidateUserForNewCustomerAsync(CustomerUserCreateRequest request, CancellationToken cancellationToken = default)
+   public async Task<Result> UpdateFailedLoginAsync(Guid id, CancellationToken cancellationToken = default)
+   {
+      var user = await _userRepository.GetByIdAsync(id, cancellationToken);
+
+      if (user == null) return Result.Failure(new NotFoundError(IamConst.Entity.User));
+
+      int maxFailedAttempts = await _parameterService.GetIntAsync(IamParam.Security.MaxFailedLoginAttempts, cancellationToken);
+     
+      int lockedOutMinutes = await _parameterService.GetIntAsync(IamParam.Security.LockoutDurationInMins, cancellationToken);
+      
+      user.RegisterFailedLoginAttempt(maxFailedAttempts, lockedOutMinutes);
+
+      return await CommitUpdateAsync(user, cancellationToken);
+   }
+
+   public async Task<Result> ValidateUserForNewOrganizationAsync(OrganizationUserCreateRequest request, CancellationToken cancellationToken = default)
    {
       bool emailExists = await EmailExistsAsync(request.Email, cancellationToken);
 
-      return _userValidator.ValidateCreateForNewCustomer(request, emailExists);
+      return _userValidator.ValidateCreateForNewOrganization(request, emailExists);
    }
 
    private async Task<bool> EmailExistsAsync(string email, CancellationToken cancellationToken)

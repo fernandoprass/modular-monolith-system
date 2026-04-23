@@ -9,12 +9,12 @@ public class AspNetUserContext(IHttpContextAccessor accessor) : IUserContext
 {
    private readonly IHttpContextAccessor _accessor = accessor;
 
-   public Guid UserOwnerId => GetCustomerId();
+   public Guid UserOwnerId => GetOrganizationId();
    public bool IsAuthenticated => _accessor.HttpContext?.User.Identity?.IsAuthenticated ?? false;
    public bool IsSystemAdmin => GetIsSystemAdmin();
    public Guid UserId => GetUserId();
 
-   private Guid GetCustomerId()
+   private Guid GetOrganizationId()
    {
       var value = _accessor.HttpContext?.User.FindFirst(IamConst.Security.Claim.UserOwnerId)?.Value;
       return Guid.TryParse(value, out var id) ? id : Guid.Empty;
@@ -28,7 +28,7 @@ public class AspNetUserContext(IHttpContextAccessor accessor) : IUserContext
 
    private Guid GetUserId()
    {
-      var value = _accessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
+      var value = _accessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
                   ?? _accessor.HttpContext?.User.FindFirst("sub")?.Value;
 
       return Guid.TryParse(value, out var id) ? id : Guid.Empty;

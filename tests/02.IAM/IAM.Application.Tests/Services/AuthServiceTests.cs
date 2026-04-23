@@ -2,11 +2,12 @@ using IAM.Application.Contracts;
 using IAM.Application.Services;
 using IAM.Domain.DTOs;
 using IAM.Domain.DTOs.Requests;
-using IAM.Domain.Messages.Errors;
+using IAM.Domain.Messages;
 using IAM.Domain.QueryRepositories;
 using Isopoh.Cryptography.Argon2;
 using Microsoft.Extensions.Configuration;
 using NSubstitute;
+using Shared.Application.Contracts;
 
 namespace IAM.Application.Tests.Services;
 
@@ -14,6 +15,7 @@ public class AuthServiceTests
 {
    private readonly IUserQueryRepository _userQueryRepositoryMock;
    private readonly IUserService _userServiceMock;
+   private readonly IParameterService _parameterServiceMock;
    private readonly IConfiguration _configurationMock;
    private readonly AuthService _authService;
 
@@ -22,11 +24,13 @@ public class AuthServiceTests
       _userQueryRepositoryMock = Substitute.For<IUserQueryRepository>();
       _userServiceMock = Substitute.For<IUserService>();
       _configurationMock = Substitute.For<IConfiguration>();
+      _parameterServiceMock = Substitute.For<IParameterService>();
 
       _configurationMock["Jwt:Secret"].Returns("dummy-secret-key-with-at-least-32-characters-used-only-for-test");
       _configurationMock["Jwt:ExpirationHours"].Returns("24");
+      
 
-      _authService = new AuthService(_userQueryRepositoryMock, _userServiceMock, _configurationMock);
+      _authService = new AuthService(_userQueryRepositoryMock, _userServiceMock, _parameterServiceMock, _configurationMock);
    }
 
    [Fact]
@@ -55,7 +59,7 @@ public class AuthServiceTests
       var result = await _authService.LoginAsync(request, TestContext.Current.CancellationToken);
 
       Assert.False(result.IsSuccess);
-      Assert.IsType<UnauthorizedError>(result.Messages.First());
+      Assert.IsType<UnauthorizedAccessError>(result.Messages.First());
    }
 
    [Fact]
@@ -71,14 +75,14 @@ public class AuthServiceTests
       var result = await _authService.LoginAsync(request, TestContext.Current.CancellationToken);
 
       Assert.False(result.IsSuccess);
-      Assert.IsType<UnauthorizedError>(result.Messages.First());
+      Assert.IsType<UnauthorizedAccessError>(result.Messages.First());
    }
 
    [Fact]
    public async Task LoginAsync_InactiveUser_ShouldReturnUnauthorized()
    {
       var password = "Password123!";
-      var user = CreateValidUser(password , isUserAtive: false, isCustumerActive: true);
+      var user = CreateValidUser(password, isUserAtive: false, isCustumerActive: true);
 
       _userQueryRepositoryMock.GetByEmailWithPasswordAsync(user.Email, Arg.Any<CancellationToken>()).Returns(user);
       var request = new UserLoginRequest(user.Email, password);
@@ -86,11 +90,11 @@ public class AuthServiceTests
       var result = await _authService.LoginAsync(request, TestContext.Current.CancellationToken);
 
       Assert.False(result.IsSuccess);
-      Assert.IsType<UnauthorizedError>(result.Messages.First());
+      Assert.IsType<UnauthorizedAccessError>(result.Messages.First());
    }
 
    [Fact]
-   public async Task LoginAsync_InactiveCustomer_ShouldReturnUnauthorized()
+   public async Task LoginAsync_InactiveOrganization_ShouldReturnUnauthorized()
    {
       var password = "Password123!";
       var user = CreateValidUser(password, isUserAtive: true, isCustumerActive: false);
@@ -101,7 +105,7 @@ public class AuthServiceTests
       var result = await _authService.LoginAsync(request, TestContext.Current.CancellationToken);
 
       Assert.False(result.IsSuccess);
-      Assert.IsType<UnauthorizedError>(result.Messages.First());
+      Assert.IsType<UnauthorizedAccessError>(result.Messages.First());
    }
 
    private UserPasswordDto CreateValidUser(string password, bool isUserAtive, bool isCustumerActive)
@@ -113,8 +117,8 @@ public class AuthServiceTests
          Email = "test@example.com",
          PasswordHash = Argon2.Hash(password),
          IsActive = isUserAtive,
-         CustomerIsActive = isCustumerActive,
-         CustomerId = Guid.NewGuid(),
+         OrganizationIsActive = isCustumerActive,
+         OrganizationId = Guid.NewGuid(),
          IsSystemAdmin = false
       };
    }

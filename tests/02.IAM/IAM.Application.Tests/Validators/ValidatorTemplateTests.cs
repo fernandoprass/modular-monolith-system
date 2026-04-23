@@ -19,7 +19,7 @@ public class ValidatorTemplateTests
    public void NameRules_ShouldValidateCorrectly(string input, bool expectedSuccess)
    {
       var validator = new FluentValidator<Dummy>()
-          .RuleFor(x => x.Value).ApplyTemplate(ValidatorTemplate.NameRules);
+          .RuleFor(x => x.Value).ApplyTemplate(ValidatorTemplates.NameRules);
 
       var result = validator.Validate(new Dummy { Value = input });
 
@@ -40,7 +40,7 @@ public class ValidatorTemplateTests
    public void EmailRules_ShouldValidateCorrectly(string input, bool expectedSuccess)
    {
       var validator = new FluentValidator<Dummy>()
-          .RuleFor(x => x.Value).ApplyTemplate(ValidatorTemplate.EmailRules);
+          .RuleFor(x => x.Value).ApplyTemplate(ValidatorTemplates.EmailRules);
 
       var result = validator.Validate(new Dummy { Value = input });
 
@@ -51,7 +51,7 @@ public class ValidatorTemplateTests
 
    #region PasswordRules Tests
 
-   [Theory]   
+   [Theory]
    [InlineData("Pass123!", true, null)]// Valid: Meets all 5 criteria   
    [InlineData("P1s!", false, typeof(PasswordMinLengthError))]            // Invalid: Too short (< 8)  
    [InlineData("pass123!", false, typeof(PasswordMissingUppercaseError))] // Invalid: Missing Uppercase  
@@ -65,7 +65,7 @@ public class ValidatorTemplateTests
        Type expectedErrorType)
    {
       var validator = new FluentValidator<Dummy>()
-          .RuleFor(x => x.Value).ApplyTemplate(ValidatorTemplate.PasswordRules);
+          .RuleFor(x => x.Value).ApplyTemplate(ValidatorTemplates.PasswordRules);
 
       var isValid = validator.Validate(new Dummy { Value = input });
 
@@ -86,7 +86,7 @@ public class ValidatorTemplateTests
    public void PasswordRules_ShouldAcceptAllDefinedSpecialCharacters(string password)
    {
       var validator = new FluentValidator<Dummy>()
-          .RuleFor(x => x.Value).ApplyTemplate(ValidatorTemplate.PasswordRules);
+          .RuleFor(x => x.Value).ApplyTemplate(ValidatorTemplates.PasswordRules);
 
       var isValid = validator.Validate(new Dummy { Value = password });
 

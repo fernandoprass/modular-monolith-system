@@ -1,6 +1,6 @@
+using Myce.Response;
 using Shared.Domain.DTOs.Requests;
 using Shared.Domain.Entities;
-using Myce.Response;
 
 namespace Shared.Application.Contracts;
 

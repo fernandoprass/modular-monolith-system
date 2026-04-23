@@ -8,6 +8,9 @@ public static class IamParam
    {
       private const string Group = "Security";
 
-      public const string PasswordExpireTime = $"{Module}.{Group}.{nameof(PasswordExpireTime)}";
+      public const string MaxPasswordAgeInDays = $"{Module}.{Group}.{nameof(MaxPasswordAgeInDays)}";
+      public const string LockoutDurationInMins = $"{Module}.{Group}.{nameof(LockoutDurationInMins)}";
+      public const string MaxFailedLoginAttempts = $"{Module}.{Group}.{nameof(MaxFailedLoginAttempts)}";
+      public const string JwtExpirationInHours = $"{Module}.{Group}.{nameof(JwtExpirationInHours)}";
    }
 }

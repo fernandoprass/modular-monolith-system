@@ -17,82 +17,84 @@ using Shared.Domain.Messages;
 namespace IAM.Application.Orchestrators;
 
 public class ResgisterOrchestrator(
-   ICustomerService customerService,
-   ICustomerQueryRepository customerQueryRepository,
+   IOrganizationService organizationService,
+   IOrganizationQueryRepository organizationQueryRepository,
    IUserContext userContext,
    IUserRepository userRepository,
    IUserService userService,
    IIamUnitOfWork iamUnitOfWork) : BaseService(userContext), IRegisterOrchestrator
 {
-   private readonly ICustomerService _customerService = customerService;
-   private readonly ICustomerQueryRepository _customerQueryRepository = customerQueryRepository;
+   private readonly IOrganizationService _organizationService = organizationService;
+   private readonly IOrganizationQueryRepository _organizationQueryRepository = organizationQueryRepository;
    private readonly IUserRepository _userRepository = userRepository;
    private readonly IUserService _userService = userService;
    private readonly IIamUnitOfWork _iamUnitOfWork = iamUnitOfWork;
 
    public async Task<Result<UserDto>> RegisterUserAsync(UserCreateRequest request, CancellationToken cancellationToken = default)
    {
-      var customerDto = await _customerQueryRepository.GetByIdAsync(request.CustomerId, cancellationToken);
+      var organizationDto = await _organizationQueryRepository.GetByIdAsync(request.OrganizationId, cancellationToken);
 
-      var customerExists = customerDto is not null;
+      var organizationExists = organizationDto is not null;
 
-      var result = await _userService.CreateUserAsync(request, customerExists, cancellationToken);
+      var result = await _userService.CreateUserAsync(request, organizationExists, cancellationToken);
 
-      if (result.IsSuccess) { 
-         result.Data.CustomerName = customerDto.Name; 
+      if (result.IsSuccess)
+      {
+         result.Data.OrganizationName = organizationDto.Name;
       }
-      
+
       return result;
    }
-   public async Task<Result<CustomerDto>> RegisterCustomerAsync(CustomerCreateRequest customerCreate, CancellationToken cancellationToken = default)
-   {   
-      var customerValidateResult = await _customerService.ValidateCreateCustomerAsync(customerCreate, cancellationToken);
-      var userValidateResult = await _userService.ValidateUserForNewCustomerAsync(customerCreate.User, cancellationToken);
+   public async Task<Result<OrganizationDto>> RegisterOrganizationAsync(OrganizationCreateRequest organizationCreate, CancellationToken cancellationToken = default)
+   {
+      var organizationValidateResult = await _organizationService.ValidateCreateOrganizationAsync(organizationCreate, cancellationToken);
+      var userValidateResult = await _userService.ValidateUserForNewOrganizationAsync(organizationCreate.User, cancellationToken);
 
-      var result = Result.Merge(customerValidateResult, userValidateResult);
+      var result = Result.Merge(organizationValidateResult, userValidateResult);
 
-      var customer = Customer.Create(
-         customerCreate.Type,
-         customerCreate.Type.Equals(CustomerType.Company) ? customerCreate.Code : _customerService.GetRandomCode(),
-         customerCreate.Type.Equals(CustomerType.Company) ? customerCreate.Name : customerCreate.User.Name,
-         customerCreate.Description
+      var organization = Organization.Create(
+         organizationCreate.Type,
+         organizationCreate.Type.Equals(OrganizationType.Company) ? organizationCreate.Code : _organizationService.GetRandomCode(),
+         organizationCreate.Type.Equals(OrganizationType.Company) ? organizationCreate.Name : organizationCreate.User.Name,
+         organizationCreate.Description
       );
 
-      if (result.HasError) { 
-         return Result<CustomerDto>.Failure(result.Messages); 
+      if (result.HasError)
+      {
+         return Result<OrganizationDto>.Failure(result.Messages);
       }
 
       var user = User.Create(
-       customerCreate.User.Name,
-       customerCreate.User.Email,
-       Argon2.Hash(customerCreate.User.Password),
+       organizationCreate.User.Name,
+       organizationCreate.User.Email,
+       Argon2.Hash(organizationCreate.User.Password),
        DateTime.UtcNow.AddDays(30),
-       customer.Id
+       organization.Id
       );
 
-      customer.CreatedBy = user.Id;
+      organization.CreatedBy = user.Id;
 
-      await _iamUnitOfWork.Customers.AddAsync(customer, cancellationToken);
+      await _iamUnitOfWork.Organizations.AddAsync(organization, cancellationToken);
       await _iamUnitOfWork.Users.AddAsync(user, cancellationToken);
       await _iamUnitOfWork.SaveChangesAsync(cancellationToken);
 
-      return Result<CustomerDto>.Success(customer.ToCustomerDto());
+      return Result<OrganizationDto>.Success(organization.ToOrganizationDto());
    }
 
-   public async Task<Result> DeleteCustomerAsync(Guid id, CancellationToken cancellationToken = default)
+   public async Task<Result> DeleteOrganizationAsync(Guid id, CancellationToken cancellationToken = default)
    {
       return await ExecuteIfUserOwnsAsync(id, async (ct) =>
       {
-         var customer = await _iamUnitOfWork.Customers.GetByIdAsync(id, ct);
-         if (customer == null)
+         var organization = await _iamUnitOfWork.Organizations.GetByIdAsync(id, ct);
+         if (organization == null)
          {
-            return Result.Failure(new NotFoundError(IamConst.Entity.Customer));
+            return Result.Failure(new NotFoundError(IamConst.Entity.Organization));
          }
 
-         await _iamUnitOfWork.Customers.DeleteAsync(id, ct);
+         await _iamUnitOfWork.Organizations.DeleteAsync(id, ct);
 
-         var users = await _userRepository.GetByCustomerIdAsync(id, ct);
-         foreach(var u in users)
+         var users = await _userRepository.GetByOrganizationIdAsync(id, ct);
+         foreach (var u in users)
          {
             await _iamUnitOfWork.Users.DeleteAsync(u.Id, ct);
          }

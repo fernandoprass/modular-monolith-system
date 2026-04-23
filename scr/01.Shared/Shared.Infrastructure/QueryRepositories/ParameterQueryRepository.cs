@@ -1,8 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Shared.Domain.DTOs.Requests;
 using Shared.Domain.DTOs.Responses;
-using Shared.Domain.Entities;
 using Shared.Domain.Enums;
 using Shared.Domain.Interfaces;
 using Shared.Domain.Mappers;
@@ -32,7 +30,7 @@ internal class ParameterQueryRepository(SharedDbContext dbContext) : IParameterQ
                   equals new
                   {
                      ParamId = paramOverride.ParameterId,
-                     Owner = paramOverride.OwnerId 
+                     Owner = paramOverride.OwnerId
                   } into overrides
                   from paramOverride in overrides.DefaultIfEmpty()
                   select new { param, paramOverride };

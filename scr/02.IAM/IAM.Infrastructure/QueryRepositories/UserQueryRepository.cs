@@ -15,7 +15,7 @@ public class UserQueryRepository(IamDbContext context) : IUserQueryRepository
    {
       return await _context.Users
           .AsNoTracking()
-          .Include(u => u.Customer)
+          .Include(u => u.Organization)
           .Where(u => u.Id == id)
           .Select(u => u.ToUserDto())
           .SingleOrDefaultAsync(cancellationToken);
@@ -25,7 +25,7 @@ public class UserQueryRepository(IamDbContext context) : IUserQueryRepository
    {
       return await _context.Users
           .AsNoTracking()
-          .Include(u => u.Customer)
+          .Include(u => u.Organization)
           .Where(u => u.Email == email)
           .Select(u => u)
           .SingleOrDefaultAsync(cancellationToken);
@@ -44,17 +44,17 @@ public class UserQueryRepository(IamDbContext context) : IUserQueryRepository
    {
       return await _context.Users
           .AsNoTracking()
-          .Include(u => u.Customer)
+          .Include(u => u.Organization)
           .Where(u => u.Email == email)
           .Select(u => u.ToUserPasswordDto())
           .SingleOrDefaultAsync(cancellationToken);
    }
 
-   public async Task<IEnumerable<UserLiteDto>> GetByCustomerIdAsync(Guid customerId, CancellationToken cancellationToken = default)
+   public async Task<IEnumerable<UserLiteDto>> GetByOrganizationIdAsync(Guid organizationId, CancellationToken cancellationToken = default)
    {
       return await _context.Users
           .AsNoTracking()
-          .Where(u => u.CustomerId == customerId)
+          .Where(u => u.OrganizationId == organizationId)
           .Select(u => new UserLiteDto
           {
              Id = u.Id,

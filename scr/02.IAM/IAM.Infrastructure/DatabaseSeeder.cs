@@ -2,6 +2,7 @@ using IAM.Domain;
 using IAM.Domain.Entities;
 using IAM.Domain.Enums;
 using IAM.Domain.Interfaces;
+using IAM.Domain.QueryRepositories;
 using Isopoh.Cryptography.Argon2;
 using Shared.Application.Contracts;
 using Shared.Domain;
@@ -15,72 +16,72 @@ public interface IDatabaseSeeder
    Task SeedAsync();
 }
 
-public class DatabaseSeeder : IDatabaseSeeder
+public class DatabaseSeeder(
+   IOrganizationQueryRepository organizationQueryRepository,
+   IParameterService parameterService,
+   IIamUnitOfWork iamUnitOfWork) : IDatabaseSeeder
 {
-   private readonly IIamUnitOfWork _iamUnitOfWork;
-   private readonly IParameterService _parameterService;
+   private readonly IIamUnitOfWork _iamUnitOfWork = iamUnitOfWork;
+   private readonly IOrganizationQueryRepository _organizationQueryRepository = organizationQueryRepository;
+   private readonly IParameterService _parameterService = parameterService;
    private const string DefaultPassword = "Password123!";
-
-   public DatabaseSeeder(
-      IParameterService parameterService,
-      IIamUnitOfWork iamUnitOfWork)
-   {
-      _parameterService = parameterService;
-      _iamUnitOfWork = iamUnitOfWork;
-   }
 
    public async Task SeedAsync()
    {
-      //await SeedAdminCustomerAsync();
-      //await SeedScientistsCustomerAsync();
+      await SeedAdminOrganizationAsync();
+      await SeedScientistsOrganizationAsync();
 
       await SeedParamentersAsync();
    }
 
-   private async Task SeedAdminCustomerAsync()
+   private async Task SeedAdminOrganizationAsync()
    {
-      var customerId = Guid.CreateVersion7();
-      if (await _iamUnitOfWork.Customers.ExistsAsync(customerId)) return;
+      var organizationId = Guid.CreateVersion7();
+      var organizationCode = "SAASADMIN";
 
-      var customer = new Customer
+      if (await _organizationQueryRepository.ExistsByCodeAsync(organizationCode)) return;
+
+      var organization = new Organization
       {
-         Id = customerId,
+         Id = organizationId,
          Name = "SaaS Internal Administration",
-         Code = "SAASADMIN",
-         Type = CustomerType.Company,
+         Code = organizationCode,
+         Type = OrganizationType.Company,
          Description = "Internal system management and support",
-         IsMaster = true, // Following our Master Customer rule
+         IsMaster = true, // Following our Master Organization rule
          CreatedAt = DateTime.UtcNow
       };
 
       var passwordHash = Argon2.Hash(DefaultPassword);
 
-      var superUser = User.Create("System Root", "admin@saas.com", passwordHash, DateTime.UtcNow.AddDays(30), customerId);
+      var superUser = User.Create("System Root", "admin@saas.com", passwordHash, DateTime.UtcNow.AddDays(30), organizationId);
       superUser.IsSystemAdmin = true;
-      customer.CreatedBy = superUser.Id;
+      organization.CreatedBy = superUser.Id;
 
-      await _iamUnitOfWork.Customers.AddAsync(customer);
+      await _iamUnitOfWork.Organizations.AddAsync(organization);
       await _iamUnitOfWork.Users.AddAsync(superUser);
-      await _iamUnitOfWork.Users.AddAsync(User.Create("Internal Support", "support@saas.com", passwordHash, DateTime.UtcNow.AddDays(30), customerId));
+      await _iamUnitOfWork.Users.AddAsync(User.Create("Internal Support", "support@saas.com", passwordHash, DateTime.UtcNow.AddDays(30), organizationId));
       await _iamUnitOfWork.SaveChangesAsync();
    }
-    
-   private async Task SeedScientistsCustomerAsync()
-   {
-      var customerId = Guid.CreateVersion7();
-      if (await _iamUnitOfWork.Customers.ExistsAsync(customerId)) return;
 
-      var customer = new Customer
+   private async Task SeedScientistsOrganizationAsync()
+   {
+      var organizationId = Guid.CreateVersion7();
+      var organizationCode = "SCIENTISTS";
+
+      if (await _organizationQueryRepository.ExistsByCodeAsync(organizationCode)) return;
+
+      var organization = new Organization
       {
-         Id = customerId,
+         Id = organizationId,
          Name = "Computing Pioneers Society",
          Code = "SCIENTISTS",
-         Type = CustomerType.Company,
+         Type = OrganizationType.Company,
          Description = "Foundation of modern Computer Science",
          CreatedAt = DateTime.UtcNow
       };
 
-      await _iamUnitOfWork.Customers.AddAsync(customer);
+      await _iamUnitOfWork.Organizations.AddAsync(organization);
 
       var passwordHash = Argon2.Hash(DefaultPassword);
       var members = new[]
@@ -94,18 +95,28 @@ public class DatabaseSeeder : IDatabaseSeeder
 
       foreach (var (name, email) in members)
       {
-         await _iamUnitOfWork.Users.AddAsync(User.Create(name, email, passwordHash, DateTime.UtcNow.AddDays(30), customerId));
+         await _iamUnitOfWork.Users.AddAsync(User.Create(name, email, passwordHash, DateTime.UtcNow.AddDays(30), organizationId));
       }
       await _iamUnitOfWork.SaveChangesAsync();
    }
 
    private async Task SeedParamentersAsync()
    {
-      await AddParameter(SharedParam.System.DateFormat, "Date Format", "The Date Format, accepted characters: 'dd' for the day, 'MM' for the month, 'yyyy' for the year, and '-' or '/' as a separator.",
-                         ParameterType.Integer, "60", ParameterOverrideType.None, false);
-
-      await AddParameter(IamParam.Security.PasswordExpireTime, "Password expiration time", "Password expiration time, in days.",
+      await AddParameter(IamParam.Security.MaxPasswordAgeInDays, "Maximum Password Age", 
+                         "The maximum number of days a password remains valid before the user is required to change it.",
                          ParameterType.String, "dd/MM/yyyy", ParameterOverrideType.UserOwnerId, true);
+
+      await AddParameter(IamParam.Security.LockoutDurationInMins, "Duration of Lockout", 
+                         "Duration of lockout in minutes after reaching the maximum number of failed login attempts.",
+                         ParameterType.Integer, "60", ParameterOverrideType.None, true);
+
+      await AddParameter(IamParam.Security.MaxFailedLoginAttempts, "Maximum failed logins attemps",
+                        "The maximum number of failed login attempts allowed before a user account is locked.",
+                         ParameterType.Integer, "3", ParameterOverrideType.None, true);
+
+      await AddParameter(IamParam.Security.JwtExpirationInHours, "JWT Expiration in Hours",
+                         "The lifespan of the JSON Web Token (JWT) in hours.",
+                          ParameterType.Integer, "24", ParameterOverrideType.None, true);
    }
 
    private async Task AddParameter(
@@ -133,28 +144,25 @@ public class DatabaseSeeder : IDatabaseSeeder
       string? listItems,
       string? externalListEndpoint)
    {
-      var paramExists = await _parameterService.ExistsAsync(key);
+      if (await _parameterService.ExistsAsync(key)) return;
 
-      if (!paramExists)
-      {
-         var parameterKey = new ParameterKey(key);
+      var parameterKey = new ParameterKey(key);
 
-         var parameter = new ParameterCreateRequest(
-                                 parameterKey.Module,
-                                 parameterKey.Group,
-                                 parameterKey.Name,
-                                 title,
-                                 description,
-                                 type,
-                                 value,
-                                 overrideType,
-                                 isVisible,
-                                 validationRegex,
-                                 validationErrorCustomMessage,
-                                 listItems,
-                                 externalListEndpoint);
+      var parameter = new ParameterCreateRequest(
+                              parameterKey.Module,
+                              parameterKey.Group,
+                              parameterKey.Name,
+                              title,
+                              description,
+                              type,
+                              value,
+                              overrideType,
+                              isVisible,
+                              validationRegex,
+                              validationErrorCustomMessage,
+                              listItems,
+                              externalListEndpoint);
 
-         await _parameterService.CreateAsync(parameter);
-      }
+      await _parameterService.CreateAsync(parameter);
    }
 }

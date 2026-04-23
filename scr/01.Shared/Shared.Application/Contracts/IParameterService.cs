@@ -1,7 +1,6 @@
 using Myce.Response;
 using Shared.Domain.DTOs.Requests;
 using Shared.Domain.DTOs.Responses;
-using System.Security.Cryptography;
 
 namespace Shared.Application.Contracts
 {

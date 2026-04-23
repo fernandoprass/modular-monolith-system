@@ -28,7 +28,7 @@ public class ParameterValidator : IParameterValidator
             .If(x => !string.IsNullOrEmpty(x.ValidationRegex), x => x.IsRequired())
          .RuleFor(x => x.Value)
             .IsRequired()
-            .If(x => !string.IsNullOrEmpty(x.ValidationRegex), 
+            .If(x => !string.IsNullOrEmpty(x.ValidationRegex),
                 x => x.Matches(request.ValidationRegex, new ParameterInvalidValueError(request?.ValidationErrorCustomMessage)))
          .RuleForValue(keyExists).IsFalse(new ParameterDuplicatedError(request.Module, request.Group, request.Name));
 

@@ -39,5 +39,6 @@ public record ParameterUpdateRequest(
            OverrideType,
            IsVisible,
            null, null, null, null
-       ) { }
+       )
+   { }
 }

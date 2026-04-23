@@ -14,9 +14,9 @@ public class RoleController(IRoleService roleService) : BaseController
    private readonly IRoleService _roleService = roleService;
 
    [HttpGet]
-   public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
+   public async Task<IActionResult> GetAll(string name, CancellationToken cancellationToken)
    {
-      var result = await _roleService.GetAllAsync(cancellationToken);
+      var result = await _roleService.GetAllAsync(name, cancellationToken);
       return OkOrNotFound(result);
    }
 

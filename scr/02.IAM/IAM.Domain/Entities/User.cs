@@ -8,18 +8,21 @@ public class User : EntityAudited
    public string PasswordHash { get; set; } = string.Empty;
    public bool IsActive { get; set; } = true;
    public bool IsSystemAdmin { get; set; } = false;
-   public Guid CustomerId { get; set; }
+   public bool IsOrganizationAdmin { get; set; } = false;
+   public int NumFailedLoginAttempts { get; set; } = 0;
    public DateTime? EmailVerifiedAt { get; set; }
    public DateTime? LastLoginAt { get; set; }
    public DateTime? PasswordExpiresAt { get; set; }
-   public Customer Customer { get; set; } = null!;
+   public DateTime? LockedOutUntil { get; set; }
+   public Guid OrganizationId { get; set; }
+   public Organization Organization { get; set; } = null!;
 
    private readonly List<UserRole> _userRoles = new();
    public IReadOnlyCollection<UserRole> UserRoles => _userRoles.AsReadOnly();
 
    private User() { }
 
-   public static User Create(string name, string email, string passwordHash, DateTime passwordExpiresAt, Guid customerId)
+   public static User Create(string name, string email, string passwordHash, DateTime passwordExpiresAt, Guid organizationId)
    {
       return new User
       {
@@ -30,7 +33,8 @@ public class User : EntityAudited
          PasswordExpiresAt = passwordExpiresAt,
          IsActive = true,
          IsSystemAdmin = false,
-         CustomerId = customerId
+         NumFailedLoginAttempts = 0,
+         OrganizationId = organizationId
       };
    }
 
@@ -47,9 +51,21 @@ public class User : EntityAudited
       PasswordExpiresAt = expiresAt;
    }
 
-   public void UpdateLastLogin()
+   public void RegisterLastSuccessfullyLogin()
    {
       LastLoginAt = DateTime.UtcNow;
+      NumFailedLoginAttempts = 0;
+      LockedOutUntil = null;
+   }
+
+   public void RegisterFailedLoginAttempt(int maxFailedAttempts, int lockoutMinutes)
+   {
+      NumFailedLoginAttempts++;
+
+      if (NumFailedLoginAttempts >= maxFailedAttempts)
+      {
+         LockedOutUntil = DateTime.UtcNow.AddMinutes(lockoutMinutes);
+      }
    }
 
    public void AddRole(Guid roleId, DateTime? expiresAt)

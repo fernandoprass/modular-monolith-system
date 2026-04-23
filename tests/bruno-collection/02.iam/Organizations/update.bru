@@ -1,0 +1,23 @@
+meta {
+  name: update
+  type: http
+  seq: 6
+}
+
+put {
+  url: {{server}}/api/{{version}}/iam/organizations/
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "name": "new name",
+    "description": "brand new description",
+    "isActive": true
+  }
+}

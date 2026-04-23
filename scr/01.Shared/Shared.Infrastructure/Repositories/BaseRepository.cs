@@ -54,7 +54,7 @@ public class BaseRepository<T, TId>(DbContext context) : IBaseRepository<T, TId>
 /// </summary>
 /// <typeparam name="T">The Type of the Entity</typeparam>
 /// <param name="context">The DbContext instance used for database operations</param>
-public class BaseRepository<T>(DbContext context) 
+public class BaseRepository<T>(DbContext context)
    : BaseRepository<T, Guid>(context) where T : Entity<Guid>
 {
 

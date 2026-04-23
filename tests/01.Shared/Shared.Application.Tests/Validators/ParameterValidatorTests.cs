@@ -19,7 +19,7 @@ public class ParameterValidatorTests
    [Fact]
    public void ValidateCreate_WhenAllDataIsValid_ShouldBeSuccess()
    {
-      var request = new ParameterCreateRequest("Sys", "Security", "MaxLoginAttempts", "Max allowed logins","Parameter Description", ParameterType.Integer, "5",ParameterOverrideType.None, true);
+      var request = new ParameterCreateRequest("Sys", "Security", "MaxLoginAttempts", "Max allowed logins", "Parameter Description", ParameterType.Integer, "5", ParameterOverrideType.None, true);
 
       var result = _validator.ValidateCreate(request, keyExists: false);
 
@@ -40,7 +40,7 @@ public class ParameterValidatorTests
    [Fact]
    public void ValidateCreate_WhenRegexDoesNotMatch_ShouldHaveError()
    {
-      var request = new ParameterCreateRequest("Sys", "Network", "IPAddress", "Server IP", "Parameter Description", ParameterType.String,"123.123", ParameterOverrideType.None,false, @"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$", "Invalid IP format.", null, null);
+      var request = new ParameterCreateRequest("Sys", "Network", "IPAddress", "Server IP", "Parameter Description", ParameterType.String, "123.123", ParameterOverrideType.None, false, @"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$", "Invalid IP format.", null, null);
 
       var result = _validator.ValidateCreate(request, keyExists: false);
 
@@ -141,7 +141,7 @@ public class ParameterValidatorTests
        bool keyExists,
        bool expectedSuccess)
    {
-      var request = new ParameterUpdateRequest(module, group, name, "title","Valid description", ParameterType.String, "SomeValue", ParameterOverrideType.None, true);
+      var request = new ParameterUpdateRequest(module, group, name, "title", "Valid description", ParameterType.String, "SomeValue", ParameterOverrideType.None, true);
 
       var result = _validator.ValidateUpdate(parameterExists, keyExists, request);
 

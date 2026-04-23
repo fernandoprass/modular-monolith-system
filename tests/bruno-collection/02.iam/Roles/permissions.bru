@@ -1,0 +1,26 @@
+meta {
+  name: permissions
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{server}}/api/{{version}}/iam/roles/user/019db54c-943e-7a36-ac30-32b1aef823b8/permissions
+  body: json
+  auth: bearer
+}
+
+params:query {
+  ~name: a
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "name": "User Test",
+    "isActive": false
+  }
+}

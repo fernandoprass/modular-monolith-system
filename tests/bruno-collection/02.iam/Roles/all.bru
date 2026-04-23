@@ -1,0 +1,26 @@
+meta {
+  name: all
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{server}}/api/{{version}}/iam/roles/?name=name
+  body: json
+  auth: bearer
+}
+
+params:query {
+  name: name
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "name": "User Test",
+    "isActive": false
+  }
+}

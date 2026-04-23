@@ -23,7 +23,7 @@ namespace IAM.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("IAM.Domain.Entities.Customer", b =>
+            modelBuilder.Entity("IAM.Domain.Entities.Organization", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -80,12 +80,12 @@ namespace IAM.Infrastructure.Migrations
                         .HasColumnName("updated_by");
 
                     b.HasKey("Id")
-                        .HasName("pk_customers");
+                        .HasName("pk_organizations");
 
-                    b.ToTable("customers", "iam");
+                    b.ToTable("organizations", "iam");
                 });
 
-            modelBuilder.Entity("IAM.Domain.Entities.Feature", b =>
+            modelBuilder.Entity("IAM.Domain.Entities.Permission", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -102,8 +102,7 @@ namespace IAM.Infrastructure.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("character varying(250)")
+                        .HasColumnType("text")
                         .HasColumnName("description");
 
                     b.Property<string>("Group")
@@ -112,11 +111,29 @@ namespace IAM.Infrastructure.Migrations
                         .HasColumnType("character varying(50)")
                         .HasColumnName("group");
 
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true)
+                        .HasColumnName("is_active");
+
+                    b.Property<string>("Module")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("module");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)")
                         .HasColumnName("name");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("title");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -127,13 +144,13 @@ namespace IAM.Infrastructure.Migrations
                         .HasColumnName("updated_by");
 
                     b.HasKey("Id")
-                        .HasName("pk_features");
+                        .HasName("pk_permissions");
 
                     b.HasIndex("Name")
                         .IsUnique()
-                        .HasDatabaseName("ix_features_name");
+                        .HasDatabaseName("ix_permissions_name");
 
-                    b.ToTable("features", "iam");
+                    b.ToTable("permissions", "iam");
                 });
 
             modelBuilder.Entity("IAM.Domain.Entities.Role", b =>
@@ -151,9 +168,16 @@ namespace IAM.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("created_by");
 
-                    b.Property<Guid?>("CustomerId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("customer_id");
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true)
+                        .HasColumnName("is_active");
 
                     b.Property<bool>("IsDefault")
                         .ValueGeneratedOnAdd()
@@ -167,6 +191,10 @@ namespace IAM.Infrastructure.Migrations
                         .HasColumnType("character varying(100)")
                         .HasColumnName("name");
 
+                    b.Property<Guid?>("OrganizationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("organization_id");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
@@ -178,30 +206,50 @@ namespace IAM.Infrastructure.Migrations
                     b.HasKey("Id")
                         .HasName("pk_roles");
 
-                    b.HasIndex("Name", "CustomerId")
+                    b.HasIndex("Name", "OrganizationId")
                         .IsUnique()
-                        .HasDatabaseName("ix_roles_name_customer_id");
+                        .HasDatabaseName("ix_roles_name_organization_id");
 
                     b.ToTable("roles", "iam");
                 });
 
-            modelBuilder.Entity("IAM.Domain.Entities.RoleFeature", b =>
+            modelBuilder.Entity("IAM.Domain.Entities.RolePermission", b =>
                 {
                     b.Property<Guid>("RoleId")
                         .HasColumnType("uuid")
                         .HasColumnName("role_id");
 
-                    b.Property<Guid>("FeatureId")
+                    b.Property<Guid>("PermissionId")
                         .HasColumnType("uuid")
-                        .HasColumnName("feature_id");
+                        .HasColumnName("permission_id");
 
-                    b.HasKey("RoleId", "FeatureId")
-                        .HasName("pk_role_features");
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
 
-                    b.HasIndex("FeatureId")
-                        .HasDatabaseName("ix_role_features_feature_id");
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
 
-                    b.ToTable("role_features", "iam");
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("RoleId", "PermissionId")
+                        .HasName("pk_role_permissions");
+
+                    b.HasIndex("PermissionId")
+                        .HasDatabaseName("ix_role_permissions_permission_id");
+
+                    b.ToTable("role_permissions", "iam");
                 });
 
             modelBuilder.Entity("IAM.Domain.Entities.User", b =>
@@ -219,10 +267,6 @@ namespace IAM.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("created_by");
 
-                    b.Property<Guid>("CustomerId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("customer_id");
-
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(256)
@@ -239,6 +283,12 @@ namespace IAM.Infrastructure.Migrations
                         .HasDefaultValue(true)
                         .HasColumnName("is_active");
 
+                    b.Property<bool>("IsOrganizationAdmin")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_organization_admin");
+
                     b.Property<bool>("IsSystemAdmin")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
@@ -249,11 +299,25 @@ namespace IAM.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("last_login_at");
 
+                    b.Property<DateTime?>("LockedOutUntil")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("locked_out_until");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)")
                         .HasColumnName("name");
+
+                    b.Property<int>("NumFailedLoginAttempts")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("num_failed_login_attempts");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("organization_id");
 
                     b.Property<DateTime?>("PasswordExpiresAt")
                         .HasColumnType("timestamp with time zone")
@@ -276,9 +340,9 @@ namespace IAM.Infrastructure.Migrations
                     b.HasKey("Id")
                         .HasName("pk_users");
 
-                    b.HasIndex("CustomerId", "Email")
+                    b.HasIndex("OrganizationId", "Email")
                         .IsUnique()
-                        .HasDatabaseName("ix_users_customer_id_email");
+                        .HasDatabaseName("ix_users_organization_id_email");
 
                     b.ToTable("users", "iam");
                 });
@@ -293,6 +357,30 @@ namespace IAM.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("role_id");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTime?>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expires_at");
+
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
                     b.HasKey("UserId", "RoleId")
                         .HasName("pk_user_roles");
 
@@ -302,37 +390,37 @@ namespace IAM.Infrastructure.Migrations
                     b.ToTable("user_roles", "iam");
                 });
 
-            modelBuilder.Entity("IAM.Domain.Entities.RoleFeature", b =>
+            modelBuilder.Entity("IAM.Domain.Entities.RolePermission", b =>
                 {
-                    b.HasOne("IAM.Domain.Entities.Feature", "Feature")
+                    b.HasOne("IAM.Domain.Entities.Permission", "Permission")
                         .WithMany("RoleFeatures")
-                        .HasForeignKey("FeatureId")
+                        .HasForeignKey("PermissionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_role_features_features_feature_id");
+                        .HasConstraintName("fk_role_permissions_permissions_permission_id");
 
                     b.HasOne("IAM.Domain.Entities.Role", "Role")
-                        .WithMany("RoleFeatures")
+                        .WithMany("RolePermissions")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_role_features_roles_role_id");
+                        .HasConstraintName("fk_role_permissions_roles_role_id");
 
-                    b.Navigation("Feature");
+                    b.Navigation("Permission");
 
                     b.Navigation("Role");
                 });
 
             modelBuilder.Entity("IAM.Domain.Entities.User", b =>
                 {
-                    b.HasOne("IAM.Domain.Entities.Customer", "Customer")
+                    b.HasOne("IAM.Domain.Entities.Organization", "Organization")
                         .WithMany("Users")
-                        .HasForeignKey("CustomerId")
+                        .HasForeignKey("OrganizationId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
-                        .HasConstraintName("fk_users_customers_customer_id");
+                        .HasConstraintName("fk_users_organizations_organization_id");
 
-                    b.Navigation("Customer");
+                    b.Navigation("Organization");
                 });
 
             modelBuilder.Entity("IAM.Domain.Entities.UserRole", b =>
@@ -356,19 +444,19 @@ namespace IAM.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("IAM.Domain.Entities.Customer", b =>
+            modelBuilder.Entity("IAM.Domain.Entities.Organization", b =>
                 {
                     b.Navigation("Users");
                 });
 
-            modelBuilder.Entity("IAM.Domain.Entities.Feature", b =>
+            modelBuilder.Entity("IAM.Domain.Entities.Permission", b =>
                 {
                     b.Navigation("RoleFeatures");
                 });
 
             modelBuilder.Entity("IAM.Domain.Entities.Role", b =>
                 {
-                    b.Navigation("RoleFeatures");
+                    b.Navigation("RolePermissions");
 
                     b.Navigation("UserRoles");
                 });

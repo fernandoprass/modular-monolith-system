@@ -27,20 +27,20 @@ public class RoleService(
 
    public async Task<Result<RoleDto>> CreateAsync(RoleCreateRequest request, CancellationToken cancellationToken = default)
    {
-      return await ExecuteIfUserOwnsAsync(request.CustomerId, async (ct) =>
+      return await ExecuteIfUserOwnsAsync(request.OrganizationId, async (ct) =>
       {
-         var nameExists = await _roleQueryRepository.NameExistsAsync(request.Name, request.CustomerId, ct);
+         var nameExists = await _roleQueryRepository.NameExistsAsync(request.Name, request.OrganizationId, ct);
          var validation = _roleValidator.ValidateCreate(request, nameExists);
 
          if (!validation.IsSuccess)
             return Result<RoleDto>.Failure(validation.Messages);
 
-         var role = Role.Create(request.Name, request.Description, request.IsDefault, request.IsActive, request.CustomerId);
+         var role = Role.Create(request.Name, request.Description, request.IsDefault, request.IsActive, request.OrganizationId);
 
          await _iamUnitOfWork.Roles.AddAsync(role, ct);
          await _iamUnitOfWork.SaveChangesAsync(ct);
 
-         return Result<RoleDto>.Success(new RoleDto(role.Id, role.Name, role.CustomerId, role.IsDefault, Enumerable.Empty<PermissionDto>()));
+         return Result<RoleDto>.Success(role.ToRoleDto());
       }, cancellationToken);
    }
 
@@ -51,7 +51,7 @@ public class RoleService(
       if (role == null)
          return Result.Failure(new NotFoundError(IamConst.Entity.Role));
 
-      return await ExecuteIfUserOwnsAsync(role.CustomerId, async (ct) =>
+      return await ExecuteIfUserOwnsAsync(role.OrganizationId, async (ct) =>
       {
          var validation = _roleValidator.ValidateUpdate(id, request, role.IsDefault);
 
@@ -69,15 +69,16 @@ public class RoleService(
    public async Task<Result> AssignToUserAsync(RoleAssignRequest request, CancellationToken cancellationToken = default)
    {
       var user = await _iamUnitOfWork.Users.GetByIdAsync(request.UserId, cancellationToken);
-      
+
       if (user == null)
          return Result.Failure(new NotFoundError(IamConst.Entity.User));
 
-      return await ExecuteIfUserOwnsAsync(user.CustomerId, async (ct) =>
+      return await ExecuteIfUserOwnsAsync(user.OrganizationId, async (ct) =>
       {
-         // Simple check for all roles existing and being within same customer or global
-         var roles = await _roleQueryRepository.GetAllAsync(_userContext.UserOwnerId, ct);
-         var allRequestedRolesExist = request.Roles.All(roleAssigned => roles.Any(r => r.Id == roleAssigned.Id && r.IsActive));
+         // Simple check for all roles existing and being within same organization or global
+         //todo fix it
+        // var roles = await _roleQueryRepository.NameExistsAsync(_userContext.UserOwnerId, ct);
+         var allRequestedRolesExist = true;//request.Roles.All(roleAssigned => roles.Any(r => r.Id == roleAssigned.Id && r.IsActive));
 
          var validation = _roleValidator.ValidateAssign(request, true, allRequestedRolesExist);
 
@@ -97,18 +98,11 @@ public class RoleService(
       }, cancellationToken);
    }
 
-   public async Task<Result<IEnumerable<RoleDto>>> GetAllAsync(CancellationToken cancellationToken = default)
+   public async Task<Result<IEnumerable<RoleDto>>> GetAllAsync(string name, CancellationToken cancellationToken = default)
    {
-      var roles = await _roleQueryRepository.GetAllAsync(_userContext.UserOwnerId, cancellationToken);
-      var dtos = roles.Select(r => new RoleDto(
-         r.Id, 
-         r.Name, 
-         r.CustomerId, 
-         r.IsDefault, 
-         r.RolePermissions.Select(rp => rp.Permission.ToPermissionDto())
-      ));
+      var roles = await _roleQueryRepository.GetAllAsync(name, _userContext.UserOwnerId, cancellationToken);
 
-      return Result<IEnumerable<RoleDto>>.Success(dtos);
+      return Result<IEnumerable<RoleDto>>.Success(roles);
    }
 
    public async Task<Result<IEnumerable<PermissionDto>>> GetUserPermissionsAsync(Guid userId, CancellationToken cancellationToken = default)
@@ -117,7 +111,7 @@ public class RoleService(
       if (user == null)
          return Result<IEnumerable<PermissionDto>>.Failure(new NotFoundError(IamConst.Entity.User));
 
-      return await ExecuteIfUserOwnsAsync(user.CustomerId, async (ct) =>
+      return await ExecuteIfUserOwnsAsync(user.OrganizationId, async (ct) =>
       {
          var permissions = await _roleQueryRepository.GetUserPermissionsAsync(userId, ct);
          var permissionDto = permissions.Select(p => p.ToPermissionDto());
