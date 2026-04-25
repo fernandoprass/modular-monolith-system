@@ -10,7 +10,6 @@ using IAM.Domain.Repositories;
 using Myce.Response;
 using NSubstitute;
 using Shared.Application.Contracts;
-using Shared.Domain.Messages;
 
 namespace IAM.Application.Tests.Services;
 

@@ -92,12 +92,13 @@ public class UserValidatorTests
    {
       var oldPassword = "Old#Password123";
       var user = User.Create("User Test", "test@email.com", Argon2.Hash(oldPassword), DateTime.UtcNow.AddDays(30), Guid.NewGuid());
+
       var request = new UserUpdatePasswordRequest(oldPassword, "New#StrongPass88");
 
       var result = _validator.ValidateUpdatePassword(user, Guid.NewGuid(), request);
 
       Assert.False(result.IsSuccess);
-      Assert.Contains(result.Messages, m => m is Shared.Domain.Messages.UnauthorizedAccessError);
+      Assert.Contains(result.Messages, m => m is Domain.Messages.UnauthorizedAccessError);
    }
 
    [Fact]

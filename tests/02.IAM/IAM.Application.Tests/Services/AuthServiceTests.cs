@@ -37,7 +37,7 @@ public class AuthServiceTests
    public async Task LoginAsync_HappyPath_ShouldReturnSuccessWithToken()
    {
       var password = "StrongPassword123!";
-      var user = CreateValidUser(password, isUserAtive: true, isCustumerActive: true);
+      var user = CreateValidUser(password, isUserAtive: true, isCustumerActive: true, isLockedUser: false);
 
       _userQueryRepositoryMock.GetByEmailWithPasswordAsync(user.Email, Arg.Any<CancellationToken>()).Returns(user);
       var request = new UserLoginRequest(user.Email, password);
@@ -59,7 +59,7 @@ public class AuthServiceTests
       var result = await _authService.LoginAsync(request, TestContext.Current.CancellationToken);
 
       Assert.False(result.IsSuccess);
-      Assert.IsType<UnauthorizedAccessError>(result.Messages.First());
+      Assert.IsType<InvalidEmailPasswordError>(result.Messages.First());
    }
 
    [Fact]
@@ -67,7 +67,7 @@ public class AuthServiceTests
    {
       var correctPassword = "CorrectPassword123!";
       var wrongPassword = "WrongPassword123!";
-      var user = CreateValidUser(correctPassword, isUserAtive: true, isCustumerActive: true);
+      var user = CreateValidUser(correctPassword, isUserAtive: true, isCustumerActive: true, isLockedUser: false);
 
       _userQueryRepositoryMock.GetByEmailWithPasswordAsync(user.Email, Arg.Any<CancellationToken>()).Returns(user);
       var request = new UserLoginRequest(user.Email, wrongPassword);
@@ -75,14 +75,14 @@ public class AuthServiceTests
       var result = await _authService.LoginAsync(request, TestContext.Current.CancellationToken);
 
       Assert.False(result.IsSuccess);
-      Assert.IsType<UnauthorizedAccessError>(result.Messages.First());
+      Assert.IsType<InvalidEmailPasswordError>(result.Messages.First());
    }
 
    [Fact]
    public async Task LoginAsync_InactiveUser_ShouldReturnUnauthorized()
    {
       var password = "Password123!";
-      var user = CreateValidUser(password, isUserAtive: false, isCustumerActive: true);
+      var user = CreateValidUser(password, isUserAtive: false, isCustumerActive: true, isLockedUser: false);
 
       _userQueryRepositoryMock.GetByEmailWithPasswordAsync(user.Email, Arg.Any<CancellationToken>()).Returns(user);
       var request = new UserLoginRequest(user.Email, password);
@@ -93,11 +93,27 @@ public class AuthServiceTests
       Assert.IsType<UnauthorizedAccessError>(result.Messages.First());
    }
 
-   [Fact]
+    [Fact]
+    public async Task LoginAsync_BlockedUser_ShouldReturnAccountLocked()
+    {
+        var password = "Password123!";
+        var user = CreateValidUser(password, isUserAtive: false, isCustumerActive: true, isLockedUser: true);
+
+        _userQueryRepositoryMock.GetByEmailWithPasswordAsync(user.Email, Arg.Any<CancellationToken>()).Returns(user);
+        
+        var request = new UserLoginRequest(user.Email, password);
+
+        var result = await _authService.LoginAsync(request, TestContext.Current.CancellationToken);
+
+        Assert.False(result.IsSuccess);
+        Assert.IsType<AccountLockedError>(result.Messages.First());
+    }
+
+    [Fact]
    public async Task LoginAsync_InactiveOrganization_ShouldReturnUnauthorized()
    {
       var password = "Password123!";
-      var user = CreateValidUser(password, isUserAtive: true, isCustumerActive: false);
+      var user = CreateValidUser(password, isUserAtive: true, isCustumerActive: false, isLockedUser: false);
 
       _userQueryRepositoryMock.GetByEmailWithPasswordAsync(user.Email, Arg.Any<CancellationToken>()).Returns(user);
       var request = new UserLoginRequest(user.Email, password);
@@ -108,7 +124,7 @@ public class AuthServiceTests
       Assert.IsType<UnauthorizedAccessError>(result.Messages.First());
    }
 
-   private UserPasswordDto CreateValidUser(string password, bool isUserAtive, bool isCustumerActive)
+   private UserPasswordDto CreateValidUser(string password, bool isUserAtive, bool isCustumerActive, bool isLockedUser)
    {
       return new UserPasswordDto
       {
@@ -119,7 +135,8 @@ public class AuthServiceTests
          IsActive = isUserAtive,
          OrganizationIsActive = isCustumerActive,
          OrganizationId = Guid.NewGuid(),
-         IsSystemAdmin = false
+         IsSystemAdmin = false,
+         LockedOutUntil = isLockedUser ? DateTime.UtcNow.AddMinutes(50) : null
       };
    }
 }
