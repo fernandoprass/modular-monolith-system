@@ -1,6 +1,6 @@
 using Asp.Versioning;
+using IAM.API.Middlewares;
 using IAM.Application.Contracts;
-using IAM.Application.Services;
 using IAM.Domain.DTOs.Requests;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -20,6 +20,7 @@ public class UserController(
 
    [HttpGet("{id:guid}")]
    [Authorize]
+   [RequirePermission("users.view")]
    public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
    {
       var user = await _userService.GetByIdAsync(id, cancellationToken);

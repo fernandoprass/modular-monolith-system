@@ -6,13 +6,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace IAM.Infrastructure.QueryRepositories;
 
-public class RoleQueryRepository(IamDbContext context) : IRoleQueryRepository
+public class RoleQueryRepository(IamDbContext dbContext) : IRoleQueryRepository
 {
-   private readonly IamDbContext _context = context;
+   private readonly IamDbContext _dbContext = dbContext;
 
    public async Task<Role?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
    {
-      return await _context.Roles
+      return await _dbContext.Roles
          .AsNoTracking()
          .Include(r => r.RolePermissions)
             .ThenInclude(rf => rf.Permission)
@@ -24,7 +24,7 @@ public class RoleQueryRepository(IamDbContext context) : IRoleQueryRepository
        Guid organizationId,
        CancellationToken cancellationToken = default)
    {
-      var query = _context.Roles
+      var query = _dbContext.Roles
           .AsNoTracking()
           .Where(r => r.OrganizationId == null || r.OrganizationId == organizationId);
 
@@ -40,19 +40,30 @@ public class RoleQueryRepository(IamDbContext context) : IRoleQueryRepository
           .ToListAsync(cancellationToken);
    }
 
-   public async Task<bool> NameExistsAsync(string name, Guid? organizationId, CancellationToken cancellationToken = default)
-   {
-      return await _context.Roles
-         .AnyAsync(r => r.Name == name && r.OrganizationId == organizationId, cancellationToken);
-   }
-
    public async Task<IEnumerable<Permission>> GetUserPermissionsAsync(Guid userId, CancellationToken cancellationToken = default)
    {
-      return await _context.UserRoles
+      return await _dbContext.UserRoles
           .AsNoTracking()
           .Where(ur => ur.UserId == userId)
           .SelectMany(ur => ur.Role.RolePermissions.Select(rf => rf.Permission))
           .Distinct()
           .ToListAsync(cancellationToken);
+   }
+
+    public async Task<IEnumerable<PermissionDto>> GetPermissionsByRoleIdAsync(
+        Guid roleId, 
+        CancellationToken cancellationToken = default)
+    {
+        return await dbContext.RolePermissions
+            .AsNoTracking()
+            .Where(rp => rp.RoleId == roleId)
+            .Select(rp => rp.Permission.ToPermissionDto())
+            .ToListAsync(cancellationToken);
+    }
+
+   public async Task<bool> NameExistsAsync(string name, Guid? organizationId, CancellationToken cancellationToken = default)
+   {
+      return await _dbContext.Roles
+         .AnyAsync(r => r.Name == name && r.OrganizationId == organizationId, cancellationToken);
    }
 }

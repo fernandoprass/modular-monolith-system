@@ -38,11 +38,10 @@ public class AuthService(
 
       await _userService.UpdateLastLoginAsync(user.Id, cancellationToken);
 
-      var userDto = user.ToUserDto();
       var expiresAt = await GetJwtExpireTime();
-      var token = GenerateJwtToken(userDto, expiresAt);
+      var token = GenerateJwtToken(user, expiresAt);
 
-      var response = new LoginResponse(token, expiresAt, userDto);
+      var response = new LoginResponse(token, expiresAt, user.ToUserDto());
 
       return Result<LoginResponse?>.Success(response);
    }
@@ -87,17 +86,22 @@ public class AuthService(
           + "$" + Convert.ToBase64String(Encoding.UTF8.GetBytes(Guid.NewGuid().ToString()));
    }
 
-   private string GenerateJwtToken(UserDto user, DateTime expiresAt)
+   private string GenerateJwtToken(UserPasswordDto user, DateTime expiresAt)
    {
-      var claims = new[]
+      var claims = new List<Claim>
           {
-            new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-            new Claim(JwtRegisteredClaimNames.Email, user.Email),
-            new Claim(JwtRegisteredClaimNames.Name, user.Name),
-            new Claim(IamConst.Security.Claim.IsSystemAdmin, user.IsSystemAdmin.ToString()),
-            new Claim(IamConst.Security.Claim.UserOwnerId, user.OrganizationId.ToString()),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            new (JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+            new (JwtRegisteredClaimNames.Email, user.Email),
+            new (JwtRegisteredClaimNames.Name, user.Name),
+            new (IamConst.Security.Claim.IsSystemAdmin, user.IsSystemAdmin.ToString()),
+            new (IamConst.Security.Claim.UserOwnerId, user.OrganizationId.ToString()),
+            new (JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
+
+      foreach (var userRole in user.UserRoles)
+      {
+         claims.Add(new Claim(IamConst.Security.Claim.Role, userRole.RoleId.ToString()));
+      }
 
       var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSecret));
       var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);

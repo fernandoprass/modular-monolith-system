@@ -32,6 +32,7 @@ public static partial class IamConst
          public const string IsSystemAdmin = "isSystemAdmin";
          public const string Issuer = "IAM.API";
          public const string Audience = "IAM.Client";
+         public const string Role = nameof(Security.Claim.Role);
       }
    }
    public static class System

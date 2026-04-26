@@ -17,13 +17,11 @@ public class RoleService(
    IIamUnitOfWork iamUnitOfWork,
    IUserContext userContext,
    IRoleValidator roleValidator,
-   IRoleQueryRepository roleQueryRepository,
-   IUserQueryRepository userQueryRepository) : BaseService(userContext), IRoleService
+   IRoleQueryRepository roleQueryRepository) : BaseService(userContext), IRoleService
 {
    private readonly IIamUnitOfWork _iamUnitOfWork = iamUnitOfWork;
    private readonly IRoleValidator _roleValidator = roleValidator;
    private readonly IRoleQueryRepository _roleQueryRepository = roleQueryRepository;
-   private readonly IUserQueryRepository _userQueryRepository = userQueryRepository;
 
    public async Task<Result<RoleDto>> CreateAsync(RoleCreateRequest request, CancellationToken cancellationToken = default)
    {

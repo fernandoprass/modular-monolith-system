@@ -5,7 +5,7 @@ using IAM.Application.Validators;
 using IAM.Domain.Interfaces;
 using IAM.Domain.QueryRepositories;
 using IAM.Domain.Repositories;
-using IAM.Infrastructure;
+using IAM.Infrastructure.DatabaseSeeder;
 using IAM.Infrastructure.QueryRepositories;
 using IAM.Infrastructure.Repositories;
 using IAM.Infrastructure.Security;

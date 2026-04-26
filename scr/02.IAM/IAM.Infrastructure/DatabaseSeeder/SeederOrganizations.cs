@@ -1,0 +1,80 @@
+﻿using IAM.Domain.Entities;
+using IAM.Domain.Enums;
+using IAM.Domain.Interfaces;
+using IAM.Domain.QueryRepositories;
+using Isopoh.Cryptography.Argon2;
+
+namespace IAM.Infrastructure.DatabaseSeeder;
+
+public class SeederOrganizations(
+   IOrganizationQueryRepository organizationQueryRepository,
+   IIamUnitOfWork iamUnitOfWork)
+{
+   private const string DefaultPassword = "Password123!";
+
+   public async Task SeedAdminOrgAsync()
+   {
+      var organizationId = Guid.CreateVersion7();
+      var organizationCode = "SAASADMIN";
+
+      if (await organizationQueryRepository.ExistsByCodeAsync(organizationCode)) return;
+
+      var organization = new Organization
+      {
+         Id = organizationId,
+         Name = "SaaS Internal Administration",
+         Code = organizationCode,
+         Type = OrganizationType.Company,
+         Description = "Internal system management and support",
+         IsMaster = true, // Following our Master Organization rule
+         CreatedAt = DateTime.UtcNow
+      };
+
+      var passwordHash = Argon2.Hash(DefaultPassword);
+
+      var superUser = User.Create("System Root", "admin@saas.com", passwordHash, DateTime.UtcNow.AddDays(30), organizationId);
+      superUser.IsSystemAdmin = true;
+      organization.CreatedBy = superUser.Id;
+
+      await iamUnitOfWork.Organizations.AddAsync(organization);
+      await iamUnitOfWork.Users.AddAsync(superUser);
+      await iamUnitOfWork.Users.AddAsync(User.Create("Internal Support", "support@saas.com", passwordHash, DateTime.UtcNow.AddDays(30), organizationId));
+      await iamUnitOfWork.SaveChangesAsync();
+   }
+
+   public async Task SeedScientistsOrgAsync()
+   {
+      var organizationId = Guid.CreateVersion7();
+      var organizationCode = "SCIENTISTS";
+
+      if (await organizationQueryRepository.ExistsByCodeAsync(organizationCode)) return;
+
+      var organization = new Organization
+      {
+         Id = organizationId,
+         Name = "Computing Pioneers Society",
+         Code = "SCIENTISTS",
+         Type = OrganizationType.Company,
+         Description = "Foundation of modern Computer Science",
+         CreatedAt = DateTime.UtcNow
+      };
+
+      await iamUnitOfWork.Organizations.AddAsync(organization);
+
+      var passwordHash = Argon2.Hash(DefaultPassword);
+      var members = new[]
+      {
+         ("Alan Turing", "alan.turing@enigma.org"),
+         ("Ada Lovelace", "ada.lovelace@analytical.org"),
+         ("Grace Hopper", "grace.hopper@cobol.org"),
+         ("John von Neumann", "john.vonneumann@architecture.org"),
+         ("Claude Shannon", "claude.shannon@entropy.org")
+     };
+
+      foreach (var (name, email) in members)
+      {
+         await iamUnitOfWork.Users.AddAsync(User.Create(name, email, passwordHash, DateTime.UtcNow.AddDays(30), organizationId));
+      }
+      await iamUnitOfWork.SaveChangesAsync();
+   }
+}
