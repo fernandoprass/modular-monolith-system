@@ -39,6 +39,8 @@ public static class DependencyInjection
       builder.Services.AddScoped<IRoleQueryRepository, RoleQueryRepository>();
       builder.Services.AddScoped<IUserRepository, UserRepository>();
       builder.Services.AddScoped<IUserQueryRepository, UserQueryRepository>();
+      builder.Services.AddScoped<IPermissionRepository, PermissionRepository>();
+      builder.Services.AddScoped<IPermissionQueryRepository, PermissionQueryRepository>();
    }
 
    private static void RegisterOrchestrators(WebApplicationBuilder builder)
@@ -53,6 +55,7 @@ public static class DependencyInjection
       builder.Services.AddScoped<IDatabaseSeeder, DatabaseSeeder>();
       builder.Services.AddScoped<IRoleService, RoleService>();
       builder.Services.AddScoped<IUserService, UserService>();
+      builder.Services.AddScoped<IPermissionService, PermissionService>();
    }
 
    private static void RegisterValidators(WebApplicationBuilder builder)
@@ -60,6 +63,7 @@ public static class DependencyInjection
       builder.Services.AddScoped<IOrganizationValidator, OrganizationValidator>();
       builder.Services.AddScoped<IUserValidator, UserValidator>();
       builder.Services.AddScoped<IRoleValidator, RoleValidator>();
+      builder.Services.AddScoped<IPermissionValidator, PermissionValidator>();
    }
 
    private static void RegisterUserContext(WebApplicationBuilder builder)

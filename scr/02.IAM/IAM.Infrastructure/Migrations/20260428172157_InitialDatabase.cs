@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace IAM.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class InitialDatabase : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -45,6 +45,7 @@ namespace IAM.Infrastructure.Migrations
                     module = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     group = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    code = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     title = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     description = table.Column<string>(type: "text", nullable: false),
                     is_active = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true),
@@ -90,10 +91,13 @@ namespace IAM.Infrastructure.Migrations
                     password_hash = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
                     is_active = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true),
                     is_system_admin = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
-                    organization_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    is_organization_admin = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    num_failed_login_attempts = table.Column<int>(type: "integer", nullable: false, defaultValue: 0),
                     email_verified_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     last_login_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     password_expires_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    locked_out_until = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    organization_id = table.Column<Guid>(type: "uuid", nullable: false),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     created_by = table.Column<Guid>(type: "uuid", nullable: false),
@@ -176,10 +180,10 @@ namespace IAM.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "ix_permissions_name",
+                name: "ix_permissions_code",
                 schema: "iam",
                 table: "permissions",
-                column: "name",
+                column: "code",
                 unique: true);
 
             migrationBuilder.CreateIndex(

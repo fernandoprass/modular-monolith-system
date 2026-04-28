@@ -18,7 +18,7 @@ namespace IAM.Infrastructure.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("iam")
-                .HasAnnotation("ProductVersion", "10.0.5")
+                .HasAnnotation("ProductVersion", "10.0.7")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -92,6 +92,12 @@ namespace IAM.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("code");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
@@ -146,9 +152,9 @@ namespace IAM.Infrastructure.Migrations
                     b.HasKey("Id")
                         .HasName("pk_permissions");
 
-                    b.HasIndex("Name")
+                    b.HasIndex("Code")
                         .IsUnique()
-                        .HasDatabaseName("ix_permissions_name");
+                        .HasDatabaseName("ix_permissions_code");
 
                     b.ToTable("permissions", "iam");
                 });

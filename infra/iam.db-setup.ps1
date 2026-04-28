@@ -73,7 +73,7 @@ if ($LASTEXITCODE -eq 0) {
         Write-Host "  Database environment is TUNED and READY!" -ForegroundColor Green
         Write-Host "  User:          $($env:POSTGRES_USER)"
         Write-Host "  RAM Allocated: $($env:TOTAL_RAM_GB) GB"
-        Write-Host "  pgAdmin:       http://localhost:8080"
+        Write-Host "  pgAdmin:       http://localhost:8080  or http://127.0.0.1:8080"
         Write-Host "----------------------------------------------------------"
     }
 }

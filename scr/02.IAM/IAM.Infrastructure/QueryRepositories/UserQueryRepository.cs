@@ -45,6 +45,7 @@ public class UserQueryRepository(IamDbContext dbContext) : IUserQueryRepository
       return await _dbContext.Users
           .AsNoTracking()
           .Include(u => u.Organization)
+          .Include(u => u.UserRoles)
           .Where(u => u.Email == email)
           .Select(u => u.ToUserPasswordDto())
           .SingleOrDefaultAsync(cancellationToken);

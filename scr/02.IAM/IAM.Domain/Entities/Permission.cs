@@ -22,7 +22,7 @@ public class Permission : EntityAudited
       Module = module;
       Group = group;
       Name = name;
-      Code = GetCode(module, group, name);
+      Code = BuildCode(module, group, name);
       Title = title;
       Description = description;
       IsActive = isActive;
@@ -33,13 +33,13 @@ public class Permission : EntityAudited
       Module = module;
       Group = group;
       Name = name;
-      Code = GetCode(module, group, name);
+      Code = BuildCode(module, group, name);
       Title = title;
       Description = description;
       IsActive = isActive;
    }
 
-   private string GetCode(string module, string group, string name)
+   public static string BuildCode(string module, string group, string name)
    {
       return $"{module}.{group}.{name}".ToLowerInvariant();
    }

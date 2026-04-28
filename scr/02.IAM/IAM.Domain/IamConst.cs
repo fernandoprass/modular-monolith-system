@@ -21,7 +21,7 @@ public static partial class IamConst
       public const string Organization = nameof(Entities.Organization);
       public const string User = nameof(Entities.User);
       public const string Role = nameof(Entities.Role);
-      public const string Feature = nameof(Entities.Permission);
+      public const string Permission = nameof(Entities.Permission);
    }
 
    public class Security

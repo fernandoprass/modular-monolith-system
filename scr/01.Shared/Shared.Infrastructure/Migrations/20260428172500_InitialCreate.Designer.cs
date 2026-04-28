@@ -12,7 +12,7 @@ using Shared.Infrastructure;
 namespace Shared.Infrastructure.Migrations
 {
     [DbContext(typeof(SharedDbContext))]
-    [Migration("20260422124129_InitialCreate")]
+    [Migration("20260428172500_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -21,7 +21,7 @@ namespace Shared.Infrastructure.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("shared")
-                .HasAnnotation("ProductVersion", "10.0.5")
+                .HasAnnotation("ProductVersion", "10.0.7")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);

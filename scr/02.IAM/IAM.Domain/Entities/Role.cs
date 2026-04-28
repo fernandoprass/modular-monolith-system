@@ -56,5 +56,5 @@ public class Role : EntityAudited
       }
    }
 
-   public void ClearFeatures() => _rolePermissions.Clear();
+   public void ClearPermissions() => _rolePermissions.Clear();
 }

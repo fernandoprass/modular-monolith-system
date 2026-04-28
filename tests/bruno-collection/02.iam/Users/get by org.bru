@@ -1,17 +1,13 @@
 meta {
-  name: all
+  name: get by org
   type: http
-  seq: 1
+  seq: 6
 }
 
 get {
-  url: {{server}}/api/{{version}}/iam/roles/
+  url: {{server}}/api/{{version}}/iam/users/by-organization/019dd545-21f2-7a37-a398-6c3f06738666
   body: json
   auth: bearer
-}
-
-params:query {
-  ~name: name
 }
 
 auth:bearer {

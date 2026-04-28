@@ -1,34 +1,47 @@
 using Asp.Versioning;
 using IAM.API.Middlewares;
 using IAM.Application.Contracts;
+using IAM.Domain;
 using IAM.Domain.DTOs.Requests;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Shared.Application.Contracts;
 
 namespace IAM.API.Controllers;
 
 [ApiVersion(1)]
 [Route("api/v{version:apiVersion}/iam/users")]
 public class UserController(
+   IUserContext userContext,
    IRegisterOrchestrator registerOrchestrator,
    IUserService userService,
    IAuthService authService) : BaseController
 {
+   private readonly IUserContext _userContext = userContext;
    private readonly IRegisterOrchestrator _registerOrchestrator = registerOrchestrator;
    private readonly IUserService _userService = userService;
    private readonly IAuthService _authService = authService;
 
    [HttpGet("{id:guid}")]
    [Authorize]
-   [RequirePermission("users.view")]
+   [RequirePermission(IamPermission.Users.View)]
    public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
    {
       var user = await _userService.GetByIdAsync(id, cancellationToken);
       return OkOrNotFound(user);
    }
 
+   [HttpGet("me")]
+   [Authorize]
+   public async Task<IActionResult> GetByCurrentUser( CancellationToken cancellationToken)
+   {
+      var user = await _userService.GetByIdAsync(_userContext.UserId, cancellationToken);
+      return OkOrNotFound(user);
+   }
+
    [HttpGet("by-organization/{organizationId:guid}")]
    [Authorize]
+   [RequirePermission(IamPermission.Users.List)]
    public async Task<IActionResult> GetByOrganizationId(Guid organizationId, CancellationToken cancellationToken)
    {
       var users = await _userService.GetByOrganizationIdAsync(organizationId, cancellationToken);
@@ -38,6 +51,7 @@ public class UserController(
 
    [HttpPost("")]
    [Authorize]
+   [RequirePermission(IamPermission.Users.Create)]
    public async Task<IActionResult> Create([FromBody] UserCreateRequest request, CancellationToken cancellationToken)
    {
       var user = await _registerOrchestrator.RegisterUserAsync(request, cancellationToken);
@@ -46,6 +60,7 @@ public class UserController(
 
    [HttpPut("{id:guid}")]
    [Authorize]
+   [RequirePermission(IamPermission.Users.Update)]
    public async Task<IActionResult> Update(Guid id, [FromBody] UserUpdateRequest user, CancellationToken cancellationToken)
    {
       var response = await _userService.UpdateAsync(id, user, cancellationToken);
@@ -64,6 +79,7 @@ public class UserController(
 
    [HttpDelete("{id:guid}")]
    [Authorize]
+   [RequirePermission(IamPermission.Users.Delete)]
    public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
    {
       var response = await _userService.DeleteAsync(id, cancellationToken);

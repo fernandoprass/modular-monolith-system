@@ -1,41 +1,37 @@
 ﻿using IAM.Application.Contracts;
 using IAM.Domain.DTOs.Requests;
+using IAM.Domain.Entities;
+using IAM.Domain.Interfaces;
 
-namespace IAM.Infrastructure.DatabaseSeeder
+namespace IAM.Infrastructure.DatabaseSeeder;
+
+public class SeederRoles(IRoleService roleService,
+   IIamUnitOfWork iamUnitOfWork)
 {
-   public class SeederRoles(IRoleService roleService)
+   public async Task SeedAsync(string systemAdminRole, string organizationAdminRole, string userRole)
    {
-      public async Task SeedAsync()
+      var roleSystemAdmin = Role.Create(systemAdminRole,"Full access to all resources.", false, true, null);
+
+      var roleOrganizationAdmin = Role.Create(organizationAdminRole,"Access to all Organization resources and data.", false, true, null);
+
+      var roleUser = Role.Create(userRole, "Access to own resources and data.", true, true, null);
+
+      var roles = await roleService.GetAllAsync(string.Empty); 
+      if (!roles.Data.Any(r => r.Name == systemAdminRole))
       {
-         var roleSystemAdmin = new RoleCreateRequest
-         (
-            Name: "System Admin",
-            Description: "Full access to all resources.",
-            IsDefault: false,
-            IsActive: true,
-            OrganizationId: null
-         );
-
-         var roleOrganizationAdmin = new RoleCreateRequest
-         (
-            Name: "Organization Admins",
-            Description: "Access to all Organization resources and data.",
-            IsDefault: false,
-            IsActive: true,
-            OrganizationId: null
-         );
-
-         var roleUser = new RoleCreateRequest
-         (
-            Name: "User",
-            Description: "Access to own resources and data.",
-            IsDefault: true,
-            IsActive: true,
-            OrganizationId: null
-         );
-
-         await roleService.CreateAsync(roleSystemAdmin);
-         await roleService.CreateAsync(roleOrganizationAdmin);
-         await roleService.CreateAsync(roleUser);
+         await iamUnitOfWork.Roles.AddAsync(roleSystemAdmin);
       }
+
+      if (!roles.Data.Any(r => r.Name == organizationAdminRole))
+      {
+         await iamUnitOfWork.Roles.AddAsync(roleOrganizationAdmin);
+      }
+
+      if (!roles.Data.Any(r => r.Name == userRole))
+      {
+         await iamUnitOfWork.Roles.AddAsync(roleUser);
+      }
+
+      await iamUnitOfWork.SaveChangesAsync();
+   }
 }

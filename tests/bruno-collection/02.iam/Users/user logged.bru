@@ -1,11 +1,11 @@
 meta {
-  name: get by customer
+  name: user logged
   type: http
-  seq: 6
+  seq: 7
 }
 
 get {
-  url: {{server}}/api/{{version}}/iam/users/by-customer/00000000-0000-0000-0000-000000000001
+  url: {{server}}/api/{{version}}/iam/users/me
   body: json
   auth: bearer
 }

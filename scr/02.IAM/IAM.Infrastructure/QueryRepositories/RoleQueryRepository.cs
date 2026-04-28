@@ -21,12 +21,16 @@ public class RoleQueryRepository(IamDbContext dbContext) : IRoleQueryRepository
 
    public async Task<IEnumerable<RoleDto>> GetAllAsync(
        string? name,
-       Guid organizationId,
+       Guid? organizationId,
        CancellationToken cancellationToken = default)
    {
       var query = _dbContext.Roles
-          .AsNoTracking()
-          .Where(r => r.OrganizationId == null || r.OrganizationId == organizationId);
+          .AsNoTracking();
+
+      if (organizationId != null && organizationId != Guid.Empty)
+      {
+         query = query.Where(r => r.OrganizationId == organizationId);
+      }
 
       if (!string.IsNullOrWhiteSpace(name))
       {

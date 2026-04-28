@@ -1,5 +1,7 @@
 using Asp.Versioning;
+using IAM.API.Middlewares;
 using IAM.Application.Contracts;
+using IAM.Domain;
 using IAM.Domain.DTOs.Requests;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,6 +16,7 @@ public class RoleController(IRoleService roleService) : BaseController
    private readonly IRoleService _roleService = roleService;
 
    [HttpGet]
+   [RequirePermission(IamPermission.Roles.List)]
    public async Task<IActionResult> GetAll(string name, CancellationToken cancellationToken)
    {
       var result = await _roleService.GetAllAsync(name, cancellationToken);
@@ -21,6 +24,7 @@ public class RoleController(IRoleService roleService) : BaseController
    }
 
    [HttpPost]
+   [RequirePermission(IamPermission.Roles.Create)]
    public async Task<IActionResult> Create([FromBody] RoleCreateRequest request, CancellationToken cancellationToken)
    {
       var result = await _roleService.CreateAsync(request, cancellationToken);
@@ -28,6 +32,7 @@ public class RoleController(IRoleService roleService) : BaseController
    }
 
    [HttpPut("{id:guid}")]
+   [RequirePermission(IamPermission.Roles.Update)]
    public async Task<IActionResult> Update(Guid id, [FromBody] RoleUpdateRequest request, CancellationToken cancellationToken)
    {
       var result = await _roleService.UpdateAsync(id, request, cancellationToken);
@@ -35,6 +40,7 @@ public class RoleController(IRoleService roleService) : BaseController
    }
 
    [HttpPost("assign")]
+   [RequirePermission(IamPermission.Roles.Assign)]
    public async Task<IActionResult> AssignToUser([FromBody] RoleAssignRequest request, CancellationToken cancellationToken)
    {
       var result = await _roleService.AssignToUserAsync(request, cancellationToken);
@@ -42,6 +48,7 @@ public class RoleController(IRoleService roleService) : BaseController
    }
 
    [HttpGet("user/{userId:guid}/permissions")]
+   [RequirePermission(IamPermission.Roles.ViewPermissions)]
    public async Task<IActionResult> GetUserPermissions(Guid userId, CancellationToken cancellationToken)
    {
       var result = await _roleService.GetUserPermissionsAsync(userId, cancellationToken);
