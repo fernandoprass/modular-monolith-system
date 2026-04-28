@@ -96,9 +96,10 @@ public class RoleService(
       }, cancellationToken);
    }
 
-   public async Task<Result<IEnumerable<RoleDto>>> GetAllAsync(string name, CancellationToken cancellationToken = default)
+   public async Task<Result<IEnumerable<RoleDto>>> GetByNameAsync(string? name, CancellationToken cancellationToken = default)
    {
-      var roles = await _roleQueryRepository.GetAllAsync(name, _userContext.UserOwnerId, cancellationToken);
+      var organizationId = _userContext.IsSystemAdmin ? Guid.Empty : _userContext.UserOwnerId;
+      var roles = await _roleQueryRepository.GetByNameAsync(name, organizationId, cancellationToken);
 
       return Result<IEnumerable<RoleDto>>.Success(roles);
    }

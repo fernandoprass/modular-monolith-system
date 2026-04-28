@@ -9,7 +9,6 @@ using IAM.Domain.QueryRepositories;
 using Myce.Response;
 using Shared.Application.Contracts;
 using Shared.Application.Services;
-using Shared.Domain.Interfaces;
 using Shared.Domain.Messages;
 
 namespace IAM.Application.Services;

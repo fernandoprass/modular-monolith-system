@@ -19,7 +19,7 @@ public class RoleQueryRepository(IamDbContext dbContext) : IRoleQueryRepository
          .FirstOrDefaultAsync(r => r.Id == id, cancellationToken);
    }
 
-   public async Task<IEnumerable<RoleDto>> GetAllAsync(
+   public async Task<IEnumerable<RoleDto>> GetByNameAsync(
        string? name,
        Guid? organizationId,
        CancellationToken cancellationToken = default)
@@ -38,8 +38,6 @@ public class RoleQueryRepository(IamDbContext dbContext) : IRoleQueryRepository
       }
 
       return await query
-          .Include(r => r.RolePermissions)
-              .ThenInclude(rf => rf.Permission)
           .Select(r => r.ToRoleDto())
           .ToListAsync(cancellationToken);
    }

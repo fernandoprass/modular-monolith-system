@@ -16,14 +16,16 @@ public class RoleController(IRoleService roleService) : BaseController
    private readonly IRoleService _roleService = roleService;
 
    [HttpGet]
+   [Authorize]
    [RequirePermission(IamPermission.Roles.List)]
-   public async Task<IActionResult> GetAll(string name, CancellationToken cancellationToken)
+   public async Task<IActionResult> GetByName(string? name, CancellationToken cancellationToken)
    {
-      var result = await _roleService.GetAllAsync(name, cancellationToken);
+      var result = await _roleService.GetByNameAsync(name, cancellationToken);
       return OkOrNotFound(result);
    }
 
    [HttpPost]
+   [Authorize]
    [RequirePermission(IamPermission.Roles.Create)]
    public async Task<IActionResult> Create([FromBody] RoleCreateRequest request, CancellationToken cancellationToken)
    {
@@ -32,6 +34,7 @@ public class RoleController(IRoleService roleService) : BaseController
    }
 
    [HttpPut("{id:guid}")]
+   [Authorize]
    [RequirePermission(IamPermission.Roles.Update)]
    public async Task<IActionResult> Update(Guid id, [FromBody] RoleUpdateRequest request, CancellationToken cancellationToken)
    {
@@ -40,6 +43,7 @@ public class RoleController(IRoleService roleService) : BaseController
    }
 
    [HttpPost("assign")]
+   [Authorize]
    [RequirePermission(IamPermission.Roles.Assign)]
    public async Task<IActionResult> AssignToUser([FromBody] RoleAssignRequest request, CancellationToken cancellationToken)
    {
@@ -48,6 +52,7 @@ public class RoleController(IRoleService roleService) : BaseController
    }
 
    [HttpGet("user/{userId:guid}/permissions")]
+   [Authorize]
    [RequirePermission(IamPermission.Roles.ViewPermissions)]
    public async Task<IActionResult> GetUserPermissions(Guid userId, CancellationToken cancellationToken)
    {

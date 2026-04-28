@@ -16,7 +16,7 @@ public class SeederRoles(IRoleService roleService,
 
       var roleUser = Role.Create(userRole, "Access to own resources and data.", true, true, null);
 
-      var roles = await roleService.GetAllAsync(string.Empty); 
+      var roles = await roleService.GetByNameAsync(string.Empty); 
       if (!roles.Data.Any(r => r.Name == systemAdminRole))
       {
          await iamUnitOfWork.Roles.AddAsync(roleSystemAdmin);
