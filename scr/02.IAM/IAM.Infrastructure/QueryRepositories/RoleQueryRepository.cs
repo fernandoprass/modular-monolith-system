@@ -42,7 +42,7 @@ public class RoleQueryRepository(IamDbContext dbContext) : IRoleQueryRepository
           .ToListAsync(cancellationToken);
    }
 
-   public async Task<IEnumerable<Permission>> GetUserPermissionsAsync(Guid userId, CancellationToken cancellationToken = default)
+   public async Task<IEnumerable<Permission>> GetRolePermissionsByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
    {
       return await _dbContext.UserRoles
           .AsNoTracking()

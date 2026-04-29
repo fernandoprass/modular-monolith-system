@@ -47,4 +47,15 @@ public static class IamPermission
       public const string SaveOverride = $"{Module}.{Group}.saveoverride";
       public const string DeleteOverride = $"{Module}.{Group}.deleteoverride";
    }
+
+   public static class Permissions
+   {
+      private const string Group = "permissions";
+
+      public const string List = $"{Module}.{Group}.list";
+      public const string Create = $"{Module}.{Group}.create";
+      public const string Update = $"{Module}.{Group}.update";
+      public const string Delete = $"{Module}.{Group}.delete";
+      public const string Assign = $"{Module}.{Group}.assign";
+   }
 }

@@ -67,9 +67,9 @@ public class PermissionService(
       return Result.Success(new SuccessInfo());
    }
 
-   public async Task<Result<IEnumerable<PermissionDto>>> GetAllAsync(string module, string group, string name, CancellationToken cancellationToken = default)
+   public async Task<Result<IEnumerable<PermissionDto>>> GetAllAsync(PermissionSearchRequest request, CancellationToken cancellationToken = default)
    {
-      var permissions = await _permissionQueryRepository.GetAllAsync(module, group, name, cancellationToken);
+      var permissions = await _permissionQueryRepository.GetAllAsync(request, cancellationToken);
       return Result<IEnumerable<PermissionDto>>.Success(permissions);
    }
 
@@ -103,4 +103,13 @@ public class PermissionService(
         var codeExists = await _permissionQueryRepository.CodeExistsAsync(code, cancellationToken);
         return codeExists;
     }
+
+   public async Task<Result<PermissionDto>> GetByCodeAsync(string code, CancellationToken cancellationToken = default)
+   {
+      var permission = await _permissionQueryRepository.GetByCodeAsync(code, cancellationToken);
+      if (permission == null)
+         return Result<PermissionDto>.Failure(new NotFoundError(IamConst.Entity.Permission));
+
+      return Result<PermissionDto>.Success(permission);
+   }
 }

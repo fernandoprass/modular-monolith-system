@@ -1,4 +1,5 @@
-﻿using IAM.Domain;
+﻿using IAM.Application.Contracts;
+using IAM.Domain;
 using IAM.Domain.QueryRepositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Caching.Memory;
@@ -72,10 +73,9 @@ public class PermissionAuthorizationHandler(
 
          // Create scope to resolve scoped service
          using var scope = _serviceProvider.CreateScope();
-         var roleQueryRepository = scope.ServiceProvider
-             .GetRequiredService<IRoleQueryRepository>();
+         var roleService = scope.ServiceProvider.GetRequiredService<IRoleService>();
 
-         var permissions = await roleQueryRepository.GetPermissionsByRoleIdAsync(roleId);
+         var permissions = await roleService.GetPermissionsByRoleIdAsync(roleId);
          return permissions.Select(p => p.Code).ToList();
       }) ?? Enumerable.Empty<string>();
    }

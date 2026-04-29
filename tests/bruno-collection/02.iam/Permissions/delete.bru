@@ -1,0 +1,16 @@
+meta {
+  name: delete
+  type: http
+  seq: 4
+}
+
+delete {
+  url: {{server}}/api/{{version}}/iam/permissions/019db57d-5204-754d-917a-3070a6e01348
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+

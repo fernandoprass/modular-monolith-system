@@ -104,7 +104,7 @@ public class RoleService(
       return Result<IEnumerable<RoleDto>>.Success(roles);
    }
 
-   public async Task<Result<IEnumerable<PermissionDto>>> GetUserPermissionsAsync(Guid userId, CancellationToken cancellationToken = default)
+   public async Task<Result<IEnumerable<PermissionDto>>> GetRolePermissionsByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
    {
       var user = await _iamUnitOfWork.Users.GetByIdAsync(userId, cancellationToken);
       if (user == null)
@@ -112,9 +112,14 @@ public class RoleService(
 
       return await ExecuteIfUserOwnsAsync(user.OrganizationId, async (ct) =>
       {
-         var permissions = await _roleQueryRepository.GetUserPermissionsAsync(userId, ct);
+         var permissions = await _roleQueryRepository.GetRolePermissionsByUserIdAsync(userId, ct);
          var permissionDto = permissions.Select(p => p.ToPermissionDto());
          return Result<IEnumerable<PermissionDto>>.Success(permissionDto);
       }, cancellationToken);
+   }
+
+   public async Task<IEnumerable<PermissionDto>> GetPermissionsByRoleIdAsync(Guid roleId, CancellationToken cancellationToken = default)
+   {
+      return await _roleQueryRepository.GetPermissionsByRoleIdAsync(roleId, cancellationToken);
    }
 }

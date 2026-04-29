@@ -1,3 +1,4 @@
+using IAM.Domain.DTOs.Requests;
 using IAM.Domain.DTOs.Responses;
 using IAM.Domain.Mappers;
 using IAM.Domain.QueryRepositories;
@@ -13,27 +14,23 @@ public class PermissionQueryRepository(IamDbContext dbContext) : IPermissionQuer
    {
       var permission = await _dbContext.Permissions
          .AsNoTracking()
-         .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
+         .SingleOrDefaultAsync(p => p.Id == id, cancellationToken);
 
       return permission?.ToPermissionDto();
    }
 
-   public async Task<IEnumerable<PermissionDto>> GetAllAsync(
-      string? module, 
-      string? group, 
-      string? name, 
-      CancellationToken cancellationToken = default)
+   public async Task<IEnumerable<PermissionDto>> GetAllAsync(PermissionSearchRequest request, CancellationToken cancellationToken = default)
    {
       var query = _dbContext.Permissions.AsNoTracking();
 
-      if (!string.IsNullOrWhiteSpace(module))
-         query = query.Where(p => EF.Functions.ILike(p.Module, $"%{module}%"));
+      if (!string.IsNullOrWhiteSpace(request.Module))
+         query = query.Where(p => EF.Functions.ILike(p.Module, $"%{request.Module}%"));
 
-      if (!string.IsNullOrWhiteSpace(group))
-         query = query.Where(p => EF.Functions.ILike(p.Group, $"%{group}%"));
+      if (!string.IsNullOrWhiteSpace(request.Group))
+         query = query.Where(p => EF.Functions.ILike(p.Group, $"%{request.Group}%"));
 
-      if (!string.IsNullOrWhiteSpace(name))
-         query = query.Where(p => EF.Functions.ILike(p.Name, $"%{name}%"));
+      if (!string.IsNullOrWhiteSpace(request.Name))
+         query = query.Where(p => EF.Functions.ILike(p.Name, $"%{request.Name}%"));
 
       return await query
          .Select(p => p.ToPermissionDto())
@@ -44,5 +41,14 @@ public class PermissionQueryRepository(IamDbContext dbContext) : IPermissionQuer
    {
       return await _dbContext.Permissions
          .AnyAsync(p => p.Code == code.ToLowerInvariant(), cancellationToken);
+   }
+
+   public async Task<PermissionDto?> GetByCodeAsync(string code, CancellationToken cancellationToken = default)
+   {
+      return await _dbContext.Permissions
+         .AsNoTracking()
+         .Where(p => p.Code == code.ToLowerInvariant())
+         .Select(p => p.ToPermissionDto())
+         .SingleOrDefaultAsync(cancellationToken);
    }
 }

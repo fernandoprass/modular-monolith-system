@@ -56,7 +56,7 @@ public class RoleController(IRoleService roleService) : BaseController
    [RequirePermission(IamPermission.Roles.ViewPermissions)]
    public async Task<IActionResult> GetUserPermissions(Guid userId, CancellationToken cancellationToken)
    {
-      var result = await _roleService.GetUserPermissionsAsync(userId, cancellationToken);
+      var result = await _roleService.GetRolePermissionsByUserIdAsync(userId, cancellationToken);
       return OkOrNotFound(result);
    }
 }

@@ -1,0 +1,22 @@
+meta {
+  name: by params
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{server}}/api/{{version}}/iam/permissions
+  body: json
+  auth: bearer
+}
+
+params:query {
+  ~module: iam
+  ~group: users
+  ~name: view
+}
+
+auth:bearer {
+  token: {{token}}
+}
+

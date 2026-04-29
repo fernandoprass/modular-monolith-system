@@ -13,7 +13,7 @@ public class SeederRolePermissions(
    public async Task SeedAsync(string systemAdminRole, string organizationAdminRole, string userRole)
    {
       var roles = await roleQueryRepository.GetByNameAsync(string.Empty, Guid.Empty);
-      var permissions = await permissionQueryRepository.GetAllAsync(string.Empty, string.Empty, string.Empty);
+      var permissions = await permissionQueryRepository.GetAllAsync(new PermissionSearchRequest(null, null, null));
 
       var permissionsByCode = permissions.ToDictionary(permission => permission.Code, permission => permission.Id);
 
@@ -61,6 +61,11 @@ public class SeederRolePermissions(
          IamPermission.Parameters.List,
          IamPermission.Parameters.SaveOverride,
          IamPermission.Parameters.DeleteOverride,
+         IamPermission.Permissions.List,
+         IamPermission.Permissions.Create,
+         IamPermission.Permissions.Update,
+         IamPermission.Permissions.Delete,
+         IamPermission.Permissions.Assign,
          IamPermission.Users.List,
          IamPermission.Users.View,
          IamPermission.Users.Create,

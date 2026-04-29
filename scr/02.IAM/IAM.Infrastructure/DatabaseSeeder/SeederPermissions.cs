@@ -1,6 +1,7 @@
 using IAM.Application.Contracts;
 using IAM.Domain;
 using IAM.Domain.DTOs.Requests;
+using IAM.Domain.Entities;
 
 namespace IAM.Infrastructure.DatabaseSeeder;
 
@@ -31,6 +32,12 @@ public class SeederPermissions(IPermissionService permissionService)
       await AddPermission(IamPermission.Parameters.View, "View Parameters", "Allows viewing parameters.");
       await AddPermission(IamPermission.Parameters.SaveOverride, "Save Parameter Overrides", "Allows saving parameter overrides.");
       await AddPermission(IamPermission.Parameters.DeleteOverride, "Delete Parameter Overrides", "Allows deleting parameter overrides.");
+
+      await AddPermission(IamPermission.Permissions.List, "List Permissions", "Allows listing permissions.");
+      await AddPermission(IamPermission.Permissions.Create, "Create Permissions", "Allows creating permissions.");
+      await AddPermission(IamPermission.Permissions.Update, "Update Permissions", "Allows updating permissions.");
+      await AddPermission(IamPermission.Permissions.Delete, "Delete Permissions", "Allows deleting permissions.");
+      await AddPermission(IamPermission.Permissions.Assign, "Assign Permissions", "Allows assigning permissions to roles.");
    }
 
    private async Task AddPermission(string code, string title, string description)
@@ -44,6 +51,9 @@ public class SeederPermissions(IPermissionService permissionService)
          title,
          description);
 
-      await permissionService.CreateAsync(permission);
+      if (await permissionService.GetByCodeAsync(code) == null)
+      {
+         await permissionService.CreateAsync(permission);
+      }
    }
 }
