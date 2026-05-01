@@ -67,9 +67,9 @@ public class PermissionService(
       return Result.Success(new SuccessInfo());
    }
 
-   public async Task<Result<IEnumerable<PermissionDto>>> GetAllAsync(PermissionSearchRequest request, CancellationToken cancellationToken = default)
+   public async Task<Result<IEnumerable<PermissionDto>>> GetByParams(PermissionSearchRequest request, CancellationToken cancellationToken = default)
    {
-      var permissions = await _permissionQueryRepository.GetAllAsync(request, cancellationToken);
+      var permissions = await _permissionQueryRepository.GetByParams(request, cancellationToken);
       return Result<IEnumerable<PermissionDto>>.Success(permissions);
    }
 

@@ -19,7 +19,7 @@ public class PermissionQueryRepository(IamDbContext dbContext) : IPermissionQuer
       return permission?.ToPermissionDto();
    }
 
-   public async Task<IEnumerable<PermissionDto>> GetAllAsync(PermissionSearchRequest request, CancellationToken cancellationToken = default)
+   public async Task<IEnumerable<PermissionDto>> GetByParams(PermissionSearchRequest request, CancellationToken cancellationToken = default)
    {
       var query = _dbContext.Permissions.AsNoTracking();
 
@@ -31,6 +31,9 @@ public class PermissionQueryRepository(IamDbContext dbContext) : IPermissionQuer
 
       if (!string.IsNullOrWhiteSpace(request.Name))
          query = query.Where(p => EF.Functions.ILike(p.Name, $"%{request.Name}%"));
+
+      if (!request.IncludeInactive)
+         query = query.Where(p => p.IsActive);
 
       return await query
          .Select(p => p.ToPermissionDto())

@@ -5,13 +5,13 @@ meta {
 }
 
 get {
-  url: {{server}}/api/{{version}}/iam/roles/
+  url: {{server}}/api/{{version}}/iam/roles/?name
   body: json
   auth: bearer
 }
 
 params:query {
-  ~name: s
+  name: 
 }
 
 auth:bearer {

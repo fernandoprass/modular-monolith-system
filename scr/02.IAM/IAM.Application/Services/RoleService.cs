@@ -25,33 +25,27 @@ public class RoleService(
 
    public async Task<Result<RoleDto>> CreateAsync(RoleCreateRequest request, CancellationToken cancellationToken = default)
    {
-      return await ExecuteIfUserOwnsAsync(request.OrganizationId, async (ct) =>
-      {
-         var nameExists = await _roleQueryRepository.NameExistsAsync(request.Name, request.OrganizationId, ct);
-         var validation = _roleValidator.ValidateCreate(request, nameExists);
+      var nameExists = await _roleQueryRepository.NameExistsAsync(request.Name, request.OrganizationId, cancellationToken);
+      var validation = _roleValidator.ValidateCreate(request, nameExists);
 
-         if (!validation.IsSuccess)
-            return Result<RoleDto>.Failure(validation.Messages);
+      if (!validation.IsSuccess)
+         return Result<RoleDto>.Failure(validation.Messages);
 
-         var role = Role.Create(request.Name, request.Description, request.IsDefault, request.IsActive, request.OrganizationId);
+      var role = Role.Create(request.Name, request.Description, request.IsDefault, request.IsActive, request.OrganizationId);
 
-         await _iamUnitOfWork.Roles.AddAsync(role, ct);
-         await _iamUnitOfWork.SaveChangesAsync(ct);
+      await _iamUnitOfWork.Roles.AddAsync(role, cancellationToken);
+      await _iamUnitOfWork.SaveChangesAsync(cancellationToken);
 
-         return Result<RoleDto>.Success(role.ToRoleDto());
-      }, cancellationToken);
+      return Result<RoleDto>.Success(role.ToRoleDto());
    }
 
    public async Task<Result> UpdateAsync(Guid id, RoleUpdateRequest request, CancellationToken cancellationToken = default)
    {
       var role = await _iamUnitOfWork.Roles.GetByIdAsync(id, cancellationToken);
 
-      if (role == null)
-         return Result.Failure(new NotFoundError(IamConst.Entity.Role));
-
-      return await ExecuteIfUserOwnsAsync(role.OrganizationId, async (ct) =>
+      return await ExecuteIfUserOwnsAsync(role?.OrganizationId, async (ct) =>
       {
-         var validation = _roleValidator.ValidateUpdate(id, request, role.IsDefault);
+         var validation = _roleValidator.ValidateUpdate(request, role != null);
 
          if (!validation.IsSuccess)
             return validation;
@@ -60,7 +54,7 @@ public class RoleService(
          _iamUnitOfWork.Roles.Update(role);
          await _iamUnitOfWork.SaveChangesAsync(ct);
 
-         return Result.Success();
+         return Result.Success(new SuccessInfo());
       }, cancellationToken);
    }
 
@@ -92,7 +86,7 @@ public class RoleService(
          _iamUnitOfWork.Users.Update(user);
          await _iamUnitOfWork.SaveChangesAsync(ct);
 
-         return Result.Success();
+         return Result.Success(new SuccessInfo());
       }, cancellationToken);
    }
 

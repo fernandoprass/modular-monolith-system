@@ -6,6 +6,6 @@ namespace IAM.Application.Contracts;
 public interface IRoleValidator
 {
    Result ValidateCreate(RoleCreateRequest request, bool nameAlreadyExists);
-   Result ValidateUpdate(Guid? id, RoleUpdateRequest request, bool isDefault);
+   Result ValidateUpdate(RoleUpdateRequest request, bool roleExists);
    Result ValidateAssign(RoleAssignRequest request, bool userExists, bool allRolesExist);
 }

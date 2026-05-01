@@ -3,5 +3,6 @@ namespace IAM.Domain.DTOs.Requests;
 public record PermissionSearchRequest(
    string? Module,
    string? Group,
-   string? Name
+   string? Name,
+   bool IncludeInactive = false
 );

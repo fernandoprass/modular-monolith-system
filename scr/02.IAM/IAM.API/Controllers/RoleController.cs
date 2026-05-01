@@ -15,7 +15,7 @@ public class RoleController(IRoleService roleService) : BaseController
 {
    private readonly IRoleService _roleService = roleService;
 
-   [HttpGet]
+   [HttpGet("")]
    [Authorize]
    [RequirePermission(IamPermission.Roles.List)]
    public async Task<IActionResult> GetByName(string? name, CancellationToken cancellationToken)
@@ -54,7 +54,7 @@ public class RoleController(IRoleService roleService) : BaseController
    [HttpGet("user/{userId:guid}/permissions")]
    [Authorize]
    [RequirePermission(IamPermission.Roles.ViewPermissions)]
-   public async Task<IActionResult> GetUserPermissions(Guid userId, CancellationToken cancellationToken)
+   public async Task<IActionResult> GetRoleUserPermissions(Guid userId, CancellationToken cancellationToken)
    {
       var result = await _roleService.GetRolePermissionsByUserIdAsync(userId, cancellationToken);
       return OkOrNotFound(result);

@@ -4,16 +4,18 @@ using IAM.Domain.DTOs.Requests;
 using IAM.Domain.Messages;
 using Myce.FluentValidator;
 using Myce.Response;
+using Shared.Application.Contracts;
 using Shared.Domain.Messages;
 
 namespace IAM.Application.Validators;
 
-public class RoleValidator : IRoleValidator
+public class RoleValidator(IUserContext userContext) : IRoleValidator
 {
    public Result ValidateCreate(RoleCreateRequest request, bool nameAlreadyExists)
    {
       var validator = new FluentValidator<RoleCreateRequest>()
          .RuleFor(x => x.Name).ApplyTemplate(ValidatorTemplates.NameRules)
+         .If(r => r.OrganizationId is not null, then => then.RuleFor(r => r.OrganizationId).IsEqualTo(userContext.UserOwnerId, new OrganizationForbiddenError()))
          .RuleForValue(nameAlreadyExists).IsFalse(new RoleDuplicateNameError(request.Name));
 
       var isValid = validator.Validate(request);
@@ -21,12 +23,11 @@ public class RoleValidator : IRoleValidator
       return isValid ? Result.Success() : Result.Failure(validator.Messages);
    }
 
-   public Result ValidateUpdate(Guid? id, RoleUpdateRequest request, bool isDefault)
+   public Result ValidateUpdate(RoleUpdateRequest request, bool roleExists)
    {
       var validator = new FluentValidator<RoleUpdateRequest>()
          .RuleFor(x => x.Name).ApplyTemplate(ValidatorTemplates.NameRules)
-         .Custom(id is not null, new NotFoundError(IamConst.Entity.Role))
-         .Custom(!isDefault, new RoleCannotUpdateDefaultError());
+         .RuleForValue(roleExists).IsTrue(new NotFoundError(IamConst.Entity.Role));
 
       var isValid = validator.Validate(request);
 
