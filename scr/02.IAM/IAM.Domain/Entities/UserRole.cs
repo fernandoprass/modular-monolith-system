@@ -12,10 +12,19 @@ public class UserRole : EntityAudited
 
    private UserRole() { }
 
-   public UserRole(Guid userId, Guid roleId, DateTime? expiresAt)
+   public static UserRole Create(Guid userId, Guid roleId, DateTime? expiresAt)
    {
-      UserId = userId;
-      RoleId = roleId;
+      return new UserRole
+      {
+         Id = Guid.CreateVersion7(),
+         UserId = userId,
+         RoleId = roleId,
+         ExpiresAt = expiresAt
+      };
+   }
+
+   public void UpdateExpiration(DateTime? expiresAt)
+   {
       ExpiresAt = expiresAt;
    }
 }

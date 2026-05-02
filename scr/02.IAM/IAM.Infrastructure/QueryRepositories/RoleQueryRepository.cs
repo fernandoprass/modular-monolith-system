@@ -10,6 +10,17 @@ public class RoleQueryRepository(IamDbContext dbContext) : IRoleQueryRepository
 {
    private readonly IamDbContext _dbContext = dbContext;
 
+   public async Task<int> CountRolesByRoleIdsAsync(
+    IEnumerable<Guid> ids,
+    Guid organizationId,
+    bool isSystemAdminUser,
+    CancellationToken cancellationToken = default)
+   {
+      var query = CreateQueryWithOrganizationContextFilter(organizationId, isSystemAdminUser);
+
+      return await query.CountAsync(r => ids.Contains(r.Id) && r.IsActive, cancellationToken);
+   }
+
    public async Task<Role?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
    {
       return await _dbContext.Roles
@@ -21,16 +32,11 @@ public class RoleQueryRepository(IamDbContext dbContext) : IRoleQueryRepository
 
    public async Task<IEnumerable<RoleDto>> GetByNameAsync(
        string? name,
-       Guid? organizationId,
+       Guid organizationId,
+       bool isSystemAdminUser,
        CancellationToken cancellationToken = default)
    {
-      var query = _dbContext.Roles
-          .AsNoTracking();
-
-      if (organizationId != null && organizationId != Guid.Empty)
-      {
-         query = query.Where(r => r.OrganizationId == organizationId);
-      }
+      var query = CreateQueryWithOrganizationContextFilter(organizationId, isSystemAdminUser);
 
       if (!string.IsNullOrWhiteSpace(name))
       {
@@ -67,5 +73,15 @@ public class RoleQueryRepository(IamDbContext dbContext) : IRoleQueryRepository
    {
       return await _dbContext.Roles
          .AnyAsync(r => r.Name == name && r.OrganizationId == organizationId, cancellationToken);
+   }
+
+   private IQueryable<Role> CreateQueryWithOrganizationContextFilter(Guid organizationId, bool isSystemAdminUser)
+   {
+      var query = _dbContext.Roles.AsNoTracking();
+
+      query = !isSystemAdminUser
+              ? query.Where(r => r.OrganizationId == organizationId)
+              : query.Where(r => r.OrganizationId == null || r.OrganizationId == organizationId);
+      return query;
    }
 }

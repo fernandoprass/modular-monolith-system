@@ -38,7 +38,7 @@ public class SeederOrganizations(
       organization.CreatedBy = superUser.Id;
 
       var supportUser = User.Create("Internal Support", "support@saas.com", passwordHash, DateTime.UtcNow.AddDays(30), organizationId);
-      var roles = await roleQueryRepository.GetByNameAsync(systemAdminRole, null);
+      var roles = await roleQueryRepository.GetByNameAsync(systemAdminRole, organizationId, true);
 
       superUser.AddRole(roles.First().Id, null);
       supportUser.AddRole(roles.First().Id, null);
@@ -68,14 +68,14 @@ public class SeederOrganizations(
 
       await iamUnitOfWork.Organizations.AddAsync(organization);
 
-      var roles = await roleQueryRepository.GetByNameAsync(organizationAdminRole, null);
+      var roles = await roleQueryRepository.GetByNameAsync(organizationAdminRole, organizationId, true);
 
       var passwordHash = Argon2.Hash(DefaultPassword);
       var alanTuring = User.Create("Alan Turing", "alan.turing@enigma.org", passwordHash, DateTime.UtcNow.AddDays(30), organizationId);
       alanTuring.AddRole(roles.First().Id, null);
 
 
-      roles = await roleQueryRepository.GetByNameAsync(userRole, null);
+      roles = await roleQueryRepository.GetByNameAsync(userRole, organizationId, true);
       var adaLovelace = User.Create("Ada Lovelace", "ada.lovelace@analytical.org", passwordHash, DateTime.UtcNow.AddDays(30), organizationId);
       var graceHopper = User.Create("Grace Hopper", "grace.hopper@cobol.org", passwordHash, DateTime.UtcNow.AddDays(30), organizationId);
       var johnVonNeumann = User.Create("John von Neumann", "john.vonneumann@architecture.org", passwordHash, DateTime.UtcNow.AddDays(30), organizationId);

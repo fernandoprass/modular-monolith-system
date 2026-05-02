@@ -11,8 +11,18 @@ namespace IAM.Domain.Messages
       }
    }
 
-   public class RoleCannotUpdateDefaultError : ErrorMessage
+   public class RolesCannotBeAssignedError : ErrorMessage
    {
-      public RoleCannotUpdateDefaultError() : base("RoleCannotUpdateDefaultError", "System default roles cannot be updated.") { }
+      public RolesCannotBeAssignedError() : base("RolesCannotBeAssignedError", "Roles cannot be assigned. One or more roles added to the list are inactive or belong to another organization.") { }
+   }
+
+   public class RolesCannotBeUnassignedError : ErrorMessage
+   {
+      public RolesCannotBeUnassignedError() : base("RolesCannotBeUnassignedError", "Roles cannot be unassigned. One or more roles are not assigned to the user.") { }
+   }
+
+   public class RolesInvalidExpirationError : ErrorMessage
+   {
+      public RolesInvalidExpirationError() : base("RolesInvalidExpirationError", "Expire date should be in the future.") { }
    }
 }

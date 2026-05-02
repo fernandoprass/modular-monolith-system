@@ -51,6 +51,7 @@ public class RoleService(
             return validation;
 
          role.Update(request.Name, request.Description, request.IsDefault, request.IsActive);
+
          _iamUnitOfWork.Roles.Update(role);
          await _iamUnitOfWork.SaveChangesAsync(ct);
 
@@ -60,27 +61,64 @@ public class RoleService(
 
    public async Task<Result> AssignToUserAsync(RoleAssignRequest request, CancellationToken cancellationToken = default)
    {
-      var user = await _iamUnitOfWork.Users.GetByIdAsync(request.UserId, cancellationToken);
-
-      if (user == null)
-         return Result.Failure(new NotFoundError(IamConst.Entity.User));
+      var user = await _iamUnitOfWork.Users.GetByIdWithRolesAsync(request.UserId, cancellationToken);
 
       return await ExecuteIfUserOwnsAsync(user.OrganizationId, async (ct) =>
       {
-         // Simple check for all roles existing and being within same organization or global
-         //todo fix it
-        // var roles = await _roleQueryRepository.NameExistsAsync(_userContext.UserOwnerId, ct);
-         var allRequestedRolesExist = true;//request.Roles.All(roleAssigned => roles.Any(r => r.Id == roleAssigned.Id && r.IsActive));
+         bool allRequestedRolesAvailable = user == null ? true : await ValidateRolesAvailability(request, user.OrganizationId, cancellationToken);
 
-         var validation = _roleValidator.ValidateAssign(request, true, allRequestedRolesExist);
+         var validation = _roleValidator.ValidateAssign(request, user is not null, allRequestedRolesAvailable);
 
-         if (!validation.IsSuccess)
-            return validation;
+         if (!validation.IsSuccess) return validation;
 
-         user.ClearRoles();
          foreach (var role in request.Roles)
          {
-            user.AddRole(role.Id, role.ExpiresAt);
+            var userRole = user.UserRoles.FirstOrDefault(ur => ur.RoleId == role.Id);
+
+            if (userRole != null)
+            {
+               userRole.UpdateExpiration(role.ExpiresAt);
+            }
+            else
+            {
+               user.AddRole(role.Id, role.ExpiresAt);
+            }
+         }
+
+         _iamUnitOfWork.Users.Update(user);
+         await _iamUnitOfWork.SaveChangesAsync(ct);
+
+         return Result.Success(new SuccessInfo());
+      }, cancellationToken);
+   }
+
+   /// <summary>
+   /// Verifies if requested roles are available: exists in DB, is active, and matches organization scope or system admin bypass
+   /// </summary>
+   private async Task<bool> ValidateRolesAvailability(RoleAssignRequest request, Guid organizationId, CancellationToken cancellationToken)
+   {
+      var requestedRoleIds = request.Roles.Select(r => r.Id).ToList();
+      var numberOfRolesToAssign = await _roleQueryRepository.CountRolesByRoleIdsAsync(requestedRoleIds, organizationId, _userContext.IsSystemAdmin, cancellationToken);
+
+      var allRequestedRolesExist = requestedRoleIds.Count == numberOfRolesToAssign;
+      return allRequestedRolesExist;
+   }
+
+   public async Task<Result> UnassignFromUserAsync(RoleUnassignRequest request, CancellationToken cancellationToken = default)
+   {
+      var user = await _iamUnitOfWork.Users.GetByIdWithRolesAsync(request.UserId, cancellationToken);
+
+      return await ExecuteIfUserOwnsAsync(user.OrganizationId, async (ct) =>
+      {
+         bool userHasAllRoles = user != null && request.RoleIds.All(roleId => user.UserRoles.Select(ur => ur.RoleId).Contains(roleId));
+
+         var validation = _roleValidator.ValidateUnassign(request, user is not null, userHasAllRoles);
+
+         if (!validation.IsSuccess) return validation;
+
+         foreach (var roleId in request.RoleIds)
+         {
+            user.RemoveRole(roleId);
          }
 
          _iamUnitOfWork.Users.Update(user);
@@ -92,8 +130,8 @@ public class RoleService(
 
    public async Task<Result<IEnumerable<RoleDto>>> GetByNameAsync(string? name, CancellationToken cancellationToken = default)
    {
-      var organizationId = _userContext.IsSystemAdmin ? Guid.Empty : _userContext.UserOwnerId;
-      var roles = await _roleQueryRepository.GetByNameAsync(name, organizationId, cancellationToken);
+
+      var roles = await _roleQueryRepository.GetByNameAsync(name, _userContext.UserOwnerId, _userContext.IsSystemAdmin, cancellationToken);
 
       return Result<IEnumerable<RoleDto>>.Success(roles);
    }
@@ -101,8 +139,8 @@ public class RoleService(
    public async Task<Result<IEnumerable<PermissionDto>>> GetRolePermissionsByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
    {
       var user = await _iamUnitOfWork.Users.GetByIdAsync(userId, cancellationToken);
-      if (user == null)
-         return Result<IEnumerable<PermissionDto>>.Failure(new NotFoundError(IamConst.Entity.User));
+      
+      if (user == null) return Result<IEnumerable<PermissionDto>>.Failure(new NotFoundError(IamConst.Entity.User));
 
       return await ExecuteIfUserOwnsAsync(user.OrganizationId, async (ct) =>
       {

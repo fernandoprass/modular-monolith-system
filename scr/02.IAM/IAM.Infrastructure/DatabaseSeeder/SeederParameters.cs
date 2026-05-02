@@ -12,7 +12,7 @@ public class SeederParameters(IParameterService parameterService)
    {
       await AddParameter(IamParam.Security.MaxPasswordAgeInDays, "Maximum Password Age",
                          "The maximum number of days a password remains valid before the user is required to change it.",
-                         ParameterType.String, "dd/MM/yyyy", ParameterOverrideType.UserOwnerId, true);
+                         ParameterType.Integer, "90", ParameterOverrideType.UserOwnerId, true);
 
       await AddParameter(IamParam.Security.LockoutDurationInMins, "Duration of Lockout",
                          "Duration of lockout in minutes after reaching the maximum number of failed login attempts.",

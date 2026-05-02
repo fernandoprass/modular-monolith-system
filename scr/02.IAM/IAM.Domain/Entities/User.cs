@@ -72,7 +72,7 @@ public class User : EntityAudited
    {
       if (!_userRoles.Any(ur => ur.RoleId == roleId))
       {
-         _userRoles.Add(new UserRole(Id, roleId, expiresAt));
+         _userRoles.Add(UserRole.Create(Id, roleId, expiresAt));
       }
    }
 

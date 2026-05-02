@@ -34,12 +34,26 @@ public class RoleValidator(IUserContext userContext) : IRoleValidator
       return isValid ? Result.Success() : Result.Failure(validator.Messages);
    }
 
-   public Result ValidateAssign(RoleAssignRequest request, bool userExists, bool allRolesExist)
+   public Result ValidateAssign(RoleAssignRequest request, bool userExists, bool allRolesAvailable)
    {
+      var isThereRoleExpiringInThePass = request.Roles.Any(r => r.ExpiresAt != null && r.ExpiresAt < DateTime.UtcNow);
       var validator = new FluentValidator<RoleAssignRequest>()
          .RuleForValue(userExists).IsTrue(new NotFoundError(IamConst.Entity.User))
-         .RuleForValue(allRolesExist).IsTrue(new NotFoundError(IamConst.Entity.Role))
-         .RuleFor(x => x.Roles).IsNotNull();
+         .RuleFor(x => x.Roles).IsNotNull().Stop().HasItems<RoleAssignRequest, IEnumerable<RoleAssignmentDto>, RoleAssignmentDto>()
+         .RuleForValue(allRolesAvailable).IsTrue(new RolesCannotBeAssignedError())
+         .RuleForValue(isThereRoleExpiringInThePass).IsFalse(new RolesInvalidExpirationError());
+
+      var isValid = validator.Validate(request);
+
+      return isValid ? Result.Success() : Result.Failure(validator.Messages);
+   }
+
+   public Result ValidateUnassign(RoleUnassignRequest request, bool userExists, bool userHasAllRoles)
+   {
+      var validator = new FluentValidator<RoleUnassignRequest>()
+         .RuleForValue(userExists).IsTrue(new NotFoundError(IamConst.Entity.User))
+         .RuleFor(x => x.RoleIds).IsNotNull().Stop().HasItems<RoleUnassignRequest, IEnumerable<Guid>, Guid>()
+         .RuleForValue(userHasAllRoles).IsTrue(new RolesCannotBeUnassignedError());
 
       var isValid = validator.Validate(request);
 

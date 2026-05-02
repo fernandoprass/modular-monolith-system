@@ -51,6 +51,15 @@ public class RoleController(IRoleService roleService) : BaseController
       return OkOrNotFound(result);
    }
 
+   [HttpDelete("unassign")]
+   [Authorize]
+   [RequirePermission(IamPermission.Roles.Assign)]
+   public async Task<IActionResult> UnassignFromUser([FromBody] RoleUnassignRequest request, CancellationToken cancellationToken)
+   {
+      var result = await _roleService.UnassignFromUserAsync(request, cancellationToken);
+      return OkOrNotFound(result);
+   }
+
    [HttpGet("user/{userId:guid}/permissions")]
    [Authorize]
    [RequirePermission(IamPermission.Roles.ViewPermissions)]
