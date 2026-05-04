@@ -69,13 +69,18 @@ public class RoleQueryRepository(IamDbContext dbContext) : IRoleQueryRepository
             .ToListAsync(cancellationToken);
     }
 
-   public async Task<bool> NameExistsAsync(string name, Guid? organizationId, CancellationToken cancellationToken = default)
+   public async Task<bool> NameExistsAsync(
+      string name,
+      Guid? organizationId, 
+      bool isSystemAdminUser, 
+      CancellationToken cancellationToken = default)
    {
-      return await _dbContext.Roles
-         .AnyAsync(r => r.Name == name && r.OrganizationId == organizationId, cancellationToken);
+      var query = CreateQueryWithOrganizationContextFilter(organizationId, isSystemAdminUser);
+
+      return await query.AnyAsync(r => r.Name == name, cancellationToken);
    }
 
-   private IQueryable<Role> CreateQueryWithOrganizationContextFilter(Guid organizationId, bool isSystemAdminUser)
+   private IQueryable<Role> CreateQueryWithOrganizationContextFilter(Guid? organizationId, bool isSystemAdminUser)
    {
       var query = _dbContext.Roles.AsNoTracking();
 

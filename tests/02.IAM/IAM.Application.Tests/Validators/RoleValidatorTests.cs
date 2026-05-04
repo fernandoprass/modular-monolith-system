@@ -2,7 +2,8 @@
 using IAM.Application.Validators;
 using IAM.Domain.DTOs.Requests;
 using IAM.Domain.Messages;
-using Moq;
+using Myce.FluentValidator.ErrorMessages;
+using NSubstitute;
 using Shared.Application.Contracts;
 using Shared.Domain.Messages;
 
@@ -10,13 +11,13 @@ namespace IAM.Application.Tests.Validators;
 
 public class RoleValidatorTests
 {
-   private readonly Mock<IUserContext> _userContextMock;
+   private readonly IUserContext _userContextMock  ;
    private readonly RoleValidator _validator;
 
    public RoleValidatorTests()
    {
-      _userContextMock = new Mock<IUserContext>();
-      _validator = new RoleValidator(_userContextMock.Object);
+      _userContextMock = Substitute.For<IUserContext>();
+      _validator = new RoleValidator(_userContextMock);
    }
 
    #region ValidateCreate Tests
@@ -25,7 +26,7 @@ public class RoleValidatorTests
    public void ValidateCreate_ShouldReturnSuccess_WhenRequestIsValid()
    {
       var request = new RoleCreateRequest(Name: "Admin", Description: "Administrator role", IsDefault: false, IsActive: true, OrganizationId: Guid.NewGuid());
-      _userContextMock.Setup(x => x.UserOwnerId).Returns(request.OrganizationId.Value);
+      _userContextMock.UserOwnerId.Returns(request.OrganizationId.Value);
 
       var result = _validator.ValidateCreate(request, nameAlreadyExists: false);
 
@@ -47,7 +48,7 @@ public class RoleValidatorTests
    public void ValidateCreate_ShouldReturnFailure_WhenOrgIdDoesNotMatchUserOwnerId()
    {
       var request = new RoleCreateRequest(Name: "Admin", Description: "Administrator role", IsDefault: false, IsActive: true, OrganizationId: Guid.NewGuid());
-      _userContextMock.Setup(x => x.UserOwnerId).Returns(Guid.NewGuid()); // Different ID
+      _userContextMock.UserOwnerId.Returns(Guid.NewGuid()); // Different ID
 
       var result = _validator.ValidateCreate(request, nameAlreadyExists: false);
 
@@ -77,8 +78,9 @@ public class RoleValidatorTests
    [Fact]
    public void ValidateAssign_ShouldReturnFailure_WhenRolesAreMissingInSystem()
    {
-      var request = new RoleAssignRequest(Guid.NewGuid(),
-         Roles = new List<RoleAssignmentDto> ( new() { Id = Guid.NewGuid() } )
+      var request = new RoleAssignRequest(
+          UserId: Guid.NewGuid(),
+          Roles: [new(RoleId: Guid.NewGuid(), ExpiresAt: null)] 
       );
 
       var result = _validator.ValidateAssign(request, userExists: true, allRolesAvailable: false);
@@ -88,15 +90,27 @@ public class RoleValidatorTests
    }
 
    [Fact]
+   public void ValidateAssign_ShouldReturnFailure_WhenHasDuplicateRoles()
+   {
+      var roleId = Guid.NewGuid();
+      var request = new RoleAssignRequest(
+          UserId: Guid.NewGuid(),
+          Roles: [new(RoleId: roleId, ExpiresAt: null), new(RoleId: roleId, ExpiresAt: null)]
+      );
+
+      var result = _validator.ValidateAssign(request, userExists: true, allRolesAvailable: true);
+
+      result.IsSuccess.Should().BeFalse();
+      result.Messages.Should().Contain(e => e is ContainsDuplicateItemsError);
+   }
+
+   [Fact]
    public void ValidateAssign_ShouldReturnFailure_WhenRoleHasPastExpirationDate()
    {
-      var request = new RoleAssignRequest
-      {
-         Roles = new List<RoleAssignmentDto>
-            {
-                new() { Id = Guid.NewGuid(), ExpiresAt = DateTime.UtcNow.AddDays(-1) }
-            }
-      };
+      var request = new RoleAssignRequest(
+          UserId: Guid.NewGuid(),
+          Roles: [new(RoleId: Guid.NewGuid(), ExpiresAt: DateTime.UtcNow.AddDays(-1))] 
+      );
 
       var result = _validator.ValidateAssign(request, userExists: true, allRolesAvailable: true);
 
@@ -111,7 +125,7 @@ public class RoleValidatorTests
    [Fact]
    public void ValidateUnassign_ShouldReturnSuccess_WhenUserHasAllRoles()
    {
-      var request = new RoleUnassignRequest { RoleIds = new List<Guid> { Guid.NewGuid() } };
+      var request = new RoleUnassignRequest(UserId: Guid.NewGuid(), RoleIds: [Guid.NewGuid()]);
 
       var result = _validator.ValidateUnassign(request, userExists: true, userHasAllRoles: true);
 
@@ -121,7 +135,7 @@ public class RoleValidatorTests
    [Fact]
    public void ValidateUnassign_ShouldReturnFailure_WhenUserDoesNotHaveTheRoles()
    {
-      var request = new RoleUnassignRequest { RoleIds = new List<Guid> { Guid.NewGuid() } };
+      var request = new RoleUnassignRequest(UserId: Guid.NewGuid(), RoleIds: [Guid.NewGuid()]);
 
       var result = _validator.ValidateUnassign(request, userExists: true, userHasAllRoles: false);
 
