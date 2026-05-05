@@ -1,5 +1,5 @@
 meta {
-  name: search by name
+  name: by name
   type: http
   seq: 5
 }
@@ -16,11 +16,4 @@ params:query {
 
 auth:bearer {
   token: {{token}}
-}
-
-body:json {
-  {
-    "name": "User Test",
-    "isActive": false
-  }
 }

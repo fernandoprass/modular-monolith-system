@@ -48,11 +48,23 @@ public class PermissionValidator : IPermissionValidator
    public Result ValidateAssign(RolePermissionAssignRequest request, bool roleExists, bool allPermissionsExist)
    {
       var validator = new FluentValidator<RolePermissionAssignRequest>()
-         .RuleFor(x => x.PermissionIds).IsNotNull()
          .RuleForValue(roleExists).IsTrue(new NotFoundError(IamConst.Entity.Role))
-         .RuleForValue(allPermissionsExist).IsTrue(new PermissionNotFoundInAssignmentError());
+         .RuleForValue(allPermissionsExist).IsTrue(new PermissionNotFoundInAssignmentError())
+         .RuleFor(x => x.PermissionIds).HasItems().HasNoDuplicates();
 
-      var isValid = validator.Validate(request);
+      var isValid = validator.Validate(request, shortCircuitMode: true);
+
+      return isValid ? Result.Success() : Result.Failure(validator.Messages);
+   }
+
+   public Result ValidateUnassign(RolePermissionUnassignRequest request, bool roleExists, bool roleHasAllPermissions)
+   {
+      var validator = new FluentValidator<RolePermissionUnassignRequest>()
+         .RuleForValue(roleExists).IsTrue(new NotFoundError(IamConst.Entity.Role))
+         .RuleForValue(roleHasAllPermissions).IsTrue(new PermissionsCannotBeUnassignedError())
+         .RuleFor(x => x.PermissionIds).HasItems().HasNoDuplicates();
+
+      var isValid = validator.Validate(request, shortCircuitMode: true);
 
       return isValid ? Result.Success() : Result.Failure(validator.Messages);
    }

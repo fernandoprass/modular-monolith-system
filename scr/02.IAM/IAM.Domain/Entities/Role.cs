@@ -39,7 +39,7 @@ public class Role : EntityAudited
       IsActive = isActive;
    }
 
-   public void AddFeature(Guid permissionId)
+   public void AddPermission(Guid permissionId)
    {
       if (!_rolePermissions.Any(rf => rf.PermissionId == permissionId))
       {
@@ -47,12 +47,12 @@ public class Role : EntityAudited
       }
    }
 
-   public void RemoveFeature(Guid permissionId)
+   public void RemovePermission(Guid permissionId)
    {
-      var feature = _rolePermissions.FirstOrDefault(rf => rf.PermissionId == permissionId);
-      if (feature != null)
+      var permission = _rolePermissions.FirstOrDefault(rf => rf.PermissionId == permissionId);
+      if (permission != null)
       {
-         _rolePermissions.Remove(feature);
+         _rolePermissions.Remove(permission);
       }
    }
 

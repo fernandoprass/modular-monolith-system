@@ -9,4 +9,5 @@ public interface IPermissionQueryRepository
    Task<IEnumerable<PermissionDto>> GetByParams(PermissionSearchRequest request, CancellationToken cancellationToken = default);
    Task<PermissionDto?> GetByCodeAsync(string code, CancellationToken cancellationToken = default);
    Task<bool> CodeExistsAsync(string code, CancellationToken cancellationToken = default);
+   Task<bool> CodeExistsAsync(string code, Guid excludedId, CancellationToken cancellationToken = default);
 }

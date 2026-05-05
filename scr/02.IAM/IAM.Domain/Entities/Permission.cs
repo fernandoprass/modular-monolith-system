@@ -16,16 +16,23 @@ public class Permission : EntityAudited
    public IReadOnlyCollection<RolePermission> RoleFeatures => _roleFeatures.AsReadOnly();
 
 
-   public Permission(string module, string group, string name, string title, string description, bool isActive)
+   private Permission()
    {
-      Id = Guid.CreateVersion7();
-      Module = module;
-      Group = group;
-      Name = name;
-      Code = BuildCode(module, group, name);
-      Title = title;
-      Description = description;
-      IsActive = isActive;
+   }
+
+   public static Permission Create(string module, string group, string name, string title, string description, bool isActive)
+   {
+      return new Permission
+      {
+         Id = Guid.CreateVersion7(),
+         Module = module,
+         Group = group,
+         Name = name,
+         Code = BuildCode(module, group, name),
+         Title = title,
+         Description = description,
+         IsActive = isActive
+      };
    }
 
    public void Update(string module, string group, string name, string title, string description, bool isActive)
