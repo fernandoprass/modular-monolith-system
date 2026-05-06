@@ -20,6 +20,7 @@ public class PermissionServiceTests
    private readonly IUserContext _userContextMock;
    private readonly IPermissionValidator _permissionValidatorMock;
    private readonly IPermissionQueryRepository _permissionQueryRepositoryMock;
+   private readonly IRolePermissionAuthorizationCache _rolePermissionAuthorizationCacheMock;
    private readonly PermissionService _permissionService;
 
    public PermissionServiceTests()
@@ -28,12 +29,14 @@ public class PermissionServiceTests
       _userContextMock = Substitute.For<IUserContext>();
       _permissionValidatorMock = Substitute.For<IPermissionValidator>();
       _permissionQueryRepositoryMock = Substitute.For<IPermissionQueryRepository>();
+      _rolePermissionAuthorizationCacheMock = Substitute.For<IRolePermissionAuthorizationCache>();
 
       _permissionService = new PermissionService(
          _unitOfWorkMock,
          _userContextMock,
          _permissionValidatorMock,
-         _permissionQueryRepositoryMock);
+         _permissionQueryRepositoryMock,
+         _rolePermissionAuthorizationCacheMock);
    }
 
    #region CreateAsync Tests
@@ -223,6 +226,7 @@ public class PermissionServiceTests
       Assert.Contains(role.RolePermissions, rp => rp.PermissionId == newPermissionId);
       _unitOfWorkMock.Roles.Received(1).Update(role);
       await _unitOfWorkMock.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+      _rolePermissionAuthorizationCacheMock.Received(1).Remove(role.Id);
    }
 
    [Fact]
@@ -286,6 +290,7 @@ public class PermissionServiceTests
       Assert.Empty(role.RolePermissions);
       _unitOfWorkMock.Roles.Received(1).Update(role);
       await _unitOfWorkMock.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+      _rolePermissionAuthorizationCacheMock.Received(1).Remove(role.Id);
    }
 
    [Fact]

@@ -53,21 +53,23 @@ public class RoleQueryRepository(IamDbContext dbContext) : IRoleQueryRepository
       return await _dbContext.UserRoles
           .AsNoTracking()
           .Where(ur => ur.UserId == userId)
+          .Where(ur => ur.Role.IsActive)
           .SelectMany(ur => ur.Role.RolePermissions.Select(rf => rf.Permission))
+          .Where(permission => permission.IsActive)
           .Distinct()
           .ToListAsync(cancellationToken);
    }
 
-    public async Task<IEnumerable<PermissionDto>> GetPermissionsByRoleIdAsync(
-        Guid roleId, 
-        CancellationToken cancellationToken = default)
-    {
-        return await dbContext.RolePermissions
-            .AsNoTracking()
-            .Where(rp => rp.RoleId == roleId)
-            .Select(rp => rp.Permission.ToPermissionDto())
-            .ToListAsync(cancellationToken);
-    }
+   public async Task<IEnumerable<PermissionDto>> GetPermissionsByRoleIdAsync(
+      Guid roleId,
+      CancellationToken cancellationToken = default)
+   {
+      return await _dbContext.RolePermissions
+         .AsNoTracking()
+         .Where(rp => rp.RoleId == roleId && rp.Role.IsActive && rp.Permission.IsActive)
+         .Select(rp => rp.Permission.ToPermissionDto())
+         .ToListAsync(cancellationToken);
+   }
 
    public async Task<bool> NameExistsAsync(
       string name,

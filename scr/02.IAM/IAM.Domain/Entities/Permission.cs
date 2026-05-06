@@ -12,8 +12,8 @@ public class Permission : EntityAudited
    public string Description { get; private set; }
    public bool IsActive { get; private set; }
 
-   private readonly List<RolePermission> _roleFeatures = new();
-   public IReadOnlyCollection<RolePermission> RoleFeatures => _roleFeatures.AsReadOnly();
+   private readonly List<RolePermission> _rolePermissions = new();
+   public IReadOnlyCollection<RolePermission> RolePermissions => _rolePermissions.AsReadOnly();
 
 
    private Permission()

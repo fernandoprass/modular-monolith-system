@@ -1,0 +1,22 @@
+meta {
+  name: save override
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{server}}/api/{{version}}/iam/parameters/019df959-903d-7aad-b6fd-d0ca63100e85/override
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "value": "5"
+  }
+}
+

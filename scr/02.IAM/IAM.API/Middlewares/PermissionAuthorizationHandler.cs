@@ -1,21 +1,19 @@
-﻿using IAM.Application.Contracts;
+using IAM.Application.Contracts;
 using IAM.Domain;
-using IAM.Domain.QueryRepositories;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.Extensions.Caching.Memory;
 
 namespace IAM.API.Middlewares;
 
 public class PermissionAuthorizationHandler(
-    IServiceProvider serviceProvider,
-    IMemoryCache cache) : AuthorizationHandler<RequirePermissionAttribute>
+   IServiceProvider serviceProvider,
+   IRolePermissionAuthorizationCache rolePermissionAuthorizationCache) : AuthorizationHandler<RequirePermissionAttribute>
 {
    private readonly IServiceProvider _serviceProvider = serviceProvider;
-   private readonly IMemoryCache _cache = cache;
+   private readonly IRolePermissionAuthorizationCache _rolePermissionAuthorizationCache = rolePermissionAuthorizationCache;
 
    protected override async Task HandleRequirementAsync(
-       AuthorizationHandlerContext context,
-       RequirePermissionAttribute requirement)
+      AuthorizationHandlerContext context,
+      RequirePermissionAttribute requirement)
    {
       var user = context.User;
 
@@ -33,8 +31,8 @@ public class PermissionAuthorizationHandler(
       }
 
       var roleClaims = user.FindAll(IamConst.Security.Claim.Role)
-                          .Select(c => c.Value)
-                          .ToList();
+         .Select(c => c.Value)
+         .ToList();
 
       if (!roleClaims.Any())
       {
@@ -42,7 +40,7 @@ public class PermissionAuthorizationHandler(
          return;
       }
 
-      var userPermissions = new HashSet<string>();
+      var userPermissions = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
       foreach (var roleId in roleClaims)
       {
@@ -65,18 +63,13 @@ public class PermissionAuthorizationHandler(
 
    private async Task<IEnumerable<string>> GetRolePermissionsAsync(Guid roleId)
    {
-      var cacheKey = $"role_permissions_{roleId}";
-
-      return await _cache.GetOrCreateAsync(cacheKey, async entry =>
+      return await _rolePermissionAuthorizationCache.GetOrCreateAsync(roleId, async () =>
       {
-         entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(15);
-
-         // Create scope to resolve scoped service
          using var scope = _serviceProvider.CreateScope();
          var roleService = scope.ServiceProvider.GetRequiredService<IRoleService>();
 
          var permissions = await roleService.GetPermissionsByRoleIdAsync(roleId);
          return permissions.Select(p => p.Code).ToList();
-      }) ?? Enumerable.Empty<string>();
+      });
    }
 }

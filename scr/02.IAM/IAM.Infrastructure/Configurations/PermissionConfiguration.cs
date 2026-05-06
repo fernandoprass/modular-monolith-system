@@ -22,7 +22,7 @@ public class PermissionConfiguration : BaseAuditedConfiguration<Permission>
 
       builder.HasIndex(p => p.Code).IsUnique();
 
-      builder.HasMany(p => p.RoleFeatures)
+      builder.HasMany(p => p.RolePermissions)
          .WithOne(rp => rp.Permission)
          .HasForeignKey(rp => rp.PermissionId)
          .OnDelete(DeleteBehavior.Cascade);

@@ -1,4 +1,5 @@
-﻿using IAM.API.Middlewares;
+using IAM.API.Middlewares;
+using IAM.Application.Contracts;
 using IAM.Domain;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -18,6 +19,7 @@ namespace IAM.API.Configure
 
          builder.Services.AddAuthorization();
 
+         builder.Services.AddSingleton<IRolePermissionAuthorizationCache, RolePermissionAuthorizationCache>();
          builder.Services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
 
          builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

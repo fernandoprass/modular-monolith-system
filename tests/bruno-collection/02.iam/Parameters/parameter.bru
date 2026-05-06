@@ -1,0 +1,15 @@
+meta {
+  name: parameter
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{server}}/api/{{version}}/iam/parameters/019dd52f-2393-75d9-869a-bd03775814bd
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}

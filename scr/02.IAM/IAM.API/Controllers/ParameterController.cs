@@ -32,10 +32,10 @@ public class ParameterController(IParameterService parameterService) : BaseContr
       return OkOrNotFound(parameters);
    }
 
-   [HttpGet("key/{key}")]
+   [HttpGet("value")]
    [Authorize]
    [RequirePermission(IamPermission.Parameters.View)]
-   public async Task<IActionResult> GetByKey(string key, CancellationToken cancellationToken)
+   public async Task<IActionResult> GetValue([FromQuery] string key, CancellationToken cancellationToken)
    {
       var parameter = await _parameterService.GetValueAsync(key, cancellationToken);
       return OkOrNotFound(parameter);

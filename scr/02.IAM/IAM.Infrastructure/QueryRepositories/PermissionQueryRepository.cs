@@ -23,6 +23,12 @@ public class PermissionQueryRepository(IamDbContext dbContext) : IPermissionQuer
    {
       var query = _dbContext.Permissions.AsNoTracking();
 
+      if (request.roleId != null && request.roleId != Guid.Empty)
+         query = from p in query
+                 join rp in _dbContext.RolePermissions on p.Id equals rp.PermissionId
+                 where rp.RoleId == request.roleId
+                 select p;
+
       if (!string.IsNullOrWhiteSpace(request.Module))
          query = query.Where(p => EF.Functions.ILike(p.Module, $"%{request.Module}%"));
 

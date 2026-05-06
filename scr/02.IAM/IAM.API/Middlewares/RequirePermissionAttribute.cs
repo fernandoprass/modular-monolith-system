@@ -3,7 +3,12 @@
 namespace IAM.API.Middlewares;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]
-public class RequirePermissionAttribute(string permission) : Attribute, IAuthorizationRequirement
+public class RequirePermissionAttribute(string permission) : AuthorizeAttribute, IAuthorizationRequirement, IAuthorizationRequirementData
 {
-    public string Permission { get; } = permission;
+   public string Permission { get; } = permission;
+
+   public IEnumerable<IAuthorizationRequirement> GetRequirements()
+   {
+      yield return this;
+   }
 }

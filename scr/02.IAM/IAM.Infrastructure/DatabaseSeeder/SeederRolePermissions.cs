@@ -13,7 +13,7 @@ public class SeederRolePermissions(
    public async Task SeedAsync(string systemAdminRole, string organizationAdminRole, string userRole)
    {
       var roles = await roleQueryRepository.GetByNameAsync(string.Empty, Guid.Empty, true);
-      var permissions = await permissionQueryRepository.GetByParams(new PermissionSearchRequest(null, null, null));
+      var permissions = await permissionQueryRepository.GetByParams(new PermissionSearchRequest(null, null, null, null));
 
       var permissionsByCode = permissions.ToDictionary(permission => permission.Code, permission => permission.Id);
 
