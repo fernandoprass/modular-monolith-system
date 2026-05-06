@@ -1,5 +1,8 @@
-﻿using IAM.Domain;
+using IAM.API.Middlewares;
+using IAM.Application.Contracts;
+using IAM.Domain;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -12,7 +15,12 @@ namespace IAM.API.Configure
          var jwtSecret = builder.Configuration["Jwt:Secret"] ?? "your-super-secret-jwt-key-here-make-it-long-and-secure";
          var key = Encoding.UTF8.GetBytes(jwtSecret);
 
+         builder.Services.AddMemoryCache();
+
          builder.Services.AddAuthorization();
+
+         builder.Services.AddSingleton<IRolePermissionAuthorizationCache, RolePermissionAuthorizationCache>();
+         builder.Services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
 
          builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
              .AddJwtBearer(options =>

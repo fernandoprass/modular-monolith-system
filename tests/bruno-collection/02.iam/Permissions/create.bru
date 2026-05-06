@@ -1,0 +1,26 @@
+meta {
+  name: create
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{server}}/api/{{version}}/iam/permissions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "module": "iam",
+    "group": "reports",
+    "name": "view",
+    "title": "View Reports",
+    "description": "Allows viewing reports.",
+    "isActive": true
+  }
+}

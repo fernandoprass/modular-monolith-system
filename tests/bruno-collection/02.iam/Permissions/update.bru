@@ -1,0 +1,26 @@
+meta {
+  name: update
+  type: http
+  seq: 2
+}
+
+put {
+  url: {{server}}/api/{{version}}/iam/permissions/019df959-903d-7aad-b6fd-d0ca63100e85
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "module": "iam",
+    "group": "reports",
+    "name": "view",
+    "title": "View Reports",
+    "description": "Allows viewing reports with update description.",
+    "isActive": false
+  }
+}

@@ -1,4 +1,6 @@
 using Asp.Versioning;
+using IAM.API.Middlewares;
+using IAM.Domain;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Application.Contracts;
@@ -14,6 +16,7 @@ public class ParameterController(IParameterService parameterService) : BaseContr
 
    [HttpGet("{id:guid}")]
    [Authorize]
+   [RequirePermission(IamPermission.Parameters.View)]
    public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
    {
       var parameter = await _parameterService.GetByIdAsync(id, cancellationToken);
@@ -22,15 +25,17 @@ public class ParameterController(IParameterService parameterService) : BaseContr
 
    [HttpGet]
    [Authorize]
-   public async Task<IActionResult> Get(ParameterSearchRequest request, CancellationToken cancellationToken)
+   [RequirePermission(IamPermission.Parameters.List)]
+   public async Task<IActionResult> GetByParams(ParameterSearchRequest request, CancellationToken cancellationToken)
    {
       var parameters = await _parameterService.GetAsync(request, cancellationToken);
       return OkOrNotFound(parameters);
    }
 
-   [HttpGet("key/{key}")]
+   [HttpGet("value")]
    [Authorize]
-   public async Task<IActionResult> GetByKey(string key, CancellationToken cancellationToken)
+   [RequirePermission(IamPermission.Parameters.View)]
+   public async Task<IActionResult> GetValue([FromQuery] string key, CancellationToken cancellationToken)
    {
       var parameter = await _parameterService.GetValueAsync(key, cancellationToken);
       return OkOrNotFound(parameter);
@@ -38,6 +43,7 @@ public class ParameterController(IParameterService parameterService) : BaseContr
 
    [HttpPut("{id:guid}/override")]
    [Authorize]
+   [RequirePermission(IamPermission.Parameters.SaveOverride)]
    public async Task<IActionResult> SaveOverride(Guid id, ParameterOwnerUpdateRequest request, CancellationToken cancellationToken)
    {
       var result = await _parameterService.SaveOverrideValueAsync(id, request, cancellationToken);
@@ -46,6 +52,7 @@ public class ParameterController(IParameterService parameterService) : BaseContr
 
    [HttpDelete("{id:guid}/override")]
    [Authorize]
+   [RequirePermission(IamPermission.Parameters.DeleteOverride)]
    public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
    {
       var result = await _parameterService.DeleteOverrideValueAsync(id, cancellationToken);

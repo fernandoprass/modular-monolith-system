@@ -1,0 +1,25 @@
+meta {
+  name: value by key
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{server}}/api/{{version}}/iam/parameters/value?key=IAM.Security.MaxFailedLoginAttempts
+  body: none
+  auth: bearer
+}
+
+params:query {
+  key: IAM.Security.MaxFailedLoginAttempts
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "key": "IAM.Security.MaxFailedLoginAttempts"
+  }
+}

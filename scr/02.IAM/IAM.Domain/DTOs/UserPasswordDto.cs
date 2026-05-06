@@ -1,4 +1,6 @@
-﻿namespace IAM.Domain.DTOs;
+﻿using IAM.Domain.Entities;
+
+namespace IAM.Domain.DTOs;
 
 public sealed record UserPasswordDto
 {
@@ -16,4 +18,5 @@ public sealed record UserPasswordDto
    public DateTime? EmailVerifiedAt { get; set; }
    public DateTime? LastLoginAt { get; set; }
    public DateTime? LockedOutUntil { get; set; }
+   public IEnumerable<UserRole> UserRoles { get; set; } = [];
 }

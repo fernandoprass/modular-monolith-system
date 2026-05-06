@@ -1,0 +1,19 @@
+meta {
+  name: search by param
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{server}}/api/{{version}}/iam/organizations/019db54c-44cc-73a5-a889-7264d342ce5b?nome=a
+  body: none
+  auth: bearer
+}
+
+params:query {
+  nome: a
+}
+
+auth:bearer {
+  token: {{token}}
+}

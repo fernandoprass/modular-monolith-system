@@ -1,0 +1,21 @@
+meta {
+  name: update code
+  type: http
+  seq: 3
+}
+
+patch {
+  url: {{server}}/api/{{version}}/iam/organizations/019db54c-44cc-73a5-a889-7264d342ce5b/code
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "code": "SAASADMIN"
+  }
+}

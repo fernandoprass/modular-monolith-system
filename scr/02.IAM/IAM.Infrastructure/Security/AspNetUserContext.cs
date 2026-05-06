@@ -13,6 +13,7 @@ public class AspNetUserContext(IHttpContextAccessor accessor) : IUserContext
    public bool IsAuthenticated => _accessor.HttpContext?.User.Identity?.IsAuthenticated ?? false;
    public bool IsSystemAdmin => GetIsSystemAdmin();
    public Guid UserId => GetUserId();
+   public IEnumerable<string> Roles => GetRoles();
 
    private Guid GetOrganizationId()
    {
@@ -34,9 +35,11 @@ public class AspNetUserContext(IHttpContextAccessor accessor) : IUserContext
       return Guid.TryParse(value, out var id) ? id : Guid.Empty;
    }
 
-   private bool? IsInRole(string role)
+   private List<string>? GetRoles()
    {
-      return _accessor.HttpContext?.User.HasClaim(ClaimTypes.Role, role);
+      var roles = _accessor.HttpContext?.User.FindAll(IamConst.Security.Claim.Role)
+                          .Select(c => c.Value)
+                          .ToList();
+      return roles;
    }
-
 }

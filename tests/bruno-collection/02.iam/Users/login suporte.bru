@@ -1,0 +1,27 @@
+meta {
+  name: login suporte
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{server}}/api/{{version}}/iam/users/login
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "support@saas.com",
+    "password": "Password123!"
+  }
+}
+
+script:post-response {
+  if (res.getStatus() === 200) {
+    const body = res.getBody();
+    if (body && body.data && body.data.token) {
+      bru.setEnvVar("token", body.data.token);
+    }
+  }
+}

@@ -5,5 +5,4 @@ public record RoleDto(
    string Name,
    bool IsActive,
    bool IsDefault,
-   Guid? OrganizationId,
-   IEnumerable<PermissionDto> Features);
+   Guid? OrganizationId);

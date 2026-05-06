@@ -1,0 +1,27 @@
+meta {
+  name: search by params
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{server}}/api/{{version}}/iam/parameters
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "module": "IAM",
+    "group": "Security",
+    "name": "",
+    "key": "",
+    "title": "",
+    "description": ""
+  }
+}
+

@@ -6,27 +6,37 @@ using Microsoft.EntityFrameworkCore;
 
 namespace IAM.Infrastructure.QueryRepositories;
 
-public class RoleQueryRepository(IamDbContext context) : IRoleQueryRepository
+public class RoleQueryRepository(IamDbContext dbContext) : IRoleQueryRepository
 {
-   private readonly IamDbContext _context = context;
+   private readonly IamDbContext _dbContext = dbContext;
+
+   public async Task<int> CountRolesByRoleIdsAsync(
+    IEnumerable<Guid> ids,
+    Guid organizationId,
+    bool isSystemAdminUser,
+    CancellationToken cancellationToken = default)
+   {
+      var query = CreateQueryWithOrganizationContextFilter(organizationId, isSystemAdminUser);
+
+      return await query.CountAsync(r => ids.Contains(r.Id) && r.IsActive, cancellationToken);
+   }
 
    public async Task<Role?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
    {
-      return await _context.Roles
+      return await _dbContext.Roles
          .AsNoTracking()
          .Include(r => r.RolePermissions)
             .ThenInclude(rf => rf.Permission)
          .FirstOrDefaultAsync(r => r.Id == id, cancellationToken);
    }
 
-   public async Task<IEnumerable<RoleDto>> GetAllAsync(
+   public async Task<IEnumerable<RoleDto>> GetByNameAsync(
        string? name,
        Guid organizationId,
+       bool isSystemAdminUser,
        CancellationToken cancellationToken = default)
    {
-      var query = _context.Roles
-          .AsNoTracking()
-          .Where(r => r.OrganizationId == null || r.OrganizationId == organizationId);
+      var query = CreateQueryWithOrganizationContextFilter(organizationId, isSystemAdminUser);
 
       if (!string.IsNullOrWhiteSpace(name))
       {
@@ -34,25 +44,51 @@ public class RoleQueryRepository(IamDbContext context) : IRoleQueryRepository
       }
 
       return await query
-          .Include(r => r.RolePermissions)
-              .ThenInclude(rf => rf.Permission)
           .Select(r => r.ToRoleDto())
           .ToListAsync(cancellationToken);
    }
 
-   public async Task<bool> NameExistsAsync(string name, Guid? organizationId, CancellationToken cancellationToken = default)
+   public async Task<IEnumerable<Permission>> GetRolePermissionsByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
    {
-      return await _context.Roles
-         .AnyAsync(r => r.Name == name && r.OrganizationId == organizationId, cancellationToken);
-   }
-
-   public async Task<IEnumerable<Permission>> GetUserPermissionsAsync(Guid userId, CancellationToken cancellationToken = default)
-   {
-      return await _context.UserRoles
+      return await _dbContext.UserRoles
           .AsNoTracking()
           .Where(ur => ur.UserId == userId)
+          .Where(ur => ur.Role.IsActive)
           .SelectMany(ur => ur.Role.RolePermissions.Select(rf => rf.Permission))
+          .Where(permission => permission.IsActive)
           .Distinct()
           .ToListAsync(cancellationToken);
+   }
+
+   public async Task<IEnumerable<PermissionDto>> GetPermissionsByRoleIdAsync(
+      Guid roleId,
+      CancellationToken cancellationToken = default)
+   {
+      return await _dbContext.RolePermissions
+         .AsNoTracking()
+         .Where(rp => rp.RoleId == roleId && rp.Role.IsActive && rp.Permission.IsActive)
+         .Select(rp => rp.Permission.ToPermissionDto())
+         .ToListAsync(cancellationToken);
+   }
+
+   public async Task<bool> NameExistsAsync(
+      string name,
+      Guid? organizationId, 
+      bool isSystemAdminUser, 
+      CancellationToken cancellationToken = default)
+   {
+      var query = CreateQueryWithOrganizationContextFilter(organizationId, isSystemAdminUser);
+
+      return await query.AnyAsync(r => r.Name == name, cancellationToken);
+   }
+
+   private IQueryable<Role> CreateQueryWithOrganizationContextFilter(Guid? organizationId, bool isSystemAdminUser)
+   {
+      var query = _dbContext.Roles.AsNoTracking();
+
+      query = !isSystemAdminUser
+              ? query.Where(r => r.OrganizationId == organizationId)
+              : query.Where(r => r.OrganizationId == null || r.OrganizationId == organizationId);
+      return query;
    }
 }

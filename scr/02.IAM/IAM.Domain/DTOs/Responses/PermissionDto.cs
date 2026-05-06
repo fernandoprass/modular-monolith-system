@@ -5,6 +5,7 @@ public record PermissionDto(
    string Module,
    string Group,
    string Name,
+   string Code,
    string Title,
    string Description,
    bool IsActive);

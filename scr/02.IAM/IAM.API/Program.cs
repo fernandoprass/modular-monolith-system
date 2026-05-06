@@ -2,6 +2,7 @@ using IAM.API.Configure;
 using IAM.API.Middlewares;
 using IAM.Domain;
 using IAM.Infrastructure;
+using IAM.Infrastructure.DatabaseSeeder;
 using Microsoft.EntityFrameworkCore;
 using Shared.Infrastructure;
 

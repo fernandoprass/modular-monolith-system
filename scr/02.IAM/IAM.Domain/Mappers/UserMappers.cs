@@ -57,7 +57,8 @@ public static class UserMappers
          FailedLoginAttempts = user.NumFailedLoginAttempts,
          OrganizationId = user.OrganizationId,
          OrganizationName = user.Organization?.Name ?? string.Empty,
-         OrganizationIsActive = user.Organization?.IsActive ?? false
+         OrganizationIsActive = user.Organization?.IsActive ?? false,
+         UserRoles = user.UserRoles
       };
    }
 }

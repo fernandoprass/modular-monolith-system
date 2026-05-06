@@ -13,8 +13,7 @@ namespace IAM.Domain.Mappers
             Name: role.Name,
             IsActive: role.IsActive,
             IsDefault: role.IsDefault,
-            OrganizationId: role.OrganizationId,
-            Features: role.RolePermissions.Select(rp => rp.Permission.ToPermissionDto())
+            OrganizationId: role.OrganizationId
          );
       }
    }

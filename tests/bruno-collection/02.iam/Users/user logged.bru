@@ -1,0 +1,22 @@
+meta {
+  name: user logged
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{server}}/api/{{version}}/iam/users/me
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "name": "User Test",
+    "isActive": false
+  }
+}

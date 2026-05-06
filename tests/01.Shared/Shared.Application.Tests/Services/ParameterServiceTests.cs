@@ -61,7 +61,8 @@ public class ParameterServiceTests
    public async Task CreateAsync_ShouldReturnValidationErrors_WhenValidatorFails()
    {
       var request = new ParameterCreateRequest("Module", "Group", "Name", "Title", "Desc", ParameterType.String, "Value", ParameterOverrideType.None, true);
-      _parameterQueryRepositoryMock.GetByModuleGroupAndKeyAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(new ParameterDto());
+      var parameter = new ParameterDto(Guid.NewGuid(), "M", "G", "N", "K", "T", "D", ParameterType.String, "value", null, null, ParameterOverrideType.None, false);
+      _parameterQueryRepositoryMock.GetByModuleGroupAndKeyAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(parameter);
       _parameterValidatorMock.ValidateCreate(request, true).Returns(Result.Failure(new ParameterDuplicatedError("M", "G", "K")));
 
       var result = await _parameterService.CreateAsync(request, TestContext.Current.CancellationToken);

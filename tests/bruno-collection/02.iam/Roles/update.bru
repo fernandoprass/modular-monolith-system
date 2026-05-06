@@ -1,11 +1,11 @@
 meta {
   name: update
   type: http
-  seq: 3
+  seq: 2
 }
 
 put {
-  url: {{server}}/api/{{version}}/iam/roles/019db57d-5204-754d-917a-3070a6e01348
+  url: {{server}}/api/{{version}}/iam/roles/019de9a5-214a-7fbd-84ee-86d6578ef235
   body: json
   auth: bearer
 }
@@ -16,9 +16,9 @@ auth:bearer {
 
 body:json {
   {
-    "name": "RoleName updated",
+    "name": "RoleName not default",
     "description": "Description also updated",
-    "isDefault": true,
+    "isDefault": false,
     "isActive": true
   }
 }

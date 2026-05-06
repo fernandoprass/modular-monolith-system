@@ -5,7 +5,7 @@ meta {
 }
 
 get {
-  url: {{server}}/api/{{version}}/iam/roles/user/019db54c-943e-7a36-ac30-32b1aef823b8/permissions
+  url: {{server}}/api/{{version}}/iam/roles/user/019dd545-247d-7ddb-aaff-edfe350859ea/permissions
   body: json
   auth: bearer
 }
@@ -16,11 +16,4 @@ params:query {
 
 auth:bearer {
   token: {{token}}
-}
-
-body:json {
-  {
-    "name": "User Test",
-    "isActive": false
-  }
 }

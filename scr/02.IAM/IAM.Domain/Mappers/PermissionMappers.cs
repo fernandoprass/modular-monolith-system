@@ -13,6 +13,7 @@ namespace IAM.Domain.Mappers
             Module: permission.Module,
             Group: permission.Group,
             Name: permission.Name,
+            Code: permission.Code,
             Title: permission.Title,
             Description: permission.Description,
             IsActive: permission.IsActive

@@ -1,0 +1,27 @@
+meta {
+  name: login user
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{server}}/api/{{version}}/iam/users/login
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "alan.turing@enigma.org",
+    "password": "Password123!"
+  }
+}
+
+script:post-response {
+  if (res.getStatus() === 200) {
+    const body = res.getBody();
+    if (body && body.data && body.data.token) {
+      bru.setEnvVar("token", body.data.token);
+    }
+  }
+}
