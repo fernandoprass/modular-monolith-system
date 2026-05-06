@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using FluentAssertions;
 using IAM.API.Middlewares;
 using IAM.Application.Contracts;
@@ -7,6 +6,8 @@ using IAM.Domain.DTOs.Responses;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
+using System.Security.Claims;
+using Xunit;
 
 namespace IAM.API.Tests.Middlewares;
 
