@@ -25,6 +25,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\scr\02.IAM\IAM.Application\IAM.Application.csproj" />
+    <ProjectReference Include="..\..\..\scr\02.IAM\IAM.API\IAM.API.csproj" />
     <ProjectReference Include="..\..\..\scr\02.IAM\IAM.Domain\IAM.Domain.csproj" />
     <ProjectReference Include="..\..\..\scr\02.IAM\IAM.Infrastructure\IAM.Infrastructure.csproj" />
   </ItemGroup>

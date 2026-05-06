@@ -42,6 +42,7 @@
     <Project Path="tests/01.Shared/Shared.Infrastructure.Tests/Shared.Infrastructure.Tests.csproj" />
   </Folder>
   <Folder Name="/tests/02.IAM/">
+    <Project Path="tests/02.IAM/IAM.API.Tests/IAM.API.Tests.csproj" Id="bb8eda8c-92b7-4043-ba94-a3967ab24af3" />
     <Project Path="tests/02.IAM/IAM.Application.Tests/IAM.Application.Tests.csproj" />
   </Folder>
   <Folder Name="/tests/api/">

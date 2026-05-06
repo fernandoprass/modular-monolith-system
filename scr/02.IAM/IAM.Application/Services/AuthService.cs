@@ -36,7 +36,7 @@ public class AuthService(
 
       if (!result.IsSuccess) return Result<LoginResponse?>.Failure(result.Messages);
 
-      await _userService.UpdateLastLoginAsync(user.Id, cancellationToken);
+      await _userService.UpdateLastLoginAsync(user!.Id, cancellationToken);
 
       var expiresAt = await GetJwtExpireTime();
       var token = GenerateJwtToken(user, expiresAt);

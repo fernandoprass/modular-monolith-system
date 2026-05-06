@@ -182,7 +182,7 @@ public class PermissionServiceTests
    [Fact]
    public async Task GetByParams_WithValidRequest_ShouldReturnPermissions()
    {
-      var request = new PermissionSearchRequest(Module: "iam", Group: null, Name: null);
+      var request = new PermissionSearchRequest(roleId: null, Module: "iam", Group: null, Name: null);
       var permissions = new List<PermissionDto>
       {
          CreatePermissionDto("create"),

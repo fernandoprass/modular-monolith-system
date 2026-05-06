@@ -1,21 +1,33 @@
 # Development Conventions & Standards
 
-This document defines the architectural conventions, naming standards, and implementation patterns for this modular .NET system built with .NET 10, PostgreSQL (code-first approach without database-first scaffolding), and Clean Architecture principles. 
+This document defines the architectural conventions, naming standards, and implementation patterns for this modular .NET system built with .NET 10, PostgreSQL (code-first approach without database-first scaffolding), and Clean Architecture principles.
 
-Communicate with me using only short sentences; caveman language is enough. Do not provide lengthy explanations; I will ask questions if necessary. Never make assumptions, always ask questions to clarify any ambiguity. Show me you plan before make changes.
+Communicate with me using only short sentences; caveman language is enough. Do not provide lengthy explanations; I will ask questions if necessary.
+
+## Collaboration Rules
+
+- Never make assumptions. Ask questions to clarify ambiguity.
+- Show me your plan before making changes.
+- After showing the plan, wait for explicit approval like `go` before editing files.
+- If file location, project layer, test project, naming, or design ownership is unclear, ask before changing files.
+- Do not choose a test project, endpoint shape, permission name, or folder location without confirmation.
+- If I ask for discussion or review, do not edit files until I approve the plan.
 
 ---
 
 ## Table of Contents
-1. [Architectural Principles](#architectural-principles)
-2. [Naming Conventions](#naming-conventions)
-3. [Async & Cancellation](#async--cancellation)
-4. [Security & Authentication](#security--authentication)
-5. [Entity & Domain Design](#entity--domain-design)
-6. [Data Access Patterns](#data-access-patterns)
-7. [Error Handling & Validation](#error-handling--validation)
-8. [Date & Time Handling](#date--time-handling)
-9. [Authorization & Permissions](#authorization--permissions)
+1. [Collaboration Rules](#collaboration-rules)
+2. [Architectural Principles](#architectural-principles)
+3. [Naming Conventions](#naming-conventions)
+4. [Async & Cancellation](#async--cancellation)
+5. [Security & Authentication](#security--authentication)
+6. [Entity & Domain Design](#entity--domain-design)
+7. [Data Access Patterns](#data-access-patterns)
+8. [Error Handling & Validation](#error-handling--validation)
+9. [Date & Time Handling](#date--time-handling)
+10. [Authorization & Permissions](#authorization--permissions)
+11. [Testing Rules](#testing-rules)
+12. [Seeder Rules](#seeder-rules)
 
 ---
 
@@ -25,7 +37,7 @@ Each business module is self-contained with Domain, Application, Infrastructure,
 
 ### Clean Architecture Layers
 
-**Dependency Flow**: API → Application → Infrastructure → Domain
+**Dependency Flow**: API -> Application -> Infrastructure -> Domain
 
 **Layer Responsibilities**:
 
@@ -45,7 +57,7 @@ Each business module is self-contained with Domain, Application, Infrastructure,
 
 **Example**:
 ```csharp
-// ✅ Correct: Domain logic in entity
+// OK: Domain logic in entity
 public void RecordFailedLogin(int maxAttempts, int lockoutDurationMinutes)
 {
     NumFailedLoginAttempts++;
@@ -55,7 +67,7 @@ public void RecordFailedLogin(int maxAttempts, int lockoutDurationMinutes)
     }
 }
 
-// ❌ Wrong: Service calculates lockout
+// Wrong: Service calculates lockout
 public void UpdateFailedLogin(DateTime? lockedOutUntil)
 {
     NumFailedLoginAttempts++;
@@ -66,7 +78,7 @@ public void UpdateFailedLogin(DateTime? lockedOutUntil)
 ### Multi-Tenancy
 
 - **Enforcement**: `BaseService.ExecuteIfUserOwnsAsync()` validates ownership via `IUserContext`
-- **Isolation**: Every mutation checks `UserOwnerId` matches entity's `CustomerId`/`OrganizationId`
+- **Isolation**: Every mutation checks `UserOwnerId` matches entity's `OrganizationId`
 - **JWT Claims**: Include `UserOwnerId` for tenant identification
 
 ---
@@ -79,12 +91,12 @@ Ensure immutability and value-based equality.
 **Pattern**: `{Entity}{Purpose}` suffix with `Dto` or `Request`/`Response`
 
 ```csharp
-// ✅ Correct
+// OK
 public class UserDto { }
 public class UserCreateRequest { }
 public class LoginResponse { } // Wrapper object
 
-// ❌ Avoid
+// Avoid
 public class UserResponse { } // Use 'Dto' instead
 public class CreateUserRequest { } // Verb should be suffix
 ```
@@ -101,12 +113,23 @@ public class CreateUserRequest { } // Verb should be suffix
 - Always lowercase codes: `.ToLowerInvariant()`
 - Trim and normalize emails: `email.ToLower().Trim()`
 
+### Search Requests
+
+Do not pass several filter parameters individually through controllers, services, or repositories.
+
+Use `{Entity}SearchRequest` records for query filters.
+
+```csharp
+public record PermissionSearchRequest(string? Module, string? Group, string? Name);
+Task<Result<IEnumerable<PermissionDto>>> GetAllAsync(PermissionSearchRequest request, CancellationToken cancellationToken = default);
+```
+
 ### Method Naming
 
 **Repository Methods**:
 ```csharp
 Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
-Task<IEnumerable<User>> GetByCustomerIdAsync(Guid customerId, CancellationToken cancellationToken = default);
+Task<IEnumerable<User>> GetByOrganizationIdAsync(Guid organizationId, CancellationToken cancellationToken = default);
 Task AddAsync(User entity, CancellationToken cancellationToken = default);
 void Update(User entity); // Synchronous by design
 Task DeleteAsync(Guid id, CancellationToken cancellationToken = default);
@@ -206,7 +229,7 @@ public class User : EntityAudited
 
     private User() { } // Prevents unauthorized instantiation
 
-    public static User Create(string name, string email, string passwordHash, Guid customerId)
+    public static User Create(string name, string email, string passwordHash, Guid organizationId)
     {
         return new User
         {
@@ -215,7 +238,7 @@ public class User : EntityAudited
             Email = email.ToLower().Trim(),
             PasswordHash = passwordHash,
             IsActive = true,
-            CustomerId = customerId
+            OrganizationId = organizationId
         };
     }
 }
@@ -244,10 +267,10 @@ public IReadOnlyCollection<UserRole> UserRoles => _userRoles.AsReadOnly();
 // Write Repository
 public class UserRepository(IamDbContext dbContext) : BaseRepository<User>(dbContext), IUserRepository
 {
-    public async Task<IEnumerable<User>> GetByCustomerIdAsync(Guid customerId, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<User>> GetByOrganizationIdAsync(Guid organizationId, CancellationToken cancellationToken = default)
     {
         return await dbContext.Users
-            .Where(u => u.CustomerId == customerId)
+            .Where(u => u.OrganizationId == organizationId)
             .ToListAsync(cancellationToken);
     }
 }
@@ -259,7 +282,7 @@ public class UserQueryRepository(IamDbContext context) : IUserQueryRepository
     {
         return await context.Users
             .AsNoTracking()
-            .Include(u => u.Customer)
+            .Include(u => u.Organization)
             .Where(u => u.Id == id)
             .Select(u => u.ToUserDto()) // Project to DTO
             .SingleOrDefaultAsync(cancellationToken);
@@ -302,10 +325,10 @@ private void ApplyAuditInformation()
 **Problem**: Nullable parameters in LINQ queries
 
 ```csharp
-// ❌ Throws exception if name is null
+// Wrong: Throws exception if name is null
 .Where(r => r.Name.Contains(name))
 
-// ✅ Conditional query building
+// OK: Conditional query building
 var query = _context.Roles
     .AsNoTracking()
     .Where(r => r.OrganizationId == null || r.OrganizationId == organizationId);
@@ -352,7 +375,7 @@ public async Task<Result> UpdateAsync(Guid id, UserUpdateRequest request, Cancel
 // Service returns Result
 public async Task<Result<UserDto>> CreateUserAsync(UserCreateRequest request, CancellationToken cancellationToken = default)
 {
-    var validation = _userValidator.ValidateCreate(request, customerExists, emailExists);
+    var validation = _userValidator.ValidateCreate(request, organizationExists, emailExists);
     if (validation.HasError)
     {
         return Result<UserDto>.Failure(validation.Messages);
@@ -379,14 +402,14 @@ return result.HasError ? BadRequest(result.Messages) : Created("", result.Data);
 ```csharp
 public class UserValidator : IUserValidator
 {
-    public Result ValidateCreate(UserCreateRequest request, bool customerExists, bool emailAlreadyExists)
+    public Result ValidateCreate(UserCreateRequest request, bool organizationExists, bool emailAlreadyExists)
     {
         var validator = new FluentValidator<UserCreateRequest>()
             .RuleFor(x => x.Name).ApplyTemplate(ValidatorTemplate.NameRules)
             .RuleFor(x => x.Email).ApplyTemplate(ValidatorTemplate.EmailRules)
             .RuleFor(x => x.Password).ApplyTemplate(ValidatorTemplate.PasswordRules)
             .RuleForValue(emailAlreadyExists).IsFalse(new EmailAlreadyExistError(request.Email))
-            .RuleForValue(customerExists).IsTrue(new NotFoundError(IamConst.Entity.Customer));
+            .RuleForValue(organizationExists).IsTrue(new NotFoundError(IamConst.Entity.Organization));
 
         var isValid = validator.Validate(request);
         return isValid ? Result.Success() : Result.Failure(validator.Messages);
@@ -397,7 +420,7 @@ public class UserValidator : IUserValidator
 **Service provides facts**:
 ```csharp
 bool emailExists = await EmailExistsAsync(request.Email, cancellationToken);
-var validation = _userValidator.ValidateCreate(request, customerExists, emailExists);
+var validation = _userValidator.ValidateCreate(request, organizationExists, emailExists);
 ```
 
 ---
@@ -409,11 +432,11 @@ var validation = _userValidator.ValidateCreate(request, customerExists, emailExi
 **Rule**: Always use `DateTime.UtcNow` for server-side timestamps. **Do not use `DateTimeOffset`** for business logic.
 
 ```csharp
-// ✅ Correct
+// OK
 public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 public DateTime? LockedOutUntil { get; set; }
 
-// ❌ Wrong
+// Wrong
 public DateTime CreatedAt { get; set; } = DateTime.Now; // Local time - ambiguous
 ```
 
@@ -465,15 +488,41 @@ Permission.Create("iam", "users", "create", "Create Users", "Allows creating new
 **Pattern**: Custom `RequirePermissionAttribute` + `AuthorizationHandler`
 
 ```csharp
-[RequirePermission("iam.users.create")]
+[RequirePermission(IamPermission.Users.Create)]
 public async Task<IActionResult> CreateUser([FromBody] UserCreateRequest request, CancellationToken cancellationToken)
 {
     // Only executes if user has "iam.users.create" permission
 }
 ```
 
+**Attribute Rule**: `RequirePermissionAttribute` must be executable authorization metadata.
+
+```csharp
+public class RequirePermissionAttribute(string permission)
+    : AuthorizeAttribute, IAuthorizationRequirement, IAuthorizationRequirementData
+{
+    public string Permission { get; } = permission;
+
+    public IEnumerable<IAuthorizationRequirement> GetRequirements()
+    {
+        yield return this;
+    }
+}
+```
+
+If `PermissionAuthorizationHandler` is not called, check the attribute/policy wiring first.
+
+**Permission Constants**:
+- Never hardcode permission strings in controllers.
+- Use `IamPermission`.
+- When adding controller endpoints, update:
+  - `IamPermission`
+  - `SeederPermissions`
+  - `SeederRolePermissions`
+  - Bruno files
+
 **Handler Logic**:
-1. Check if user is `IsSystemAdmin` → bypass all checks
+1. Check if user is `IsSystemAdmin` -> bypass all checks
 2. Extract role IDs from JWT claims
 3. Fetch permissions for each role (with caching)
 4. Check if required permission exists in user's permission set
@@ -492,6 +541,27 @@ builder.Services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHand
 
 ---
 
+## Testing Rules
+
+- Before adding tests, ask which test project should own them if no matching test project exists.
+- Do not add project references across layers without confirmation.
+- Authorization handlers must have unit tests for success, failure, role claims, admin bypass, and cache behavior.
+
+---
+
+## Seeder Rules
+
+- Seeders must be idempotent.
+- Do not create duplicates.
+- Seed order matters:
+  - parameters
+  - permissions
+  - roles
+  - role permissions
+- When adding permissions, update both permission seed data and role-permission seed data.
+
+---
+
 ## Summary Checklist
 
 **Before Committing Code**:
@@ -502,10 +572,14 @@ builder.Services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHand
 - [ ] All timestamps use `DateTime.UtcNow`
 - [ ] Null checks after repository queries
 - [ ] Permission codes are lowercase
+- [ ] Controllers use `IamPermission`, not hardcoded permission strings
+- [ ] New endpoints update permission constants, permission seeders, role-permission seeders, and Bruno files
 - [ ] Validation uses `Result` pattern (no exceptions)
 - [ ] Multi-tenancy enforced via `ExecuteIfUserOwnsAsync()`
 - [ ] Authorization checks `IsSystemAdmin` first
+- [ ] `RequirePermissionAttribute` implements `IAuthorizationRequirementData`
 - [ ] Query repositories use `AsNoTracking()` and return DTOs
+- [ ] Search filters use `{Entity}SearchRequest`
 - [ ] Entities use private constructors + static `Create()` methods
 - [ ] Collections are encapsulated with `IReadOnlyCollection<T>`
 
