@@ -11,8 +11,8 @@ namespace IAM.Domain.Mappers
          (
             Id: permission.Id,
             Module: permission.Module,
-            Group: permission.Group,
-            Name: permission.Name,
+            Resource: permission.Resource,
+            Action: permission.Action,
             Code: permission.Code,
             Title: permission.Title,
             Description: permission.Description,

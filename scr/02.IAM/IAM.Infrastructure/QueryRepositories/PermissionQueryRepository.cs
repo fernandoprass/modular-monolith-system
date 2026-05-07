@@ -32,11 +32,11 @@ public class PermissionQueryRepository(IamDbContext dbContext) : IPermissionQuer
       if (!string.IsNullOrWhiteSpace(request.Module))
          query = query.Where(p => EF.Functions.ILike(p.Module, $"%{request.Module}%"));
 
-      if (!string.IsNullOrWhiteSpace(request.Group))
-         query = query.Where(p => EF.Functions.ILike(p.Group, $"%{request.Group}%"));
+      if (!string.IsNullOrWhiteSpace(request.Resource))
+         query = query.Where(p => EF.Functions.ILike(p.Resource, $"%{request.Resource}%"));
 
-      if (!string.IsNullOrWhiteSpace(request.Name))
-         query = query.Where(p => EF.Functions.ILike(p.Name, $"%{request.Name}%"));
+      if (!string.IsNullOrWhiteSpace(request.Action))
+         query = query.Where(p => EF.Functions.ILike(p.Action, $"%{request.Action}%"));
 
       if (!request.IncludeInactive)
          query = query.Where(p => p.IsActive);

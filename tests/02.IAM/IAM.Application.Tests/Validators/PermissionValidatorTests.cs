@@ -172,8 +172,8 @@ public class PermissionValidatorTests
    {
       return new PermissionCreateRequest(
          Module: module,
-         Group: "users",
-         Name: "create",
+         Resource: "users",
+         Action: "create",
          Title: "Create Users",
          Description: "Allows creating users.");
    }
@@ -182,8 +182,8 @@ public class PermissionValidatorTests
    {
       return new PermissionUpdateRequest(
          Module: "iam",
-         Group: "users",
-         Name: "create",
+         Resource: "users",
+         Action: "create",
          Title: "Create Users",
          Description: "Allows creating users.",
          IsActive: true);

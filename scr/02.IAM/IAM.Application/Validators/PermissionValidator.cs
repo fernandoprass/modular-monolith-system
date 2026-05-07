@@ -16,12 +16,12 @@ public class PermissionValidator : IPermissionValidator
 
    public Result ValidateCreate(PermissionCreateRequest request, bool codeAlreadyExists)
    {
-      string code = Permission.BuildCode(request.Module, request.Group, request.Name);
+      string code = Permission.BuildCode(request.Module, request.Resource, request.Action);
 
       var validator = new FluentValidator<PermissionCreateRequest>()
          .RuleFor(x => x.Module).ApplyTemplate(MemberCodeTemplate)
-         .RuleFor(x => x.Group).ApplyTemplate(MemberCodeTemplate)
-         .RuleFor(x => x.Name).ApplyTemplate(MemberCodeTemplate)
+         .RuleFor(x => x.Resource).ApplyTemplate(MemberCodeTemplate)
+         .RuleFor(x => x.Action).ApplyTemplate(MemberCodeTemplate)
          .RuleForValue(codeAlreadyExists).IsFalse(new PermissionDuplicateCodeError(code));
 
       var isValid = validator.Validate(request);
@@ -31,12 +31,12 @@ public class PermissionValidator : IPermissionValidator
 
    public Result ValidateUpdate(PermissionUpdateRequest request, bool codeAlreadyExists, bool permissionExists)
    {
-      string code = Permission.BuildCode(request.Module, request.Group, request.Name);
+      string code = Permission.BuildCode(request.Module, request.Resource, request.Action);
 
       var validator = new FluentValidator<PermissionUpdateRequest>()
          .RuleFor(x => x.Module).ApplyTemplate(MemberCodeTemplate)
-         .RuleFor(x => x.Group).ApplyTemplate(MemberCodeTemplate)
-         .RuleFor(x => x.Name).ApplyTemplate(MemberCodeTemplate)
+         .RuleFor(x => x.Resource).ApplyTemplate(MemberCodeTemplate)
+         .RuleFor(x => x.Action).ApplyTemplate(MemberCodeTemplate)
          .RuleForValue(codeAlreadyExists).IsFalse(new PermissionDuplicateCodeError(code))
          .RuleForValue(permissionExists).IsTrue(new NotFoundError(IamConst.Entity.Permission));
 

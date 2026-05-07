@@ -12,6 +12,7 @@ Communicate with me using only short sentences; caveman language is enough. Do n
 - If file location, project layer, test project, naming, or design ownership is unclear, ask before changing files.
 - Do not choose a test project, endpoint shape, permission name, or folder location without confirmation.
 - If I ask for discussion or review, do not edit files until I approve the plan.
+- When you see a better name, suggest it with a short reason before changing it.
 
 ---
 
@@ -120,7 +121,7 @@ Do not pass several filter parameters individually through controllers, services
 Use `{Entity}SearchRequest` records for query filters.
 
 ```csharp
-public record PermissionSearchRequest(string? Module, string? Group, string? Name);
+public record PermissionSearchRequest(string? Module, string? Resource, string? Action);
 Task<Result<IEnumerable<PermissionDto>>> GetAllAsync(PermissionSearchRequest request, CancellationToken cancellationToken = default);
 ```
 
@@ -450,25 +451,25 @@ public DateTime CreatedAt { get; set; } = DateTime.Now; // Local time - ambiguou
 
 ### Permission Model
 
-**Hierarchy**: `Module.Group.Name` (lowercase)
+**Hierarchy**: `Module.Resource.Action` (lowercase)
 
 ```csharp
 public class Permission : EntityAudited
 {
     public string Module { get; private set; } = string.Empty; // "iam"
-    public string Group { get; private set; } = string.Empty;  // "users"
-    public string Name { get; private set; } = string.Empty;   // "create"
+    public string Resource { get; private set; } = string.Empty;  // "users"
+    public string Action { get; private set; } = string.Empty;   // "create"
     public string Code { get; private set; } = string.Empty;   // "iam.users.create"
     
-    public static Permission Create(string module, string group, string name, string title, string description)
+    public static Permission Create(string module, string resource, string action, string title, string description)
     {
         return new Permission
         {
             Id = Guid.CreateVersion7(),
             Module = module,
-            Group = group,
-            Name = name,
-            Code = $"{module}.{group}.{name}".ToLowerInvariant(), // Normalized
+            Resource = resource,
+            Action = action,
+            Code = $"{module}.{resource}.{action}".ToLowerInvariant(), // Normalized
             Title = title,
             Description = description,
             IsActive = true
@@ -519,7 +520,7 @@ If `PermissionAuthorizationHandler` is not called, check the attribute/policy wi
   - `IamPermission`
   - `SeederPermissions`
   - `SeederRolePermissions`
-  - Bruno files
+  - Bruno files (Bruno files live in tests/bruno-collectio, folders match controller areasn)
 
 **Handler Logic**:
 1. Check if user is `IsSystemAdmin` -> bypass all checks

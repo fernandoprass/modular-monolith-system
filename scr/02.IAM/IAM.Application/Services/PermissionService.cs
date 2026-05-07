@@ -27,13 +27,13 @@ public class PermissionService(
 
    public async Task<Result<PermissionDto>> CreateAsync(PermissionCreateRequest request, CancellationToken cancellationToken = default)
    {
-      bool codeExists = await GetCodeExistsAsync(request.Module, request.Group, request.Name, cancellationToken);
+      bool codeExists = await GetCodeExistsAsync(request.Module, request.Resource, request.Action, cancellationToken);
       var validation = _permissionValidator.ValidateCreate(request, codeExists);
 
       if (!validation.IsSuccess)
          return Result<PermissionDto>.Failure(validation.Messages);
 
-      var permission = Permission.Create(request.Module, request.Group, request.Name, request.Title, request.Description, request.IsActive);
+      var permission = Permission.Create(request.Module, request.Resource, request.Action, request.Title, request.Description, request.IsActive);
 
       await _iamUnitOfWork.Permissions.AddAsync(permission, cancellationToken);
       await _iamUnitOfWork.SaveChangesAsync(cancellationToken);
@@ -44,13 +44,13 @@ public class PermissionService(
    public async Task<Result> UpdateAsync(Guid id, PermissionUpdateRequest request, CancellationToken cancellationToken = default)
    {
       var permission = await _iamUnitOfWork.Permissions.GetByIdAsync(id, cancellationToken);
-      bool codeExists = await GetCodeExistsAsync(request.Module, request.Group, request.Name, id, cancellationToken);
+      bool codeExists = await GetCodeExistsAsync(request.Module, request.Resource, request.Action, id, cancellationToken);
       var validation = _permissionValidator.ValidateUpdate(request, codeExists, permission != null);
 
       if (!validation.IsSuccess)
          return validation;
 
-      permission!.Update(request.Module, request.Group, request.Name, request.Title, request.Description, request.IsActive);
+      permission!.Update(request.Module, request.Resource, request.Action, request.Title, request.Description, request.IsActive);
       _iamUnitOfWork.Permissions.Update(permission);
       await _iamUnitOfWork.SaveChangesAsync(cancellationToken);
 
@@ -143,15 +143,15 @@ public class PermissionService(
       return Result<PermissionDto>.Success(permission);
    }
 
-   private async Task<bool> GetCodeExistsAsync(string module, string group, string name, CancellationToken cancellationToken)
+   private async Task<bool> GetCodeExistsAsync(string module, string resource, string action, CancellationToken cancellationToken)
    {
-      var code = Permission.BuildCode(module, group, name);
+      var code = Permission.BuildCode(module, resource, action);
       return await _permissionQueryRepository.CodeExistsAsync(code, cancellationToken);
    }
 
-   private async Task<bool> GetCodeExistsAsync(string module, string group, string name, Guid excludedId, CancellationToken cancellationToken)
+   private async Task<bool> GetCodeExistsAsync(string module, string resource, string action, Guid excludedId, CancellationToken cancellationToken)
    {
-      var code = Permission.BuildCode(module, group, name);
+      var code = Permission.BuildCode(module, resource, action);
       return await _permissionQueryRepository.CodeExistsAsync(code, excludedId, cancellationToken);
    }
 }

@@ -2,8 +2,8 @@ namespace IAM.Domain.DTOs.Requests;
 
 public record PermissionUpdateRequest(
    string Module,
-   string Group,
-   string Name,
+   string Resource,
+   string Action,
    string Title,
    string Description,
    bool IsActive

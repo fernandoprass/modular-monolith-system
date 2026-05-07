@@ -182,7 +182,7 @@ public class PermissionServiceTests
    [Fact]
    public async Task GetByParams_WithValidRequest_ShouldReturnPermissions()
    {
-      var request = new PermissionSearchRequest(roleId: null, Module: "iam", Group: null, Name: null);
+      var request = new PermissionSearchRequest(roleId: null, Module: "iam", Resource: null, Action: null);
       var permissions = new List<PermissionDto>
       {
          CreatePermissionDto("create"),
@@ -382,8 +382,8 @@ public class PermissionServiceTests
    {
       return new PermissionCreateRequest(
          Module: module,
-         Group: "users",
-         Name: "create",
+         Resource: "users",
+         Action: "create",
          Title: "Create Users",
          Description: "Allows creating users.");
    }
@@ -392,8 +392,8 @@ public class PermissionServiceTests
    {
       return new PermissionUpdateRequest(
          Module: "iam",
-         Group: "users",
-         Name: "update",
+         Resource: "users",
+         Action: "update",
          Title: "Update Users",
          Description: "Allows updating users.",
          IsActive: true);
