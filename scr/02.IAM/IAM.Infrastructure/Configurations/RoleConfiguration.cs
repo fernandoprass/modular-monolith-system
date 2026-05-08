@@ -31,9 +31,9 @@ public class RoleConfiguration : BaseAuditedConfiguration<Role>
          .HasForeignKey(ur => ur.RoleId)
          .OnDelete(DeleteBehavior.Restrict);
 
-      //builder.HasOne(r => r.Organization)
-      // .WithMany(c => c.Users)
-      // .HasForeignKey(u => u.OrganizationId)
-      // .OnDelete(DeleteBehavior.NoAction);
+      builder.HasOne(r => r.Organization)
+             .WithMany(r => r.Roles)
+             .HasForeignKey(r => r.OrganizationId)
+             .OnDelete(DeleteBehavior.NoAction);
    }
 }

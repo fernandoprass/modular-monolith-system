@@ -10,6 +10,8 @@ public class Role : EntityAudited
    public bool IsActive { get; private set; } = true;
    public Guid? OrganizationId { get; private set; } // Roles can be global or specific to a Organization
 
+   public Organization Organization { get; set; } = null!;
+
    private readonly List<RolePermission> _rolePermissions = new();
    public IReadOnlyCollection<RolePermission> RolePermissions => _rolePermissions.AsReadOnly();
 

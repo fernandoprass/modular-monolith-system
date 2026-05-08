@@ -26,7 +26,6 @@ public class UserConfiguration : BaseAuditedConfiguration<User>
 
       builder.HasIndex(u => new { u.OrganizationId, u.Email }).IsUnique();
 
-      // Foreign key
       builder.HasOne(u => u.Organization)
              .WithMany(c => c.Users)
              .HasForeignKey(u => u.OrganizationId)

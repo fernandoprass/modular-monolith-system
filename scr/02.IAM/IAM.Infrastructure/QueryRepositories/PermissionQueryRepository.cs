@@ -1,8 +1,11 @@
 using IAM.Domain.DTOs.Requests;
 using IAM.Domain.DTOs.Responses;
+using IAM.Domain.Entities;
 using IAM.Domain.Mappers;
 using IAM.Domain.QueryRepositories;
 using Microsoft.EntityFrameworkCore;
+using Shared.Application.Contracts;
+using static IAM.Domain.IamPermission;
 
 namespace IAM.Infrastructure.QueryRepositories;
 
@@ -19,15 +22,18 @@ public class PermissionQueryRepository(IamDbContext dbContext) : IPermissionQuer
       return permission?.ToPermissionDto();
    }
 
-   public async Task<IEnumerable<PermissionDto>> GetByParams(PermissionSearchRequest request, CancellationToken cancellationToken = default)
+   public async Task<IEnumerable<PermissionDto>> GetByParams(PermissionSearchRequest request, IUserContext userContext, CancellationToken cancellationToken = default)
    {
       var query = _dbContext.Permissions.AsNoTracking();
 
-      if (request.roleId != null && request.roleId != Guid.Empty)
-         query = from p in query
-                 join rp in _dbContext.RolePermissions on p.Id equals rp.PermissionId
-                 where rp.RoleId == request.roleId
-                 select p;
+      if (!userContext.IsSystemAdmin)
+      {
+            query = from p in query
+                    join rp in _dbContext.RolePermissions on p.Id equals rp.PermissionId
+                    where rp.RoleId == (request.roleId.HasValue ? request.roleId : rp.RoleId) &&
+                          p.RolePermissions.Any(rp => rp.Role.UserRoles.Any(ur => ur.UserId == userContext.UserId))
+                    select p;
+      }
 
       if (!string.IsNullOrWhiteSpace(request.Module))
          query = query.Where(p => EF.Functions.ILike(p.Module, $"%{request.Module}%"));

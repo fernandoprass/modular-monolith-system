@@ -2,24 +2,25 @@ using IAM.Application.Contracts;
 using IAM.Domain;
 using IAM.Domain.DTOs.Requests;
 using IAM.Domain.QueryRepositories;
+using IAM.Domain.Repositories;
 
 namespace IAM.Infrastructure.DatabaseSeeder;
 
 public class SeederRolePermissions(
-   IRoleQueryRepository roleQueryRepository,
-   IPermissionQueryRepository permissionQueryRepository,
+   IRoleRepository roleRepository,
+   IPermissionRepository permissionRepository,
    IPermissionService permissionService)
 {
-   public async Task SeedAsync(string systemAdminRole, string organizationAdminRole, string userRole)
+   public async Task SeedAsync(string systemAdminRoleName, string organizationAdminRoleName, string userRoleName)
    {
-      var roles = await roleQueryRepository.GetByNameAsync(string.Empty, Guid.Empty, true);
-      var permissions = await permissionQueryRepository.GetByParams(new PermissionSearchRequest(null, null, null, null));
+      var roles = await roleRepository.GetAllByOrganizationAsync(organizationId: null);
+      var permissions = await permissionRepository.GetAll(CancellationToken.None);
 
       var permissionsByCode = permissions.ToDictionary(permission => permission.Code, permission => permission.Id);
 
-      await AssignAsync(roles.FirstOrDefault(role => role.Name == systemAdminRole)?.Id, permissionsByCode, AllPermissions());
-      await AssignAsync(roles.FirstOrDefault(role => role.Name == organizationAdminRole)?.Id, permissionsByCode, OrganizationAdminPermissions());
-      await AssignAsync(roles.FirstOrDefault(role => role.Name == userRole)?.Id, permissionsByCode, UserPermissions());
+      await AssignAsync(roles.FirstOrDefault(role => role.Name == systemAdminRoleName)?.Id, permissionsByCode, AllPermissions());
+      await AssignAsync(roles.FirstOrDefault(role => role.Name == organizationAdminRoleName)?.Id, permissionsByCode, OrganizationAdminPermissions());
+      await AssignAsync(roles.FirstOrDefault(role => role.Name == userRoleName)?.Id, permissionsByCode, UserPermissions());
    }
 
    private async Task AssignAsync(

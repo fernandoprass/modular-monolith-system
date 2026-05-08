@@ -1,33 +1,32 @@
-﻿using IAM.Application.Contracts;
-using IAM.Domain.DTOs.Requests;
-using IAM.Domain.Entities;
+﻿using IAM.Domain.Entities;
 using IAM.Domain.Interfaces;
+using IAM.Domain.Repositories;
 
 namespace IAM.Infrastructure.DatabaseSeeder;
 
-public class SeederRoles(IRoleService roleService,
+public class SeederRoles(IRoleRepository roleRepository,
    IIamUnitOfWork iamUnitOfWork)
 {
-   public async Task SeedAsync(string systemAdminRole, string organizationAdminRole, string userRole)
+   public async Task SeedAsync(string systemAdminRoleName, string organizationAdminRoleName, string userRoleName)
    {
-      var roleSystemAdmin = Role.Create(systemAdminRole,"Full access to all resources.", false, true, null);
+      var roleSystemAdmin = Role.Create(systemAdminRoleName,"Full access to all resources.", false, true, null);
 
-      var roleOrganizationAdmin = Role.Create(organizationAdminRole,"Access to all Organization resources and data.", false, true, null);
+      var roleOrganizationAdmin = Role.Create(organizationAdminRoleName,"Access to all Organization resources and data.", false, true, null);
 
-      var roleUser = Role.Create(userRole, "Access to own resources and data.", true, true, null);
+      var roleUser = Role.Create(userRoleName, "Access to own resources and data.", true, true, null);
 
-      var roles = await roleService.GetByNameAsync(string.Empty); 
-      if (!roles.Data.Any(r => r.Name == systemAdminRole))
+      var roles = await roleRepository.GetAllByOrganizationAsync(organizationId: null); 
+      if (!roles.Any(r => r.Name == systemAdminRoleName))
       {
          await iamUnitOfWork.Roles.AddAsync(roleSystemAdmin);
       }
 
-      if (!roles.Data.Any(r => r.Name == organizationAdminRole))
+      if (!roles.Any(r => r.Name == organizationAdminRoleName))
       {
          await iamUnitOfWork.Roles.AddAsync(roleOrganizationAdmin);
       }
 
-      if (!roles.Data.Any(r => r.Name == userRole))
+      if (!roles.Any(r => r.Name == userRoleName))
       {
          await iamUnitOfWork.Roles.AddAsync(roleUser);
       }

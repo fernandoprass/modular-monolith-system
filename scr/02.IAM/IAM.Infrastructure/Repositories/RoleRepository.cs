@@ -13,4 +13,11 @@ public class RoleRepository(IamDbContext dbContext) : BaseRepository<Role>(dbCon
          .Include(r => r.RolePermissions)
          .FirstOrDefaultAsync(r => r.Id == id, cancellationToken);
    }
+   public async Task<IEnumerable<Role?>> GetAllByOrganizationAsync(Guid? organizationId, CancellationToken cancellationToken = default)
+   {
+      return await _dbSet
+         .Where(r => r.OrganizationId == organizationId)
+         .ToListAsync(cancellationToken);
+   }
+
 }

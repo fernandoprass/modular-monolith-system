@@ -3,6 +3,7 @@ using IAM.Domain.Entities;
 using IAM.Domain.Mappers;
 using IAM.Domain.QueryRepositories;
 using Microsoft.EntityFrameworkCore;
+using Shared.Application.Contracts;
 
 namespace IAM.Infrastructure.QueryRepositories;
 
@@ -13,10 +14,10 @@ public class RoleQueryRepository(IamDbContext dbContext) : IRoleQueryRepository
    public async Task<int> CountRolesByRoleIdsAsync(
     IEnumerable<Guid> ids,
     Guid organizationId,
-    bool isSystemAdminUser,
+    IUserContext userContext,
     CancellationToken cancellationToken = default)
    {
-      var query = CreateQueryWithOrganizationContextFilter(organizationId, isSystemAdminUser);
+      var query = CreateQueryWithSecurityContextFilter(organizationId, userContext);
 
       return await query.CountAsync(r => ids.Contains(r.Id) && r.IsActive, cancellationToken);
    }
@@ -32,11 +33,11 @@ public class RoleQueryRepository(IamDbContext dbContext) : IRoleQueryRepository
 
    public async Task<IEnumerable<RoleDto>> GetByNameAsync(
        string? name,
-       Guid organizationId,
-       bool isSystemAdminUser,
+       Guid? organizationId,
+       IUserContext userContext,
        CancellationToken cancellationToken = default)
    {
-      var query = CreateQueryWithOrganizationContextFilter(organizationId, isSystemAdminUser);
+      var query = CreateQueryWithSecurityContextFilter(organizationId, userContext);
 
       if (!string.IsNullOrWhiteSpace(name))
       {
@@ -73,22 +74,33 @@ public class RoleQueryRepository(IamDbContext dbContext) : IRoleQueryRepository
 
    public async Task<bool> NameExistsAsync(
       string name,
-      Guid? organizationId, 
-      bool isSystemAdminUser, 
+      Guid? organizationId,
+      IUserContext userContext,
       CancellationToken cancellationToken = default)
    {
-      var query = CreateQueryWithOrganizationContextFilter(organizationId, isSystemAdminUser);
+      var query = CreateQueryWithSecurityContextFilter(organizationId, userContext);
 
       return await query.AnyAsync(r => r.Name == name, cancellationToken);
    }
 
-   private IQueryable<Role> CreateQueryWithOrganizationContextFilter(Guid? organizationId, bool isSystemAdminUser)
+   private IQueryable<Role> CreateQueryWithSecurityContextFilter(Guid? organizationId, IUserContext userContext)
    {
       var query = _dbContext.Roles.AsNoTracking();
 
-      query = !isSystemAdminUser
-              ? query.Where(r => r.OrganizationId == organizationId)
-              : query.Where(r => r.OrganizationId == null || r.OrganizationId == organizationId);
+      if (!userContext.IsSystemAdmin)
+      {
+         //if user is not system admin, we need to filter roles based on user's organization and their assigned roles
+         query = from role in query
+                 join rp in _dbContext.UserRoles on role.Id equals rp.RoleId
+                 where rp.UserId ==  userContext.UserId && 
+                       role.OrganizationId == (organizationId.Equals(Guid.Empty) ? null : organizationId)
+                 select role;
+      }
+      else
+      {
+         query = query.Where(r => r.OrganizationId == null || r.OrganizationId == organizationId);
+      }
+
       return query;
    }
 }

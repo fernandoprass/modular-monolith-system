@@ -2,18 +2,19 @@
 using IAM.Domain.Enums;
 using IAM.Domain.Interfaces;
 using IAM.Domain.QueryRepositories;
+using IAM.Domain.Repositories;
 using Isopoh.Cryptography.Argon2;
 
 namespace IAM.Infrastructure.DatabaseSeeder;
 
 public class SeederOrganizations(
    IOrganizationQueryRepository organizationQueryRepository,
-   IRoleQueryRepository roleQueryRepository,
+   IRoleRepository roleRepository,
    IIamUnitOfWork iamUnitOfWork)
 {
    private const string DefaultPassword = "Password123!";
 
-   public async Task SeedAdminOrgAsync(string systemAdminRole)
+   public async Task SeedAdminOrgAsync(string systemAdminRoleName)
    {
       var organizationId = Guid.CreateVersion7();
       var organizationCode = "SAASADMIN";
@@ -38,7 +39,7 @@ public class SeederOrganizations(
       organization.CreatedBy = superUser.Id;
 
       var supportUser = User.Create("Internal Support", "support@saas.com", passwordHash, DateTime.UtcNow.AddDays(30), organizationId);
-      var roles = await roleQueryRepository.GetByNameAsync(systemAdminRole, organizationId, true);
+      var roles = await roleRepository.GetAllByOrganizationAsync(organizationId);
 
       superUser.AddRole(roles.First().Id, null);
       supportUser.AddRole(roles.First().Id, null);
@@ -49,7 +50,7 @@ public class SeederOrganizations(
       await iamUnitOfWork.SaveChangesAsync();
    }
 
-   public async Task SeedScientistsOrgAsync(string organizationAdminRole, string userRole)
+   public async Task SeedScientistsOrgAsync(string organizationAdminRoleName, string userRoleName)
    {
       var organizationId = Guid.CreateVersion7();
       var organizationCode = "SCIENTISTS";
@@ -68,22 +69,22 @@ public class SeederOrganizations(
 
       await iamUnitOfWork.Organizations.AddAsync(organization);
 
-      var roles = await roleQueryRepository.GetByNameAsync(organizationAdminRole, organizationId, true);
+      var roles = await roleRepository.GetAllByOrganizationAsync(organizationId);
 
       var passwordHash = Argon2.Hash(DefaultPassword);
       var alanTuring = User.Create("Alan Turing", "alan.turing@enigma.org", passwordHash, DateTime.UtcNow.AddDays(30), organizationId);
-      alanTuring.AddRole(roles.First().Id, null);
+      alanTuring.AddRole(roles.First(r => r.Name == organizationAdminRoleName).Id, null);
 
-
-      roles = await roleQueryRepository.GetByNameAsync(userRole, organizationId, true);
       var adaLovelace = User.Create("Ada Lovelace", "ada.lovelace@analytical.org", passwordHash, DateTime.UtcNow.AddDays(30), organizationId);
       var graceHopper = User.Create("Grace Hopper", "grace.hopper@cobol.org", passwordHash, DateTime.UtcNow.AddDays(30), organizationId);
       var johnVonNeumann = User.Create("John von Neumann", "john.vonneumann@architecture.org", passwordHash, DateTime.UtcNow.AddDays(30), organizationId);
       var claudeShannon = User.Create("Claude Shannon", "claude.shannon@entropy.org", passwordHash, DateTime.UtcNow.AddDays(30), organizationId);
-      adaLovelace.AddRole(roles.First().Id, null);
-      graceHopper.AddRole(roles.First().Id, null);
-      johnVonNeumann.AddRole(roles.First().Id, null);
-      claudeShannon.AddRole(roles.First().Id, null);
+
+      var userRoleId = roles.First(r => r.Name == userRoleName).Id;
+      adaLovelace.AddRole(userRoleId, null);
+      graceHopper.AddRole(userRoleId, null);
+      johnVonNeumann.AddRole(userRoleId, null);
+      claudeShannon.AddRole(userRoleId, null);
 
       var members = new[]
       {

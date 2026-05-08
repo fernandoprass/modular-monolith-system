@@ -15,6 +15,8 @@ public class Organization : EntityAudited
    // Navigation property
    public ICollection<User> Users { get; set; } = new List<User>();
 
+   public ICollection<Role> Roles { get; set; } = new List<Role>();
+
    public static Organization Create(OrganizationType type, string code, string name, string? description)
    {
       return new Organization
