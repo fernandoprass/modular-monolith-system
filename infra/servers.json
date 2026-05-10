@@ -3,12 +3,11 @@
     "1": {
       "Name": "Local PostgreSQL",
       "Group": "Servers",
-      "Host": "postgres",
+      "Host": "postgres_db",
       "Port": 5432,
-      "MaintenanceDB": "postgres",
-      "Username": "postgres_user",
-      "SSLMode": "prefer",
-      "PassFile": "/pgpass"
+      "MaintenanceDB": "iam",
+      "Username": "admin",
+      "SSLMode": "prefer"
     }
   }
 }

@@ -24,11 +24,11 @@
   <Folder Name="/infra/">
     <File Path="infra/.env" />
     <File Path="infra/clean-database.sql" />
-    <File Path="infra/create-module-shared.ps1" />
-    <File Path="infra/create-module.ps1" />
     <File Path="infra/docker-compose.mongodb.yaml" />
     <File Path="infra/docker-compose.postgresql.yaml" />
     <File Path="infra/docker-compose.redis.yaml" />
+    <File Path="infra/dotnet.create-module-shared.ps1" />
+    <File Path="infra/dotnet.create-module.ps1" />
     <File Path="infra/iam.db-backup.ps1" />
     <File Path="infra/servers.json" />
     <File Path="infra/start-infra.ps1" />
@@ -37,6 +37,13 @@
     <File Path=".gitignore" />
     <File Path="LICENSE" />
     <File Path="readme.md" />
+  </Folder>
+  <Folder Name="/src/" />
+  <Folder Name="/src/02.Sentinel/">
+    <Project Path="src/02.Sentinel/Sentinel.API/Sentinel.API.csproj" />
+    <Project Path="src/02.Sentinel/Sentinel.Application/Sentinel.Application.csproj" />
+    <Project Path="src/02.Sentinel/Sentinel.Domain/Sentinel.Domain.csproj" />
+    <Project Path="src/02.Sentinel/Sentinel.Infrastructure/Sentinel.Infrastructure.csproj" />
   </Folder>
   <Folder Name="/tests/" />
   <Folder Name="/tests/01.Shared/">
@@ -47,6 +54,9 @@
   <Folder Name="/tests/02.IAM/">
     <Project Path="tests/02.IAM/IAM.API.Tests/IAM.API.Tests.csproj" Id="bb8eda8c-92b7-4043-ba94-a3967ab24af3" />
     <Project Path="tests/02.IAM/IAM.Application.Tests/IAM.Application.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tests/02.Sentinel/">
+    <Project Path="tests/02.Sentinel/Sentinel.Application.Tests/Sentinel.Application.Tests.csproj" />
   </Folder>
   <Folder Name="/tests/api/">
     <File Path="tests/api/http-client.env.json" />
