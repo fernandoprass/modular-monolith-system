@@ -12,7 +12,7 @@ using Shared.Infrastructure;
 namespace Shared.Infrastructure.Migrations
 {
     [DbContext(typeof(SharedDbContext))]
-    [Migration("20260428172500_InitialCreate")]
+    [Migration("20260510190608_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />

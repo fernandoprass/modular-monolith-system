@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace IAM.Infrastructure.Migrations
 {
     [DbContext(typeof(IamDbContext))]
-    [Migration("20260428172157_InitialDatabase")]
-    partial class InitialDatabase
+    [Migration("20260510190655_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -95,6 +95,12 @@ namespace IAM.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("action");
+
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -114,12 +120,6 @@ namespace IAM.Infrastructure.Migrations
                         .HasColumnType("text")
                         .HasColumnName("description");
 
-                    b.Property<string>("Group")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
-                        .HasColumnName("group");
-
                     b.Property<bool>("IsActive")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
@@ -132,11 +132,11 @@ namespace IAM.Infrastructure.Migrations
                         .HasColumnType("character varying(50)")
                         .HasColumnName("module");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("Resource")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("name");
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("resource");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -214,6 +214,9 @@ namespace IAM.Infrastructure.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_roles");
+
+                    b.HasIndex("OrganizationId")
+                        .HasDatabaseName("ix_roles_organization_id");
 
                     b.HasIndex("Name", "OrganizationId")
                         .IsUnique()
@@ -399,10 +402,21 @@ namespace IAM.Infrastructure.Migrations
                     b.ToTable("user_roles", "iam");
                 });
 
+            modelBuilder.Entity("IAM.Domain.Entities.Role", b =>
+                {
+                    b.HasOne("IAM.Domain.Entities.Organization", "Organization")
+                        .WithMany("Roles")
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("fk_roles_organizations_organization_id");
+
+                    b.Navigation("Organization");
+                });
+
             modelBuilder.Entity("IAM.Domain.Entities.RolePermission", b =>
                 {
                     b.HasOne("IAM.Domain.Entities.Permission", "Permission")
-                        .WithMany("RoleFeatures")
+                        .WithMany("RolePermissions")
                         .HasForeignKey("PermissionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
@@ -455,12 +469,14 @@ namespace IAM.Infrastructure.Migrations
 
             modelBuilder.Entity("IAM.Domain.Entities.Organization", b =>
                 {
+                    b.Navigation("Roles");
+
                     b.Navigation("Users");
                 });
 
             modelBuilder.Entity("IAM.Domain.Entities.Permission", b =>
                 {
-                    b.Navigation("RoleFeatures");
+                    b.Navigation("RolePermissions");
                 });
 
             modelBuilder.Entity("IAM.Domain.Entities.Role", b =>

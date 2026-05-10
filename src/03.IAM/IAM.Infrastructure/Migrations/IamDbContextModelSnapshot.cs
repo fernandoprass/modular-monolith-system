@@ -3,7 +3,6 @@ using System;
 using IAM.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,11 +11,9 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace IAM.Infrastructure.Migrations
 {
     [DbContext(typeof(IamDbContext))]
-    [Migration("20260507190129_UpdatePermission")]
-    partial class UpdatePermission
+    partial class IamDbContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -215,6 +212,9 @@ namespace IAM.Infrastructure.Migrations
                     b.HasKey("Id")
                         .HasName("pk_roles");
 
+                    b.HasIndex("OrganizationId")
+                        .HasDatabaseName("ix_roles_organization_id");
+
                     b.HasIndex("Name", "OrganizationId")
                         .IsUnique()
                         .HasDatabaseName("ix_roles_name_organization_id");
@@ -399,6 +399,17 @@ namespace IAM.Infrastructure.Migrations
                     b.ToTable("user_roles", "iam");
                 });
 
+            modelBuilder.Entity("IAM.Domain.Entities.Role", b =>
+                {
+                    b.HasOne("IAM.Domain.Entities.Organization", "Organization")
+                        .WithMany("Roles")
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("fk_roles_organizations_organization_id");
+
+                    b.Navigation("Organization");
+                });
+
             modelBuilder.Entity("IAM.Domain.Entities.RolePermission", b =>
                 {
                     b.HasOne("IAM.Domain.Entities.Permission", "Permission")
@@ -455,6 +466,8 @@ namespace IAM.Infrastructure.Migrations
 
             modelBuilder.Entity("IAM.Domain.Entities.Organization", b =>
                 {
+                    b.Navigation("Roles");
+
                     b.Navigation("Users");
                 });
 

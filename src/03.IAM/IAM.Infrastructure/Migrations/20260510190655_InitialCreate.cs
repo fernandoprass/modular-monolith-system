@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace IAM.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialDatabase : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -43,8 +43,8 @@ namespace IAM.Infrastructure.Migrations
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
                     module = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    group = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    resource = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    action = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     code = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     title = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     description = table.Column<string>(type: "text", nullable: false),
@@ -78,6 +78,12 @@ namespace IAM.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("pk_roles", x => x.id);
+                    table.ForeignKey(
+                        name: "fk_roles_organizations_organization_id",
+                        column: x => x.organization_id,
+                        principalSchema: "iam",
+                        principalTable: "organizations",
+                        principalColumn: "id");
                 });
 
             migrationBuilder.CreateTable(
@@ -198,6 +204,12 @@ namespace IAM.Infrastructure.Migrations
                 table: "roles",
                 columns: new[] { "name", "organization_id" },
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "ix_roles_organization_id",
+                schema: "iam",
+                table: "roles",
+                column: "organization_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_user_roles_role_id",
