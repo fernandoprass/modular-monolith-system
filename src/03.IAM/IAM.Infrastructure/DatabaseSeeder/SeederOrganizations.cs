@@ -1,0 +1,104 @@
+﻿using IAM.Domain.Entities;
+using IAM.Domain.Enums;
+using IAM.Domain.Interfaces;
+using IAM.Domain.QueryRepositories;
+using IAM.Domain.Repositories;
+using Isopoh.Cryptography.Argon2;
+
+namespace IAM.Infrastructure.DatabaseSeeder;
+
+public class SeederOrganizations(
+   IOrganizationQueryRepository organizationQueryRepository,
+   IRoleRepository roleRepository,
+   IIamUnitOfWork iamUnitOfWork)
+{
+   private const string DefaultPassword = "Password123!";
+
+   public async Task SeedAdminOrgAsync(string systemAdminRoleName)
+   {
+      var organizationId = Guid.CreateVersion7();
+      var organizationCode = "SAASADMIN";
+
+      if (await organizationQueryRepository.ExistsByCodeAsync(organizationCode)) return;
+
+      var organization = new Organization
+      {
+         Id = organizationId,
+         Name = "SaaS Internal Administration",
+         Code = organizationCode,
+         Type = OrganizationType.Company,
+         Description = "Internal system management and support",
+         IsMaster = true, // Following our Master Organization rule
+         CreatedAt = DateTime.UtcNow
+      };
+
+      var passwordHash = Argon2.Hash(DefaultPassword);
+
+      var superUser = User.Create("System Root", "admin@saas.com", passwordHash, DateTime.UtcNow.AddDays(30), organizationId);
+      superUser.IsSystemAdmin = true;
+      organization.CreatedBy = superUser.Id;
+
+      var supportUser = User.Create("Internal Support", "support@saas.com", passwordHash, DateTime.UtcNow.AddDays(30), organizationId);
+      var roles = await roleRepository.GetAllByOrganizationAsync(organizationId);
+
+      superUser.AddRole(roles.First().Id, null);
+      supportUser.AddRole(roles.First().Id, null);
+
+      await iamUnitOfWork.Organizations.AddAsync(organization);
+      await iamUnitOfWork.Users.AddAsync(superUser);
+      await iamUnitOfWork.Users.AddAsync(supportUser);
+      await iamUnitOfWork.SaveChangesAsync();
+   }
+
+   public async Task SeedScientistsOrgAsync(string organizationAdminRoleName, string userRoleName)
+   {
+      var organizationId = Guid.CreateVersion7();
+      var organizationCode = "SCIENTISTS";
+
+      if (await organizationQueryRepository.ExistsByCodeAsync(organizationCode)) return;
+
+      var organization = new Organization
+      {
+         Id = organizationId,
+         Name = "Computing Pioneers Society",
+         Code = "SCIENTISTS",
+         Type = OrganizationType.Company,
+         Description = "Foundation of modern Computer Science",
+         CreatedAt = DateTime.UtcNow
+      };
+
+      await iamUnitOfWork.Organizations.AddAsync(organization);
+
+      var roles = await roleRepository.GetAllByOrganizationAsync(organizationId);
+
+      var passwordHash = Argon2.Hash(DefaultPassword);
+      var alanTuring = User.Create("Alan Turing", "alan.turing@enigma.org", passwordHash, DateTime.UtcNow.AddDays(30), organizationId);
+      alanTuring.AddRole(roles.First(r => r.Name == organizationAdminRoleName).Id, null);
+
+      var adaLovelace = User.Create("Ada Lovelace", "ada.lovelace@analytical.org", passwordHash, DateTime.UtcNow.AddDays(30), organizationId);
+      var graceHopper = User.Create("Grace Hopper", "grace.hopper@cobol.org", passwordHash, DateTime.UtcNow.AddDays(30), organizationId);
+      var johnVonNeumann = User.Create("John von Neumann", "john.vonneumann@architecture.org", passwordHash, DateTime.UtcNow.AddDays(30), organizationId);
+      var claudeShannon = User.Create("Claude Shannon", "claude.shannon@entropy.org", passwordHash, DateTime.UtcNow.AddDays(30), organizationId);
+
+      var userRoleId = roles.First(r => r.Name == userRoleName).Id;
+      adaLovelace.AddRole(userRoleId, null);
+      graceHopper.AddRole(userRoleId, null);
+      johnVonNeumann.AddRole(userRoleId, null);
+      claudeShannon.AddRole(userRoleId, null);
+
+      var members = new[]
+      {
+         alanTuring,
+         adaLovelace,
+         graceHopper,
+         johnVonNeumann,
+         claudeShannon
+     };
+
+      foreach (var user in members)
+      {
+         await iamUnitOfWork.Users.AddAsync(user);
+      }
+      await iamUnitOfWork.SaveChangesAsync();
+   }
+}

@@ -1,0 +1,25 @@
+meta {
+  name: search by params
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{server}}/api/{{version}}/iam/permissions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "roleId": null,
+    "module": "",
+    "resource": "",
+    "action": "",
+    "includeInactive": true
+  }
+}

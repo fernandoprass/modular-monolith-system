@@ -20,10 +20,14 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.7" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\src\01.Shared\Shared.Application\Shared.Application.csproj" />
+    <ProjectReference Include="..\..\..\src\03.IAM\IAM.API\IAM.API.csproj" />
+    <ProjectReference Include="..\..\..\src\03.IAM\IAM.Application\IAM.Application.csproj" />
+    <ProjectReference Include="..\..\..\src\03.IAM\IAM.Domain\IAM.Domain.csproj" />
+    <ProjectReference Include="..\..\..\src\03.IAM\IAM.Infrastructure\IAM.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>

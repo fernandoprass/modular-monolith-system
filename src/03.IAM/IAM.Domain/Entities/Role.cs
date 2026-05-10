@@ -1,0 +1,62 @@
+using Shared.Domain.Entities;
+
+namespace IAM.Domain.Entities;
+
+public class Role : EntityAudited
+{
+   public string Name { get; private set; }
+   public string Description { get; private set; }
+   public bool IsDefault { get; private set; } = false; // Indicates if this is a default role assigned to new users
+   public bool IsActive { get; private set; } = true;
+   public Guid? OrganizationId { get; private set; } // Roles can be global or specific to a Organization
+
+   public Organization Organization { get; set; } = null!;
+
+   private readonly List<RolePermission> _rolePermissions = new();
+   public IReadOnlyCollection<RolePermission> RolePermissions => _rolePermissions.AsReadOnly();
+
+   private readonly List<UserRole> _userRoles = new();
+   public IReadOnlyCollection<UserRole> UserRoles => _userRoles.AsReadOnly();
+
+   private Role() { }
+
+   public static Role Create(string name, string description, bool isDefault, bool isActive, Guid? organizationId)
+   {
+      return new Role
+      {
+         Id = Guid.CreateVersion7(),
+         Name = name,
+         Description = description,
+         IsDefault = isDefault,
+         IsActive = isActive,
+         OrganizationId = organizationId
+      };
+   }
+
+   public void Update(string name, string description, bool isDefault, bool isActive)
+   {
+      Name = name;
+      Description = description;
+      IsDefault = isDefault;
+      IsActive = isActive;
+   }
+
+   public void AddPermission(Guid permissionId)
+   {
+      if (!_rolePermissions.Any(rf => rf.PermissionId == permissionId))
+      {
+         _rolePermissions.Add(new RolePermission(Id, permissionId));
+      }
+   }
+
+   public void RemovePermission(Guid permissionId)
+   {
+      var permission = _rolePermissions.FirstOrDefault(rf => rf.PermissionId == permissionId);
+      if (permission != null)
+      {
+         _rolePermissions.Remove(permission);
+      }
+   }
+
+   public void ClearPermissions() => _rolePermissions.Clear();
+}

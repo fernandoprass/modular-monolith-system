@@ -1,0 +1,34 @@
+services:
+  redis:
+    image: redis:7.2-alpine
+    container_name: ${REDIS_SERVICE_NAME}
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT}:6379"
+    # appendonly: survives restarts; loglevel warning: keeps logs clean
+    command: >
+      redis-server
+      --appendonly yes
+      --loglevel warning
+      --maxmemory ${REDIS_MAX_MEMORY}
+      --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    volumes:
+      - redis_data:/data
+    env_file:
+      - .env
+    networks:
+      - modular-network
+
+networks:
+  modular-network:
+    external: true
+    name: ${NETWORK_NAME}
+
+volumes:
+  redis_data:
