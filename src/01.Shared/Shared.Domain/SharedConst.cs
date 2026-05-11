@@ -17,6 +17,15 @@ public static partial class SharedConst
       public const string ParameterOverride = nameof(Entities.ParameterOverride);
    }
 
+   public static class Redis
+   {
+      public const string ConnectionString = "Redis";
+
+      public const string AuditLogEventsStream = "audit-log-events";
+      public const string SystemLogEventsStream = "system-log-events";
+      public const string NotificationEventsChannel = "notification-events";
+   }
+
    public static class System
    {
       public const string ModuleName = "Shared";
