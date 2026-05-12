@@ -18,15 +18,13 @@ public class AuditLogConfiguration : BaseConfiguration<AuditLog>
       builder.Property(a => a.Action).IsRequired().HasMaxLength(100);
       builder.Property(a => a.PrivacyLevel).IsRequired().HasConversion<byte>();
       builder.Property(a => a.Description).HasMaxLength(500);
-      builder.Property(a => a.Entity).IsRequired().HasMaxLength(100);
       builder.Property(a => a.IpAddress).HasMaxLength(64);
       builder.Property(a => a.UserAgent).HasMaxLength(500);
       builder.Property(a => a.Metadata).HasColumnType(SentinelConst.Database.JsonbType);
 
-      builder.HasIndex(a => new { a.OrganizationId, a.Timestamp, a.UserId });
-      builder.HasIndex(a => new { a.OrganizationId, a.Timestamp, a.Module });
-      builder.HasIndex(a => new { a.OrganizationId, a.Timestamp, a.EntityId });
-
-
+      builder.HasIndex(a => new { a.OrganizationId, a.Timestamp });
+      builder.HasIndex(a => new { a.OrganizationId, a.Module, a.Timestamp });
+      builder.HasIndex(a => new { a.OrganizationId, a.TargetId, a.Timestamp });
+      builder.HasIndex(a => new { a.OrganizationId, a.UserId, a.Timestamp });
    }
 }

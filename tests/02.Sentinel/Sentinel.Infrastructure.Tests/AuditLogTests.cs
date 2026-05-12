@@ -17,7 +17,6 @@ public class AuditLogTests
          "Created user",
          Guid.CreateVersion7(),
          Guid.CreateVersion7(),
-         "User",
          Guid.CreateVersion7(),
          "127.0.0.1",
          "test-agent",

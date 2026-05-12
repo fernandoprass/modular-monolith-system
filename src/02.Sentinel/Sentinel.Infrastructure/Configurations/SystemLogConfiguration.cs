@@ -22,8 +22,9 @@ public class SystemLogConfiguration : BaseConfiguration<SystemLog>
       builder.Property(s => s.RequestId).HasMaxLength(100);
       builder.Property(s => s.PropertiesJson).HasColumnType(SentinelConst.Database.JsonbType);
 
-      builder.HasIndex(s => new { s.OrganizationId, s.Timestamp, s.UserId });
-      builder.HasIndex(s => new { s.OrganizationId, s.Timestamp, s.Source });
-      builder.HasIndex(s => new { s.OrganizationId, s.Timestamp, s.RequestId });
+      builder.HasIndex(s => new { s.OrganizationId, s.Timestamp});
+      builder.HasIndex(s => new { s.OrganizationId, s.Source, s.Timestamp });
+      builder.HasIndex(s => new { s.OrganizationId, s.RequestId, s.Timestamp });
+      builder.HasIndex(s => new { s.OrganizationId, s.UserId, s.Timestamp });
    }
 }

@@ -13,8 +13,7 @@ public class AuditLog : Entity
    public string Description { get; private set; } = string.Empty;
    public Guid UserId { get; private set; }
    public Guid OrganizationId { get; private set; }
-   public string Entity { get; private set; } = string.Empty;
-   public Guid EntityId { get; private set; }
+   public Guid TargetId { get; private set; }
    public string? IpAddress { get; private set; }
    public string? UserAgent { get; private set; }
    public string Metadata { get; private set; } = "{}";
@@ -30,8 +29,7 @@ public class AuditLog : Entity
       string description,
       Guid userId,
       Guid organizationId,
-      string entity,
-      Guid entityId,
+      Guid targetId,
       string? ipAddress,
       string? userAgent,
       string metadata)
@@ -47,8 +45,7 @@ public class AuditLog : Entity
          Description = description,
          UserId = userId,
          OrganizationId = organizationId,
-         Entity = entity,
-         EntityId = entityId,
+         TargetId = targetId,
          IpAddress = ipAddress,
          UserAgent = userAgent,
          Metadata = string.IsNullOrWhiteSpace(metadata) ? "{}" : metadata

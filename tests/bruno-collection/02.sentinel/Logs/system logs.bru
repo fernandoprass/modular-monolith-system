@@ -1,0 +1,30 @@
+meta {
+  name: system logs
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{server}}/api/{{version}}/sentinel/logs/system
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "organizationId": null,
+    "userId": null,
+    "level": null,
+    "status": null,
+    "source": "",
+    "requestId": "",
+    "from": null,
+    "to": null,
+    "pageNumber": 1,
+    "pageSize": 50
+  }
+}

@@ -1,10 +1,8 @@
 using FluentAssertions;
-using IAM.API.Middlewares;
-using IAM.Application.Contracts;
+using Shared.Application.Contracts;
+using Shared.Infrastructure.Authorization;
 using IAM.Domain;
-using IAM.Domain.DTOs.Responses;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using System.Security.Claims;
 using Xunit;
@@ -13,29 +11,16 @@ namespace IAM.API.Tests.Middlewares;
 
 public class PermissionAuthorizationHandlerTests
 {
-   private readonly IServiceProvider _serviceProvider;
-   private readonly IServiceProvider _scopeServiceProvider;
-   private readonly IServiceScope _scope;
-   private readonly IServiceScopeFactory _scopeFactory;
    private readonly IRolePermissionAuthorizationCache _cache;
-   private readonly IRoleService _roleService;
+   private readonly IRolePermissionProvider _rolePermissionProvider;
    private readonly PermissionAuthorizationHandler _handler;
 
    public PermissionAuthorizationHandlerTests()
    {
-      _serviceProvider = Substitute.For<IServiceProvider>();
-      _scopeServiceProvider = Substitute.For<IServiceProvider>();
-      _scope = Substitute.For<IServiceScope>();
-      _scopeFactory = Substitute.For<IServiceScopeFactory>();
       _cache = Substitute.For<IRolePermissionAuthorizationCache>();
-      _roleService = Substitute.For<IRoleService>();
+      _rolePermissionProvider = Substitute.For<IRolePermissionProvider>();
 
-      _scope.ServiceProvider.Returns(_scopeServiceProvider);
-      _scopeFactory.CreateScope().Returns(_scope);
-      _serviceProvider.GetService(typeof(IServiceScopeFactory)).Returns(_scopeFactory);
-      _scopeServiceProvider.GetService(typeof(IRoleService)).Returns(_roleService);
-
-      _handler = new PermissionAuthorizationHandler(_serviceProvider, _cache);
+      _handler = new PermissionAuthorizationHandler(_cache, _rolePermissionProvider);
    }
 
    [Fact]
@@ -155,7 +140,7 @@ public class PermissionAuthorizationHandlerTests
       await _handler.HandleAsync(context);
 
       context.HasSucceeded.Should().BeTrue();
-      await _roleService.DidNotReceive().GetPermissionsByRoleIdAsync(roleId);
+      await _rolePermissionProvider.DidNotReceive().GetPermissionsByRoleIdAsync(roleId);
    }
 
    private void ConfigureCacheMiss(Guid roleId, IEnumerable<string> permissionCodes)
@@ -163,8 +148,8 @@ public class PermissionAuthorizationHandlerTests
       _cache.GetOrCreateAsync(roleId, Arg.Any<Func<Task<IEnumerable<string>>>>())
          .Returns(call => call.Arg<Func<Task<IEnumerable<string>>>>()());
 
-      _roleService.GetPermissionsByRoleIdAsync(roleId)
-         .Returns(permissionCodes.Select(CreatePermissionDto));
+      _rolePermissionProvider.GetPermissionsByRoleIdAsync(roleId)
+         .Returns(permissionCodes);
    }
 
    private static AuthorizationHandlerContext CreateContext(ClaimsPrincipal user)
@@ -177,18 +162,5 @@ public class PermissionAuthorizationHandlerTests
    {
       return new ClaimsPrincipal(new ClaimsIdentity(claims, "Test"));
    }
-
-   private static PermissionDto CreatePermissionDto(string code)
-   {
-      var parts = code.Split('.');
-      return new PermissionDto(
-         Guid.NewGuid(),
-         parts[0],
-         parts[1],
-         parts[2],
-         code,
-         code,
-         code,
-         true);
-   }
 }
+

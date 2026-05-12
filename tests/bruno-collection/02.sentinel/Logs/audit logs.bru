@@ -1,0 +1,31 @@
+meta {
+  name: audit logs
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{server}}/api/{{version}}/sentinel/logs/audit
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "organizationId": null,
+    "userId": null,
+    "module": "",
+    "feature": "",
+    "action": "",
+    "privacyLevel": null,
+    "targetId": null,
+    "from": null,
+    "to": null,
+    "pageNumber": 1,
+    "pageSize": 50
+  }
+}

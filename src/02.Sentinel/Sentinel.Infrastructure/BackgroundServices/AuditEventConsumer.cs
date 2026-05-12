@@ -117,8 +117,7 @@ public class AuditEventConsumer(
          auditEvent.Description,
          auditEvent.UserId,
          auditEvent.OrganizationId,
-         auditEvent.Entity,
-         auditEvent.EntityId,
+         auditEvent.TargetId,
          auditEvent.IpAddress,
          auditEvent.UserAgent,
          auditEvent.Metadata);
@@ -126,6 +125,6 @@ public class AuditEventConsumer(
       await unitOfWork.AuditLogs.AddAsync(auditLog, cancellationToken);
       await unitOfWork.SaveChangesAsync(cancellationToken);
 
-      _logger.LogDebug("Persisted audit event {EventId}: {Action} on {Entity}", auditEvent.EventId, auditEvent.Action, auditEvent.Entity);
+      _logger.LogDebug("Persisted audit event {EventId}: {Action} on {TargetId}", auditEvent.EventId, auditEvent.Action, auditEvent.TargetId);
    }
 }

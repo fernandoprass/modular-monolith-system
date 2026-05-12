@@ -13,8 +13,7 @@ public record AuditLogEvent
    public AuditPrivacyLevel PrivacyLevel { get; init; } = AuditPrivacyLevel.Medium;
    public string Description { get; init; } = string.Empty;
    public Guid UserId { get; init; }
-   public string Entity { get; init; } = string.Empty;
-   public Guid EntityId { get; init; }
+   public Guid TargetId { get; init; }
    public string? IpAddress { get; init; }
    public string? UserAgent { get; init; }
    public string Metadata { get; init; } = "{}";
