@@ -27,7 +27,7 @@ public class DatabaseSeeder(
    private readonly IPermissionService _permissionService = permissionService;
 
    private const string SystemAdminRoleName = "System Admin";
-   private const string OrganizationAdminRoleName = "Organization Admins";
+   private const string OrganizationAdminRoleName = "Organization Admin";
    private const string UserRoleName = "User";
 
    public async Task SeedAsync()
@@ -41,7 +41,7 @@ public class DatabaseSeeder(
       var seedRoles = new SeederRoles(_roleRepository, _iamUnitOfWork);
       await seedRoles.SeedAsync(SystemAdminRoleName, OrganizationAdminRoleName, UserRoleName);
 
-      var seedRolePermissions = new SeederRolePermissions(_roleRepository, _permissionRepository, _permissionService);
+      var seedRolePermissions = new SeederRolePermissions(_roleRepository, _permissionRepository, _iamUnitOfWork);
       await seedRolePermissions.SeedAsync(SystemAdminRoleName, OrganizationAdminRoleName, UserRoleName);
 
       var seedOrganizations = new SeederOrganizations(_organizationQueryRepository, _roleRepository, _iamUnitOfWork);

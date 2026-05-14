@@ -1,7 +1,6 @@
 using IAM.Application.Contracts;
 using IAM.Domain;
 using IAM.Domain.DTOs.Requests;
-using IAM.Domain.Entities;
 
 namespace IAM.Infrastructure.DatabaseSeeder;
 
@@ -38,6 +37,10 @@ public class SeederPermissions(IPermissionService permissionService)
       await AddPermission(IamPermission.Permissions.Update, "Update Permissions", "Allows updating permissions.");
       await AddPermission(IamPermission.Permissions.Delete, "Delete Permissions", "Allows deleting permissions.");
       await AddPermission(IamPermission.Permissions.Assign, "Assign Permissions", "Allows assigning permissions to roles.");
+
+      //todo add more permissions as needed, e.g. for audit logs, system logs, etc.
+      //await AddPermission(SentinelPermission.AuditLogs.List, "List Audit Logs", "Allows listing Sentinel audit logs.");
+      //await AddPermission(SentinelPermission.SystemLogs.List, "List System Logs", "Allows listing Sentinel system logs.");
    }
 
    private async Task AddPermission(string code, string title, string description)
@@ -51,7 +54,8 @@ public class SeederPermissions(IPermissionService permissionService)
          title,
          description);
 
-      if (await permissionService.GetByCodeAsync(code) == null)
+      var permissionExists = await permissionService.GetByCodeAsync(code);
+      if (permissionExists.Data == null)
       {
          await permissionService.CreateAsync(permission);
       }
