@@ -8,6 +8,7 @@ namespace Shared.Infrastructure.Configurations
    {
       public virtual void Configure(EntityTypeBuilder<T> builder)
       {
+         builder.Property(x => x.Id).IsRequired();
          builder.HasKey(x => x.Id);
       }
    }

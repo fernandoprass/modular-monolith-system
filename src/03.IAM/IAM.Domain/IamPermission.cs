@@ -44,6 +44,7 @@ public static class IamPermission
 
       public const string List = $"{Module}.{Resource}.list";
       public const string View = $"{Module}.{Resource}.view";
+      public const string Update = $"{Module}.{Resource}.update";
       public const string SaveOverride = $"{Module}.{Resource}.saveoverride";
       public const string DeleteOverride = $"{Module}.{Resource}.deleteoverride";
    }

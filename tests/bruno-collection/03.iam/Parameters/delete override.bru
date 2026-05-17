@@ -1,11 +1,11 @@
 meta {
   name: delete override
   type: http
-  seq: 5
+  seq: 6
 }
 
 delete {
-  url: {{server}}/api/{{version}}/iam/parameters/019df959-903d-7aad-b6fd-d0ca63100e85/override
+  url: {{host.iam}}/api/{{version}}/iam/parameters/019df959-903d-7aad-b6fd-d0ca63100e85/override
   body: none
   auth: bearer
 }

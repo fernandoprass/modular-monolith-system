@@ -7,6 +7,7 @@ using Shared.Domain.DTOs.Requests;
 using Shared.Domain.DTOs.Responses;
 using Shared.Domain.Entities;
 using Shared.Domain.Enums;
+using Shared.Domain.Events;
 using Shared.Domain.Interfaces;
 using Shared.Domain.Messages;
 
@@ -20,6 +21,7 @@ public class ParameterServiceTests
    private readonly IParameterRepository _parameterRepositoryMock;
    private readonly IParameterOverrideRepository _parameterOverrideRepositoryMock;
    private readonly IParameterQueryRepository _parameterQueryRepositoryMock;
+   private readonly IEventPublisher _eventPublisherMock;
    private readonly ParameterService _parameterService;
 
    private readonly string _keyMock = "Module.Group.Key";
@@ -32,6 +34,7 @@ public class ParameterServiceTests
       _parameterRepositoryMock = Substitute.For<IParameterRepository>();
       _parameterOverrideRepositoryMock = Substitute.For<IParameterOverrideRepository>();
       _parameterQueryRepositoryMock = Substitute.For<IParameterQueryRepository>();
+      _eventPublisherMock = Substitute.For<IEventPublisher>();
 
       _userContextMock.UserOwnerId.Returns(Guid.NewGuid());
       _userContextMock.UserId.Returns(Guid.NewGuid());
@@ -42,7 +45,8 @@ public class ParameterServiceTests
           _parameterValidatorMock,
           _parameterRepositoryMock,
           _parameterOverrideRepositoryMock,
-          _parameterQueryRepositoryMock);
+          _parameterQueryRepositoryMock,
+          _eventPublisherMock);
    }
 
    [Fact]

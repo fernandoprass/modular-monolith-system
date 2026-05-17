@@ -18,12 +18,12 @@ public class PermissionService(
    IUserContext userContext,
    IPermissionValidator permissionValidator,
    IPermissionQueryRepository permissionQueryRepository,
-   IRolePermissionAuthorizationCache rolePermissionAuthorizationCache) : BaseService(userContext), IPermissionService
+   IRolePermissionCacheInvalidator rolePermissionAuthorizationCache) : BaseService(userContext), IPermissionService
 {
    private readonly IIamUnitOfWork _iamUnitOfWork = iamUnitOfWork;
    private readonly IPermissionValidator _permissionValidator = permissionValidator;
    private readonly IPermissionQueryRepository _permissionQueryRepository = permissionQueryRepository;
-   private readonly IRolePermissionAuthorizationCache _rolePermissionAuthorizationCache = rolePermissionAuthorizationCache;
+   private readonly IRolePermissionCacheInvalidator _rolePermissionAuthorizationCache = rolePermissionAuthorizationCache;
 
    public async Task<Result<PermissionDto>> CreateAsync(PermissionCreateRequest request, CancellationToken cancellationToken = default)
    {
@@ -101,7 +101,7 @@ public class PermissionService(
 
          _iamUnitOfWork.Roles.Update(role!);
          await _iamUnitOfWork.SaveChangesAsync(ct);
-         _rolePermissionAuthorizationCache.Remove(role!.Id);
+         await _rolePermissionAuthorizationCache.RemoveAsync(role!.Id, ct);
 
          return Result.Success(new SuccessInfo());
       }, cancellationToken);
@@ -128,7 +128,7 @@ public class PermissionService(
 
          _iamUnitOfWork.Roles.Update(role!);
          await _iamUnitOfWork.SaveChangesAsync(ct);
-         _rolePermissionAuthorizationCache.Remove(role!.Id);
+         await _rolePermissionAuthorizationCache.RemoveAsync(role!.Id, ct);
 
          return Result.Success(new SuccessInfo());
       }, cancellationToken);

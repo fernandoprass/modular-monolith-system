@@ -39,10 +39,10 @@ public class SeederOrganizations(
       organization.CreatedBy = superUser.Id;
 
       var supportUser = User.Create("Internal Support", "support@saas.com", passwordHash, DateTime.UtcNow.AddDays(30), organizationId);
-      var roles = await roleRepository.GetAllByOrganizationAsync(organizationId);
+      var roles = await roleRepository.GetAllByOrganizationAsync(null);
 
-      superUser.AddRole(roles.First().Id, null);
-      supportUser.AddRole(roles.First().Id, null);
+      superUser.AddRole(roles.First(r => r.Name == systemAdminRoleName).Id, null);
+      supportUser.AddRole(roles.First(r => r.Name == systemAdminRoleName).Id, null);
 
       await iamUnitOfWork.Organizations.AddAsync(organization);
       await iamUnitOfWork.Users.AddAsync(superUser);
@@ -69,7 +69,7 @@ public class SeederOrganizations(
 
       await iamUnitOfWork.Organizations.AddAsync(organization);
 
-      var roles = await roleRepository.GetAllByOrganizationAsync(organizationId);
+      var roles = await roleRepository.GetAllByOrganizationAsync(null);
 
       var passwordHash = Argon2.Hash(DefaultPassword);
       var alanTuring = User.Create("Alan Turing", "alan.turing@enigma.org", passwordHash, DateTime.UtcNow.AddDays(30), organizationId);

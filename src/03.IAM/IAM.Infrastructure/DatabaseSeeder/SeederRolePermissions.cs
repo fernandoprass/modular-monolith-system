@@ -1,7 +1,8 @@
 using IAM.Application.Contracts;
 using IAM.Domain;
 using IAM.Domain.DTOs.Requests;
-using IAM.Domain.QueryRepositories;
+using IAM.Domain.Entities;
+using IAM.Domain.Interfaces;
 using IAM.Domain.Repositories;
 
 namespace IAM.Infrastructure.DatabaseSeeder;
@@ -9,7 +10,7 @@ namespace IAM.Infrastructure.DatabaseSeeder;
 public class SeederRolePermissions(
    IRoleRepository roleRepository,
    IPermissionRepository permissionRepository,
-   IPermissionService permissionService)
+   IIamUnitOfWork iamUnitOfWork)
 {
    public async Task SeedAsync(string systemAdminRoleName, string organizationAdminRoleName, string userRoleName)
    {
@@ -35,12 +36,24 @@ public class SeederRolePermissions(
          .Select(code => permissionsByCode[code])
          .ToList();
 
-      await permissionService.AssignToRoleAsync(new RolePermissionAssignRequest(roleId.Value, permissionIds));
+      var role = await roleRepository.GetByIdAsync(roleId.Value);
+
+      foreach (var permissionId in permissionIds)
+      {
+         role.AddPermission(permissionId);
+      }
+      iamUnitOfWork.SaveChangesAsync();
    }
 
    private static IEnumerable<string> AllPermissions()
    {
-      return OrganizationAdminPermissions();
+      var permissions = OrganizationAdminPermissions().ToList();
+
+      //todo add permissions for audit and system logs
+      //permissions.AddRange(SentinelPermission.SystemLogs.List);
+      //permissions.AddRange(SentinelPermission.SystemLogs.View);
+
+      return permissions;
    }
 
    private static IEnumerable<string> OrganizationAdminPermissions()
@@ -70,6 +83,9 @@ public class SeederRolePermissions(
          IamPermission.Users.List,
          IamPermission.Users.View,
          IamPermission.Users.Create,
+         //todo add permissions for audit and system logs
+         //SentinelPermission.AuditLogs.List,
+         //SentinelPermission.AuditLogs.View
       };
 
       var userPermissions = UserPermissions();

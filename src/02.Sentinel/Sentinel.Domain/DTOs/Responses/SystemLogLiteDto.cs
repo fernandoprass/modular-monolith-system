@@ -1,0 +1,14 @@
+using Shared.Domain.Enums;
+
+namespace Sentinel.Domain.DTOs.Responses;
+
+public record SystemLogLiteDto(
+   Guid Id,
+   DateTime Timestamp,
+   SystemLogLevel Level,
+   SystemLogStatus Status,
+   string Source,
+   string Message,
+   string? RequestId,
+   Guid? UserId,
+   Guid? OrganizationId);

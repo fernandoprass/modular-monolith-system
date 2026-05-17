@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/docs/">
     <File Path="docs/00.migrations.md" />
+    <File Path="docs/00.redis.messaging-system.md" />
     <File Path="docs/01.Shared.entities.md" />
     <File Path="docs/01.shared.enums.md" />
     <File Path="docs/01.shared.infrastructure-repository.md" />
@@ -29,9 +30,9 @@
   </Folder>
   <Folder Name="/src/" />
    <Folder Name="/src/01.Shared/">
-      <Project Path="src/01.Shared/Shared.Application/Shared.Application.csproj" />
-      <Project Path="src/01.Shared/Shared.Domain/Shared.Domain.csproj" />
-      <Project Path="src/01.Shared/Shared.Infrastructure/Shared.Infrastructure.csproj" />
+     <Project Path="src/01.Shared/Shared.Application/Shared.Application.csproj" />
+     <Project Path="src/01.Shared/Shared.Domain/Shared.Domain.csproj" />
+     <Project Path="src/01.Shared/Shared.Infrastructure/Shared.Infrastructure.csproj" />
    </Folder>
   <Folder Name="/src/02.Sentinel/">
     <Project Path="src/02.Sentinel/Sentinel.API/Sentinel.API.csproj" />
@@ -40,10 +41,10 @@
     <Project Path="src/02.Sentinel/Sentinel.Infrastructure/Sentinel.Infrastructure.csproj" />
   </Folder>
    <Folder Name="/src/03.IAM/">
-      <Project Path="src/03.IAM/IAM.API/IAM.API.csproj" />
-      <Project Path="src/03.IAM/IAM.Application/IAM.Application.csproj" />
-      <Project Path="src/03.IAM/IAM.Domain/IAM.Domain.csproj" />
-      <Project Path="src/03.IAM/IAM.Infrastructure/IAM.Infrastructure.csproj" />
+     <Project Path="src/03.IAM/IAM.API/IAM.API.csproj" />
+     <Project Path="src/03.IAM/IAM.Application/IAM.Application.csproj" />
+     <Project Path="src/03.IAM/IAM.Domain/IAM.Domain.csproj" />
+     <Project Path="src/03.IAM/IAM.Infrastructure/IAM.Infrastructure.csproj" />
    </Folder>
   <Folder Name="/tests/" />
   <Folder Name="/tests/01.Shared/">
@@ -52,7 +53,9 @@
     <Project Path="tests/01.Shared/Shared.Infrastructure.Tests/Shared.Infrastructure.Tests.csproj" />
   </Folder>
   <Folder Name="/tests/02.Sentinel/">
+    <Project Path="tests/02.Sentinel/Sentinel.API.Tests/Sentinel.API.Tests.csproj" />
     <Project Path="tests/02.Sentinel/Sentinel.Application.Tests/Sentinel.Application.Tests.csproj" />
+    <Project Path="tests/02.Sentinel/Sentinel.Infrastructure.Tests/Sentinel.Infrastructure.Tests.csproj" />
   </Folder>
   <Folder Name="/tests/03.IAM/">
     <Project Path="tests/03.IAM/IAM.API.Tests/IAM.API.Tests.csproj" Id="bb8eda8c-92b7-4043-ba94-a3967ab24af3" />
