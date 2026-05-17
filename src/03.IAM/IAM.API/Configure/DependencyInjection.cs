@@ -8,9 +8,9 @@ using IAM.Domain.Repositories;
 using IAM.Infrastructure.DatabaseSeeder;
 using IAM.Infrastructure.QueryRepositories;
 using IAM.Infrastructure.Repositories;
-using IAM.Infrastructure.Security;
 using IAM.Infrastructure.UoW;
 using Shared.Application.Contracts;
+using Shared.Infrastructure.Security;
 
 namespace IAM.API.Configure;
 
@@ -56,6 +56,7 @@ public static class DependencyInjection
       builder.Services.AddScoped<IRoleService, RoleService>();
       builder.Services.AddScoped<IUserService, UserService>();
       builder.Services.AddScoped<IPermissionService, PermissionService>();
+      builder.Services.AddScoped<IPermissionAuthorizationService, PermissionAuthorizationService>();
    }
 
    private static void RegisterValidators(WebApplicationBuilder builder)

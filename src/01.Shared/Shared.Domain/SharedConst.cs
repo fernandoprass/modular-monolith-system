@@ -34,7 +34,7 @@ public static partial class SharedConst
          public const string IsSystemAdmin = "isSystemAdmin";
          public const string Issuer = "IAM.API";
          public const string Audience = "IAM.Client";
-         public const string Role = nameof(Security.Claim.Role);
+         public const string Role = "role";
       }
    }
 

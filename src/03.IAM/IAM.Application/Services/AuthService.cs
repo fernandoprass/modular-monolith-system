@@ -11,21 +11,27 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Myce.Response;
 using Shared.Application.Contracts;
+using Shared.Domain;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using SharedPermissionService = Shared.Application.Contracts.IRolePermissionCache;
 
 namespace IAM.Application.Services;
 
 public class AuthService(
    IUserQueryRepository userQueryRepository,
+   IRoleQueryRepository roleQueryRepository,
    IUserService userService,
    IParameterService parameterService,
+   SharedPermissionService permissionService,
    IConfiguration configuration) : IAuthService
 {
    private readonly IUserQueryRepository _userQueryRepository = userQueryRepository;
+   private readonly IRoleQueryRepository _roleQueryRepository = roleQueryRepository;
    private readonly IUserService _userService = userService;
    private readonly IParameterService _parameterService = parameterService;
+   private readonly SharedPermissionService _permissionService = permissionService;
    private readonly string _jwtSecret = configuration["Jwt:Secret"] ?? "your-super-secret-jwt-key-here-make-it-long-and-secure";
 
    public async Task<Result<LoginResponse?>> LoginAsync(UserLoginRequest request, CancellationToken cancellationToken = default)
@@ -39,11 +45,28 @@ public class AuthService(
       await _userService.UpdateLastLoginAsync(user!.Id, cancellationToken);
 
       var expiresAt = await GetJwtExpireTime();
+      await HydratePermissionCacheAsync(user, expiresAt, cancellationToken);
       var token = GenerateJwtToken(user, expiresAt);
 
       var response = new LoginResponse(token, expiresAt, user.ToUserDto());
 
       return Result<LoginResponse?>.Success(response);
+   }
+
+   private async Task HydratePermissionCacheAsync(
+      UserPasswordDto user,
+      DateTime expiresAt,
+      CancellationToken cancellationToken)
+   {
+      foreach (var userRole in user.UserRoles)
+      {
+         var permissions = await _roleQueryRepository.GetPermissionsByRoleIdAsync(userRole.RoleId, cancellationToken);
+         await _permissionService.SetPermissionsAsync(
+            userRole.RoleId.ToString(),
+            permissions.Select(permission => permission.Code),
+            expiresAt,
+            cancellationToken);
+      }
    }
 
    private async Task<Result> Validate(UserPasswordDto? user, string password, CancellationToken cancellationToken)
@@ -93,22 +116,22 @@ public class AuthService(
             new (JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new (JwtRegisteredClaimNames.Email, user.Email),
             new (JwtRegisteredClaimNames.Name, user.Name),
-            new (IamConst.Security.Claim.IsSystemAdmin, user.IsSystemAdmin.ToString()),
-            new (IamConst.Security.Claim.UserOwnerId, user.OrganizationId.ToString()),
+            new (SharedConst.Security.Claim.IsSystemAdmin, user.IsSystemAdmin.ToString()),
+            new (SharedConst.Security.Claim.UserOwnerId, user.OrganizationId.ToString()),
             new (JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
 
       foreach (var userRole in user.UserRoles)
       {
-         claims.Add(new Claim(IamConst.Security.Claim.Role, userRole.RoleId.ToString()));
+         claims.Add(new Claim(SharedConst.Security.Claim.Role, userRole.RoleId.ToString()));
       }
 
       var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSecret));
       var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
       var token = new JwtSecurityToken(
-          issuer: IamConst.Security.Claim.Issuer,
-          audience: IamConst.Security.Claim.Audience,
+          issuer: SharedConst.Security.Claim.Issuer,
+          audience: SharedConst.Security.Claim.Audience,
           claims: claims,
           expires: expiresAt,
           signingCredentials: creds
