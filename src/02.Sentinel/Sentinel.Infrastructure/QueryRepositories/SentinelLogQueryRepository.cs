@@ -17,7 +17,7 @@ public class SentinelLogQueryRepository(SentinelDbContext dbContext) : ISentinel
 
    private readonly SentinelDbContext _dbContext = dbContext;
 
-   public async Task<PagedResultDto<AuditLogDto>> GetAuditLogsByParamsAsync(
+   public async Task<PagedResultDto<AuditLogLiteDto>> GetAuditLogsByParamsAsync(
       AuditLogSearchRequest request,
       IUserContext userContext,
       CancellationToken cancellationToken = default)
@@ -33,7 +33,7 @@ public class SentinelLogQueryRepository(SentinelDbContext dbContext) : ISentinel
          .Limit(pageSize)
          .ToListAsync(cancellationToken);
 
-      var items = logs.Select(a => new AuditLogDto(
+      var items = logs.Select(a => new AuditLogLiteDto(
          a.Id,
          a.Timestamp,
          a.Module,
@@ -42,13 +42,9 @@ public class SentinelLogQueryRepository(SentinelDbContext dbContext) : ISentinel
          a.PrivacyLevel,
          a.Description,
          a.UserId,
-         a.OrganizationId,
-         a.TargetId,
-         a.IpAddress,
-         a.UserAgent,
-         a.Metadata));
+         a.TargetId));
 
-      return new PagedResultDto<AuditLogDto>(
+      return new PagedResultDto<AuditLogLiteDto>(
          items,
          pageNumber,
          pageSize,
@@ -56,7 +52,7 @@ public class SentinelLogQueryRepository(SentinelDbContext dbContext) : ISentinel
          GetTotalPages(totalCount, pageSize));
    }
 
-   public async Task<PagedResultDto<SystemLogDto>> GetSystemLogsByParamsAsync(
+   public async Task<PagedResultDto<SystemLogLiteDto>> GetSystemLogsByParamsAsync(
       SystemLogSearchRequest request,
       IUserContext userContext,
       CancellationToken cancellationToken = default)
@@ -72,21 +68,18 @@ public class SentinelLogQueryRepository(SentinelDbContext dbContext) : ISentinel
          .Limit(pageSize)
          .ToListAsync(cancellationToken);
 
-      var items = logs.Select(s => new SystemLogDto(
+      var items = logs.Select(s => new SystemLogLiteDto(
          s.Id,
          s.Timestamp,
          s.Level,
          s.Status,
          s.Source,
          s.Message,
-         s.Exception,
-         s.StackTrace,
          s.RequestId,
          s.UserId,
-         s.OrganizationId,
-         s.PropertiesJson));
+         s.OrganizationId));
 
-      return new PagedResultDto<SystemLogDto>(
+      return new PagedResultDto<SystemLogLiteDto>(
          items,
          pageNumber,
          pageSize,
@@ -181,5 +174,68 @@ public class SentinelLogQueryRepository(SentinelDbContext dbContext) : ISentinel
    private static int GetTotalPages(long totalCount, int pageSize)
    {
       return totalCount == 0 ? 0 : (int)Math.Ceiling(totalCount / (double)pageSize);
+   }
+
+   public async Task<AuditLogDto?> GetAuditLogByIdAsync(Guid id, IUserContext userContext, CancellationToken cancellationToken = default)
+   {
+      var builder = Builders<AuditLog>.Filter;
+      var filter = builder.Eq(a => a.Id, id);
+
+      if (!userContext.IsSystemAdmin)
+      {
+         filter &= builder.Eq(a => a.OrganizationId, userContext.UserOwnerId);
+      }
+
+      var auditLog = await _dbContext.AuditLogs
+         .Find(filter)
+         .SingleOrDefaultAsync(cancellationToken);
+
+      return auditLog == null
+         ? null
+         : new AuditLogDto(
+            auditLog.Id,
+            auditLog.Timestamp,
+            auditLog.Module,
+            auditLog.Feature,
+            auditLog.Action,
+            auditLog.PrivacyLevel,
+            auditLog.Description,
+            auditLog.UserId,
+            auditLog.OrganizationId,
+            auditLog.TargetId,
+            auditLog.IpAddress,
+            auditLog.UserAgent,
+            auditLog.Metadata);
+   }
+
+   public async Task<SystemLogDto?> GetSystemLogByIdAsync(Guid id, IUserContext userContext, CancellationToken cancellationToken = default)
+   {
+      var builder = Builders<SystemLog>.Filter;
+      var filter = builder.Eq(s => s.Id, id);
+
+      if (!userContext.IsSystemAdmin)
+      {
+         filter &= builder.Eq(s => s.OrganizationId, userContext.UserOwnerId);
+      }
+
+      var systemLog = await _dbContext.SystemLogs
+         .Find(filter)
+         .SingleOrDefaultAsync(cancellationToken);
+
+      return systemLog == null
+         ? null
+         : new SystemLogDto(
+            systemLog.Id,
+            systemLog.Timestamp,
+            systemLog.Level,
+            systemLog.Status,
+            systemLog.Source,
+            systemLog.Message,
+            systemLog.Exception,
+            systemLog.StackTrace,
+            systemLog.RequestId,
+            systemLog.UserId,
+            systemLog.OrganizationId,
+            systemLog.PropertiesJson);
    }
 }

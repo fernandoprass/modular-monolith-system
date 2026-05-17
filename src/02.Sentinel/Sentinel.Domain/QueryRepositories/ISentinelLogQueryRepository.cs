@@ -6,6 +6,8 @@ namespace Sentinel.Domain.QueryRepositories;
 
 public interface ISentinelLogQueryRepository
 {
-   Task<PagedResultDto<AuditLogDto>> GetAuditLogsByParamsAsync(AuditLogSearchRequest request, IUserContext userContext, CancellationToken cancellationToken = default);
-   Task<PagedResultDto<SystemLogDto>> GetSystemLogsByParamsAsync(SystemLogSearchRequest request, IUserContext userContext, CancellationToken cancellationToken = default);
+   Task<PagedResultDto<AuditLogLiteDto>> GetAuditLogsByParamsAsync(AuditLogSearchRequest request, IUserContext userContext, CancellationToken cancellationToken = default);
+   Task<PagedResultDto<SystemLogLiteDto>> GetSystemLogsByParamsAsync(SystemLogSearchRequest request, IUserContext userContext, CancellationToken cancellationToken = default);
+   Task<AuditLogDto?> GetAuditLogByIdAsync(Guid id, IUserContext userContext, CancellationToken cancellationToken = default);
+   Task<SystemLogDto?> GetSystemLogByIdAsync(Guid id, IUserContext userContext, CancellationToken cancellationToken = default);
 }

@@ -24,6 +24,15 @@ public class LogController(ISentinelLogService sentinelLogService) : BaseControl
       return OkOrNotFound(result);
    }
 
+   [HttpGet("audit/{id:guid}")]
+   [Authorize]
+   [RequirePermission(SentinelPermission.AuditLogs.View)]
+   public async Task<IActionResult> GetAuditLogById(Guid id, CancellationToken cancellationToken)
+   {
+      var result = await _sentinelLogService.GetAuditLogByIdAsync(id, cancellationToken);
+      return result.HasError ? NotFound(result) : Ok(result);
+   }
+
    [HttpGet("system")]
    [Authorize]
    [RequirePermission(SentinelPermission.SystemLogs.List)]
@@ -31,5 +40,14 @@ public class LogController(ISentinelLogService sentinelLogService) : BaseControl
    {
       var result = await _sentinelLogService.GetSystemLogsByParamsAsync(request, cancellationToken);
       return OkOrNotFound(result);
+   }
+
+   [HttpGet("system/{id:guid}")]
+   [Authorize]
+   [RequirePermission(SentinelPermission.SystemLogs.View)]
+   public async Task<IActionResult> GetSystemLogById(Guid id, CancellationToken cancellationToken)
+   {
+      var result = await _sentinelLogService.GetSystemLogByIdAsync(id, cancellationToken);
+      return result.HasError ? NotFound(result) : Ok(result);
    }
 }

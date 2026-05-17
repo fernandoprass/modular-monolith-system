@@ -1,11 +1,11 @@
 meta {
-  name: system logs
+  name: audit logs by Id
   type: http
-  seq: 3
+  seq: 2
 }
 
 get {
-  url: {{host.sentinel}}/api/{{version}}/sentinel/logs/system
+  url: {{host.sentinel}}/api/{{version}}/sentinel/logs/audit/019e367c-0010-7c9c-9a33-3050795a793d
   body: json
   auth: bearer
 }
@@ -18,10 +18,11 @@ body:json {
   {
     "organizationId": null,
     "userId": null,
-    "level": null,
-    "status": null,
-    "source": "",
-    "requestId": "",
+    "module": "",
+    "feature": "",
+    "action": "",
+    "privacyLevel": null,
+    "targetId": null,
     "from": null,
     "to": null,
     "pageNumber": 1,
