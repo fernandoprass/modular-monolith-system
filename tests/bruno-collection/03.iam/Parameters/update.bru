@@ -1,0 +1,33 @@
+meta {
+  name: update
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{host.iam}}/api/{{version}}/iam/parameters/019e2345-c6a9-748f-b2ba-b9b1d75eeb02
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "module": "IAM",
+    "group": "Security",
+    "name": "JwtExpirationInHours",
+    "title": "JWT Expiration in Hours",
+    "description": "The lifespan of the JSON Web Token (JWT) in hours.",
+    "type": 2,
+    "value": "24",
+    "overrideType": 0,
+    "isVisible": true,
+    "validationRegex": null,
+    "validationErrorCustomMessage": null,
+    "listItems": null,
+    "externalListEndpoint": null
+  }
+}

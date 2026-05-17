@@ -5,7 +5,7 @@ meta {
 }
 
 get {
-  url: {{server}}/api/{{version}}/iam/parameters/value?key=IAM.Security.MaxFailedLoginAttempts
+  url: {{host.iam}}/api/{{version}}/iam/parameters/value?key=IAM.Security.MaxFailedLoginAttempts
   body: none
   auth: bearer
 }
