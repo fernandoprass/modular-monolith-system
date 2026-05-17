@@ -1,9 +1,10 @@
-﻿using IAM.Domain;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Net.Http.Headers;
 using Shared.Application.Contracts;
+using Shared.Domain;
 using System.Security.Claims;
 
-namespace IAM.Infrastructure.Security;
+namespace Shared.Infrastructure.Security;
 
 public class AspNetUserContext(IHttpContextAccessor accessor) : IUserContext
 {
@@ -12,19 +13,23 @@ public class AspNetUserContext(IHttpContextAccessor accessor) : IUserContext
    public Guid UserOwnerId => GetOrganizationId();
    public bool IsAuthenticated => _accessor.HttpContext?.User.Identity?.IsAuthenticated ?? false;
    public bool IsSystemAdmin => GetIsSystemAdmin();
-   public Guid UserId => GetUserId();
+   public string? IpAddress => _accessor.HttpContext?.Connection.RemoteIpAddress?.ToString();
+   public string? UserAgent => _accessor.HttpContext?.Request.Headers[HeaderNames.UserAgent].ToString();
+
+
+public Guid UserId => GetUserId();
    public IEnumerable<string> Roles => GetRoles();
 
    private Guid GetOrganizationId()
    {
-      var value = _accessor.HttpContext?.User.FindFirst(IamConst.Security.Claim.UserOwnerId)?.Value;
+      var value = _accessor.HttpContext?.User.FindFirst(SharedConst.Security.Claim.UserOwnerId)?.Value;
       return Guid.TryParse(value, out var id) ? id : Guid.Empty;
    }
 
    private bool GetIsSystemAdmin()
    {
-      var value = _accessor.HttpContext?.User.FindFirst(IamConst.Security.Claim.IsSystemAdmin)?.Value;
-      return Boolean.TryParse(value, out var isSystemAdmin) ? isSystemAdmin : false;
+      var value = _accessor.HttpContext?.User.FindFirst(SharedConst.Security.Claim.IsSystemAdmin)?.Value;
+      return bool.TryParse(value, out var isSystemAdmin) && isSystemAdmin;
    }
 
    private Guid GetUserId()
@@ -35,11 +40,10 @@ public class AspNetUserContext(IHttpContextAccessor accessor) : IUserContext
       return Guid.TryParse(value, out var id) ? id : Guid.Empty;
    }
 
-   private List<string>? GetRoles()
+   private List<string> GetRoles()
    {
-      var roles = _accessor.HttpContext?.User.FindAll(IamConst.Security.Claim.Role)
+      return _accessor.HttpContext?.User.FindAll(SharedConst.Security.Claim.Role)
                           .Select(c => c.Value)
-                          .ToList();
-      return roles;
+                          .ToList() ?? [];
    }
 }

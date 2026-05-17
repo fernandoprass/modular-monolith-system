@@ -51,7 +51,7 @@ public class SeederRolePermissions(
 
       //todo add permissions for audit and system logs
       //permissions.AddRange(SentinelPermission.SystemLogs.List);
-
+      //permissions.AddRange(SentinelPermission.SystemLogs.View);
 
       return permissions;
    }
@@ -85,6 +85,7 @@ public class SeederRolePermissions(
          IamPermission.Users.Create,
          //todo add permissions for audit and system logs
          //SentinelPermission.AuditLogs.List,
+         //SentinelPermission.AuditLogs.View
       };
 
       var userPermissions = UserPermissions();

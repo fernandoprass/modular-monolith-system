@@ -10,11 +10,10 @@ public class SentinelUnitOfWork(SentinelDbContext dbContext) : ISentinelUnitOfWo
 
    public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
    {
-      return dbContext.SaveChangesAsync(cancellationToken);
+      return Task.FromResult(0);
    }
 
    public void Dispose()
    {
-      dbContext.Dispose();
    }
 }

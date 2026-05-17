@@ -1,10 +1,11 @@
-using Sentinel.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
+using Sentinel.API.Configure;
+using Sentinel.Domain;
+using Sentinel.Infrastructure;
 using Shared.Application.Contracts;
 using Shared.Domain;
-using Shared.Infrastructure.Authorization;
+using Shared.Infrastructure;
 using Shared.Infrastructure.Security;
 using System.Text;
 
@@ -14,12 +15,12 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApi();
 builder.Services.AddSentinelInfrastructure(builder.Configuration);
-builder.Services.AddMemoryCache();
+builder.Services.AddSharedAuthorization(builder.Configuration);
 builder.Services.AddAuthorization();
-builder.Services.AddSingleton<IRolePermissionAuthorizationCache, RolePermissionAuthorizationCache>();
-builder.Services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IUserContext, AspNetUserContext>();
+
+ApiVersioning.Configure(builder);
 
 var jwtSecret = builder.Configuration["Jwt:Secret"] ?? "your-super-secret-jwt-key-here-make-it-long-and-secure";
 var key = Encoding.UTF8.GetBytes(jwtSecret);
@@ -52,7 +53,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
-app.MapGet("/health", () => Results.Ok(new { Status = "Healthy", Module = "Sentinel" }));
+app.MapGet("/health", () => Results.Ok(new { Status = "Healthy", Module = SentinelConst.System.ModuleName }));
 
 app.Run();
 

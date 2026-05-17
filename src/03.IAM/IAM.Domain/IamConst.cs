@@ -24,17 +24,6 @@ public static partial class IamConst
       public const string Permission = nameof(Entities.Permission);
    }
 
-   public class Security
-   {
-      public static class Claim
-      {
-         public const string UserOwnerId = "userOwnerId";
-         public const string IsSystemAdmin = "isSystemAdmin";
-         public const string Issuer = "IAM.API";
-         public const string Audience = "IAM.Client";
-         public const string Role = nameof(Security.Claim.Role);
-      }
-   }
    public static class System
    {
       public const string ModuleName = "IAM";

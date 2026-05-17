@@ -1,5 +1,5 @@
 using Asp.Versioning;
-using IAM.API.Middlewares;
+using Shared.Infrastructure.Authorization;
 using IAM.Application.Contracts;
 using IAM.Domain;
 using IAM.Domain.DTOs.Requests;
@@ -61,9 +61,9 @@ public class UserController(
    [HttpPut("{id:guid}")]
    [Authorize]
    [RequirePermission(IamPermission.Users.Update)]
-   public async Task<IActionResult> Update(Guid id, [FromBody] UserUpdateRequest user, CancellationToken cancellationToken)
+   public async Task<IActionResult> Update(Guid id, [FromBody] UserUpdateRequest request, CancellationToken cancellationToken)
    {
-      var response = await _userService.UpdateAsync(id, user, cancellationToken);
+      var response = await _userService.UpdateAsync(id, request, cancellationToken);
 
       return OkOrNotFound(response);
    }
@@ -96,3 +96,4 @@ public class UserController(
 
    }
 }
+

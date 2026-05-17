@@ -12,33 +12,8 @@ public record ParameterUpdateRequest(
     string Value,
     ParameterOverrideType OverrideType,
     bool IsVisible,
-    string? ValidationRegex,
-    string? ValidationErrorCustomMessage,
-    string? ListItems,
-    string? ExternalListEndpoint
-)
-{
-   public ParameterUpdateRequest(
-       string Module,
-       string Group,
-       string Name,
-       string Title,
-       string Description,
-       ParameterType Type,
-       string Value,
-       ParameterOverrideType OverrideType,
-       bool IsVisible)
-       : this(
-           Module,
-           Group,
-           Name,
-           Title,
-           Description,
-           Type,
-           Value,
-           OverrideType,
-           IsVisible,
-           null, null, null, null
-       )
-   { }
-}
+    string? ValidationRegex = null,        // Default values
+    string? ValidationErrorCustomMessage = null,
+    string? ListItems = null,
+    string? ExternalListEndpoint = null
+);

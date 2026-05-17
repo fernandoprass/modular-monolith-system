@@ -1,8 +1,11 @@
-using Microsoft.EntityFrameworkCore;
+using MongoDB.Bson;
+using MongoDB.Driver;
 using Sentinel.Domain.DTOs.Requests;
 using Sentinel.Domain.DTOs.Responses;
+using Sentinel.Domain.Entities;
 using Sentinel.Domain.QueryRepositories;
 using Shared.Application.Contracts;
+using System.Text.RegularExpressions;
 
 namespace Sentinel.Infrastructure.QueryRepositories;
 
@@ -14,136 +17,157 @@ public class SentinelLogQueryRepository(SentinelDbContext dbContext) : ISentinel
 
    private readonly SentinelDbContext _dbContext = dbContext;
 
-   public async Task<PagedResultDto<AuditLogDto>> GetAuditLogsByParamsAsync(AuditLogSearchRequest request, IUserContext userContext, CancellationToken cancellationToken = default)
+   public async Task<PagedResultDto<AuditLogDto>> GetAuditLogsByParamsAsync(
+      AuditLogSearchRequest request,
+      IUserContext userContext,
+      CancellationToken cancellationToken = default)
    {
-      var query = _dbContext.AuditLogs.AsNoTracking();
-
-      if (!userContext.IsSystemAdmin)
-      {
-         query = query.Where(a => a.OrganizationId == userContext.UserOwnerId);
-      }
-      else if (request.OrganizationId.HasValue)
-      {
-         query = query.Where(a => a.OrganizationId == request.OrganizationId.Value);
-      }
-
-      if (request.UserId.HasValue)
-         query = query.Where(a => a.UserId == request.UserId.Value);
-
-      if (!string.IsNullOrWhiteSpace(request.Module))
-         query = query.Where(a => EF.Functions.ILike(a.Module, $"%{request.Module}%"));
-
-      if (!string.IsNullOrWhiteSpace(request.Feature))
-         query = query.Where(a => EF.Functions.ILike(a.Feature, $"%{request.Feature}%"));
-
-      if (!string.IsNullOrWhiteSpace(request.Action))
-         query = query.Where(a => EF.Functions.ILike(a.Action, $"%{request.Action}%"));
-
-      if (request.PrivacyLevel.HasValue)
-         query = query.Where(a => a.PrivacyLevel == request.PrivacyLevel.Value);
-
-      if (request.TargetId.HasValue)
-         query = query.Where(a => a.TargetId == request.TargetId.Value);
-
-      if (request.From.HasValue)
-         query = query.Where(a => a.Timestamp >= request.From.Value);
-
-      if (request.To.HasValue)
-         query = query.Where(a => a.Timestamp <= request.To.Value);
-
+      var filter = BuildAuditLogFilter(request, userContext);
       var (pageNumber, pageSize) = NormalizePaging(request.PageNumber, request.PageSize);
-      var totalCount = await query.CountAsync(cancellationToken);
 
-      var items = await query
-         .OrderByDescending(a => a.Timestamp)
+      var totalCount = await _dbContext.AuditLogs.CountDocumentsAsync(filter, cancellationToken: cancellationToken);
+      var logs = await _dbContext.AuditLogs
+         .Find(filter)
+         .SortByDescending(log => log.Timestamp)
          .Skip((pageNumber - 1) * pageSize)
-         .Take(pageSize)
-         .Select(a => new AuditLogDto(
-            a.Id,
-            a.Timestamp,
-            a.Module,
-            a.Feature,
-            a.Action,
-            a.PrivacyLevel,
-            a.Description,
-            a.UserId,
-            a.OrganizationId,
-            a.TargetId,
-            a.IpAddress,
-            a.UserAgent,
-            a.Metadata))
+         .Limit(pageSize)
          .ToListAsync(cancellationToken);
+
+      var items = logs.Select(a => new AuditLogDto(
+         a.Id,
+         a.Timestamp,
+         a.Module,
+         a.Feature,
+         a.Action,
+         a.PrivacyLevel,
+         a.Description,
+         a.UserId,
+         a.OrganizationId,
+         a.TargetId,
+         a.IpAddress,
+         a.UserAgent,
+         a.Metadata));
 
       return new PagedResultDto<AuditLogDto>(
          items,
          pageNumber,
          pageSize,
-         totalCount,
+         (int)totalCount,
          GetTotalPages(totalCount, pageSize));
    }
 
-   public async Task<PagedResultDto<SystemLogDto>> GetSystemLogsByParamsAsync(SystemLogSearchRequest request, IUserContext userContext, CancellationToken cancellationToken = default)
+   public async Task<PagedResultDto<SystemLogDto>> GetSystemLogsByParamsAsync(
+      SystemLogSearchRequest request,
+      IUserContext userContext,
+      CancellationToken cancellationToken = default)
    {
-      var query = _dbContext.SystemLogs.AsNoTracking();
-
-      if (!userContext.IsSystemAdmin)
-      {
-         query = query.Where(s => s.OrganizationId == userContext.UserOwnerId);
-      }
-      else if (request.OrganizationId.HasValue)
-      {
-         query = query.Where(s => s.OrganizationId == request.OrganizationId.Value);
-      }
-
-      if (request.UserId.HasValue)
-         query = query.Where(s => s.UserId == request.UserId.Value);
-
-      if (request.Level.HasValue)
-         query = query.Where(s => s.Level == request.Level.Value);
-
-      if (request.Status.HasValue)
-         query = query.Where(s => s.Status == request.Status.Value);
-
-      if (!string.IsNullOrWhiteSpace(request.Source))
-         query = query.Where(s => EF.Functions.ILike(s.Source, $"%{request.Source}%"));
-
-      if (!string.IsNullOrWhiteSpace(request.RequestId))
-         query = query.Where(s => s.RequestId == request.RequestId);
-
-      if (request.From.HasValue)
-         query = query.Where(s => s.Timestamp >= request.From.Value);
-
-      if (request.To.HasValue)
-         query = query.Where(s => s.Timestamp <= request.To.Value);
-
+      var filter = BuildSystemLogFilter(request, userContext);
       var (pageNumber, pageSize) = NormalizePaging(request.PageNumber, request.PageSize);
-      var totalCount = await query.CountAsync(cancellationToken);
 
-      var items = await query
-         .OrderByDescending(s => s.Timestamp)
+      var totalCount = await _dbContext.SystemLogs.CountDocumentsAsync(filter, cancellationToken: cancellationToken);
+      var logs = await _dbContext.SystemLogs
+         .Find(filter)
+         .SortByDescending(log => log.Timestamp)
          .Skip((pageNumber - 1) * pageSize)
-         .Take(pageSize)
-         .Select(s => new SystemLogDto(
-            s.Id,
-            s.Timestamp,
-            s.Level,
-            s.Status,
-            s.Source,
-            s.Message,
-            s.Exception,
-            s.StackTrace,
-            s.RequestId,
-            s.UserId,
-            s.OrganizationId,
-            s.PropertiesJson))
+         .Limit(pageSize)
          .ToListAsync(cancellationToken);
+
+      var items = logs.Select(s => new SystemLogDto(
+         s.Id,
+         s.Timestamp,
+         s.Level,
+         s.Status,
+         s.Source,
+         s.Message,
+         s.Exception,
+         s.StackTrace,
+         s.RequestId,
+         s.UserId,
+         s.OrganizationId,
+         s.PropertiesJson));
 
       return new PagedResultDto<SystemLogDto>(
          items,
          pageNumber,
          pageSize,
-         totalCount,
+         (int)totalCount,
          GetTotalPages(totalCount, pageSize));
+   }
+
+   private static FilterDefinition<AuditLog> BuildAuditLogFilter(AuditLogSearchRequest request, IUserContext userContext)
+   {
+      var builder = Builders<AuditLog>.Filter;
+      var filters = new List<FilterDefinition<AuditLog>>();
+
+      if (!userContext.IsSystemAdmin)
+         filters.Add(builder.Eq(a => a.OrganizationId, userContext.UserOwnerId));
+      else if (request.OrganizationId.HasValue)
+         filters.Add(builder.Eq(a => a.OrganizationId, request.OrganizationId.Value));
+
+      if (request.UserId.HasValue)
+         filters.Add(builder.Eq(a => a.UserId, request.UserId.Value));
+
+      if (!string.IsNullOrWhiteSpace(request.Module))
+         filters.Add(builder.Regex(a => a.Module, Contains(request.Module)));
+
+      if (!string.IsNullOrWhiteSpace(request.Feature))
+         filters.Add(builder.Regex(a => a.Feature, Contains(request.Feature)));
+
+      if (!string.IsNullOrWhiteSpace(request.Action))
+         filters.Add(builder.Regex(a => a.Action, Contains(request.Action)));
+
+      if (request.PrivacyLevel.HasValue)
+         filters.Add(builder.Eq(a => a.PrivacyLevel, request.PrivacyLevel.Value));
+
+      if (request.TargetId.HasValue)
+         filters.Add(builder.Eq(a => a.TargetId, request.TargetId.Value));
+
+      if (request.From.HasValue)
+         filters.Add(builder.Gte(a => a.Timestamp, request.From.Value));
+
+      if (request.To.HasValue)
+         filters.Add(builder.Lte(a => a.Timestamp, request.To.Value));
+
+      return filters.Count == 0 ? builder.Empty : builder.And(filters);
+   }
+
+   private static FilterDefinition<SystemLog> BuildSystemLogFilter(SystemLogSearchRequest request, IUserContext userContext)
+   {
+      var builder = Builders<SystemLog>.Filter;
+      var filters = new List<FilterDefinition<SystemLog>>();
+
+      if (!userContext.IsSystemAdmin)
+         filters.Add(builder.Eq(s => s.OrganizationId, userContext.UserOwnerId));
+      else if (request.OrganizationId.HasValue)
+         filters.Add(builder.Eq(s => s.OrganizationId, request.OrganizationId.Value));
+
+      if (request.UserId.HasValue)
+         filters.Add(builder.Eq(s => s.UserId, request.UserId.Value));
+
+      if (request.Level.HasValue)
+         filters.Add(builder.Eq(s => s.Level, request.Level.Value));
+
+      if (request.Status.HasValue)
+         filters.Add(builder.Eq(s => s.Status, request.Status.Value));
+
+      if (!string.IsNullOrWhiteSpace(request.Source))
+         filters.Add(builder.Regex(s => s.Source, Contains(request.Source)));
+
+      if (!string.IsNullOrWhiteSpace(request.RequestId))
+         filters.Add(builder.Eq(s => s.RequestId, request.RequestId));
+
+      if (request.From.HasValue)
+         filters.Add(builder.Gte(s => s.Timestamp, request.From.Value));
+
+      if (request.To.HasValue)
+         filters.Add(builder.Lte(s => s.Timestamp, request.To.Value));
+
+      return filters.Count == 0 ? builder.Empty : builder.And(filters);
+   }
+
+   private static BsonRegularExpression Contains(string value)
+   {
+      return new BsonRegularExpression($".*{Regex.Escape(value)}.*", "i");
    }
 
    private static (int PageNumber, int PageSize) NormalizePaging(int pageNumber, int pageSize)
@@ -154,7 +178,7 @@ public class SentinelLogQueryRepository(SentinelDbContext dbContext) : ISentinel
       return (normalizedPageNumber, normalizedPageSize);
    }
 
-   private static int GetTotalPages(int totalCount, int pageSize)
+   private static int GetTotalPages(long totalCount, int pageSize)
    {
       return totalCount == 0 ? 0 : (int)Math.Ceiling(totalCount / (double)pageSize);
    }

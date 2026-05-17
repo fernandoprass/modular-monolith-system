@@ -5,10 +5,13 @@ using Shared.Domain.DTOs.Requests;
 using Shared.Domain.DTOs.Responses;
 using Shared.Domain.Entities;
 using Shared.Domain.Enums;
+using Shared.Domain.Events;
 using Shared.Domain.Interfaces;
 using Shared.Domain.Mappers;
 using Shared.Domain.Messages;
 using System.Globalization;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace Shared.Application.Services;
 
@@ -18,13 +21,15 @@ internal class ParameterService(
     IParameterValidator parameterValidator,
     IParameterRepository parameterRepository,
     IParameterOverrideRepository parameterOverrideRepository,
-    IParameterQueryRepository parameterQueryRepository) : BaseService(userContext), IParameterService
+    IParameterQueryRepository parameterQueryRepository,
+    IEventPublisher eventPublisher) : BaseService(userContext), IParameterService
 {
    private readonly ISharedUnitOfWork _unitOfWork = unitOfWork;
    private readonly IParameterValidator _parameterValidator = parameterValidator;
    private readonly IParameterRepository _parameterRepository = parameterRepository;
    private readonly IParameterOverrideRepository _parameterOverrideRepository = parameterOverrideRepository;
    private readonly IParameterQueryRepository _parameterQueryRepository = parameterQueryRepository;
+   private readonly IEventPublisher _eventPublisher = eventPublisher;
 
    #region Controller Methods
    public async Task<Result<ParameterDto>> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
@@ -129,8 +134,10 @@ internal class ParameterService(
    public async Task<Result> UpdateAsync(Guid id, ParameterUpdateRequest request, CancellationToken cancellationToken = default)
    {
       var parameter = await _parameterRepository.GetByIdAsync(id, cancellationToken);
-      var keyExists = await _parameterQueryRepository.GetByModuleGroupAndKeyAsync(request.Module, request.Group, request.Name, cancellationToken);
-      var validation = _parameterValidator.ValidateUpdate(parameter != null, keyExists != null, request);
+      var existingParameter = await _parameterQueryRepository.GetByModuleGroupAndKeyAsync(request.Module, request.Group, request.Name, cancellationToken);
+
+      var keyExists = existingParameter != null && existingParameter.Id != id;
+      var validation = _parameterValidator.ValidateUpdate(parameter != null, keyExists, request);
       if (validation.HasError) return Result.Failure(validation.Messages);
 
       parameter.Update(
@@ -150,6 +157,23 @@ internal class ParameterService(
 
       _unitOfWork.Parameters.Update(parameter);
       await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+      var requestAsJson = JsonSerializer.Serialize(request);
+
+      await _eventPublisher.PublishAuditLogEventAsync(new AuditLogEvent
+      {
+         Module = SharedConst.System.ModuleName.ToLowerInvariant(),
+         Feature = "parameters",
+         Action = "update",
+         PrivacyLevel = AuditPrivacyLevel.Medium,
+         Description = $"Updated parameter {parameter.Key}",
+         UserId = _userContext.UserId,
+         OrganizationId = _userContext.UserOwnerId,
+         IpAddress = _userContext.IpAddress,
+         UserAgent = _userContext.UserAgent,
+         TargetId = parameter.Id,
+         Metadata = requestAsJson
+      }, cancellationToken);
 
       return Result.Success(new SuccessInfo());
    }

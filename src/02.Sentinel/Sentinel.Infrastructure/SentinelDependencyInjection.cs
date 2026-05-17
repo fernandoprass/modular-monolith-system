@@ -1,17 +1,13 @@
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Sentinel.Domain;
-using Sentinel.Domain.Interfaces;
 using Sentinel.Application.Contracts;
 using Sentinel.Application.Services;
+using Sentinel.Domain.Interfaces;
 using Sentinel.Domain.QueryRepositories;
-using Sentinel.Infrastructure.Authorization;
 using Sentinel.Infrastructure.BackgroundServices;
 using Sentinel.Infrastructure.QueryRepositories;
 using Sentinel.Infrastructure.Repositories;
 using Sentinel.Infrastructure.UoW;
-using Shared.Application.Contracts;
 using StackExchange.Redis;
 
 namespace Sentinel.Infrastructure;
@@ -23,14 +19,14 @@ public static class SentinelDependencyInjection
       ConfigureDbContext(services, configuration);
       ConfigureRedis(services, configuration);
 
+      services.AddSingleton<SentinelDbContext>();
       services.AddScoped<ISentinelUnitOfWork, SentinelUnitOfWork>();
       services.AddScoped<IAuditLogRepository, AuditLogRepository>();
       services.AddScoped<ISystemLogRepository, SystemLogRepository>();
       services.AddScoped<ISentinelLogQueryRepository, SentinelLogQueryRepository>();
       services.AddScoped<ISentinelLogService, SentinelLogService>();
-      services.AddScoped<IRolePermissionProvider, SentinelRolePermissionProvider>();
 
-      services.AddHostedService<AuditEventConsumer>();
+      services.AddHostedService<AuditLogConsumer>();
       services.AddHostedService<SystemLogConsumer>();
 
       return services;
@@ -38,8 +34,12 @@ public static class SentinelDependencyInjection
 
    private static void ConfigureDbContext(IServiceCollection services, IConfiguration configuration)
    {
-      var connectionString = configuration.GetConnectionString(SentinelConst.Database.ConnectionString);
-      services.AddDbContext<SentinelDbContext>(options => options.UseNpgsql(connectionString).UseSnakeCaseNamingConvention());
+      var connectionString = configuration.GetConnectionString("SentinelDb");
+
+      if (string.IsNullOrWhiteSpace(connectionString))
+      {
+         throw new InvalidOperationException("Sentinel MongoDB connection string is required.");
+      }
    }
 
    private static void ConfigureRedis(IServiceCollection services, IConfiguration configuration)

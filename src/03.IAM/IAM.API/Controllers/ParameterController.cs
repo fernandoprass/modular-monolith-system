@@ -1,10 +1,11 @@
 using Asp.Versioning;
-using IAM.API.Middlewares;
 using IAM.Domain;
+using IAM.Domain.DTOs.Requests;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Application.Contracts;
 using Shared.Domain.DTOs.Requests;
+using Shared.Infrastructure.Authorization;
 
 namespace IAM.API.Controllers;
 
@@ -41,7 +42,19 @@ public class ParameterController(IParameterService parameterService) : BaseContr
       return OkOrNotFound(parameter);
    }
 
-   [HttpPut("{id:guid}/override")]
+
+   [HttpPut("{id:guid}")]
+   [Authorize]
+   [RequirePermission(IamPermission.Parameters.Update)]
+   public async Task<IActionResult> Update(Guid id, [FromBody] ParameterUpdateRequest request, CancellationToken cancellationToken)
+   {
+      var response = await _parameterService.UpdateAsync(id, request, cancellationToken);
+
+      return OkOrNotFound(response);
+   }
+
+
+      [HttpPut("{id:guid}/override")]
    [Authorize]
    [RequirePermission(IamPermission.Parameters.SaveOverride)]
    public async Task<IActionResult> SaveOverride(Guid id, ParameterOwnerUpdateRequest request, CancellationToken cancellationToken)
@@ -59,3 +72,4 @@ public class ParameterController(IParameterService parameterService) : BaseContr
       return OkOrNotFound(result);
    }
 }
+

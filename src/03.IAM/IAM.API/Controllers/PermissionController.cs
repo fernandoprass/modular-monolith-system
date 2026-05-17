@@ -1,5 +1,5 @@
 using Asp.Versioning;
-using IAM.API.Middlewares;
+using Shared.Infrastructure.Authorization;
 using IAM.Application.Contracts;
 using IAM.Domain;
 using IAM.Domain.DTOs.Requests;
@@ -69,3 +69,4 @@ public class PermissionController(IPermissionService permissionService) : BaseCo
       return OkOrNotFound(result);
    }
 }
+

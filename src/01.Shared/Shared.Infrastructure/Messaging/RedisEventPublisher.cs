@@ -1,9 +1,9 @@
-using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Shared.Domain;
 using Shared.Domain.Events;
 using Shared.Domain.Interfaces;
 using StackExchange.Redis;
+using System.Text.Json;
 
 namespace Shared.Infrastructure.Messaging;
 

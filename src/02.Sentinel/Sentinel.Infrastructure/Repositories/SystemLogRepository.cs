@@ -1,14 +1,20 @@
-using Microsoft.EntityFrameworkCore;
+using MongoDB.Driver;
 using Sentinel.Domain.Entities;
 using Sentinel.Domain.Interfaces;
-using Shared.Infrastructure.Repositories;
 
 namespace Sentinel.Infrastructure.Repositories;
 
-public class SystemLogRepository(SentinelDbContext dbContext) : BaseRepository<SystemLog>(dbContext), ISystemLogRepository
+public class SystemLogRepository(SentinelDbContext dbContext) : ISystemLogRepository
 {
+   public async Task AddAsync(SystemLog log, CancellationToken cancellationToken = default)
+   {
+      await dbContext.SystemLogs.InsertOneAsync(log, cancellationToken: cancellationToken);
+   }
+
    public async Task<bool> ExistsByIdAsync(Guid id, CancellationToken cancellationToken = default)
    {
-      return await dbContext.SystemLogs.AsNoTracking().AnyAsync(s => s.Id == id, cancellationToken);
+      return await dbContext.SystemLogs
+         .Find(log => log.Id == id)
+         .AnyAsync(cancellationToken);
    }
 }

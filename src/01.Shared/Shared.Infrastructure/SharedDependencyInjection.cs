@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.Application.Contracts;
@@ -6,6 +7,7 @@ using Shared.Application.Services;
 using Shared.Application.Validators;
 using Shared.Domain;
 using Shared.Domain.Interfaces;
+using Shared.Infrastructure.Authorization;
 using Shared.Infrastructure.Messaging;
 using Shared.Infrastructure.QueryRepositories;
 using Shared.Infrastructure.Repositories;
@@ -36,6 +38,21 @@ public static class SharedDependencyInjection
       services.AddScoped<IParameterValidator, ParameterValidator>();
 
       ConfigureRedis(services, configuration);
+      services.AddSharedAuthorization(configuration);
+
+      return services;
+   }
+
+   public static IServiceCollection AddSharedAuthorization(
+      this IServiceCollection services,
+      IConfiguration configuration)
+   {
+      ConfigureDistributedCache(services, configuration);
+
+      services.AddSingleton<DistributedRolePermissionCache>();
+      services.AddSingleton<IRolePermissionCache>(provider => provider.GetRequiredService<DistributedRolePermissionCache>());
+      services.AddSingleton<IRolePermissionCacheInvalidator>(provider => provider.GetRequiredService<DistributedRolePermissionCache>());
+      services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
 
       return services;
    }
@@ -68,5 +85,21 @@ public static class SharedDependencyInjection
       });
 
       services.AddScoped<IEventPublisher, RedisEventPublisher>();
+   }
+
+   private static void ConfigureDistributedCache(IServiceCollection services, IConfiguration configuration)
+   {
+      var redisConnectionString = configuration.GetConnectionString(SharedConst.Redis.ConnectionString);
+
+      if (string.IsNullOrWhiteSpace(redisConnectionString))
+      {
+         services.AddDistributedMemoryCache();
+         return;
+      }
+
+      services.AddStackExchangeRedisCache(options =>
+      {
+         options.Configuration = redisConnectionString;
+      });
    }
 }
