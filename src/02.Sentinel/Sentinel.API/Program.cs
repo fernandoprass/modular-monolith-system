@@ -53,7 +53,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
-app.MapGet("/health", () => Results.Ok(new { Status = "Healthy", Module = SentinelConst.System.ModuleName }));
+app.MapGet("api/v{version:apiVersion}/sentinel/health", () => Results.Ok(new { Status = "Ok", Module = SentinelConst.System.ModuleName }));
 
 app.Run();
 

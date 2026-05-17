@@ -2,7 +2,6 @@ using IAM.API.Configure;
 using IAM.API.Middlewares;
 using IAM.Domain;
 using IAM.Infrastructure;
-using IAM.Infrastructure.DatabaseSeeder;
 using Microsoft.EntityFrameworkCore;
 using Shared.Infrastructure;
 
@@ -46,9 +45,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
-//Apply migrations and seed database in development
-//await MigrateDatabase(app);
-await PopulateDatabase(app);
+app.MapGet("api/v{version:apiVersion}/iam/health", () => Results.Ok(new { Status = "Ok", Module = IamConst.System.ModuleName }));
 
 app.Run();
 
@@ -64,12 +61,3 @@ static async Task MigrateDatabase(WebApplication app)
    }
 }
 
-static async Task PopulateDatabase(WebApplication app)
-{
-   if (app.Environment.IsDevelopment())
-   {
-      using var scope = app.Services.CreateScope();
-      var seeder = scope.ServiceProvider.GetRequiredService<IDatabaseSeeder>();
-      await seeder.SeedAsync();
-   }
-}

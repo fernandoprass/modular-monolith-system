@@ -1,0 +1,11 @@
+meta {
+  name: Health
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{host.sentinel}}/api/{{version}}/sentinel/health
+  body: none
+  auth: none
+}
