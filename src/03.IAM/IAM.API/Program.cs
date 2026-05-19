@@ -48,16 +48,3 @@ app.MapControllers();
 app.MapGet("api/v{version:apiVersion}/iam/health", () => Results.Ok(new { Status = "Ok", Module = IamConst.System.ModuleName }));
 
 app.Run();
-
-static async Task MigrateDatabase(WebApplication app)
-{
-   if (app.Environment.IsDevelopment())
-   {
-      using var scope = app.Services.CreateScope();
-      var dbIam = scope.ServiceProvider.GetRequiredService<IamDbContext>();
-      dbIam.Database.Migrate();
-      var dbShared = scope.ServiceProvider.GetRequiredService<SharedDbContext>();
-      dbShared.Database.Migrate();
-   }
-}
-

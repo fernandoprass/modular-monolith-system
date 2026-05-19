@@ -20,6 +20,7 @@ public class SystemLog : Entity
    private SystemLog() { }
 
    public static SystemLog Create(
+      Guid id,
       DateTime timestamp,
       SystemLogLevel level,
       SystemLogStatus status,
@@ -34,7 +35,7 @@ public class SystemLog : Entity
    {
       return new SystemLog
       {
-         Id = Guid.CreateVersion7(),
+         Id = id,
          Timestamp = timestamp,
          Level = level,
          Status = status,

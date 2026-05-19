@@ -8,6 +8,7 @@ using Shared.Application.Validators;
 using Shared.Domain;
 using Shared.Domain.Interfaces;
 using Shared.Infrastructure.Authorization;
+using Shared.Infrastructure.ExceptionHandling;
 using Shared.Infrastructure.Messaging;
 using Shared.Infrastructure.QueryRepositories;
 using Shared.Infrastructure.Repositories;
@@ -39,6 +40,7 @@ public static class SharedDependencyInjection
 
       ConfigureRedis(services, configuration);
       RegisterParameterValueCache(services, configuration);
+      services.AddScoped<IExceptionSystemLogPublisher, ExceptionSystemLogPublisher>();
       services.AddSharedAuthorization(configuration);
 
       return services;

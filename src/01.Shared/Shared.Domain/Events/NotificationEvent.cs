@@ -2,7 +2,7 @@ namespace Shared.Domain.Events;
 
 public record NotificationEvent
 {
-   public Guid NotificationId { get; init; } = Guid.CreateVersion7();
+   public Guid Id { get; init; } = Guid.CreateVersion7();
    public DateTime Timestamp { get; init; } = DateTime.UtcNow;
    public string Type { get; init; } = string.Empty;
    public Guid UserId { get; init; }

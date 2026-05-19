@@ -1,12 +1,16 @@
-﻿using Microsoft.AspNetCore.Diagnostics;
-using Microsoft.EntityFrameworkCore;
-using System.Net;
+using Microsoft.AspNetCore.Diagnostics;
+using IAM.Domain;
+using Shared.Domain.Interfaces;
+using Shared.Infrastructure.ExceptionHandling;
 
 namespace IAM.API.Middlewares;
 
-public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IExceptionHandler
+public class GlobalExceptionHandler(
+   ILogger<GlobalExceptionHandler> logger,
+   IServiceProvider serviceProvider) : IExceptionHandler
 {
    private readonly ILogger<GlobalExceptionHandler> _logger = logger;
+   private readonly IServiceProvider _serviceProvider = serviceProvider;
 
    public async ValueTask<bool> TryHandleAsync(
        HttpContext httpContext,
@@ -16,31 +20,28 @@ public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IE
       _logger.LogError(exception, "An unhandled exception occurred: {Message}", exception.Message);
 
       httpContext.Response.ContentType = "application/json";
-      // Default response for unexpected errors
-      var statusCode = (int)HttpStatusCode.InternalServerError;
-      var message = "An unexpected error occurred.";
-      var details = exception.Message; // Hide in production
-                                       // Specific handling for Database Exceptions
-      if (exception is DbUpdateException dbUpdateException)
-      {
-         statusCode = (int)HttpStatusCode.BadRequest; // Or 409 Conflict
-         message = "A database error occurred. This could be a constraint violation or invalid data.";
-         details = dbUpdateException.InnerException?.Message ?? dbUpdateException.Message;
-      }
-      else if (exception is UnauthorizedAccessException)
-      {
-         statusCode = (int)HttpStatusCode.Unauthorized;
-         message = "Unauthorized access.";
-      }
-      // You can add more specific exception checks here (e.g. ValidationException)
-      httpContext.Response.StatusCode = statusCode;
+
+      var exceptionResponse = ExceptionResponseFactory.Create(exception);
+
+      using var scope = _serviceProvider.CreateScope();
+      var systemLogPublisher = scope.ServiceProvider.GetRequiredService<IExceptionSystemLogPublisher>();
+
+      await systemLogPublisher.PublishAsync(
+         IamConst.System.ModuleName,
+         exception,
+         exceptionResponse.StatusCode,
+         httpContext.TraceIdentifier,
+         httpContext.Request.Path.ToString(),
+         cancellationToken);
+
+      httpContext.Response.StatusCode = exceptionResponse.StatusCode;
       var response = new
       {
-         Message = message,
-         Details = details
+         exceptionResponse.Message,
+         exceptionResponse.Details
       };
+
       await httpContext.Response.WriteAsJsonAsync(response, cancellationToken);
-      // Return true to indicate the exception has been handled and shouldn't propagate further
       return true;
    }
 }

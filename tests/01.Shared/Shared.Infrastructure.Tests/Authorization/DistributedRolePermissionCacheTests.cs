@@ -3,6 +3,7 @@ using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
+using Shared.Domain;
 using Shared.Infrastructure.Authorization;
 using System.Text;
 using System.Text.Json;
@@ -18,8 +19,9 @@ public class DistributedRolePermissionCacheTests
    {
       var cache = Substitute.For<IDistributedCache>();
       var service = new DistributedRolePermissionCache(cache);
+      var cacheKey = $"{SharedConst.Redis.CacheKeyPrefixForRole}{role}";
 
-      cache.GetAsync($"perm:{role}", Arg.Any<CancellationToken>())
+      cache.GetAsync(cacheKey, Arg.Any<CancellationToken>())
          .Returns(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(permissions)));
 
       var result = await service.GetPermissionsAsync(role, TestContext.Current.CancellationToken);
@@ -35,15 +37,17 @@ public class DistributedRolePermissionCacheTests
       var cache = Substitute.For<IDistributedCache>();
       var service = new DistributedRolePermissionCache(cache);
       var expiresAt = DateTime.UtcNow.AddMinutes(15);
+      var cacheKey = $"{SharedConst.Redis.CacheKeyPrefixForRole}{role}";
 
       byte[]? cachedBytes = null;
       DistributedCacheEntryOptions? cacheOptions = null;
 
-      await cache.SetAsync(
-         $"perm:{role}",
+      cache.SetAsync(
+         cacheKey,
          Arg.Do<byte[]>(value => cachedBytes = value),
          Arg.Do<DistributedCacheEntryOptions>(options => cacheOptions = options),
-         Arg.Any<CancellationToken>());
+         Arg.Any<CancellationToken>())
+         .Returns(Task.CompletedTask);
 
       await service.SetPermissionsAsync(role, permissions, expiresAt, TestContext.Current.CancellationToken);
 
@@ -58,10 +62,11 @@ public class DistributedRolePermissionCacheTests
       var cache = Substitute.For<IDistributedCache>();
       var service = new DistributedRolePermissionCache(cache);
       var roleId = Guid.NewGuid();
+      var cacheKey = $"{SharedConst.Redis.CacheKeyPrefixForRole}{roleId}";
 
       await service.RemoveAsync(roleId, TestContext.Current.CancellationToken);
 
-      await cache.Received(1).RemoveAsync($"perm:{roleId}", Arg.Any<CancellationToken>());
+      await cache.Received(1).RemoveAsync(cacheKey, Arg.Any<CancellationToken>());
    }
 
    [Fact]

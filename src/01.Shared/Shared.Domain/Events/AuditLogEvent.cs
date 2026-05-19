@@ -4,7 +4,7 @@ namespace Shared.Domain.Events;
 
 public record AuditLogEvent
 {
-   public Guid EventId { get; init; } = Guid.CreateVersion7();
+   public Guid Id { get; init; } = Guid.NewGuid();
    public Guid OrganizationId { get; init; }
    public DateTime Timestamp { get; init; } = DateTime.UtcNow;
    public string Module { get; init; } = string.Empty;
