@@ -7,7 +7,6 @@ using Shared.Domain.DTOs.Requests;
 using Shared.Domain.DTOs.Responses;
 using Shared.Domain.Entities;
 using Shared.Domain.Enums;
-using Shared.Domain.Events;
 using Shared.Domain.Interfaces;
 using Shared.Domain.Messages;
 
@@ -22,6 +21,7 @@ public class ParameterServiceTests
    private readonly IParameterOverrideRepository _parameterOverrideRepositoryMock;
    private readonly IParameterQueryRepository _parameterQueryRepositoryMock;
    private readonly IEventPublisher _eventPublisherMock;
+   private readonly IParameterCacheRespository _parameterValueCacheMock;
    private readonly ParameterService _parameterService;
 
    private readonly string _keyMock = "Module.Group.Key";
@@ -35,9 +35,12 @@ public class ParameterServiceTests
       _parameterOverrideRepositoryMock = Substitute.For<IParameterOverrideRepository>();
       _parameterQueryRepositoryMock = Substitute.For<IParameterQueryRepository>();
       _eventPublisherMock = Substitute.For<IEventPublisher>();
+      _parameterValueCacheMock = Substitute.For<IParameterCacheRespository>();
 
       _userContextMock.UserOwnerId.Returns(Guid.NewGuid());
       _userContextMock.UserId.Returns(Guid.NewGuid());
+      _parameterValueCacheMock.GetAsync(Arg.Any<string>(), Arg.Any<Guid>(), Arg.Any<Guid>(), Arg.Any<CancellationToken>())
+         .Returns(Task.FromResult<string?>(null));
 
       _parameterService = new ParameterService(
           _unitOfWorkMock,
@@ -46,7 +49,116 @@ public class ParameterServiceTests
           _parameterRepositoryMock,
           _parameterOverrideRepositoryMock,
           _parameterQueryRepositoryMock,
-          _eventPublisherMock);
+          _eventPublisherMock,
+          _parameterValueCacheMock);
+   }
+
+   [Fact]
+   public async Task GetValueAsync_ShouldReturnCachedValue_WhenCacheHit()
+   {
+      _parameterValueCacheMock.GetAsync(_keyMock, _userContextMock.UserOwnerId, _userContextMock.UserId, Arg.Any<CancellationToken>())
+         .Returns(Task.FromResult<string?>("cached"));
+
+      var result = await _parameterService.GetValueAsync(_keyMock, TestContext.Current.CancellationToken);
+
+      result.IsSuccess.Should().BeTrue();
+      result.Data!.Value.Should().Be("cached");
+      await _parameterQueryRepositoryMock.DidNotReceive().GetValueAsync(Arg.Any<string>(), Arg.Any<Guid>(), Arg.Any<Guid>(), Arg.Any<CancellationToken>());
+      await _parameterValueCacheMock.DidNotReceive().SetAsync(Arg.Any<ParameterValueDto>(), Arg.Any<Guid>(), Arg.Any<CancellationToken>());
+   }
+
+   [Fact]
+   public async Task GetValueAsync_ShouldCacheStaticParameter_WhenCacheMiss()
+   {
+      var parameter = new ParameterValueDto
+      {
+         Key = _keyMock,
+         Value = "3",
+         DefaultValue = "3",
+         CanBeOverride = false,
+         IsOverride = false,
+         OverrideType = ParameterOverrideType.None
+      };
+
+      _parameterQueryRepositoryMock.GetValueAsync(_keyMock, _userContextMock.UserOwnerId, _userContextMock.UserId, Arg.Any<CancellationToken>())
+         .Returns(parameter);
+
+      var result = await _parameterService.GetValueAsync(_keyMock, TestContext.Current.CancellationToken);
+
+      result.IsSuccess.Should().BeTrue();
+      await _parameterValueCacheMock.Received(1).SetAsync(
+         Arg.Is<ParameterValueDto>(p => p.Key == _keyMock && !p.CanBeOverride),
+         _userContextMock.UserId,
+         Arg.Any<CancellationToken>());
+   }
+
+   [Fact]
+   public async Task GetValueAsync_ShouldCacheOverrideWithOwnerId_WhenOverrideExists()
+   {
+      var parameter = new ParameterValueDto
+      {
+         Key = _keyMock,
+         Value = "Dark",
+         DefaultValue = "Blue",
+         CanBeOverride = true,
+         IsOverride = true,
+         OverrideType = ParameterOverrideType.UserOwnerId
+      };
+
+      _parameterQueryRepositoryMock.GetValueAsync(_keyMock, _userContextMock.UserOwnerId, _userContextMock.UserId, Arg.Any<CancellationToken>())
+         .Returns(parameter);
+
+      var result = await _parameterService.GetValueAsync(_keyMock, TestContext.Current.CancellationToken);
+
+      result.IsSuccess.Should().BeTrue();
+      await _parameterValueCacheMock.Received(1).SetAsync(parameter, _userContextMock.UserOwnerId, Arg.Any<CancellationToken>());
+   }
+
+   [Fact]
+   public async Task GetValueAsync_ShouldCacheOverrideWithUserId_WhenUserOverrideExists()
+   {
+      var parameter = new ParameterValueDto
+      {
+         Key = _keyMock,
+         Value = "Dark",
+         DefaultValue = "Blue",
+         CanBeOverride = true,
+         IsOverride = true,
+         OverrideType = ParameterOverrideType.UserId
+      };
+
+      _parameterQueryRepositoryMock.GetValueAsync(_keyMock, _userContextMock.UserOwnerId, _userContextMock.UserId, Arg.Any<CancellationToken>())
+         .Returns(parameter);
+
+      var result = await _parameterService.GetValueAsync(_keyMock, TestContext.Current.CancellationToken);
+
+      result.IsSuccess.Should().BeTrue();
+      await _parameterValueCacheMock.Received(1).SetAsync(parameter, _userContextMock.UserId, Arg.Any<CancellationToken>());
+   }
+
+   [Fact]
+   public async Task GetValueAsync_ShouldNotCacheUserField_WhenDefaultIsUsed()
+   {
+      var parameter = new ParameterValueDto
+      {
+         Key = _keyMock,
+         Value = "Blue",
+         DefaultValue = "Blue",
+         CanBeOverride = true,
+         IsOverride = false,
+         OverrideType = ParameterOverrideType.UserOwnerId
+      };
+
+      _parameterQueryRepositoryMock.GetValueAsync(_keyMock, _userContextMock.UserOwnerId, _userContextMock.UserId, Arg.Any<CancellationToken>())
+         .Returns(parameter);
+
+      var result = await _parameterService.GetValueAsync(_keyMock, TestContext.Current.CancellationToken);
+
+      result.IsSuccess.Should().BeTrue();
+      await _parameterValueCacheMock.Received(1).SetAsync(
+         Arg.Is<ParameterValueDto>(p => p.CanBeOverride && !p.IsOverride),
+         _userContextMock.UserId,
+         Arg.Any<CancellationToken>());
    }
 
    [Fact]
@@ -95,7 +207,7 @@ public class ParameterServiceTests
    {
       var parameterId = Guid.NewGuid();
       var request = new ParameterOwnerUpdateRequest("NewValue");
-      var parameter = new Parameter { OverrideType = ParameterOverrideType.UserOwnerId };
+      var parameter = Parameter.Create("Module", "Group", "Key", "Title", "Desc", ParameterType.String, "Value", null, null, null, null, ParameterOverrideType.UserOwnerId);
 
       _parameterRepositoryMock.GetByIdAsync(parameterId, Arg.Any<CancellationToken>()).Returns(parameter);
       _parameterValidatorMock.ValidateOwnerUpdate(parameter, request).Returns(Result.Success());
@@ -106,6 +218,28 @@ public class ParameterServiceTests
       result.IsSuccess.Should().BeTrue();
       await _unitOfWorkMock.ParameterOverrides.Received(1).AddAsync(Arg.Any<ParameterOverride>(), Arg.Any<CancellationToken>());
       await _unitOfWorkMock.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+      await _parameterValueCacheMock.Received(1).RemoveOverrideAsync(parameter.Key, _userContextMock.UserOwnerId, Arg.Any<CancellationToken>());
+      await _parameterValueCacheMock.DidNotReceive().RemoveAsync(parameter.Key, Arg.Any<CancellationToken>());
+   }
+
+   [Fact]
+   public async Task DeleteOverrideValueAsync_ShouldRemoveOnlyOverrideFromCache()
+   {
+      var parameterId = Guid.NewGuid();
+      var parameter = Parameter.Create("Module", "Group", "Key", "Title", "Desc", ParameterType.String, "Value", null, null, null, null, ParameterOverrideType.UserId);
+      var parameterOverride = ParameterOverride.Create(parameterId, _userContextMock.UserId, "Dark");
+
+      _parameterRepositoryMock.GetByIdAsync(parameterId, Arg.Any<CancellationToken>()).Returns(parameter);
+      _parameterOverrideRepositoryMock.GetByParameterIdAndOwnerIdAsync(parameterId, _userContextMock.UserId, Arg.Any<CancellationToken>())
+         .Returns(parameterOverride);
+
+      var result = await _parameterService.DeleteOverrideValueAsync(parameterId, TestContext.Current.CancellationToken);
+
+      result.IsSuccess.Should().BeTrue();
+      await _unitOfWorkMock.ParameterOverrides.Received(1).DeleteAsync(parameterOverride.Id, Arg.Any<CancellationToken>());
+      await _unitOfWorkMock.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+      await _parameterValueCacheMock.Received(1).RemoveOverrideAsync(parameter.Key, _userContextMock.UserId, Arg.Any<CancellationToken>());
+      await _parameterValueCacheMock.DidNotReceive().RemoveAsync(parameter.Key, Arg.Any<CancellationToken>());
    }
 
    [Fact]

@@ -38,6 +38,7 @@ public static class SharedDependencyInjection
       services.AddScoped<IParameterValidator, ParameterValidator>();
 
       ConfigureRedis(services, configuration);
+      RegisterParameterValueCache(services, configuration);
       services.AddSharedAuthorization(configuration);
 
       return services;
@@ -87,14 +88,26 @@ public static class SharedDependencyInjection
       services.AddScoped<IEventPublisher, RedisEventPublisher>();
    }
 
+   private static void RegisterParameterValueCache(IServiceCollection services, IConfiguration configuration)
+   {
+      var redisConnectionString = configuration.GetConnectionString(SharedConst.Redis.ConnectionString);
+
+      if (string.IsNullOrWhiteSpace(redisConnectionString))
+      {
+         services.AddScoped<IParameterCacheRespository, ParameterNullCacheRepository>();
+         return;
+      }
+
+      services.AddScoped<IParameterCacheRespository, ParameterRedisCacheRepository>();
+   }
+
    private static void ConfigureDistributedCache(IServiceCollection services, IConfiguration configuration)
    {
       var redisConnectionString = configuration.GetConnectionString(SharedConst.Redis.ConnectionString);
 
       if (string.IsNullOrWhiteSpace(redisConnectionString))
       {
-         services.AddDistributedMemoryCache();
-         return;
+         throw new InvalidOperationException("Redis connection string is required for distributed cache.");
       }
 
       services.AddStackExchangeRedisCache(options =>

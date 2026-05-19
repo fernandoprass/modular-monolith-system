@@ -11,7 +11,6 @@ using Shared.Domain.Mappers;
 using Shared.Domain.Messages;
 using System.Globalization;
 using System.Text.Json;
-using System.Text.Json.Nodes;
 
 namespace Shared.Application.Services;
 
@@ -22,7 +21,8 @@ internal class ParameterService(
     IParameterRepository parameterRepository,
     IParameterOverrideRepository parameterOverrideRepository,
     IParameterQueryRepository parameterQueryRepository,
-    IEventPublisher eventPublisher) : BaseService(userContext), IParameterService
+    IEventPublisher eventPublisher,
+    IParameterCacheRespository parameterValueCache) : BaseService(userContext), IParameterService
 {
    private readonly ISharedUnitOfWork _unitOfWork = unitOfWork;
    private readonly IParameterValidator _parameterValidator = parameterValidator;
@@ -30,6 +30,7 @@ internal class ParameterService(
    private readonly IParameterOverrideRepository _parameterOverrideRepository = parameterOverrideRepository;
    private readonly IParameterQueryRepository _parameterQueryRepository = parameterQueryRepository;
    private readonly IEventPublisher _eventPublisher = eventPublisher;
+   private readonly IParameterCacheRespository _parameterValueCache = parameterValueCache;
 
    #region Controller Methods
    public async Task<Result<ParameterDto>> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
@@ -52,9 +53,21 @@ internal class ParameterService(
 
    public async Task<Result<ParameterValueDto>> GetValueAsync(string key, CancellationToken cancellationToken = default)
    {
+      var cachedValue = await _parameterValueCache.GetAsync(key, _userContext.UserOwnerId, _userContext.UserId, cancellationToken);
+      if (cachedValue != null)
+      {
+         return Result<ParameterValueDto>.Success(new ParameterValueDto
+         {
+            Key = key,
+            Value = cachedValue
+         });
+      }
+
       var parameter = await _parameterQueryRepository.GetValueAsync(key, _userContext.UserOwnerId, _userContext.UserId, cancellationToken);
 
       if (parameter == null) return Result<ParameterValueDto>.Failure(new NotFoundError(key));
+
+      await _parameterValueCache.SetAsync(parameter, GetOwnerId(parameter), cancellationToken);
 
       return Result<ParameterValueDto>.Success(parameter);
    }
@@ -82,6 +95,7 @@ internal class ParameterService(
       }
 
       await _unitOfWork.SaveChangesAsync(cancellationToken);
+      await _parameterValueCache.RemoveOverrideAsync(parameter.Key, ownerId, cancellationToken);
       return Result.Success(new SuccessInfo());
    }
 
@@ -98,6 +112,7 @@ internal class ParameterService(
 
       await _unitOfWork.ParameterOverrides.DeleteAsync(parameterOverride.Id, cancellationToken);
       await _unitOfWork.SaveChangesAsync(cancellationToken);
+      await _parameterValueCache.RemoveOverrideAsync(parameter.Key, ownerId, cancellationToken);
 
       return Result.Success(new SuccessInfo());
    }
@@ -140,6 +155,8 @@ internal class ParameterService(
       var validation = _parameterValidator.ValidateUpdate(parameter != null, keyExists, request);
       if (validation.HasError) return Result.Failure(validation.Messages);
 
+      var oldKey = parameter.Key;
+
       parameter.Update(
           request.Module,
           request.Group,
@@ -157,6 +174,8 @@ internal class ParameterService(
 
       _unitOfWork.Parameters.Update(parameter);
       await _unitOfWork.SaveChangesAsync(cancellationToken);
+      await _parameterValueCache.RemoveAsync(oldKey, cancellationToken);
+      await _parameterValueCache.RemoveAsync(parameter.Key, cancellationToken);
 
       var requestAsJson = JsonSerializer.Serialize(request);
 
@@ -192,6 +211,7 @@ internal class ParameterService(
 
       await _unitOfWork.Parameters.DeleteAsync(id, cancellationToken);
       await _unitOfWork.SaveChangesAsync(cancellationToken);
+      await _parameterValueCache.RemoveAsync(parameter.Key, cancellationToken);
 
       return Result.Success(new SuccessInfo());
    }
@@ -245,14 +265,14 @@ internal class ParameterService(
 
    private async Task<string?> GetResolvedValueAsync(string key, CancellationToken cancellationToken)
    {
-      var parameter = await _parameterQueryRepository.GetValueAsync(key, _userContext.UserOwnerId, _userContext.UserId, cancellationToken);
+      var parameter = await GetValueAsync(key, cancellationToken);
 
-      if (parameter == null)
+      if (parameter.HasError || parameter.Data == null)
       {
          throw new ArgumentNullException(nameof(key));
       }
 
-      return parameter.Value;
+      return parameter.Data.Value;
    }
 
    private Guid GetOwnerId(ParameterOverrideType overrideType)
@@ -263,6 +283,16 @@ internal class ParameterService(
          ParameterOverrideType.UserId => _userContext.UserId,
          _ => throw new InvalidOperationException("Invalid override type")
       };
+   }
+
+   private Guid GetOwnerId(ParameterValueDto parameter)
+   {
+      if (!parameter.IsOverride)
+      {
+         return _userContext.UserId;
+      }
+
+      return GetOwnerId(parameter.OverrideType);
    }
    #endregion
 }

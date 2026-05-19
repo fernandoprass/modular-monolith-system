@@ -24,6 +24,7 @@ public static partial class SharedConst
       public const string AuditLogEventsStream = "audit-log-events";
       public const string SystemLogEventsStream = "system-log-events";
       public const string NotificationEventsChannel = "notification-events";
+      public const string ParameterPrefix = "param:";
    }
 
    public class Security
