@@ -82,15 +82,24 @@ internal class ParameterQueryRepository(SharedDbContext dbContext) : IParameterQ
       return await _dbContext.Parameters
               .AsNoTracking()
               .Where(p => p.Key == key)
-              .Select(p => new ParameterValueDto
+              .Select(p => new
               {
-                 Key = p.Key,
-                 Type = p.Type,
-                 Value = _dbContext.ParameterOverrides
+                 Parameter = p,
+                 OverrideValue = _dbContext.ParameterOverrides
                       .Where(o => o.ParameterId == p.Id &&
                                  o.OwnerId == (p.OverrideType == ParameterOverrideType.UserOwnerId ? userOwnerId : userId))
                       .Select(o => o.Value)
-                      .FirstOrDefault() ?? p.Value
+                      .FirstOrDefault()
+              })
+              .Select(x => new ParameterValueDto
+              {
+                 Key = x.Parameter.Key,
+                 Type = x.Parameter.Type,
+                 Value = x.OverrideValue ?? x.Parameter.Value,
+                 DefaultValue = x.Parameter.Value,
+                 CanBeOverride = x.Parameter.OverrideType != ParameterOverrideType.None,
+                 IsOverride = x.OverrideValue != null,
+                 OverrideType = x.Parameter.OverrideType
               })
               .SingleOrDefaultAsync(cancellationToken);
    }

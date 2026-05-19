@@ -30,6 +30,7 @@ public class SystemLogConsumer(
 
       var propertiesJson = JsonSerializer.Serialize(systemLogEvent.Properties, JsonOptions);
       var systemLog = SystemLog.Create(
+         systemLogEvent.Id,
          systemLogEvent.Timestamp,
          systemLogEvent.Level,
          systemLogEvent.Status,
@@ -45,6 +46,6 @@ public class SystemLogConsumer(
       await unitOfWork.SystemLogs.AddAsync(systemLog, cancellationToken);
       await unitOfWork.SaveChangesAsync(cancellationToken);
 
-      _logger.LogDebug("Persisted system log {LogId}: {Level} {Status}", systemLogEvent.LogId, systemLogEvent.Level, systemLogEvent.Status);
+      _logger.LogDebug("Persisted system log {LogId}: {Level} {Status}", systemLogEvent.Id, systemLogEvent.Level, systemLogEvent.Status);
    }
 }

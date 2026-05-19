@@ -1,39 +1,102 @@
 using FluentAssertions;
 using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using NSubstitute;
+using Shared.Domain;
 using Shared.Infrastructure.Authorization;
+using System.Text;
+using System.Text.Json;
 
 namespace Shared.Infrastructure.Tests.Authorization;
 
 public class DistributedRolePermissionCacheTests
 {
-   [Fact]
-   public async Task SetPermissionsAsync_ShouldStorePermissionsUntilExpiration()
+   [Theory]
+   [InlineData("role-a", "iam.users.list")]
+   [InlineData("role-b", "iam.users.list", "iam.users.create")]
+   public async Task GetPermissionsAsync_ShouldDeserializeCachedPermissions(string role, params string[] permissions)
    {
-      IDistributedCache cache = new MemoryDistributedCache(Options.Create(new MemoryDistributedCacheOptions()));
+      var cache = Substitute.For<IDistributedCache>();
       var service = new DistributedRolePermissionCache(cache);
-      var roleId = Guid.NewGuid().ToString();
+      var cacheKey = $"{SharedConst.Redis.CacheKeyPrefixForRole}{role}";
 
-      await service.SetPermissionsAsync(roleId, ["iam.users.list"], DateTime.UtcNow.AddMinutes(5), TestContext.Current.CancellationToken);
+      cache.GetAsync(cacheKey, Arg.Any<CancellationToken>())
+         .Returns(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(permissions)));
 
-      var permissions = await service.GetPermissionsAsync(roleId, TestContext.Current.CancellationToken);
+      var result = await service.GetPermissionsAsync(role, TestContext.Current.CancellationToken);
 
-      permissions.Should().Contain("iam.users.list");
+      result.Should().BeEquivalentTo(permissions);
+   }
+
+   [Theory]
+   [InlineData("role-a", "iam.users.list")]
+   [InlineData("role-b", "iam.users.list", "iam.users.create")]
+   public async Task SetPermissionsAsync_ShouldSerializePermissionsAndUseAbsoluteExpiration(string role, params string[] permissions)
+   {
+      var cache = Substitute.For<IDistributedCache>();
+      var service = new DistributedRolePermissionCache(cache);
+      var expiresAt = DateTime.UtcNow.AddMinutes(15);
+      var cacheKey = $"{SharedConst.Redis.CacheKeyPrefixForRole}{role}";
+
+      byte[]? cachedBytes = null;
+      DistributedCacheEntryOptions? cacheOptions = null;
+
+      cache.SetAsync(
+         cacheKey,
+         Arg.Do<byte[]>(value => cachedBytes = value),
+         Arg.Do<DistributedCacheEntryOptions>(options => cacheOptions = options),
+         Arg.Any<CancellationToken>())
+         .Returns(Task.CompletedTask);
+
+      await service.SetPermissionsAsync(role, permissions, expiresAt, TestContext.Current.CancellationToken);
+
+      var cachedPermissions = JsonSerializer.Deserialize<IReadOnlyCollection<string>>(Encoding.UTF8.GetString(cachedBytes!));
+      cachedPermissions.Should().BeEquivalentTo(permissions);
+      cacheOptions!.AbsoluteExpiration.Should().Be(new DateTimeOffset(expiresAt));
    }
 
    [Fact]
    public async Task RemoveAsync_ShouldRemoveRolePermissions()
    {
-      IDistributedCache cache = new MemoryDistributedCache(Options.Create(new MemoryDistributedCacheOptions()));
+      var cache = Substitute.For<IDistributedCache>();
       var service = new DistributedRolePermissionCache(cache);
       var roleId = Guid.NewGuid();
+      var cacheKey = $"{SharedConst.Redis.CacheKeyPrefixForRole}{roleId}";
 
-      await service.SetPermissionsAsync(roleId.ToString(), ["iam.users.list"], DateTime.UtcNow.AddMinutes(5), TestContext.Current.CancellationToken);
       await service.RemoveAsync(roleId, TestContext.Current.CancellationToken);
 
-      var permissions = await service.GetPermissionsAsync(roleId.ToString(), TestContext.Current.CancellationToken);
+      await cache.Received(1).RemoveAsync(cacheKey, Arg.Any<CancellationToken>());
+   }
 
-      permissions.Should().BeEmpty();
+   [Fact]
+   public void AddSharedAuthorization_ShouldRequireRedisConnectionString()
+   {
+      var services = new ServiceCollection();
+      var configuration = new ConfigurationBuilder().Build();
+
+      Action act = () => services.AddSharedAuthorization(configuration);
+
+      act.Should().Throw<InvalidOperationException>()
+         .WithMessage("*Redis connection string*");
+   }
+
+   [Fact]
+   public void AddSharedAuthorization_ShouldRegisterRedisDistributedCache_WhenRedisConnectionStringExists()
+   {
+      var services = new ServiceCollection();
+      var configuration = new ConfigurationBuilder()
+         .AddInMemoryCollection(new Dictionary<string, string?>
+         {
+            ["ConnectionStrings:Redis"] = "localhost:6379,abortConnect=false"
+         })
+         .Build();
+
+      services.AddSharedAuthorization(configuration);
+
+      using var provider = services.BuildServiceProvider();
+      var cache = provider.GetRequiredService<IDistributedCache>();
+
+      cache.GetType().FullName.Should().Contain("StackExchangeRedis");
    }
 }

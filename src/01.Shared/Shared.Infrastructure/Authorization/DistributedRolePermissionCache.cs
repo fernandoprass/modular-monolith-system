@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Caching.Distributed;
 using Shared.Application.Contracts;
+using Shared.Domain;
 using System.Text.Json;
 
 namespace Shared.Infrastructure.Authorization;
@@ -70,6 +71,6 @@ public class DistributedRolePermissionCache(IDistributedCache cache) : IRolePerm
 
    private static string GetCacheKey(string role)
    {
-      return $"perm:{role}";
+      return $"{SharedConst.Redis.CacheKeyPrefixForRole}{role}";
    }
 }

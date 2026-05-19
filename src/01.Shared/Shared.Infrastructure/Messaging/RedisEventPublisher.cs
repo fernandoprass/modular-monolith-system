@@ -19,24 +19,24 @@ public class RedisEventPublisher(IConnectionMultiplexer redis, ILogger<RedisEven
       WriteIndented = false
    };
 
-   public async Task PublishAuditLogEventAsync(AuditLogEvent auditEvent, CancellationToken cancellationToken = default)
+   public async Task PublishAuditLogEventAsync(AuditLogEvent auditLogEvent, CancellationToken cancellationToken = default)
    {
       cancellationToken.ThrowIfCancellationRequested();
 
-      var json = JsonSerializer.Serialize(auditEvent, JsonOptions);
+      var json = JsonSerializer.Serialize(auditLogEvent, JsonOptions);
       var streamId = await _database.StreamAddAsync(SharedConst.Redis.AuditLogEventsStream, "event", json);
 
-      _logger.LogDebug("Published audit event {EventId} to stream {StreamId}", auditEvent.EventId, streamId);
+      _logger.LogDebug("Published audit event {EventId} to stream {StreamId}", auditLogEvent.Id, streamId);
    }
 
-   public async Task PublishSystemLogEventAsync(SystemLogEvent systemLog, CancellationToken cancellationToken = default)
+   public async Task PublishSystemLogEventAsync(SystemLogEvent systemLogEvent, CancellationToken cancellationToken = default)
    {
       cancellationToken.ThrowIfCancellationRequested();
 
-      var json = JsonSerializer.Serialize(systemLog, JsonOptions);
+      var json = JsonSerializer.Serialize(systemLogEvent, JsonOptions);
       var streamId = await _database.StreamAddAsync(SharedConst.Redis.SystemLogEventsStream, "event", json);
 
-      _logger.LogDebug("Published system log {LogId} to stream {StreamId}", systemLog.LogId, streamId);
+      _logger.LogDebug("Published system log {EventId} to stream {StreamId}", systemLogEvent.Id, streamId);
    }
 
    public async Task PublishNotificationEventAsync(NotificationEvent notification, CancellationToken cancellationToken = default)
@@ -46,6 +46,6 @@ public class RedisEventPublisher(IConnectionMultiplexer redis, ILogger<RedisEven
       var json = JsonSerializer.Serialize(notification, JsonOptions);
       await _subscriber.PublishAsync(RedisChannel.Literal(SharedConst.Redis.NotificationEventsChannel), json);
 
-      _logger.LogDebug("Published notification {NotificationId}", notification.NotificationId);
+      _logger.LogDebug("Published notification {NotificationId}", notification.Id);
    }
 }

@@ -14,6 +14,7 @@
   <Folder Name="/infra/">
     <File Path="infra/.env" />
     <File Path="infra/clean-database.sql" />
+    <File Path="infra/docker-compose.apps.yaml" />
     <File Path="infra/docker-compose.mongodb.yaml" />
     <File Path="infra/docker-compose.postgresql.yaml" />
     <File Path="infra/docker-compose.redis.yaml" />
@@ -21,6 +22,7 @@
     <File Path="infra/dotnet.create-module.ps1" />
     <File Path="infra/iam.db-backup.ps1" />
     <File Path="infra/servers.json" />
+    <File Path="infra/start-apps.ps1" />
     <File Path="infra/start-infra.ps1" />
   </Folder>
   <Folder Name="/Solution Items/">
@@ -29,6 +31,9 @@
     <File Path="readme.md" />
   </Folder>
   <Folder Name="/src/" />
+  <Folder Name="/src/00.Seeder/">
+    <Project Path="src/00.Seeder/DatabaseSeeder/DatabaseSeeder.csproj" Id="82fafb8b-1d81-4240-af9c-e9fc62396eb1" />
+  </Folder>
    <Folder Name="/src/01.Shared/">
      <Project Path="src/01.Shared/Shared.Application/Shared.Application.csproj" />
      <Project Path="src/01.Shared/Shared.Domain/Shared.Domain.csproj" />

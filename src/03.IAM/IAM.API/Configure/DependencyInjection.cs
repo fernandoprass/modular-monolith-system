@@ -5,7 +5,6 @@ using IAM.Application.Validators;
 using IAM.Domain.Interfaces;
 using IAM.Domain.QueryRepositories;
 using IAM.Domain.Repositories;
-using IAM.Infrastructure.DatabaseSeeder;
 using IAM.Infrastructure.QueryRepositories;
 using IAM.Infrastructure.Repositories;
 using IAM.Infrastructure.UoW;
@@ -52,7 +51,6 @@ public static class DependencyInjection
    {
       builder.Services.AddScoped<IAuthService, AuthService>();
       builder.Services.AddScoped<IOrganizationService, OrganizationService>();
-      builder.Services.AddScoped<IDatabaseSeeder, DatabaseSeeder>();
       builder.Services.AddScoped<IRoleService, RoleService>();
       builder.Services.AddScoped<IUserService, UserService>();
       builder.Services.AddScoped<IPermissionService, PermissionService>();

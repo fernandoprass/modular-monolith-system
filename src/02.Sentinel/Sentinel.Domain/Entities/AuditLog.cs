@@ -21,6 +21,7 @@ public class AuditLog : Entity
    private AuditLog() { }
 
    public static AuditLog Create(
+      Guid id,
       DateTime timestamp,
       string module,
       string feature,
@@ -36,7 +37,7 @@ public class AuditLog : Entity
    {
       return new AuditLog
       {
-         Id = Guid.CreateVersion7(),
+         Id = id,
          Timestamp = timestamp,
          Module = module,
          Feature = feature,

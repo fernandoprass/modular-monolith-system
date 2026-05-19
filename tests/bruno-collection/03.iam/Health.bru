@@ -1,0 +1,11 @@
+meta {
+  name: Health
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{host.iam}}/api/{{version}}/iam/health
+  body: none
+  auth: none
+}

@@ -1,0 +1,65 @@
+services:
+  iam-api:
+    build:
+      context: ..
+      dockerfile: src/03.IAM/IAM.API/Dockerfile
+    container_name: ${IAM_API_CONTAINER_NAME}
+    restart: on-failure
+    ports:
+      - "${IAM_API_PORT}:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
+      ASPNETCORE_URLS: http://+:8080
+      Kestrel__Endpoints__Http__Url: http://+:8080
+      ConnectionStrings__IamDb: "Host=${POSTGRES_SERVICE_NAME};Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}"
+      ConnectionStrings__Redis: "${REDIS_SERVICE_NAME}:6379,abortConnect=false,connectTimeout=5000,syncTimeout=5000"
+      Jwt__Secret: ${JWT_SECRET}
+      Jwt__ExpirationHours: ${JWT_EXPIRATION_HOURS}
+      InternalApi__Key: ${INTERNAL_API_KEY}
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/api/v1/iam/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    env_file:
+      - .env
+    networks:
+      - modular-network
+
+  sentinel-api:
+    build:
+      context: ..
+      dockerfile: src/02.Sentinel/Sentinel.API/Dockerfile
+    container_name: ${SENTINEL_API_CONTAINER_NAME}
+    restart: on-failure
+    ports:
+      - "${SENTINEL_API_PORT}:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
+      ASPNETCORE_URLS: http://+:8080
+      Kestrel__Endpoints__Http__Url: http://+:8080
+      ConnectionStrings__SentinelDb: "mongodb://${MONGO_ROOT_USER}:${MONGO_ROOT_PASSWORD}@${MONGO_SERVICE_NAME}:27017/?authSource=admin"
+      ConnectionStrings__Redis: "${REDIS_SERVICE_NAME}:6379,abortConnect=false,connectTimeout=5000,syncTimeout=5000"
+      Jwt__Secret: ${JWT_SECRET}
+      Iam__BaseUrl: "http://iam-api:8080/"
+      Iam__InternalApiKey: ${INTERNAL_API_KEY}
+      Sentinel__DatabaseName: ${MONGO_DB_NAME}
+    depends_on:
+      iam-api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/api/v1/sentinel/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    env_file:
+      - .env
+    networks:
+      - modular-network
+
+networks:
+  modular-network:
+    external: true
+    name: ${NETWORK_NAME}

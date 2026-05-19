@@ -1,0 +1,12 @@
+**/bin/
+**/obj/
+**/TestResults/
+.git/
+.vs/
+.agents/
+.github/
+docs/
+tests/
+*.user
+*.suo
+*.nupkg

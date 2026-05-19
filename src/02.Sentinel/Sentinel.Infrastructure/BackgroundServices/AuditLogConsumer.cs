@@ -28,6 +28,7 @@ public class AuditLogConsumer(
       var unitOfWork = scope.ServiceProvider.GetRequiredService<ISentinelUnitOfWork>();
 
       var auditLog = AuditLog.Create(
+         auditEvent.Id,
          auditEvent.Timestamp,
          auditEvent.Module,
          auditEvent.Feature,
@@ -44,6 +45,6 @@ public class AuditLogConsumer(
       await unitOfWork.AuditLogs.AddAsync(auditLog, cancellationToken);
       await unitOfWork.SaveChangesAsync(cancellationToken);
 
-      _logger.LogDebug("Persisted audit event {EventId}: {Action} on {TargetId}", auditEvent.EventId, auditEvent.Action, auditEvent.TargetId);
+      _logger.LogDebug("Persisted audit event {EventId}: {Action} on {TargetId}", auditEvent.Id, auditEvent.Action, auditEvent.TargetId);
    }
 }
