@@ -73,6 +73,6 @@ public class ParameterRedisCacheRepository(IConnectionMultiplexer redis) : IPara
 
    private static RedisKey GetCacheKey(string key)
    {
-      return $"{SharedConst.Redis.ParameterPrefix}{key}";
+      return $"{SharedConst.Redis.CacheKeyPrefixForParameter}{key}";
    }
 }

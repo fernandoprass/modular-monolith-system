@@ -4,10 +4,10 @@ using Shared.Domain;
 
 namespace Shared.Infrastructure.Authorization;
 
-public class PermissionAuthorizationHandler(IRolePermissionCache permissionService)
+public class PermissionAuthorizationHandler(IRolePermissionCache rolePermissionService)
    : AuthorizationHandler<RequirePermissionAttribute>
 {
-   private readonly IRolePermissionCache _permissionService = permissionService;
+   private readonly IRolePermissionCache _rolePermissionService = rolePermissionService;
 
    protected override async Task HandleRequirementAsync(
       AuthorizationHandlerContext context,
@@ -44,7 +44,7 @@ public class PermissionAuthorizationHandler(IRolePermissionCache permissionServi
 
       foreach (var role in roleClaims)
       {
-         var permissions = await _permissionService.GetPermissionsAsync(role);
+         var permissions = await _rolePermissionService.GetPermissionsAsync(role);
          userPermissions.UnionWith(permissions);
       }
 
