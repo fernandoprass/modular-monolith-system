@@ -12,6 +12,7 @@ using Isopoh.Cryptography.Argon2;
 using Myce.Response;
 using Shared.Application.Contracts;
 using Shared.Application.Services;
+using Shared.Domain.Enums;
 using Shared.Domain.Messages;
 
 namespace IAM.Application.Orchestrators;
@@ -22,13 +23,15 @@ public class ResgisterOrchestrator(
    IUserContext userContext,
    IUserRepository userRepository,
    IUserService userService,
-   IIamUnitOfWork iamUnitOfWork) : BaseService(userContext), IRegisterOrchestrator
+   IIamUnitOfWork iamUnitOfWork,
+   IIamAuditLogger auditLogger) : BaseService(userContext), IRegisterOrchestrator
 {
    private readonly IOrganizationService _organizationService = organizationService;
    private readonly IOrganizationQueryRepository _organizationQueryRepository = organizationQueryRepository;
    private readonly IUserRepository _userRepository = userRepository;
    private readonly IUserService _userService = userService;
    private readonly IIamUnitOfWork _iamUnitOfWork = iamUnitOfWork;
+   private readonly IIamAuditLogger _auditLogger = auditLogger;
 
    public async Task<Result<UserDto>> RegisterUserAsync(UserCreateRequest request, CancellationToken cancellationToken = default)
    {
@@ -41,10 +44,19 @@ public class ResgisterOrchestrator(
       if (result.IsSuccess)
       {
          result.Data.OrganizationName = organizationDto.Name;
+         await _auditLogger.LogAsync(
+            IamConst.Logger.Feature.Users,
+            IamConst.Logger.Action.Create,
+            AuditPrivacyLevel.High,
+            $"Created user {request.Email}",
+            result.Data.Id,
+            new { request.Name, request.Email, request.OrganizationId },
+            cancellationToken);
       }
 
       return result;
    }
+
    public async Task<Result<OrganizationDto>> RegisterOrganizationAsync(OrganizationCreateRequest organizationCreate, CancellationToken cancellationToken = default)
    {
       var organizationValidateResult = await _organizationService.ValidateCreateOrganizationAsync(organizationCreate, cancellationToken);
@@ -78,6 +90,15 @@ public class ResgisterOrchestrator(
       await _iamUnitOfWork.Users.AddAsync(user, cancellationToken);
       await _iamUnitOfWork.SaveChangesAsync(cancellationToken);
 
+      await _auditLogger.LogAsync(
+         IamConst.Logger.Feature.Organizations,
+         IamConst.Logger.Action.Create,
+         AuditPrivacyLevel.Medium,
+         $"Created organization {organization.Code}",
+         organization.Id,
+         organizationCreate,
+         cancellationToken);
+
       return Result<OrganizationDto>.Success(organization.ToOrganizationDto());
    }
 
@@ -100,6 +121,15 @@ public class ResgisterOrchestrator(
          }
 
          await _iamUnitOfWork.SaveChangesAsync(ct);
+
+         await _auditLogger.LogAsync(
+            IamConst.Logger.Feature.Organizations,
+            IamConst.Logger.Action.Delete,
+            AuditPrivacyLevel.Medium,
+            $"Deleted organization {id}",
+            id,
+            new { OrganizationId = id },
+            ct);
 
          return Result.Success(new SuccessInfo());
       }, cancellationToken);

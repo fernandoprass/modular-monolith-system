@@ -10,6 +10,7 @@ using IAM.Domain.QueryRepositories;
 using Myce.Response;
 using NSubstitute;
 using Shared.Application.Contracts;
+using Shared.Domain.Enums;
 using Shared.Domain.Messages;
 
 namespace IAM.Application.Tests.Services;
@@ -21,6 +22,7 @@ public class PermissionServiceTests
    private readonly IPermissionValidator _permissionValidatorMock;
    private readonly IPermissionQueryRepository _permissionQueryRepositoryMock;
    private readonly IRolePermissionCacheInvalidator _rolePermissionAuthorizationCacheMock;
+   private readonly IIamAuditLogger _auditLoggerMock;
    private readonly PermissionService _permissionService;
 
    public PermissionServiceTests()
@@ -30,13 +32,15 @@ public class PermissionServiceTests
       _permissionValidatorMock = Substitute.For<IPermissionValidator>();
       _permissionQueryRepositoryMock = Substitute.For<IPermissionQueryRepository>();
       _rolePermissionAuthorizationCacheMock = Substitute.For<IRolePermissionCacheInvalidator>();
+      _auditLoggerMock = Substitute.For<IIamAuditLogger>();
 
       _permissionService = new PermissionService(
          _unitOfWorkMock,
          _userContextMock,
          _permissionValidatorMock,
          _permissionQueryRepositoryMock,
-         _rolePermissionAuthorizationCacheMock);
+         _rolePermissionAuthorizationCacheMock,
+         _auditLoggerMock);
    }
 
    #region CreateAsync Tests
@@ -227,6 +231,14 @@ public class PermissionServiceTests
       _unitOfWorkMock.Roles.Received(1).Update(role);
       await _unitOfWorkMock.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
       await _rolePermissionAuthorizationCacheMock.Received(1).RemoveAsync(role.Id, Arg.Any<CancellationToken>());
+      await _auditLoggerMock.Received(1).LogAsync(
+         IamConst.Logger.Feature.Permissions,
+         IamConst.Logger.Action.AssignToRole,
+         AuditPrivacyLevel.High,
+         Arg.Any<string>(),
+         role.Id,
+         request,
+         Arg.Any<CancellationToken>());
    }
 
    [Fact]
@@ -291,6 +303,14 @@ public class PermissionServiceTests
       _unitOfWorkMock.Roles.Received(1).Update(role);
       await _unitOfWorkMock.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
       await _rolePermissionAuthorizationCacheMock.Received(1).RemoveAsync(role.Id, Arg.Any<CancellationToken>());
+      await _auditLoggerMock.Received(1).LogAsync(
+         IamConst.Logger.Feature.Permissions,
+         IamConst.Logger.Action.UnassignFromRole,
+         AuditPrivacyLevel.High,
+         Arg.Any<string>(),
+         role.Id,
+         request,
+         Arg.Any<CancellationToken>());
    }
 
    [Fact]

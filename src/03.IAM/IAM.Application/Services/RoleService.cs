@@ -9,6 +9,7 @@ using IAM.Domain.QueryRepositories;
 using Myce.Response;
 using Shared.Application.Contracts;
 using Shared.Application.Services;
+using Shared.Domain.Enums;
 using Shared.Domain.Messages;
 
 namespace IAM.Application.Services;
@@ -17,11 +18,13 @@ public class RoleService(
    IIamUnitOfWork iamUnitOfWork,
    IUserContext userContext,
    IRoleValidator roleValidator,
-   IRoleQueryRepository roleQueryRepository) : BaseService(userContext), IRoleService
+   IRoleQueryRepository roleQueryRepository,
+   IIamAuditLogger auditLogger) : BaseService(userContext), IRoleService
 {
    private readonly IIamUnitOfWork _iamUnitOfWork = iamUnitOfWork;
    private readonly IRoleValidator _roleValidator = roleValidator;
    private readonly IRoleQueryRepository _roleQueryRepository = roleQueryRepository;
+   private readonly IIamAuditLogger _auditLogger = auditLogger;
 
    public async Task<Result<RoleDto>> CreateAsync(RoleCreateRequest request, CancellationToken cancellationToken = default)
    {
@@ -35,6 +38,15 @@ public class RoleService(
 
       await _iamUnitOfWork.Roles.AddAsync(role, cancellationToken);
       await _iamUnitOfWork.SaveChangesAsync(cancellationToken);
+
+      await _auditLogger.LogAsync(
+         IamConst.Logger.Feature.Roles,
+         IamConst.Logger.Action.Create,
+         AuditPrivacyLevel.Medium,
+         $"Created role {role.Name}",
+         role.Id,
+         request,
+         cancellationToken);
 
       return Result<RoleDto>.Success(role.ToRoleDto());
    }
@@ -54,6 +66,15 @@ public class RoleService(
 
          _iamUnitOfWork.Roles.Update(role);
          await _iamUnitOfWork.SaveChangesAsync(ct);
+
+         await _auditLogger.LogAsync(
+            IamConst.Logger.Feature.Roles,
+            IamConst.Logger.Action.Update,
+            AuditPrivacyLevel.Medium,
+            $"Updated role {role.Id}",
+            role.Id,
+            request,
+            ct);
 
          return Result.Success(new SuccessInfo());
       }, cancellationToken);
@@ -87,6 +108,15 @@ public class RoleService(
 
          _iamUnitOfWork.Users.Update(user);
          await _iamUnitOfWork.SaveChangesAsync(ct);
+
+         await _auditLogger.LogAsync(
+            IamConst.Logger.Feature.Roles,
+            IamConst.Logger.Action.Assign,
+            AuditPrivacyLevel.High,
+            $"Assigned roles to user {user.Id}",
+            user.Id,
+            request,
+            ct);
 
          return Result.Success(new SuccessInfo());
       }, cancellationToken);
@@ -126,6 +156,15 @@ public class RoleService(
 
          _iamUnitOfWork.Users.Update(user);
          await _iamUnitOfWork.SaveChangesAsync(ct);
+
+         await _auditLogger.LogAsync(
+            IamConst.Logger.Feature.Roles,
+            IamConst.Logger.Action.Unassign,
+            AuditPrivacyLevel.High,
+            $"Unassigned roles from user {user.Id}",
+            user.Id,
+            request,
+            ct);
 
          return Result.Success(new SuccessInfo());
       }, cancellationToken);

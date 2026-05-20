@@ -12,7 +12,7 @@ namespace Shared.Application.Contracts
       Task<Result<IEnumerable<ParameterLiteDto>>> GetAsync(ParameterSearchRequest request, CancellationToken cancellationToken = default);
       Task<Result<ParameterValueDto>> GetValueAsync(string key, CancellationToken cancellationToken = default);
       Task<Result> SaveOverrideValueAsync(Guid parameterId, ParameterOwnerUpdateRequest request, CancellationToken cancellationToken = default);
-      Task<Result> DeleteOverrideValueAsync(Guid parameterId, CancellationToken cancellationToken = default);
+      Task<Result> DeleteOverrideValueAsync(Guid parameterOverrideId, CancellationToken cancellationToken = default);
 
       //Convenience methods to get parameter values directly by key, will throw an exception if the
       //parameter is not found or if the value cannot be converted to the expected type

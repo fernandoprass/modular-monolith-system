@@ -96,25 +96,44 @@ internal class ParameterService(
 
       await _unitOfWork.SaveChangesAsync(cancellationToken);
       await _parameterValueCache.RemoveOverrideAsync(parameter.Key, ownerId, cancellationToken);
+
+      await PublishParameterAuditLogAsync(
+         "save-override",
+         $"Saved parameter override {parameter.Key}",
+         parameterOverride.Id,
+         request,
+         _userContext,
+         cancellationToken);
+
       return Result.Success(new SuccessInfo());
    }
 
-   public async Task<Result> DeleteOverrideValueAsync(Guid parameterId, CancellationToken cancellationToken = default)
+   public async Task<Result> DeleteOverrideValueAsync(Guid parameterOverrideId, CancellationToken cancellationToken = default)
    {
-      var parameter = await _parameterRepository.GetByIdAsync(parameterId, cancellationToken);
-
-      if (parameter == null) return Result<ParameterValueDto>.Failure(new NotFoundError(SharedConst.Entity.Parameter));
-
-      var ownerId = GetOwnerId(parameter.OverrideType);
-      var parameterOverride = await _parameterOverrideRepository.GetByParameterIdAndOwnerIdAsync(parameterId, ownerId, cancellationToken);
+      var parameterOverride = await _parameterOverrideRepository.GetByIdAsync(parameterOverrideId, cancellationToken);
 
       if (parameterOverride == null) return Result.Failure(new NotFoundError(SharedConst.Entity.ParameterOverride));
 
-      await _unitOfWork.ParameterOverrides.DeleteAsync(parameterOverride.Id, cancellationToken);
-      await _unitOfWork.SaveChangesAsync(cancellationToken);
-      await _parameterValueCache.RemoveOverrideAsync(parameter.Key, ownerId, cancellationToken);
+      return await ExecuteIfUserOwnsAsync(parameterOverride.OwnerId, async (ct) =>
+      {
+         var parameter = await _parameterQueryRepository.GetByIdAsync(parameterOverride.ParameterId, ct);
 
-      return Result.Success(new SuccessInfo());
+         if (parameter == null) return Result.Failure(new NotFoundError(SharedConst.Entity.Parameter));
+
+         await _unitOfWork.ParameterOverrides.DeleteAsync(parameterOverride.Id, ct);
+         await _unitOfWork.SaveChangesAsync(ct);
+         await _parameterValueCache.RemoveOverrideAsync(parameter.Key, parameterOverride.OwnerId, ct);
+
+         await PublishParameterAuditLogAsync(
+            "delete-override",
+            $"Deleted parameter override {parameter.Key}",
+            parameterOverride.Id,
+            parameterOverride,
+            _userContext,
+            ct);
+
+         return Result.Success(new SuccessInfo());
+      }, cancellationToken);
    }
    #endregion
 
@@ -177,22 +196,13 @@ internal class ParameterService(
       await _parameterValueCache.RemoveAsync(oldKey, cancellationToken);
       await _parameterValueCache.RemoveAsync(parameter.Key, cancellationToken);
 
-      var requestAsJson = JsonSerializer.Serialize(request);
-
-      await _eventPublisher.PublishAuditLogEventAsync(new AuditLogEvent
-      {
-         Module = SharedConst.System.ModuleName.ToLowerInvariant(),
-         Feature = "parameters",
-         Action = "update",
-         PrivacyLevel = AuditPrivacyLevel.Medium,
-         Description = $"Updated parameter {parameter.Key}",
-         UserId = _userContext.UserId,
-         OrganizationId = _userContext.UserOwnerId,
-         IpAddress = _userContext.IpAddress,
-         UserAgent = _userContext.UserAgent,
-         TargetId = parameter.Id,
-         Metadata = requestAsJson
-      }, cancellationToken);
+      await PublishParameterAuditLogAsync(
+         "update",
+         $"Updated parameter {parameter.Key}",
+         parameter.Id,
+         request,
+         _userContext,
+         cancellationToken);
 
       return Result.Success(new SuccessInfo());
    }
@@ -293,6 +303,30 @@ internal class ParameterService(
       }
 
       return GetOwnerId(parameter.OverrideType);
+   }
+
+   private async Task PublishParameterAuditLogAsync(
+      string action,
+      string description,
+      Guid targetId,
+      object metadata,
+      IUserContext userContext,
+      CancellationToken cancellationToken)
+   {
+      await _eventPublisher.PublishAuditLogEventAsync(new AuditLogEvent
+      {
+         Module = SharedConst.System.ModuleName.ToLowerInvariant(),
+         Feature = "parameters",
+         Action = action,
+         PrivacyLevel = AuditPrivacyLevel.Medium,
+         Description = description,
+         UserId = userContext.UserId,
+         OrganizationId = userContext.UserOwnerId,
+         IpAddress = userContext.IpAddress,
+         UserAgent = userContext.UserAgent,
+         TargetId = targetId,
+         Metadata = JsonSerializer.Serialize(metadata)
+      }, cancellationToken);
    }
    #endregion
 }

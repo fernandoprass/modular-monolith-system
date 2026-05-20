@@ -7,6 +7,7 @@ using Shared.Domain.DTOs.Requests;
 using Shared.Domain.DTOs.Responses;
 using Shared.Domain.Entities;
 using Shared.Domain.Enums;
+using Shared.Domain.Events;
 using Shared.Domain.Interfaces;
 using Shared.Domain.Messages;
 
@@ -39,6 +40,8 @@ public class ParameterServiceTests
 
       _userContextMock.UserOwnerId.Returns(Guid.NewGuid());
       _userContextMock.UserId.Returns(Guid.NewGuid());
+      _userContextMock.IpAddress.Returns("127.0.0.1");
+      _userContextMock.UserAgent.Returns("test-agent");
       _parameterValueCacheMock.GetAsync(Arg.Any<string>(), Arg.Any<Guid>(), Arg.Any<Guid>(), Arg.Any<CancellationToken>())
          .Returns(Task.FromResult<string?>(null));
 
@@ -220,26 +223,63 @@ public class ParameterServiceTests
       await _unitOfWorkMock.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
       await _parameterValueCacheMock.Received(1).RemoveOverrideAsync(parameter.Key, _userContextMock.UserOwnerId, Arg.Any<CancellationToken>());
       await _parameterValueCacheMock.DidNotReceive().RemoveAsync(parameter.Key, Arg.Any<CancellationToken>());
+      await _eventPublisherMock.Received(1).PublishAuditLogEventAsync(
+         Arg.Is<AuditLogEvent>(auditLog =>
+            auditLog.Module == "shared" &&
+            auditLog.Feature == "parameters" &&
+            auditLog.Action == "save-override" &&
+            auditLog.TargetId != Guid.Empty &&
+            auditLog.UserId == _userContextMock.UserId &&
+            auditLog.OrganizationId == _userContextMock.UserOwnerId &&
+            auditLog.IpAddress == _userContextMock.IpAddress &&
+            auditLog.UserAgent == _userContextMock.UserAgent &&
+            auditLog.Metadata.Contains(request.Value)),
+         Arg.Any<CancellationToken>());
    }
 
    [Fact]
    public async Task DeleteOverrideValueAsync_ShouldRemoveOnlyOverrideFromCache()
    {
       var parameterId = Guid.NewGuid();
-      var parameter = Parameter.Create("Module", "Group", "Key", "Title", "Desc", ParameterType.String, "Value", null, null, null, null, ParameterOverrideType.UserId);
-      var parameterOverride = ParameterOverride.Create(parameterId, _userContextMock.UserId, "Dark");
+      var parameter = new ParameterDto(
+         parameterId,
+         "Module",
+         "Group",
+         "Key",
+         "Module.Group.Key",
+         "Title",
+         "Desc",
+         ParameterType.String,
+         "Value",
+         null,
+         null,
+         ParameterOverrideType.UserOwnerId,
+         true);
+      var parameterOverride = ParameterOverride.Create(parameterId, _userContextMock.UserOwnerId, "Dark");
 
-      _parameterRepositoryMock.GetByIdAsync(parameterId, Arg.Any<CancellationToken>()).Returns(parameter);
-      _parameterOverrideRepositoryMock.GetByParameterIdAndOwnerIdAsync(parameterId, _userContextMock.UserId, Arg.Any<CancellationToken>())
-         .Returns(parameterOverride);
+      _parameterOverrideRepositoryMock.GetByIdAsync(parameterOverride.Id, Arg.Any<CancellationToken>()).Returns(parameterOverride);
+      _parameterQueryRepositoryMock.GetByIdAsync(parameterId, Arg.Any<CancellationToken>()).Returns(parameter);
 
-      var result = await _parameterService.DeleteOverrideValueAsync(parameterId, TestContext.Current.CancellationToken);
+      var result = await _parameterService.DeleteOverrideValueAsync(parameterOverride.Id, TestContext.Current.CancellationToken);
 
       result.IsSuccess.Should().BeTrue();
       await _unitOfWorkMock.ParameterOverrides.Received(1).DeleteAsync(parameterOverride.Id, Arg.Any<CancellationToken>());
       await _unitOfWorkMock.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
-      await _parameterValueCacheMock.Received(1).RemoveOverrideAsync(parameter.Key, _userContextMock.UserId, Arg.Any<CancellationToken>());
+      await _parameterValueCacheMock.Received(1).RemoveOverrideAsync(parameter.Key, _userContextMock.UserOwnerId, Arg.Any<CancellationToken>());
       await _parameterValueCacheMock.DidNotReceive().RemoveAsync(parameter.Key, Arg.Any<CancellationToken>());
+      await _parameterRepositoryMock.DidNotReceive().GetByIdAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>());
+      await _eventPublisherMock.Received(1).PublishAuditLogEventAsync(
+         Arg.Is<AuditLogEvent>(auditLog =>
+            auditLog.Module == "shared" &&
+            auditLog.Feature == "parameters" &&
+            auditLog.Action == "delete-override" &&
+            auditLog.TargetId == parameterOverride.Id &&
+            auditLog.UserId == _userContextMock.UserId &&
+            auditLog.OrganizationId == _userContextMock.UserOwnerId &&
+            auditLog.IpAddress == _userContextMock.IpAddress &&
+            auditLog.UserAgent == _userContextMock.UserAgent &&
+            auditLog.Metadata.Contains(parameterOverride.Value)),
+         Arg.Any<CancellationToken>());
    }
 
    [Fact]

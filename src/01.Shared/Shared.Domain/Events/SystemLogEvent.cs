@@ -4,7 +4,7 @@ namespace Shared.Domain.Events;
 
 public record SystemLogEvent
 {
-   public Guid Id { get; init; } = Guid.NewGuid();
+   public Guid Id { get; init; } = Guid.CreateVersion7();
    public DateTime Timestamp { get; init; } = DateTime.UtcNow;
    public SystemLogLevel Level { get; init; } = SystemLogLevel.Information;
    public SystemLogStatus Status { get; init; } = SystemLogStatus.Unknown;

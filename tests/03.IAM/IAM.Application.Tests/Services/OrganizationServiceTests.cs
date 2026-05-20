@@ -1,5 +1,6 @@
 using IAM.Application.Contracts;
 using IAM.Application.Services;
+using IAM.Domain;
 using IAM.Domain.DTOs.Requests;
 using IAM.Domain.DTOs.Responses;
 using IAM.Domain.Entities;
@@ -11,6 +12,7 @@ using IAM.Domain.Repositories;
 using Myce.Response;
 using NSubstitute;
 using Shared.Application.Contracts;
+using Shared.Domain.Enums;
 using Shared.Domain.Messages;
 
 namespace IAM.Application.Tests.Services;
@@ -22,6 +24,7 @@ public class OrganizationServiceTests
    private readonly IOrganizationValidator _organizationValidator;
    private readonly IIamUnitOfWork _unitOfWork;
    private readonly IUserContext _userContext;
+   private readonly IIamAuditLogger _auditLogger;
    private readonly OrganizationService _service;
 
    public OrganizationServiceTests()
@@ -31,13 +34,15 @@ public class OrganizationServiceTests
       _organizationValidator = Substitute.For<IOrganizationValidator>();
       _unitOfWork = Substitute.For<IIamUnitOfWork>();
       _userContext = Substitute.For<IUserContext>();
+      _auditLogger = Substitute.For<IIamAuditLogger>();
 
       _service = new OrganizationService(
           _organizationQueryRepository,
           _organizationRepository,
           _organizationValidator,
           _unitOfWork,
-          _userContext);
+          _userContext,
+          _auditLogger);
    }
 
    [Fact]
@@ -121,6 +126,14 @@ public class OrganizationServiceTests
       Assert.True(result.IsSuccess);
       _unitOfWork.Organizations.Received(1).Update(organization);
       await _unitOfWork.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+      await _auditLogger.Received(1).LogAsync(
+         IamConst.Logger.Feature.Organizations,
+         IamConst.Logger.Action.Update,
+         AuditPrivacyLevel.Medium,
+         Arg.Any<string>(),
+         organization.Id,
+         request,
+         Arg.Any<CancellationToken>());
    }
 
    [Fact]
@@ -155,6 +168,14 @@ public class OrganizationServiceTests
 
       Assert.True(result.IsSuccess);
       Assert.Equal("NEWCODE", organization.Code);
+      await _auditLogger.Received(1).LogAsync(
+         IamConst.Logger.Feature.Organizations,
+         IamConst.Logger.Action.UpdateCode,
+         AuditPrivacyLevel.Medium,
+         Arg.Any<string>(),
+         organization.Id,
+         request,
+         Arg.Any<CancellationToken>());
    }
 
    [Fact]

@@ -12,6 +12,7 @@ using Microsoft.IdentityModel.Tokens;
 using Myce.Response;
 using Shared.Application.Contracts;
 using Shared.Domain;
+using Shared.Domain.Enums;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -20,27 +21,31 @@ using SharedPermissionService = Shared.Application.Contracts.IRolePermissionCach
 namespace IAM.Application.Services;
 
 public class AuthService(
-   IUserQueryRepository userQueryRepository,
    IRoleQueryRepository roleQueryRepository,
    IUserService userService,
    IParameterService parameterService,
    SharedPermissionService permissionService,
+   IIamAuditLogger auditLogger,
    IConfiguration configuration) : IAuthService
 {
-   private readonly IUserQueryRepository _userQueryRepository = userQueryRepository;
    private readonly IRoleQueryRepository _roleQueryRepository = roleQueryRepository;
    private readonly IUserService _userService = userService;
    private readonly IParameterService _parameterService = parameterService;
    private readonly SharedPermissionService _permissionService = permissionService;
+   private readonly IIamAuditLogger _auditLogger = auditLogger;
    private readonly string _jwtSecret = configuration["Jwt:Secret"] ?? "your-super-secret-jwt-key-here-make-it-long-and-secure";
 
    public async Task<Result<LoginResponse?>> LoginAsync(UserLoginRequest request, CancellationToken cancellationToken = default)
    {
-      var user = await _userQueryRepository.GetByEmailWithPasswordAsync(request.Email, cancellationToken);
+      var user = await _userService.GetByEmailWithPasswordAsync(request.Email, cancellationToken);
 
       var result = await Validate(user, request.Password, cancellationToken);
 
-      if (!result.IsSuccess) return Result<LoginResponse?>.Failure(result.Messages);
+      if (!result.IsSuccess)
+      {
+         await PublishLoginAuditLogAsync(false, request.Email, user, result, cancellationToken);
+         return Result<LoginResponse?>.Failure(result.Messages);
+      }
 
       await _userService.UpdateLastLoginAsync(user!.Id, cancellationToken);
 
@@ -50,7 +55,35 @@ public class AuthService(
 
       var response = new LoginResponse(token, expiresAt, user.ToUserDto());
 
+      await PublishLoginAuditLogAsync(true, request.Email, user, result, cancellationToken);
+
       return Result<LoginResponse?>.Success(response);
+   }
+
+   private async Task PublishLoginAuditLogAsync(
+      bool isSuccess,
+      string email,
+      UserPasswordDto? user,
+      Result result,
+      CancellationToken cancellationToken)
+   {
+      var action = isSuccess ? IamConst.Logger.Action.LoginSuccess : IamConst.Logger.Action.LoginFail;
+      var description = isSuccess ? $"Successful login for {email}" : $"Failed login for {email}";
+      var metadata = new
+      {
+         Email = email,
+         IsSuccess = isSuccess,
+         Reasons = result.Messages.Select(message => message.GetType().Name)
+      };
+
+      await _auditLogger.LogAsync(
+         IamConst.Logger.Feature.Authentication,
+         action,
+         AuditPrivacyLevel.Medium,
+         description,
+         user?.Id,
+         metadata,
+         cancellationToken);
    }
 
    private async Task HydratePermissionCacheAsync(
@@ -106,7 +139,7 @@ public class AuthService(
       // Use the dummy hash for timing attack prevention even if the user is not found
       return "$argon2id$v=19$m=65536,t=2,p=1$"
           + Convert.ToBase64String(Encoding.UTF8.GetBytes("fake-salt"))
-          + "$" + Convert.ToBase64String(Encoding.UTF8.GetBytes(Guid.NewGuid().ToString()));
+          + "$" + Convert.ToBase64String(Encoding.UTF8.GetBytes(Guid.CreateVersion7().ToString()));
    }
 
    private string GenerateJwtToken(UserPasswordDto user, DateTime expiresAt)
@@ -118,7 +151,7 @@ public class AuthService(
             new (JwtRegisteredClaimNames.Name, user.Name),
             new (SharedConst.Security.Claim.IsSystemAdmin, user.IsSystemAdmin.ToString()),
             new (SharedConst.Security.Claim.UserOwnerId, user.OrganizationId.ToString()),
-            new (JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            new (JwtRegisteredClaimNames.Jti, Guid.CreateVersion7().ToString())
         };
 
       foreach (var userRole in user.UserRoles)

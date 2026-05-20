@@ -27,8 +27,11 @@ Communicate with me using only short sentences; caveman language is enough. Do n
 8. [Error Handling & Validation](#error-handling--validation)
 9. [Date & Time Handling](#date--time-handling)
 10. [Authorization & Permissions](#authorization--permissions)
-11. [Testing Rules](#testing-rules)
-12. [Seeder Rules](#seeder-rules)
+11. [Audit Logging](#audit-logging)
+12. [Caching Rules](#caching-rules)
+13. [Docker & Local Environment](#docker--local-environment)
+14. [Testing Rules](#testing-rules)
+15. [Seeder Rules](#seeder-rules)
 
 ---
 
@@ -424,6 +427,13 @@ bool emailExists = await EmailExistsAsync(request.Email, cancellationToken);
 var validation = _userValidator.ValidateCreate(request, organizationExists, emailExists);
 ```
 
+### Exception Logging
+
+- Shared exception handling logic should live in Shared.
+- Module APIs should keep only module-specific wiring.
+- IAM and other modules should publish system log events.
+- Sentinel should persist its own exception logs directly through repository/unit of work.
+
 ---
 
 ## Date & Time Handling
@@ -542,11 +552,40 @@ builder.Services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHand
 
 ---
 
+## Audit Logging
+
+- Use audit logging for user/business actions.
+- Do not duplicate audit event creation in services.
+- Use module-specific audit logger helpers, like `IamAuditLogger`.
+- Use constants for log feature/action names. No magic strings.
+- Feature should name the domain area, like `users`, `roles`, `permissions`.
+- Action should be generic, like `create`, `update`, `delete`, `assign`, `unassign`.
+- Do not log database seeder actions unless explicitly required.
+
+---
+
+## Caching Rules
+
+- Cache interfaces belong in Shared.Domain when used across modules.
+- Redis implementations belong in Infrastructure.
+- Prefer targeted cache invalidation over deleting whole cache entries when possible.
+
+---
+
+## Docker & Local Environment
+
+- Docker ports and local Visual Studio ports should be different.
+- Do not change Docker ports just to fix local host conflicts.
+
+---
+
 ## Testing Rules
 
 - Before adding tests, ask which test project should own them if no matching test project exists.
 - Do not add project references across layers without confirmation.
 - Authorization handlers must have unit tests for success, failure, role claims, admin bypass, and cache behavior.
+- When adding audit logging, update service tests to verify log dispatch on success.
+- Do not add controller tests when behavior is only in application services.
 
 ---
 

@@ -24,6 +24,31 @@ public static partial class IamConst
       public const string Permission = nameof(Entities.Permission);
    }
 
+   public static class Logger
+   {
+      public static class Feature
+      {
+         public const string Authentication = "authentication";
+         public const string Organizations = "organizations";
+         public const string Permissions = "permissions";
+         public const string Roles = "roles";
+         public const string Users = "users";
+      }
+
+      public static class Action
+      {
+         public const string Create = "create";
+         public const string Update = "update";
+         public const string UpdateCode = "update-code";
+         public const string UpdatePassword = "update-password";
+         public const string Delete = "delete";
+         public const string LoginSuccess = "login-success";
+         public const string LoginFail = "login-fail";
+         public const string Assign = "assign";
+         public const string Unassign = "unassign";
+      }
+   }
+
    public static class System
    {
       public const string ModuleName = "IAM";
