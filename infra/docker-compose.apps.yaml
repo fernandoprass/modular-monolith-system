@@ -59,6 +59,32 @@ services:
     networks:
       - modular-network
 
+  courier-api:
+    build:
+      context: ..
+      dockerfile: src/04.Courier/Courier.API/Dockerfile
+    container_name: ${COURIER_API_CONTAINER_NAME}
+    restart: on-failure
+    ports:
+      - "${COURIER_API_PORT}:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
+      ASPNETCORE_URLS: http://+:8080
+      Kestrel__Endpoints__Http__Url: http://+:8080
+      ConnectionStrings__CourierDb: "mongodb://${MONGO_ROOT_USER}:${MONGO_ROOT_PASSWORD}@${MONGO_SERVICE_NAME}:27017/?authSource=admin"
+      ConnectionStrings__Redis: "${REDIS_SERVICE_NAME}:6379,abortConnect=false,connectTimeout=5000,syncTimeout=5000"
+      Courier__DatabaseName: ${COURIER_MONGO_DB_NAME}
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/api/v1/courier/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    env_file:
+      - .env
+    networks:
+      - modular-network
+
 networks:
   modular-network:
     external: true

@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Asp.Versioning.Mvc" Version="10.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Courier.Domain\Courier.Domain.csproj" />
+    <ProjectReference Include="..\Courier.Application\Courier.Application.csproj" />
+    <ProjectReference Include="..\Courier.Infrastructure\Courier.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

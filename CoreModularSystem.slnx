@@ -51,6 +51,12 @@
      <Project Path="src/03.IAM/IAM.Domain/IAM.Domain.csproj" />
      <Project Path="src/03.IAM/IAM.Infrastructure/IAM.Infrastructure.csproj" />
    </Folder>
+  <Folder Name="/src/04.Courier/">
+    <Project Path="src/04.Courier/Courier.API/Courier.API.csproj" />
+    <Project Path="src/04.Courier/Courier.Application/Courier.Application.csproj" />
+    <Project Path="src/04.Courier/Courier.Domain/Courier.Domain.csproj" />
+    <Project Path="src/04.Courier/Courier.Infrastructure/Courier.Infrastructure.csproj" />
+  </Folder>
   <Folder Name="/tests/" />
   <Folder Name="/tests/01.Shared/">
     <Project Path="tests/01.Shared/Shared.Application.Tests/Shared.Application.Tests.csproj" />
@@ -65,5 +71,8 @@
   <Folder Name="/tests/03.IAM/">
     <Project Path="tests/03.IAM/IAM.API.Tests/IAM.API.Tests.csproj" Id="bb8eda8c-92b7-4043-ba94-a3967ab24af3" />
     <Project Path="tests/03.IAM/IAM.Application.Tests/IAM.Application.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tests/04.Courier/">
+    <Project Path="tests/04.Courier/Courier.Application.Tests/Courier.Application.Tests.csproj" />
   </Folder>
 </Solution>
