@@ -1,6 +1,15 @@
 using Courier.Domain;
+using Courier.Domain.Interfaces.Repositories;
+using Courier.Application.Contracts;
+using Courier.Application.Services;
+using Courier.Application.Validators;
+using Courier.Infrastructure.BackgroundServices;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Courier.Infrastructure.Repositories;
+using Shared.Domain.Interfaces;
+using Shared.Infrastructure.ExceptionHandling;
+using Shared.Infrastructure.Messaging;
 using StackExchange.Redis;
 
 namespace Courier.Infrastructure;
@@ -13,6 +22,16 @@ public static class CourierDependencyInjection
       ConfigureRedis(services, configuration);
 
       services.AddSingleton<CourierDbContext>();
+      services.AddScoped<IEmailRepository, EmailRepository>();
+      services.AddScoped<IEmailTemplateRepository, EmailTemplateRepository>();
+      services.AddScoped<IEmailTemplateWriteRepository, EmailTemplateRepository>();
+      services.AddScoped<IEmailService, EmailService>();
+      services.AddScoped<IEmailValidator, EmailValidator>();
+      services.AddScoped<IEmailTemplateService, EmailTemplateService>();
+      services.AddScoped<IEmailTemplateValidator, EmailTemplateValidator>();
+      services.AddScoped<IEventPublisher, RedisEventPublisher>();
+      services.AddScoped<IExceptionSystemLogPublisher, ExceptionSystemLogPublisher>();
+      services.AddHostedService<CourierIndexInitializer>();
 
       return services;
    }

@@ -1,0 +1,19 @@
+using Microsoft.AspNetCore.Mvc;
+using Myce.Response;
+using Shared.Domain.Messages;
+
+namespace Courier.API.Controllers;
+
+[ApiController]
+public abstract class BaseController : ControllerBase
+{
+   protected IActionResult OkOrNotFound<T>(T? value) where T : class
+   {
+      if (value == null)
+      {
+         return NotFound(Result<T>.Failure(new NotFoundError()));
+      }
+
+      return value is Result ? Ok(value) : Ok(Result<T>.Success(value));
+   }
+}

@@ -1,4 +1,6 @@
 using Courier.Domain;
+using Courier.Domain.Entities;
+using Courier.Domain.ValueObjects;
 using Microsoft.Extensions.Configuration;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
@@ -9,8 +11,6 @@ namespace Courier.Infrastructure;
 
 public class CourierDbContext
 {
-   private const string DefaultDatabaseName = "courier";
-
    private readonly IMongoDatabase _database;
    private static int _mongoConfigured;
 
@@ -29,12 +29,45 @@ public class CourierDbContext
 
       var client = new MongoClient(connectionString);
 
-      _database = client.GetDatabase(string.IsNullOrWhiteSpace(databaseName) ? DefaultDatabaseName : databaseName);
+      _database = client.GetDatabase(string.IsNullOrWhiteSpace(databaseName) ? CourierConst.Database.DefaultName : databaseName);
    }
 
    public async Task PingAsync(CancellationToken cancellationToken = default)
    {
       await _database.RunCommandAsync((Command<BsonDocument>)"{ping:1}", cancellationToken: cancellationToken);
+   }
+
+   public IMongoCollection<Email> Emails => _database.GetCollection<Email>(CourierConst.Collection.Emails);
+
+   internal IMongoCollection<EmailTemplate> EmailTemplates => _database.GetCollection<EmailTemplate>(CourierConst.Collection.EmailTemplates);
+
+   public async Task ConfigureIndexesAsync(CancellationToken cancellationToken = default)
+   {
+      var emailIndexes = new[]
+      {
+         new CreateIndexModel<Email>(
+            Builders<Email>.IndexKeys.Ascending(e => e.OrganizationId).Descending(e => e.CreatedAt)),
+         new CreateIndexModel<Email>(
+            Builders<Email>.IndexKeys.Ascending(e => e.OrganizationId).Ascending(e => e.UserId).Descending(e => e.CreatedAt)),
+         new CreateIndexModel<Email>(
+            Builders<Email>.IndexKeys.Ascending(e => e.OrganizationId).Ascending(e => e.Module).Ascending(e => e.Feature).Descending(e => e.CreatedAt)),
+         new CreateIndexModel<Email>(
+            Builders<Email>.IndexKeys.Ascending(e => e.OrganizationId).Ascending(e => e.Recipient).Descending(e => e.CreatedAt)),
+         new CreateIndexModel<Email>(
+            Builders<Email>.IndexKeys.Ascending(e => e.ExpiresAt),
+            new CreateIndexOptions { ExpireAfter = TimeSpan.Zero, Name = "ttl_emails_expires_at" })
+      };
+
+      await Emails.Indexes.CreateManyAsync(emailIndexes, cancellationToken);
+
+      var templateIndexes = new[]
+      {
+         new CreateIndexModel<EmailTemplate>(
+            Builders<EmailTemplate>.IndexKeys.Ascending(t => t.Key),
+            new CreateIndexOptions { Unique = true, Name = "ux_email_templates_key" })
+      };
+
+      await EmailTemplates.Indexes.CreateManyAsync(templateIndexes, cancellationToken);
    }
 
    private static void ConfigureMongoSerialization()
@@ -45,5 +78,23 @@ public class CourierDbContext
       }
 
       BsonSerializer.RegisterSerializer(new GuidSerializer(GuidRepresentation.Standard));
+
+      if (!BsonClassMap.IsClassMapRegistered(typeof(EmailTemplate)))
+      {
+         BsonClassMap.RegisterClassMap<EmailTemplate>(cm =>
+         {
+            cm.AutoMap();
+            cm.MapField("_translations").SetElementName("translations");
+            cm.UnmapMember(t => t.Translations);
+         });
+      }
+
+      if (!BsonClassMap.IsClassMapRegistered(typeof(EmailTemplateTranslation)))
+      {
+         BsonClassMap.RegisterClassMap<EmailTemplateTranslation>(cm =>
+         {
+            cm.AutoMap();
+         });
+      }
    }
 }

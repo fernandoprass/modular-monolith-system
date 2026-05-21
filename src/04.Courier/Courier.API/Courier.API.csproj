@@ -8,13 +8,17 @@
 
   <ItemGroup>
     <PackageReference Include="Asp.Versioning.Mvc" Version="10.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.8" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.5" />
+    <PackageReference Include="Myce.Response" Version="1.3.3" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Courier.Domain\Courier.Domain.csproj" />
     <ProjectReference Include="..\Courier.Application\Courier.Application.csproj" />
     <ProjectReference Include="..\Courier.Infrastructure\Courier.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\01.Shared\Shared.Domain\Shared.Domain.csproj" />
+    <ProjectReference Include="..\..\01.Shared\Shared.Infrastructure\Shared.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

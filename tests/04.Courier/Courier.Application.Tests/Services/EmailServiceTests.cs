@@ -1,0 +1,91 @@
+using Courier.Application.Contracts;
+using Courier.Application.Services;
+using Courier.Domain.DTOs.Requests;
+using Courier.Domain.DTOs.Responses;
+using Courier.Domain.Entities;
+using Courier.Domain.Enums;
+using Courier.Domain.Interfaces.Repositories;
+using FluentAssertions;
+using Myce.Response;
+using NSubstitute;
+using Shared.Domain.Messages;
+
+namespace Courier.Application.Tests.Services;
+
+public class EmailServiceTests
+{
+   private readonly IEmailRepository _emailRepository = Substitute.For<IEmailRepository>();
+   private readonly IEmailTemplateRepository _emailTemplateRepository = Substitute.For<IEmailTemplateRepository>();
+   private readonly IEmailValidator _emailValidator = Substitute.For<IEmailValidator>();
+   private readonly EmailService _service;
+
+   public EmailServiceTests()
+   {
+      _service = new EmailService(_emailRepository, _emailTemplateRepository, _emailValidator);
+   }
+
+   [Fact]
+   public async Task GetAsync_ShouldReturnRepositoryResult()
+   {
+      var request = new EmailSearchRequest(null, null, "IAM", null, null, null, null, null);
+      var page = new PagedResultDto<EmailLiteDto>([], 1, 25, 0, 0);
+      _emailValidator.ValidateSearch(request).Returns(Result.Success());
+      _emailRepository.GetAsync(request, Arg.Any<CancellationToken>()).Returns(page);
+
+      var result = await _service.GetAsync(request, TestContext.Current.CancellationToken);
+
+      result.HasError.Should().BeFalse();
+      result.Data.Should().Be(page);
+   }
+
+   [Fact]
+   public async Task GetByIdAsync_ShouldReturnNotFound_WhenEmailDoesNotExist()
+   {
+      var id = Guid.NewGuid();
+      _emailRepository.GetByIdAsync(id, Arg.Any<CancellationToken>()).Returns((Email?)null);
+
+      var result = await _service.GetByIdAsync(id, TestContext.Current.CancellationToken);
+
+      result.HasError.Should().BeTrue();
+      result.Messages.Should().ContainSingle(m => m is NotFoundError);
+   }
+
+   [Fact]
+   public async Task CreateAsync_ShouldPersistEmailAndReturnId()
+   {
+      var request = CreateRequest();
+      var id = Guid.NewGuid();
+      _emailValidator.ValidateCreate(request).Returns(Result.Success());
+      _emailTemplateRepository.GetRetentionPolicyByKeyAsync(request.TemplateKey, Arg.Any<CancellationToken>())
+         .Returns(EmailRetentionPolicy.Standard);
+      _emailRepository.AddAsync(Arg.Any<Email>(), Arg.Any<CancellationToken>()).Returns(id);
+
+      var result = await _service.CreateAsync(request, TestContext.Current.CancellationToken);
+
+      result.HasError.Should().BeFalse();
+      result.Data!.Id.Should().Be(id);
+      await _emailRepository.Received(1).AddAsync(
+         Arg.Is<Email>(e =>
+            e.OrganizationId == request.OrganizationId &&
+            e.UserId == request.UserId &&
+            e.Module == request.Module &&
+            e.Feature == request.Feature &&
+            e.Subject == request.Subject &&
+            e.Body == request.Body),
+         Arg.Any<CancellationToken>());
+   }
+
+   private static EmailCreateRequest CreateRequest()
+   {
+      return new EmailCreateRequest(
+         Guid.NewGuid(),
+         Guid.NewGuid(),
+         "IAM",
+         "Users",
+         "welcome",
+         "person@example.com",
+         "Subject",
+         "Body",
+         false);
+   }
+}

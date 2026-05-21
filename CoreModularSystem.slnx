@@ -1,15 +1,21 @@
 <Solution>
   <Folder Name="/docs/">
+    <File Path="docs/00.database.seeder.md" />
+    <File Path="docs/00.docker.md" />
+    <File Path="docs/00.folder-structure.md" />
     <File Path="docs/00.migrations.md" />
+    <File Path="docs/00.redis.cache.md" />
     <File Path="docs/00.redis.messaging-system.md" />
     <File Path="docs/01.Shared.entities.md" />
     <File Path="docs/01.shared.enums.md" />
-    <File Path="docs/01.shared.infrastructure-repository.md" />
-    <File Path="docs/01.shared.infrastructure-uow.md" />
+    <File Path="docs/01.shared.repositories.md" />
+    <File Path="docs/01.shared.uow.md" />
+    <File Path="docs/02.sentinel.entities.md" />
      <File Path="docs/03.iam.docker.md" />
      <File Path="docs/03.iam.entities.md" />
      <File Path="docs/03.iam.folder-structure.md" />
      <File Path="docs/03.iam.libraries.md" />
+    <File Path="docs/readme.md" />
   </Folder>
   <Folder Name="/infra/">
     <File Path="infra/.env" />
@@ -27,6 +33,7 @@
   </Folder>
   <Folder Name="/Solution Items/">
     <File Path=".gitignore" />
+    <File Path="agents.md" />
     <File Path="LICENSE" />
     <File Path="readme.md" />
   </Folder>
@@ -74,5 +81,6 @@
   </Folder>
   <Folder Name="/tests/04.Courier/">
     <Project Path="tests/04.Courier/Courier.Application.Tests/Courier.Application.Tests.csproj" />
+    <Project Path="tests/04.Courier/Courier.Infrastructure.Tests/Courier.Infrastructure.Tests.csproj" />
   </Folder>
 </Solution>
