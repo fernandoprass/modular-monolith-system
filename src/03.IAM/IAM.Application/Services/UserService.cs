@@ -1,5 +1,6 @@
 using IAM.Application.Contracts;
 using IAM.Domain;
+using IAM.Domain.DTOs;
 using IAM.Domain.DTOs.Requests;
 using IAM.Domain.DTOs.Responses;
 using IAM.Domain.Entities;
@@ -11,6 +12,7 @@ using Isopoh.Cryptography.Argon2;
 using Myce.Response;
 using Shared.Application.Contracts;
 using Shared.Application.Services;
+using Shared.Domain.Enums;
 using Shared.Domain.Messages;
 
 namespace IAM.Application.Services;
@@ -21,17 +23,24 @@ public class UserService(
     IUserContext userContext,
     IUserValidator userValidator,
     IUserRepository userRepository,
-    IUserQueryRepository userQueryRepository) : BaseService(userContext), IUserService
+    IUserQueryRepository userQueryRepository,
+    IIamAuditLogger auditLogger) : BaseService(userContext), IUserService
 {
    private readonly IIamUnitOfWork _iamUnitOfWork = iamUnitOfWork;
    private readonly IParameterService _parameterService = parameterService;
    private readonly IUserValidator _userValidator = userValidator;
    private readonly IUserRepository _userRepository = userRepository;
    private readonly IUserQueryRepository _userQueryRepository = userQueryRepository;
+   private readonly IIamAuditLogger _auditLogger = auditLogger;
 
    public async Task<UserDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
    {
       return await _userQueryRepository.GetByIdAsync(id, cancellationToken);
+   }
+
+   public async Task<UserPasswordDto?> GetByEmailWithPasswordAsync(string email, CancellationToken cancellationToken = default)
+   {
+      return await _userQueryRepository.GetByEmailWithPasswordAsync(email, cancellationToken);
    }
 
    public async Task<IEnumerable<UserLiteDto>> GetByOrganizationIdAsync(Guid organizationId, CancellationToken cancellationToken = default)
@@ -81,7 +90,21 @@ public class UserService(
 
          user.Update(request.Name, request.IsActive);
 
-         return await CommitUpdateAsync(user, ct);
+         var result = await CommitUpdateAsync(user, ct);
+
+         if (result.IsSuccess)
+         {
+            await _auditLogger.LogAsync(
+               IamConst.Logger.Feature.Users,
+               IamConst.Logger.Action.Update,
+               AuditPrivacyLevel.Medium,
+               $"Updated user {user.Id}",
+               user.Id,
+               request,
+               ct);
+         }
+
+         return result;
       }, cancellationToken);
    }
 
@@ -99,7 +122,21 @@ public class UserService(
 
       user.UpdatePassword(Argon2.Hash(request.PasswordNew), passwordExpiresAt);
 
-      return await CommitUpdateAsync(user, cancellationToken);
+      var result = await CommitUpdateAsync(user, cancellationToken);
+
+      if (result.IsSuccess)
+      {
+         await _auditLogger.LogAsync(
+            IamConst.Logger.Feature.Users,
+            IamConst.Logger.Action.UpdatePassword,
+            AuditPrivacyLevel.High,
+            $"Updated user password {user.Id}",
+            user.Id,
+            new { user.Id, user.Email },
+            cancellationToken);
+      }
+
+      return result;
    }
 
    private async Task<DateTime> GetPasswordExpiresAt(CancellationToken cancellationToken)
@@ -123,6 +160,16 @@ public class UserService(
 
          await _iamUnitOfWork.Users.DeleteAsync(id, ct);
          await _iamUnitOfWork.SaveChangesAsync(ct);
+
+         await _auditLogger.LogAsync(
+            IamConst.Logger.Feature.Users,
+            IamConst.Logger.Action.Delete,
+            AuditPrivacyLevel.High,
+            $"Deleted user {id}",
+            id,
+            new { user.Id, user.Email },
+            ct);
+
          return Result.Success(new SuccessInfo());
       }, cancellationToken);
    }

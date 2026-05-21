@@ -27,8 +27,12 @@ Communicate with me using only short sentences; caveman language is enough. Do n
 8. [Error Handling & Validation](#error-handling--validation)
 9. [Date & Time Handling](#date--time-handling)
 10. [Authorization & Permissions](#authorization--permissions)
-11. [Testing Rules](#testing-rules)
-12. [Seeder Rules](#seeder-rules)
+11. [Audit Logging](#audit-logging)
+12. [Caching Rules](#caching-rules)
+13. [Docker & Local Environment](#docker--local-environment)
+14. [Documentation Rules](#documentation-rules)
+15. [Testing Rules](#testing-rules)
+16. [Seeder Rules](#seeder-rules)
 
 ---
 
@@ -424,6 +428,13 @@ bool emailExists = await EmailExistsAsync(request.Email, cancellationToken);
 var validation = _userValidator.ValidateCreate(request, organizationExists, emailExists);
 ```
 
+### Exception Logging
+
+- Shared exception handling logic should live in Shared.
+- Module APIs should keep only module-specific wiring.
+- IAM and other modules should publish system log events.
+- Sentinel should persist its own exception logs directly through repository/unit of work.
+
 ---
 
 ## Date & Time Handling
@@ -542,11 +553,61 @@ builder.Services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHand
 
 ---
 
+## Audit Logging
+
+- Use audit logging for user/business actions.
+- Do not duplicate audit event creation in services.
+- Use module-specific audit logger helpers, like `IamAuditLogger`.
+- Use constants for log feature/action names. No magic strings.
+- Feature should name the domain area, like `users`, `roles`, `permissions`.
+- Action should be generic, like `create`, `update`, `delete`, `assign`, `unassign`.
+- Do not log database seeder actions unless explicitly required.
+
+---
+
+## Caching Rules
+
+- Cache interfaces belong in Shared.Domain when used across modules.
+- Redis implementations belong in Infrastructure.
+- Prefer targeted cache invalidation over deleting whole cache entries when possible.
+
+---
+
+## Docker & Local Environment
+
+- Docker ports and local Visual Studio ports should be different.
+- Do not change Docker ports just to fix local host conflicts.
+
+---
+
+## Documentation Rules
+
+- Documentation must be written for junior developers.
+- Keep text simple and concise, but complete enough to understand the context.
+- Do not write documentation only for agents or senior developers.
+- Before planning a code or docs task, read `docs/readme.md` and the relevant module `readme.md`.
+- For cross-module tasks, read all affected module readmes.
+- For docs tasks, also read the target doc before proposing changes.
+- Preserve useful teaching material like concept tables, diagrams, flow examples, and file trees.
+- Remove stale code examples, not useful explanations.
+- Prefer small code snippets only when they teach the pattern.
+- Use current project names, file paths, class names, and stream/cache names.
+- If renaming or moving docs, keep module readmes and docs index aligned.
+- Each module should have a `readme.md` in its module folder.
+- The `docs/readme.md` file should act as an index for the docs folder.
+- Module readmes should explain purpose, structure, flows, important services/entities, integration points, and design rules.
+- Topic docs should go deeper than module readmes.
+- When updating docs, touch only the requested docs unless the docs index or moved links also need updates.
+
+---
+
 ## Testing Rules
 
 - Before adding tests, ask which test project should own them if no matching test project exists.
 - Do not add project references across layers without confirmation.
 - Authorization handlers must have unit tests for success, failure, role claims, admin bypass, and cache behavior.
+- When adding audit logging, update service tests to verify log dispatch on success.
+- Do not add controller tests when behavior is only in application services.
 
 ---
 

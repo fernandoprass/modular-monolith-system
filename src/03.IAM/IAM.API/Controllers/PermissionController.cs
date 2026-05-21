@@ -24,30 +24,12 @@ public class PermissionController(IPermissionService permissionService) : BaseCo
       return OkOrNotFound(result);
    }
 
-   [HttpPost]
-   [Authorize]
-   [RequirePermission(IamPermission.Permissions.Create)]
-   public async Task<IActionResult> Create([FromBody] PermissionCreateRequest request, CancellationToken cancellationToken)
-   {
-      var result = await _permissionService.CreateAsync(request, cancellationToken);
-      return OkOrNotFound(result);
-   }
-
    [HttpPut("{id:guid}")]
    [Authorize]
    [RequirePermission(IamPermission.Permissions.Update)]
    public async Task<IActionResult> Update(Guid id, [FromBody] PermissionUpdateRequest request, CancellationToken cancellationToken)
    {
       var result = await _permissionService.UpdateAsync(id, request, cancellationToken);
-      return OkOrNotFound(result);
-   }
-
-   [HttpDelete("{id:guid}")]
-   [Authorize]
-   [RequirePermission(IamPermission.Permissions.Delete)]
-   public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
-   {
-      var result = await _permissionService.DeleteAsync(id, cancellationToken);
       return OkOrNotFound(result);
    }
 

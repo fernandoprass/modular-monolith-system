@@ -11,39 +11,39 @@ using Isopoh.Cryptography.Argon2;
 using Microsoft.Extensions.Configuration;
 using NSubstitute;
 using Shared.Application.Contracts;
+using Shared.Domain.Enums;
 using SharedPermissionService = Shared.Application.Contracts.IRolePermissionCache;
 
 namespace IAM.Application.Tests.Services;
 
 public class AuthServiceTests
 {
-   private readonly IUserQueryRepository _userQueryRepositoryMock;
    private readonly IRoleQueryRepository _roleQueryRepositoryMock;
    private readonly IUserService _userServiceMock;
    private readonly IParameterService _parameterServiceMock;
    private readonly SharedPermissionService _permissionServiceMock;
+   private readonly IIamAuditLogger _auditLoggerMock;
    private readonly IConfiguration _configurationMock;
    private readonly AuthService _authService;
 
    public AuthServiceTests()
    {
-      _userQueryRepositoryMock = Substitute.For<IUserQueryRepository>();
       _roleQueryRepositoryMock = Substitute.For<IRoleQueryRepository>();
       _userServiceMock = Substitute.For<IUserService>();
       _configurationMock = Substitute.For<IConfiguration>();
       _parameterServiceMock = Substitute.For<IParameterService>();
       _permissionServiceMock = Substitute.For<SharedPermissionService>();
+      _auditLoggerMock = Substitute.For<IIamAuditLogger>();
 
       _configurationMock["Jwt:Secret"].Returns("dummy-secret-key-with-at-least-32-characters-used-only-for-test");
       _configurationMock["Jwt:ExpirationHours"].Returns("24");
-      
 
       _authService = new AuthService(
-         _userQueryRepositoryMock,
          _roleQueryRepositoryMock,
          _userServiceMock,
          _parameterServiceMock,
          _permissionServiceMock,
+         _auditLoggerMock,
          _configurationMock);
    }
 
@@ -53,7 +53,7 @@ public class AuthServiceTests
       var password = "StrongPassword123!";
       var user = CreateValidUser(password, isUserAtive: true, isCustumerActive: true, isLockedUser: false);
 
-      _userQueryRepositoryMock.GetByEmailWithPasswordAsync(user.Email, Arg.Any<CancellationToken>()).Returns(user);
+      _userServiceMock.GetByEmailWithPasswordAsync(user.Email, Arg.Any<CancellationToken>()).Returns(user);
       var request = new UserLoginRequest(user.Email, password);
 
       var result = await _authService.LoginAsync(request, TestContext.Current.CancellationToken);
@@ -62,6 +62,14 @@ public class AuthServiceTests
       Assert.NotNull(result.Data?.Token);
       Assert.Equal(user.Email, result.Data.User.Email);
       await _userServiceMock.Received(1).UpdateLastLoginAsync(user.Id, Arg.Any<CancellationToken>());
+      await _auditLoggerMock.Received(1).LogAsync(
+         IamConst.Logger.Feature.Authentication,
+         IamConst.Logger.Action.LoginSuccess,
+         AuditPrivacyLevel.Medium,
+         Arg.Is<string>(description => description.Contains(user.Email)),
+         user.Id,
+         Arg.Any<object>(),
+         Arg.Any<CancellationToken>());
    }
 
    [Fact]
@@ -73,7 +81,7 @@ public class AuthServiceTests
       user.UserRoles = [UserRole.Create(user.Id, roleId, null)];
       var permission = new PermissionDto(Guid.NewGuid(), "iam", "users", "list", IamPermission.Users.List, "List Users", "Allows listing users", true);
 
-      _userQueryRepositoryMock.GetByEmailWithPasswordAsync(user.Email, Arg.Any<CancellationToken>()).Returns(user);
+      _userServiceMock.GetByEmailWithPasswordAsync(user.Email, Arg.Any<CancellationToken>()).Returns(user);
       _roleQueryRepositoryMock.GetPermissionsByRoleIdAsync(roleId, Arg.Any<CancellationToken>()).Returns([permission]);
       var request = new UserLoginRequest(user.Email, password);
 
@@ -90,13 +98,21 @@ public class AuthServiceTests
    [Fact]
    public async Task LoginAsync_InvalidEmail_ShouldReturnUnauthorized()
    {
-      _userQueryRepositoryMock.GetByEmailWithPasswordAsync(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns((UserPasswordDto)null!);
+      _userServiceMock.GetByEmailWithPasswordAsync(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns((UserPasswordDto)null!);
       var request = new UserLoginRequest("nonexistent@email.com", "anyPassword");
 
       var result = await _authService.LoginAsync(request, TestContext.Current.CancellationToken);
 
       Assert.False(result.IsSuccess);
       Assert.IsType<InvalidEmailPasswordError>(result.Messages.First());
+      await _auditLoggerMock.Received(1).LogAsync(
+         IamConst.Logger.Feature.Authentication,
+         IamConst.Logger.Action.LoginFail,
+         AuditPrivacyLevel.Medium,
+         Arg.Is<string>(description => description.Contains(request.Email)),
+         null,
+         Arg.Any<object>(),
+         Arg.Any<CancellationToken>());
    }
 
    [Fact]
@@ -106,13 +122,21 @@ public class AuthServiceTests
       var wrongPassword = "WrongPassword123!";
       var user = CreateValidUser(correctPassword, isUserAtive: true, isCustumerActive: true, isLockedUser: false);
 
-      _userQueryRepositoryMock.GetByEmailWithPasswordAsync(user.Email, Arg.Any<CancellationToken>()).Returns(user);
+      _userServiceMock.GetByEmailWithPasswordAsync(user.Email, Arg.Any<CancellationToken>()).Returns(user);
       var request = new UserLoginRequest(user.Email, wrongPassword);
 
       var result = await _authService.LoginAsync(request, TestContext.Current.CancellationToken);
 
       Assert.False(result.IsSuccess);
       Assert.IsType<InvalidEmailPasswordError>(result.Messages.First());
+      await _auditLoggerMock.Received(1).LogAsync(
+         IamConst.Logger.Feature.Authentication,
+         IamConst.Logger.Action.LoginFail,
+         AuditPrivacyLevel.Medium,
+         Arg.Is<string>(description => description.Contains(user.Email)),
+         user.Id,
+         Arg.Any<object>(),
+         Arg.Any<CancellationToken>());
    }
 
    [Fact]
@@ -121,7 +145,7 @@ public class AuthServiceTests
       var password = "Password123!";
       var user = CreateValidUser(password, isUserAtive: false, isCustumerActive: true, isLockedUser: false);
 
-      _userQueryRepositoryMock.GetByEmailWithPasswordAsync(user.Email, Arg.Any<CancellationToken>()).Returns(user);
+      _userServiceMock.GetByEmailWithPasswordAsync(user.Email, Arg.Any<CancellationToken>()).Returns(user);
       var request = new UserLoginRequest(user.Email, password);
 
       var result = await _authService.LoginAsync(request, TestContext.Current.CancellationToken);
@@ -136,7 +160,7 @@ public class AuthServiceTests
         var password = "Password123!";
         var user = CreateValidUser(password, isUserAtive: false, isCustumerActive: true, isLockedUser: true);
 
-        _userQueryRepositoryMock.GetByEmailWithPasswordAsync(user.Email, Arg.Any<CancellationToken>()).Returns(user);
+        _userServiceMock.GetByEmailWithPasswordAsync(user.Email, Arg.Any<CancellationToken>()).Returns(user);
         
         var request = new UserLoginRequest(user.Email, password);
 
@@ -152,7 +176,7 @@ public class AuthServiceTests
       var password = "Password123!";
       var user = CreateValidUser(password, isUserAtive: true, isCustumerActive: false, isLockedUser: false);
 
-      _userQueryRepositoryMock.GetByEmailWithPasswordAsync(user.Email, Arg.Any<CancellationToken>()).Returns(user);
+      _userServiceMock.GetByEmailWithPasswordAsync(user.Email, Arg.Any<CancellationToken>()).Returns(user);
       var request = new UserLoginRequest(user.Email, password);
 
       var result = await _authService.LoginAsync(request, TestContext.Current.CancellationToken);

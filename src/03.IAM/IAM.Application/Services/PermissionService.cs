@@ -9,6 +9,7 @@ using IAM.Domain.QueryRepositories;
 using Myce.Response;
 using Shared.Application.Contracts;
 using Shared.Application.Services;
+using Shared.Domain.Enums;
 using Shared.Domain.Messages;
 
 namespace IAM.Application.Services;
@@ -18,12 +19,14 @@ public class PermissionService(
    IUserContext userContext,
    IPermissionValidator permissionValidator,
    IPermissionQueryRepository permissionQueryRepository,
-   IRolePermissionCacheInvalidator rolePermissionAuthorizationCache) : BaseService(userContext), IPermissionService
+   IRolePermissionCacheInvalidator rolePermissionAuthorizationCache,
+   IIamAuditLogger auditLogger) : BaseService(userContext), IPermissionService
 {
    private readonly IIamUnitOfWork _iamUnitOfWork = iamUnitOfWork;
    private readonly IPermissionValidator _permissionValidator = permissionValidator;
    private readonly IPermissionQueryRepository _permissionQueryRepository = permissionQueryRepository;
    private readonly IRolePermissionCacheInvalidator _rolePermissionAuthorizationCache = rolePermissionAuthorizationCache;
+   private readonly IIamAuditLogger _auditLogger = auditLogger;
 
    public async Task<Result<PermissionDto>> CreateAsync(PermissionCreateRequest request, CancellationToken cancellationToken = default)
    {
@@ -103,6 +106,15 @@ public class PermissionService(
          await _iamUnitOfWork.SaveChangesAsync(ct);
          await _rolePermissionAuthorizationCache.RemoveAsync(role!.Id, ct);
 
+         await _auditLogger.LogAsync(
+            IamConst.Logger.Feature.Permissions,
+            IamConst.Logger.Action.Assign,
+            AuditPrivacyLevel.High,
+            $"Assigned permissions to role {role.Id}",
+            role.Id,
+            request,
+            ct);
+
          return Result.Success(new SuccessInfo());
       }, cancellationToken);
    }
@@ -129,6 +141,15 @@ public class PermissionService(
          _iamUnitOfWork.Roles.Update(role!);
          await _iamUnitOfWork.SaveChangesAsync(ct);
          await _rolePermissionAuthorizationCache.RemoveAsync(role!.Id, ct);
+
+         await _auditLogger.LogAsync(
+            IamConst.Logger.Feature.Permissions,
+            IamConst.Logger.Action.Unassign,
+            AuditPrivacyLevel.High,
+            $"Unassigned permissions from role {role.Id}",
+            role.Id,
+            request,
+            ct);
 
          return Result.Success(new SuccessInfo());
       }, cancellationToken);

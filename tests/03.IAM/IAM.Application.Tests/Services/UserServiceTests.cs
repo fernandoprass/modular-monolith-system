@@ -1,6 +1,7 @@
 using FluentAssertions;
 using IAM.Application.Contracts;
 using IAM.Application.Services;
+using IAM.Domain;
 using IAM.Domain.DTOs.Requests;
 using IAM.Domain.Entities;
 using IAM.Domain.Interfaces;
@@ -10,6 +11,7 @@ using IAM.Domain.Repositories;
 using Myce.Response;
 using NSubstitute;
 using Shared.Application.Contracts;
+using Shared.Domain.Enums;
 
 namespace IAM.Application.Tests.Services;
 
@@ -21,6 +23,7 @@ public class UserServiceTests
    private readonly IUserContext _userContextMock;
    private readonly IUserRepository _userRepositoryMock;
    private readonly IUserQueryRepository _userQueryRepositoryMock;
+   private readonly IIamAuditLogger _auditLoggerMock;
    private readonly UserService _userService;
 
    public UserServiceTests()
@@ -31,6 +34,7 @@ public class UserServiceTests
       _userValidatorMock = Substitute.For<IUserValidator>();
       _userRepositoryMock = Substitute.For<IUserRepository>();
       _userQueryRepositoryMock = Substitute.For<IUserQueryRepository>();
+      _auditLoggerMock = Substitute.For<IIamAuditLogger>();
 
       _unitOfWorkMock.Users.Returns(_userRepositoryMock);
       _userContextMock.UserOwnerId.Returns(Guid.CreateVersion7());
@@ -41,7 +45,8 @@ public class UserServiceTests
           _userContextMock,
           _userValidatorMock,
           _userRepositoryMock,
-          _userQueryRepositoryMock);
+          _userQueryRepositoryMock,
+          _auditLoggerMock);
    }
 
    [Fact]
@@ -127,6 +132,14 @@ public class UserServiceTests
       result.IsSuccess.Should().BeTrue();
       user.PasswordExpiresAt.Should().BeCloseTo(DateTime.UtcNow.AddDays(90), TimeSpan.FromSeconds(5));
       await _unitOfWorkMock.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+      await _auditLoggerMock.Received(1).LogAsync(
+         IamConst.Logger.Feature.Users,
+         IamConst.Logger.Action.UpdatePassword,
+         AuditPrivacyLevel.High,
+         Arg.Any<string>(),
+         user.Id,
+         Arg.Any<object>(),
+         Arg.Any<CancellationToken>());
    }
 
 
@@ -163,6 +176,14 @@ public class UserServiceTests
       user.Name.Should().Be("Updated Name");
       user.IsActive.Should().BeFalse();
       await _unitOfWorkMock.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+      await _auditLoggerMock.Received(1).LogAsync(
+         IamConst.Logger.Feature.Users,
+         IamConst.Logger.Action.Update,
+         AuditPrivacyLevel.Medium,
+         Arg.Any<string>(),
+         user.Id,
+         request,
+         Arg.Any<CancellationToken>());
    }
 
    [Fact]
