@@ -5,7 +5,7 @@ namespace Sentinel.Domain.Entities;
 
 public class AuditLog : Entity
 {
-   public DateTime Timestamp { get; private set; }
+   public DateTime CreatedAt { get; private set; }
    public string Module { get; private set; } = string.Empty;
    public string Feature { get; private set; } = string.Empty;
    public string Action { get; private set; } = string.Empty;
@@ -22,7 +22,7 @@ public class AuditLog : Entity
 
    public static AuditLog Create(
       Guid id,
-      DateTime timestamp,
+      DateTime createdAt,
       string module,
       string feature,
       string action,
@@ -38,7 +38,7 @@ public class AuditLog : Entity
       return new AuditLog
       {
          Id = id,
-         Timestamp = timestamp,
+         CreatedAt = createdAt,
          Module = module,
          Feature = feature,
          Action = action,

@@ -29,7 +29,7 @@ public class AuditLogConsumer(
 
       var auditLog = AuditLog.Create(
          auditEvent.Id,
-         auditEvent.Timestamp,
+         auditEvent.CreatedAt,
          auditEvent.Module,
          auditEvent.Feature,
          auditEvent.Action,

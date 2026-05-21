@@ -4,7 +4,7 @@ namespace Sentinel.Domain.DTOs.Responses;
 
 public record SystemLogLiteDto(
    Guid Id,
-   DateTime Timestamp,
+   DateTime CreatedAt,
    SystemLogLevel Level,
    SystemLogStatus Status,
    string Source,

@@ -42,21 +42,21 @@ public class SentinelDbContext
       var auditIndexes = new[]
       {
          new CreateIndexModel<AuditLog>(
-            Builders<AuditLog>.IndexKeys.Ascending(a => a.OrganizationId).Descending(a => a.Timestamp)),
+            Builders<AuditLog>.IndexKeys.Ascending(a => a.OrganizationId).Descending(a => a.CreatedAt)),
          new CreateIndexModel<AuditLog>(
-            Builders<AuditLog>.IndexKeys.Ascending(a => a.OrganizationId).Ascending(a => a.Module).Descending(a => a.Timestamp)),
+            Builders<AuditLog>.IndexKeys.Ascending(a => a.OrganizationId).Ascending(a => a.Module).Descending(a => a.CreatedAt)),
          new CreateIndexModel<AuditLog>(
-            Builders<AuditLog>.IndexKeys.Ascending(a => a.OrganizationId).Ascending(a => a.TargetId).Descending(a => a.Timestamp)),
+            Builders<AuditLog>.IndexKeys.Ascending(a => a.OrganizationId).Ascending(a => a.TargetId).Descending(a => a.CreatedAt)),
          new CreateIndexModel<AuditLog>(
-            Builders<AuditLog>.IndexKeys.Ascending(a => a.OrganizationId).Ascending(a => a.UserId).Descending(a => a.Timestamp))
+            Builders<AuditLog>.IndexKeys.Ascending(a => a.OrganizationId).Ascending(a => a.UserId).Descending(a => a.CreatedAt))
       };
 
       var systemIndexes = new[]
       {
          new CreateIndexModel<SystemLog>(
-            Builders<SystemLog>.IndexKeys.Ascending(s => s.OrganizationId).Descending(s => s.Timestamp)),
+            Builders<SystemLog>.IndexKeys.Ascending(s => s.OrganizationId).Descending(s => s.CreatedAt)),
          new CreateIndexModel<SystemLog>(
-            Builders<SystemLog>.IndexKeys.Ascending(s => s.OrganizationId).Ascending(s => s.Level).Descending(s => s.Timestamp)),
+            Builders<SystemLog>.IndexKeys.Ascending(s => s.OrganizationId).Ascending(s => s.Level).Descending(s => s.CreatedAt)),
          new CreateIndexModel<SystemLog>(
             Builders<SystemLog>.IndexKeys.Ascending(s => s.RequestId))
       };
