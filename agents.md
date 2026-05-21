@@ -30,8 +30,9 @@ Communicate with me using only short sentences; caveman language is enough. Do n
 11. [Audit Logging](#audit-logging)
 12. [Caching Rules](#caching-rules)
 13. [Docker & Local Environment](#docker--local-environment)
-14. [Testing Rules](#testing-rules)
-15. [Seeder Rules](#seeder-rules)
+14. [Documentation Rules](#documentation-rules)
+15. [Testing Rules](#testing-rules)
+16. [Seeder Rules](#seeder-rules)
 
 ---
 
@@ -576,6 +577,27 @@ builder.Services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHand
 
 - Docker ports and local Visual Studio ports should be different.
 - Do not change Docker ports just to fix local host conflicts.
+
+---
+
+## Documentation Rules
+
+- Documentation must be written for junior developers.
+- Keep text simple and concise, but complete enough to understand the context.
+- Do not write documentation only for agents or senior developers.
+- Before planning a code or docs task, read `docs/readme.md` and the relevant module `readme.md`.
+- For cross-module tasks, read all affected module readmes.
+- For docs tasks, also read the target doc before proposing changes.
+- Preserve useful teaching material like concept tables, diagrams, flow examples, and file trees.
+- Remove stale code examples, not useful explanations.
+- Prefer small code snippets only when they teach the pattern.
+- Use current project names, file paths, class names, and stream/cache names.
+- If renaming or moving docs, keep module readmes and docs index aligned.
+- Each module should have a `readme.md` in its module folder.
+- The `docs/readme.md` file should act as an index for the docs folder.
+- Module readmes should explain purpose, structure, flows, important services/entities, integration points, and design rules.
+- Topic docs should go deeper than module readmes.
+- When updating docs, touch only the requested docs unless the docs index or moved links also need updates.
 
 ---
 
