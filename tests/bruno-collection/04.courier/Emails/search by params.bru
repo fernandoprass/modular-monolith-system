@@ -1,0 +1,30 @@
+meta {
+  name: search by params
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{host.courier}}/api/{{version}}/emails
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "organizationId": null,
+    "userId": null,
+    "module": "",
+    "feature": "",
+    "subject": "",
+    "recipient": "",
+    "dateFrom": null,
+    "dateTo": null,
+    "pageNumber": 1,
+    "pageSize": 25
+  }
+}

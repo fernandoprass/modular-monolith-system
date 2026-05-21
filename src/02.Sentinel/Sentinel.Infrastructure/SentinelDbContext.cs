@@ -10,8 +10,6 @@ namespace Sentinel.Infrastructure;
 
 public class SentinelDbContext
 {
-   private const string DefaultDatabaseName = "sentinel";
-
    private readonly IMongoDatabase _database;
    private static int _mongoConfigured;
 
@@ -30,12 +28,12 @@ public class SentinelDbContext
 
       var client = new MongoClient(connectionString);
 
-      _database = client.GetDatabase(string.IsNullOrWhiteSpace(databaseName) ? DefaultDatabaseName : databaseName);
+      _database = client.GetDatabase(string.IsNullOrWhiteSpace(databaseName) ? SentinelConst.Database.DefaultName : databaseName);
    }
 
-   public IMongoCollection<AuditLog> AuditLogs => _database.GetCollection<AuditLog>("audit_logs");
+   public IMongoCollection<AuditLog> AuditLogs => _database.GetCollection<AuditLog>(SentinelConst.Collection.AuditLogs);
 
-   public IMongoCollection<SystemLog> SystemLogs => _database.GetCollection<SystemLog>("system_logs");
+   public IMongoCollection<SystemLog> SystemLogs => _database.GetCollection<SystemLog>(SentinelConst.Collection.SystemLogs);
 
    public async Task ConfigureIndexesAsync(CancellationToken cancellationToken = default)
    {

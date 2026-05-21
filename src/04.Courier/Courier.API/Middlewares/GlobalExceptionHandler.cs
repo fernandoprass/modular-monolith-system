@@ -1,9 +1,9 @@
+using Courier.Domain;
 using Microsoft.AspNetCore.Diagnostics;
-using IAM.Domain;
 using Shared.Domain.Interfaces;
 using Shared.Infrastructure.ExceptionHandling;
 
-namespace IAM.API.Middlewares;
+namespace Courier.API.Middlewares;
 
 public class GlobalExceptionHandler(
    ILogger<GlobalExceptionHandler> logger,
@@ -13,14 +13,13 @@ public class GlobalExceptionHandler(
    private readonly IServiceProvider _serviceProvider = serviceProvider;
 
    public async ValueTask<bool> TryHandleAsync(
-       HttpContext httpContext,
-       Exception exception,
-       CancellationToken cancellationToken)
+      HttpContext httpContext,
+      Exception exception,
+      CancellationToken cancellationToken)
    {
       _logger.LogError(exception, "An unhandled exception occurred: {Message}", exception.Message);
 
       httpContext.Response.ContentType = "application/json";
-
       var exceptionResponse = ExceptionResponseFactory.Create(exception);
 
       await PublishSystemLogAsync(httpContext, exception, exceptionResponse.StatusCode, cancellationToken);
@@ -48,7 +47,7 @@ public class GlobalExceptionHandler(
          var publisher = scope.ServiceProvider.GetRequiredService<IExceptionSystemLogPublisher>();
 
          await publisher.PublishAsync(
-            IamConst.System.ModuleName,
+            CourierConst.System.ModuleName,
             exception,
             statusCode,
             httpContext.TraceIdentifier,
@@ -57,7 +56,7 @@ public class GlobalExceptionHandler(
       }
       catch (Exception publishException)
       {
-         _logger.LogError(publishException, "Failed to publish IAM exception log");
+         _logger.LogError(publishException, "Failed to publish Courier exception log");
       }
    }
 }

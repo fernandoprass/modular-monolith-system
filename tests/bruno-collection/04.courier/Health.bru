@@ -1,0 +1,11 @@
+meta {
+  name: Health
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{host.courier}}/api/{{version}}/courier/health
+  body: none
+  auth: none
+}

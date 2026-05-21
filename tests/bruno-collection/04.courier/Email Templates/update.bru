@@ -1,0 +1,22 @@
+meta {
+  name: update
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{host.courier}}/api/{{version}}/email-templates/{{emailTemplateId}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "key": "welcome-email",
+    "retentionPolicy": 3
+  }
+}

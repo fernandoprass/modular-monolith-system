@@ -1,0 +1,21 @@
+meta {
+  name: search by params
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{host.courier}}/api/{{version}}/email-templates?key={{key}}&pageNumber={{pageNumber}}&pageSize={{pageSize}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+vars:pre-request {
+  key: welcome
+  pageNumber: 1
+  pageSize: 25
+}

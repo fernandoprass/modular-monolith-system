@@ -1,0 +1,29 @@
+meta {
+  name: create
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{host.courier}}/api/{{version}}/emails/
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "organizationId": "019e2364-6a9c-740b-bd42-49794d97e136",
+    "userId": "019e2364-6f13-7980-980c-04811cf11e9d",
+    "module": "iam",
+    "feature": "users",
+    "templateKey": "welcome-email",
+    "recipient": "person@example.com",
+    "subject": "Welcome",
+    "body": "<p>Hello from Courier.</p>",
+    "isHtml": true
+  }
+}

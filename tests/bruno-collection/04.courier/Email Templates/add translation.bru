@@ -1,0 +1,24 @@
+meta {
+  name: add translation
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{host.courier}}/api/{{version}}/email-templates/019e4baf-80bb-724b-a1b3-2950f1daae27/translations
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "language": "en",
+    "name": "Welcome Email",
+    "subject": "Welcome",
+    "body": "<p>Hi {{name}}</p>"
+  }
+}
