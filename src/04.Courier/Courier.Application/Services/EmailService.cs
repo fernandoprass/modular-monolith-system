@@ -6,6 +6,8 @@ using Courier.Domain.Entities;
 using Courier.Domain.Interfaces.Repositories;
 using Courier.Domain.Mappers;
 using Myce.Response;
+using Shared.Application.Contracts;
+using Shared.Application.Services;
 using Shared.Domain.Messages;
 
 namespace Courier.Application.Services;
@@ -13,7 +15,8 @@ namespace Courier.Application.Services;
 public class EmailService(
    IEmailRepository emailRepository,
    IEmailTemplateRepository emailTemplateRepository,
-   IEmailValidator emailValidator) : IEmailService
+   IEmailValidator emailValidator,
+   IUserContext userContext) : BaseService(userContext), IEmailService
 {
    private readonly IEmailRepository _emailRepository = emailRepository;
    private readonly IEmailTemplateRepository _emailTemplateRepository = emailTemplateRepository;
@@ -28,7 +31,11 @@ public class EmailService(
          return Result<PagedResultDto<EmailLiteDto>>.Failure(validation.Messages);
       }
 
-      var emails = await _emailRepository.GetAsync(request, cancellationToken);
+      var searchRequest = _userContext.IsSystemAdmin
+         ? request
+         : request with { OrganizationId = _userContext.UserOwnerId };
+
+      var emails = await _emailRepository.GetAsync(searchRequest, cancellationToken);
       return Result<PagedResultDto<EmailLiteDto>>.Success(emails);
    }
 
@@ -41,7 +48,8 @@ public class EmailService(
          return Result<EmailDto>.Failure(new NotFoundError(CourierConst.Entity.Email));
       }
 
-      return Result<EmailDto>.Success(email.ToEmailDto());
+      return await ExecuteIfUserOwnsAsync(email.OrganizationId, _ =>
+         Task.FromResult(Result<EmailDto>.Success(email.ToEmailDto())), cancellationToken);
    }
 
    public async Task<Result<EmailCreateDto>> CreateAsync(EmailCreateRequest request, CancellationToken cancellationToken = default)

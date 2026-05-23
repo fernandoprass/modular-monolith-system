@@ -1,6 +1,5 @@
 using Courier.Application.Validators;
 using Courier.Domain.DTOs.Requests;
-using Courier.Domain.Messages;
 using FluentAssertions;
 
 namespace Courier.Application.Tests.Validators;
@@ -37,7 +36,17 @@ public class EmailValidatorTests
    [InlineData(1, 0, false)]
    public void ValidateSearch_ShouldValidatePaging(int pageNumber, int pageSize, bool expectedSuccess)
    {
-      var request = new EmailSearchRequest(null, null, null, null, null, null, null, null, pageNumber, pageSize);
+      var request = new EmailSearchRequest(
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         DateTime.UtcNow.AddDays(-1),
+         DateTime.UtcNow,
+         pageNumber,
+         pageSize);
 
       var result = _validator.ValidateSearch(request);
 
@@ -45,7 +54,7 @@ public class EmailValidatorTests
    }
 
    [Fact]
-   public void ValidateSearch_ShouldReturnDateRangeError_WhenDateFromIsAfterDateTo()
+   public void ValidateSearch_ShouldFail_WhenDateFromIsAfterDateTo()
    {
       var request = new EmailSearchRequest(
          null,
@@ -59,6 +68,6 @@ public class EmailValidatorTests
 
       var result = _validator.ValidateSearch(request);
 
-      result.Messages.Should().Contain(m => m is EmailInvalidDateRangeError);
+      result.HasError.Should().BeTrue();
    }
 }

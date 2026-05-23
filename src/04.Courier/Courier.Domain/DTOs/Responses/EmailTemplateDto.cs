@@ -5,6 +5,7 @@ namespace Courier.Domain.DTOs.Responses;
 public record EmailTemplateDto(
    Guid Id,
    string Key,
+   string Name,
    EmailRetentionPolicy RetentionPolicy,
    DateTime CreatedAt,
    Guid CreatedBy,

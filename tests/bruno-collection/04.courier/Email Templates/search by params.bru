@@ -5,8 +5,8 @@ meta {
 }
 
 get {
-  url: {{host.courier}}/api/{{version}}/email-templates?key={{key}}&pageNumber={{pageNumber}}&pageSize={{pageSize}}
-  body: none
+  url: {{host.courier}}/api/{{version}}/email-templates
+  body: json
   auth: bearer
 }
 
@@ -14,8 +14,11 @@ auth:bearer {
   token: {{token}}
 }
 
-vars:pre-request {
-  key: welcome
-  pageNumber: 1
-  pageSize: 25
+body:json {
+  {
+    "key": "",
+    "name": "",
+    "pageNumber": 1,
+    "pageSize": 25
+  }
 }

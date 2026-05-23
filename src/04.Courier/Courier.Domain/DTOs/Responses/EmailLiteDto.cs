@@ -11,10 +11,6 @@ public record EmailLiteDto(
    string TemplateKey,
    string Recipient,
    string Subject,
-   bool IsHtml,
    DateTime CreatedAt,
    DateTime? SentAt,
-   DateTime ExpiresAt,
-   EmailStatus Status,
-   int RetryCount,
-   DateTime? NextAttemptAt);
+   EmailStatus Status);
