@@ -1,4 +1,5 @@
 using IAM.Domain;
+using Courier.Domain;
 using Microsoft.EntityFrameworkCore;
 using Shared.Domain;
 using Shared.Domain.Entities;
@@ -13,6 +14,7 @@ public class SeederParameters(SharedDbContext dbContext)
    {
       Console.WriteLine("Starting to add parameters...");
       await SeedIamParameters(cancellationToken);
+      await SeedCourierParameters(cancellationToken);
 
       await dbContext.SaveChangesAsync(cancellationToken);
 
@@ -58,6 +60,19 @@ public class SeederParameters(SharedDbContext dbContext)
          "The lifespan of the JSON Web Token (JWT) in hours.",
          ParameterType.Integer,
          value: "24",
+         ParameterOverrideType.None,
+         isVisible: true,
+         cancellationToken);
+   }
+
+   private async Task SeedCourierParameters(CancellationToken cancellationToken)
+   {
+      await AddParameterAsync(
+         CourierParam.EmailDelivery.MaxRetries,
+         "Maximum Email Delivery Retries",
+         "The maximum number of email delivery attempts before an email is marked as failed.",
+         ParameterType.Integer,
+         value: "3",
          ParameterOverrideType.None,
          isVisible: true,
          cancellationToken);

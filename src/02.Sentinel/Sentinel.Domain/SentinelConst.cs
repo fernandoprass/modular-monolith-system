@@ -12,12 +12,12 @@ public static partial class SentinelConst
       public const string TextType = "text";
       public const string JsonbType = "jsonb";
       public const string UuidType = "uuid";
-   }
 
-   public static class Collection
-   {
-      public const string AuditLogs = "audit_logs";
-      public const string SystemLogs = "system_logs";
+      public static class Collection
+      {
+         public const string AuditLogs = "audit_logs";
+         public const string SystemLogs = "system_logs";
+      }
    }
 
    public static class Entity

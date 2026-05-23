@@ -19,7 +19,9 @@ builder.Services.AddOpenApi();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 builder.Services.AddCourierInfrastructure(builder.Configuration);
-builder.Services.AddSharedAuthorization(builder.Configuration);
+var sharedConnectionString = builder.Configuration.GetConnectionString(SharedConst.Database.ConnectionString)
+   ?? throw new InvalidOperationException("Shared database connection string is required.");
+builder.Services.AddSharedInfrastructure(builder.Configuration, sharedConnectionString);
 builder.Services.AddAuthorization();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IUserContext, AspNetUserContext>();

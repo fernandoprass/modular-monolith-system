@@ -31,9 +31,9 @@ public class SentinelDbContext
       _database = client.GetDatabase(string.IsNullOrWhiteSpace(databaseName) ? SentinelConst.Database.DefaultName : databaseName);
    }
 
-   public IMongoCollection<AuditLog> AuditLogs => _database.GetCollection<AuditLog>(SentinelConst.Collection.AuditLogs);
+   public IMongoCollection<AuditLog> AuditLogs => _database.GetCollection<AuditLog>(SentinelConst.Database.Collection.AuditLogs);
 
-   public IMongoCollection<SystemLog> SystemLogs => _database.GetCollection<SystemLog>(SentinelConst.Collection.SystemLogs);
+   public IMongoCollection<SystemLog> SystemLogs => _database.GetCollection<SystemLog>(SentinelConst.Database.Collection.SystemLogs);
 
    public async Task ConfigureIndexesAsync(CancellationToken cancellationToken = default)
    {
