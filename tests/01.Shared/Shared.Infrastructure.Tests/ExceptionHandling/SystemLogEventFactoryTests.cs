@@ -49,6 +49,7 @@ public class SystemLogEventFactoryTests
       public bool IsAuthenticated => true;
       public string? IpAddress => "127.0.0.1";
       public string? UserAgent => "test-agent";
+      public string Language => "en";
       public IEnumerable<string> Roles => [];
    }
 }

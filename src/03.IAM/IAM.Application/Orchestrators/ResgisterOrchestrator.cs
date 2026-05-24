@@ -24,7 +24,8 @@ public class ResgisterOrchestrator(
    IUserRepository userRepository,
    IUserService userService,
    IIamUnitOfWork iamUnitOfWork,
-   IIamAuditLogger auditLogger) : BaseService(userContext), IRegisterOrchestrator
+   IIamAuditLogger auditLogger,
+   IIamEmailNotifier emailNotifier) : BaseService(userContext), IRegisterOrchestrator
 {
    private readonly IOrganizationService _organizationService = organizationService;
    private readonly IOrganizationQueryRepository _organizationQueryRepository = organizationQueryRepository;
@@ -32,6 +33,7 @@ public class ResgisterOrchestrator(
    private readonly IUserService _userService = userService;
    private readonly IIamUnitOfWork _iamUnitOfWork = iamUnitOfWork;
    private readonly IIamAuditLogger _auditLogger = auditLogger;
+   private readonly IIamEmailNotifier _emailNotifier = emailNotifier;
 
    public async Task<Result<UserDto>> RegisterUserAsync(UserCreateRequest request, CancellationToken cancellationToken = default)
    {
@@ -43,7 +45,7 @@ public class ResgisterOrchestrator(
 
       if (result.IsSuccess)
       {
-         result.Data.OrganizationName = organizationDto.Name;
+         result.Data!.OrganizationName = organizationDto?.Name ?? string.Empty;
          await _auditLogger.LogAsync(
             IamConst.Logger.Feature.Users,
             IamConst.Logger.Action.Create,
@@ -99,6 +101,24 @@ public class ResgisterOrchestrator(
          organizationCreate,
          cancellationToken);
 
+      await _emailNotifier.NotifyAsync(
+         IamConst.EmailTemplate.OrganizationWelcome,
+         organization.Id,
+         user.Id,
+         user.Email,
+         IamConst.Logger.Feature.Organizations,
+         BuildOrganizationTemplateValues(organization, user),
+         cancellationToken);
+
+      await _emailNotifier.NotifyAsync(
+         IamConst.EmailTemplate.UserWelcome,
+         organization.Id,
+         user.Id,
+         user.Email,
+         IamConst.Logger.Feature.Users,
+         BuildOrganizationTemplateValues(organization, user),
+         cancellationToken);
+
       return Result<OrganizationDto>.Success(organization.ToOrganizationDto());
    }
 
@@ -131,7 +151,30 @@ public class ResgisterOrchestrator(
             new { OrganizationId = id },
             ct);
 
+         foreach (var user in users)
+         {
+            await _emailNotifier.NotifyAsync(
+               IamConst.EmailTemplate.OrganizationDelete,
+               organization.Id,
+               user.Id,
+               user.Email,
+               IamConst.Logger.Feature.Organizations,
+               BuildOrganizationTemplateValues(organization, user),
+               ct);
+         }
+
          return Result.Success(new SuccessInfo());
       }, cancellationToken);
+   }
+
+   private static IReadOnlyDictionary<string, string> BuildOrganizationTemplateValues(Organization organization, User user)
+   {
+      return new Dictionary<string, string>
+      {
+         ["organization.name"] = organization.Name,
+         ["organization.code"] = organization.Code,
+         ["user.name"] = user.Name,
+         ["user.email"] = user.Email
+      };
    }
 }

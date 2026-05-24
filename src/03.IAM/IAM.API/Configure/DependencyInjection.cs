@@ -51,6 +51,7 @@ public static class DependencyInjection
    {
       builder.Services.AddScoped<IAuthService, AuthService>();
       builder.Services.AddScoped<IIamAuditLogger, IamAuditLogger>();
+      builder.Services.AddScoped<IIamEmailNotifier, IamEmailNotifier>();
       builder.Services.AddScoped<IOrganizationService, OrganizationService>();
       builder.Services.AddScoped<IRoleService, RoleService>();
       builder.Services.AddScoped<IUserService, UserService>();

@@ -24,7 +24,8 @@ public class UserService(
     IUserValidator userValidator,
     IUserRepository userRepository,
     IUserQueryRepository userQueryRepository,
-    IIamAuditLogger auditLogger) : BaseService(userContext), IUserService
+    IIamAuditLogger auditLogger,
+    IIamEmailNotifier emailNotifier) : BaseService(userContext), IUserService
 {
    private readonly IIamUnitOfWork _iamUnitOfWork = iamUnitOfWork;
    private readonly IParameterService _parameterService = parameterService;
@@ -32,6 +33,7 @@ public class UserService(
    private readonly IUserRepository _userRepository = userRepository;
    private readonly IUserQueryRepository _userQueryRepository = userQueryRepository;
    private readonly IIamAuditLogger _auditLogger = auditLogger;
+   private readonly IIamEmailNotifier _emailNotifier = emailNotifier;
 
    public async Task<UserDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
    {
@@ -72,6 +74,15 @@ public class UserService(
 
          await _iamUnitOfWork.Users.AddAsync(user, ct);
          await _iamUnitOfWork.SaveChangesAsync(ct);
+
+         await _emailNotifier.NotifyAsync(
+            IamConst.EmailTemplate.UserWelcome,
+            user.OrganizationId,
+            user.Id,
+            user.Email,
+            IamConst.Logger.Feature.Users,
+            BuildUserTemplateValues(user),
+            ct);
 
          return Result<UserDto>.Success(user.ToUserDto());
       }, cancellationToken);
@@ -170,6 +181,15 @@ public class UserService(
             new { user.Id, user.Email },
             ct);
 
+         await _emailNotifier.NotifyAsync(
+            IamConst.EmailTemplate.UserDelete,
+            user.OrganizationId,
+            user.Id,
+            user.Email,
+            IamConst.Logger.Feature.Users,
+            BuildUserTemplateValues(user),
+            ct);
+
          return Result.Success(new SuccessInfo());
       }, cancellationToken);
    }
@@ -191,13 +211,29 @@ public class UserService(
 
       if (user == null) return Result.Failure(new NotFoundError(IamConst.Entity.User));
 
+      var wasLocked = user.LockedOutUntil.HasValue;
+
       int maxFailedAttempts = await _parameterService.GetIntAsync(IamParam.Security.MaxFailedLoginAttempts, cancellationToken);
      
       int lockedOutMinutes = await _parameterService.GetIntAsync(IamParam.Security.LockoutDurationInMins, cancellationToken);
       
       user.RegisterFailedLoginAttempt(maxFailedAttempts, lockedOutMinutes);
 
-      return await CommitUpdateAsync(user, cancellationToken);
+      var result = await CommitUpdateAsync(user, cancellationToken);
+
+      if (result.IsSuccess && !wasLocked && user.LockedOutUntil.HasValue)
+      {
+         await _emailNotifier.NotifyAsync(
+            IamConst.EmailTemplate.UserMaxFailedLoginAttempts,
+            user.OrganizationId,
+            user.Id,
+            user.Email,
+            IamConst.Logger.Feature.Users,
+            BuildUserTemplateValues(user),
+            cancellationToken);
+      }
+
+      return result;
    }
 
    public async Task<Result> ValidateUserForNewOrganizationAsync(OrganizationUserCreateRequest request, CancellationToken cancellationToken = default)
@@ -221,5 +257,14 @@ public class UserService(
       await _iamUnitOfWork.SaveChangesAsync(cancellationToken);
 
       return Result.Success(new SuccessInfo());
+   }
+
+   private static IReadOnlyDictionary<string, string> BuildUserTemplateValues(User user)
+   {
+      return new Dictionary<string, string>
+      {
+         ["user.name"] = user.Name,
+         ["user.email"] = user.Email
+      };
    }
 }

@@ -15,9 +15,9 @@ public class AspNetUserContext(IHttpContextAccessor accessor) : IUserContext
    public bool IsSystemAdmin => GetIsSystemAdmin();
    public string? IpAddress => _accessor.HttpContext?.Connection.RemoteIpAddress?.ToString();
    public string? UserAgent => _accessor.HttpContext?.Request.Headers[HeaderNames.UserAgent].ToString();
+   public string Language => GetLanguage();
 
-
-public Guid UserId => GetUserId();
+   public Guid UserId => GetUserId();
    public IEnumerable<string> Roles => GetRoles();
 
    private Guid GetOrganizationId()
@@ -38,6 +38,13 @@ public Guid UserId => GetUserId();
                   ?? _accessor.HttpContext?.User.FindFirst("sub")?.Value;
 
       return Guid.TryParse(value, out var id) ? id : Guid.Empty;
+   }
+
+   private string GetLanguage()
+   {
+      var value = _accessor.HttpContext?.User.FindFirst(SharedConst.Security.Claim.Language)?.Value;
+
+      return string.IsNullOrEmpty(value) ? SharedConst.System.DefaultLanguage : value;
    }
 
    private List<string> GetRoles()

@@ -233,7 +233,7 @@ public class PermissionServiceTests
       await _rolePermissionAuthorizationCacheMock.Received(1).RemoveAsync(role.Id, Arg.Any<CancellationToken>());
       await _auditLoggerMock.Received(1).LogAsync(
          IamConst.Logger.Feature.Permissions,
-         IamConst.Logger.Action.AssignToRole,
+         IamConst.Logger.Action.Assign,
          AuditPrivacyLevel.High,
          Arg.Any<string>(),
          role.Id,
@@ -305,7 +305,7 @@ public class PermissionServiceTests
       await _rolePermissionAuthorizationCacheMock.Received(1).RemoveAsync(role.Id, Arg.Any<CancellationToken>());
       await _auditLoggerMock.Received(1).LogAsync(
          IamConst.Logger.Feature.Permissions,
-         IamConst.Logger.Action.UnassignFromRole,
+         IamConst.Logger.Action.Unassign,
          AuditPrivacyLevel.High,
          Arg.Any<string>(),
          role.Id,

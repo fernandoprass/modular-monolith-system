@@ -6,6 +6,7 @@ public interface IUserContext
    bool IsSystemAdmin { get; }
    string? IpAddress { get; }
    string? UserAgent { get; }
+   string Language { get; }
    Guid UserId { get; }
    Guid UserOwnerId { get; }
    IEnumerable<string> Roles { get; }
