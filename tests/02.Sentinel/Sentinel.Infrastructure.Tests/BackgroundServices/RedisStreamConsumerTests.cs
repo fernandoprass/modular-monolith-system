@@ -2,6 +2,8 @@ using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Sentinel.Domain;
 using Sentinel.Infrastructure.BackgroundServices;
+using Shared.Domain;
+using Shared.Domain.Events;
 using StackExchange.Redis;
 using System.Reflection;
 using System.Text.Json;
@@ -16,7 +18,10 @@ public class RedisStreamConsumerTests
       var database = Substitute.For<IDatabase>();
       var redis = CreateRedis(database);
       var consumer = new TestRedisStreamConsumer(redis);
-      var payload = JsonSerializer.Serialize(new TestEvent("created"));
+      var payload = JsonSerializer.Serialize(IntegrationEvent<TestEvent>.Create(
+         TestRedisStreamConsumer.TestEventName,
+         SharedConst.Event.Version,
+         new TestEvent("created")));
       var entry = new StreamEntry("1-0", [new NameValueEntry(SentinelConst.Redis.EventFieldName, payload)]);
 
       await InvokeProcessEntryAsync(consumer, entry);
@@ -46,7 +51,10 @@ public class RedisStreamConsumerTests
       var database = Substitute.For<IDatabase>();
       var redis = CreateRedis(database);
       var consumer = new TestRedisStreamConsumer(redis, shouldThrow: true);
-      var payload = JsonSerializer.Serialize(new TestEvent("created"));
+      var payload = JsonSerializer.Serialize(IntegrationEvent<TestEvent>.Create(
+         TestRedisStreamConsumer.TestEventName,
+         SharedConst.Event.Version,
+         new TestEvent("created")));
       var entry = new StreamEntry("1-0", [new NameValueEntry(SentinelConst.Redis.EventFieldName, payload)]);
 
       await InvokeProcessEntryAsync(consumer, entry);
@@ -77,6 +85,7 @@ public class RedisStreamConsumerTests
       Action? onProcess = null,
       bool shouldThrow = false) : RedisStreamConsumer<TestEvent>(redis, Substitute.For<ILogger>())
    {
+      public const string TestEventName = "test.event.created";
       public List<TestEvent> ProcessedEvents { get; } = [];
 
       protected override string StreamName => "test-stream";
@@ -84,6 +93,7 @@ public class RedisStreamConsumerTests
       protected override string ConsumerNamePrefix => "test-consumer";
       protected override string ConsumerDisplayName => "Test consumer";
       protected override string ProcessingErrorMessage => "Error processing test event";
+      protected override string ExpectedEventName => TestEventName;
 
       protected override Task ProcessEventAsync(TestEvent eventData, CancellationToken cancellationToken)
       {

@@ -10,8 +10,6 @@ namespace Sentinel.Infrastructure;
 
 public class SentinelDbContext
 {
-   private const string DefaultDatabaseName = "sentinel";
-
    private readonly IMongoDatabase _database;
    private static int _mongoConfigured;
 
@@ -30,33 +28,33 @@ public class SentinelDbContext
 
       var client = new MongoClient(connectionString);
 
-      _database = client.GetDatabase(string.IsNullOrWhiteSpace(databaseName) ? DefaultDatabaseName : databaseName);
+      _database = client.GetDatabase(string.IsNullOrWhiteSpace(databaseName) ? SentinelConst.Database.DefaultName : databaseName);
    }
 
-   public IMongoCollection<AuditLog> AuditLogs => _database.GetCollection<AuditLog>("audit_logs");
+   public IMongoCollection<AuditLog> AuditLogs => _database.GetCollection<AuditLog>(SentinelConst.Database.Collection.AuditLogs);
 
-   public IMongoCollection<SystemLog> SystemLogs => _database.GetCollection<SystemLog>("system_logs");
+   public IMongoCollection<SystemLog> SystemLogs => _database.GetCollection<SystemLog>(SentinelConst.Database.Collection.SystemLogs);
 
    public async Task ConfigureIndexesAsync(CancellationToken cancellationToken = default)
    {
       var auditIndexes = new[]
       {
          new CreateIndexModel<AuditLog>(
-            Builders<AuditLog>.IndexKeys.Ascending(a => a.OrganizationId).Descending(a => a.Timestamp)),
+            Builders<AuditLog>.IndexKeys.Ascending(a => a.OrganizationId).Descending(a => a.CreatedAt)),
          new CreateIndexModel<AuditLog>(
-            Builders<AuditLog>.IndexKeys.Ascending(a => a.OrganizationId).Ascending(a => a.Module).Descending(a => a.Timestamp)),
+            Builders<AuditLog>.IndexKeys.Ascending(a => a.OrganizationId).Ascending(a => a.Module).Descending(a => a.CreatedAt)),
          new CreateIndexModel<AuditLog>(
-            Builders<AuditLog>.IndexKeys.Ascending(a => a.OrganizationId).Ascending(a => a.TargetId).Descending(a => a.Timestamp)),
+            Builders<AuditLog>.IndexKeys.Ascending(a => a.OrganizationId).Ascending(a => a.TargetId).Descending(a => a.CreatedAt)),
          new CreateIndexModel<AuditLog>(
-            Builders<AuditLog>.IndexKeys.Ascending(a => a.OrganizationId).Ascending(a => a.UserId).Descending(a => a.Timestamp))
+            Builders<AuditLog>.IndexKeys.Ascending(a => a.OrganizationId).Ascending(a => a.UserId).Descending(a => a.CreatedAt))
       };
 
       var systemIndexes = new[]
       {
          new CreateIndexModel<SystemLog>(
-            Builders<SystemLog>.IndexKeys.Ascending(s => s.OrganizationId).Descending(s => s.Timestamp)),
+            Builders<SystemLog>.IndexKeys.Ascending(s => s.OrganizationId).Descending(s => s.CreatedAt)),
          new CreateIndexModel<SystemLog>(
-            Builders<SystemLog>.IndexKeys.Ascending(s => s.OrganizationId).Ascending(s => s.Level).Descending(s => s.Timestamp)),
+            Builders<SystemLog>.IndexKeys.Ascending(s => s.OrganizationId).Ascending(s => s.Level).Descending(s => s.CreatedAt)),
          new CreateIndexModel<SystemLog>(
             Builders<SystemLog>.IndexKeys.Ascending(s => s.RequestId))
       };

@@ -28,14 +28,14 @@ public class SentinelLogQueryRepository(SentinelDbContext dbContext) : ISentinel
       var totalCount = await _dbContext.AuditLogs.CountDocumentsAsync(filter, cancellationToken: cancellationToken);
       var logs = await _dbContext.AuditLogs
          .Find(filter)
-         .SortByDescending(log => log.Timestamp)
+         .SortByDescending(log => log.CreatedAt)
          .Skip((pageNumber - 1) * pageSize)
          .Limit(pageSize)
          .ToListAsync(cancellationToken);
 
       var items = logs.Select(a => new AuditLogLiteDto(
          a.Id,
-         a.Timestamp,
+         a.CreatedAt,
          a.Module,
          a.Feature,
          a.Action,
@@ -63,14 +63,14 @@ public class SentinelLogQueryRepository(SentinelDbContext dbContext) : ISentinel
       var totalCount = await _dbContext.SystemLogs.CountDocumentsAsync(filter, cancellationToken: cancellationToken);
       var logs = await _dbContext.SystemLogs
          .Find(filter)
-         .SortByDescending(log => log.Timestamp)
+         .SortByDescending(log => log.CreatedAt)
          .Skip((pageNumber - 1) * pageSize)
          .Limit(pageSize)
          .ToListAsync(cancellationToken);
 
       var items = logs.Select(s => new SystemLogLiteDto(
          s.Id,
-         s.Timestamp,
+         s.CreatedAt,
          s.Level,
          s.Status,
          s.Source,
@@ -116,10 +116,10 @@ public class SentinelLogQueryRepository(SentinelDbContext dbContext) : ISentinel
          filters.Add(builder.Eq(a => a.TargetId, request.TargetId.Value));
 
       if (request.From.HasValue)
-         filters.Add(builder.Gte(a => a.Timestamp, request.From.Value));
+         filters.Add(builder.Gte(a => a.CreatedAt, request.From.Value));
 
       if (request.To.HasValue)
-         filters.Add(builder.Lte(a => a.Timestamp, request.To.Value));
+         filters.Add(builder.Lte(a => a.CreatedAt, request.To.Value));
 
       return filters.Count == 0 ? builder.Empty : builder.And(filters);
    }
@@ -150,10 +150,10 @@ public class SentinelLogQueryRepository(SentinelDbContext dbContext) : ISentinel
          filters.Add(builder.Eq(s => s.RequestId, request.RequestId));
 
       if (request.From.HasValue)
-         filters.Add(builder.Gte(s => s.Timestamp, request.From.Value));
+         filters.Add(builder.Gte(s => s.CreatedAt, request.From.Value));
 
       if (request.To.HasValue)
-         filters.Add(builder.Lte(s => s.Timestamp, request.To.Value));
+         filters.Add(builder.Lte(s => s.CreatedAt, request.To.Value));
 
       return filters.Count == 0 ? builder.Empty : builder.And(filters);
    }
@@ -194,7 +194,7 @@ public class SentinelLogQueryRepository(SentinelDbContext dbContext) : ISentinel
          ? null
          : new AuditLogDto(
             auditLog.Id,
-            auditLog.Timestamp,
+            auditLog.CreatedAt,
             auditLog.Module,
             auditLog.Feature,
             auditLog.Action,
@@ -226,7 +226,7 @@ public class SentinelLogQueryRepository(SentinelDbContext dbContext) : ISentinel
          ? null
          : new SystemLogDto(
             systemLog.Id,
-            systemLog.Timestamp,
+            systemLog.CreatedAt,
             systemLog.Level,
             systemLog.Status,
             systemLog.Source,

@@ -23,8 +23,12 @@ public class RedisEventPublisher(IConnectionMultiplexer redis, ILogger<RedisEven
    {
       cancellationToken.ThrowIfCancellationRequested();
 
-      var json = JsonSerializer.Serialize(auditLogEvent, JsonOptions);
-      var streamId = await _database.StreamAddAsync(SharedConst.Redis.AuditLogEventsStream, "event", json);
+      var envelope = IntegrationEvent<AuditLogEvent>.Create(
+         SharedConst.Event.Name.AuditLogRequested,
+         SharedConst.Event.Version,
+         auditLogEvent);
+      var json = JsonSerializer.Serialize(envelope, JsonOptions);
+      var streamId = await _database.StreamAddAsync(SharedConst.Redis.AuditLogEventsStream, SharedConst.Redis.EventFieldName, json);
 
       _logger.LogDebug("Published audit event {EventId} to stream {StreamId}", auditLogEvent.Id, streamId);
    }
@@ -33,17 +37,39 @@ public class RedisEventPublisher(IConnectionMultiplexer redis, ILogger<RedisEven
    {
       cancellationToken.ThrowIfCancellationRequested();
 
-      var json = JsonSerializer.Serialize(systemLogEvent, JsonOptions);
-      var streamId = await _database.StreamAddAsync(SharedConst.Redis.SystemLogEventsStream, "event", json);
+      var envelope = IntegrationEvent<SystemLogEvent>.Create(
+         SharedConst.Event.Name.SystemLogRequested,
+         SharedConst.Event.Version,
+         systemLogEvent);
+      var json = JsonSerializer.Serialize(envelope, JsonOptions);
+      var streamId = await _database.StreamAddAsync(SharedConst.Redis.SystemLogEventsStream, SharedConst.Redis.EventFieldName, json);
 
       _logger.LogDebug("Published system log {EventId} to stream {StreamId}", systemLogEvent.Id, streamId);
+   }
+
+   public async Task PublishEmailRequestedEventAsync(EmailRequestedEvent emailRequest, CancellationToken cancellationToken = default)
+   {
+      cancellationToken.ThrowIfCancellationRequested();
+
+      var envelope = IntegrationEvent<EmailRequestedEvent>.Create(
+         SharedConst.Event.Name.EmailRequested,
+         SharedConst.Event.Version,
+         emailRequest);
+      var json = JsonSerializer.Serialize(envelope, JsonOptions);
+      var streamId = await _database.StreamAddAsync(SharedConst.Redis.EmailRequestsStream, SharedConst.Redis.EventFieldName, json);
+
+      _logger.LogDebug("Published email request {EventId} to stream {StreamId}", envelope.EventId, streamId);
    }
 
    public async Task PublishNotificationEventAsync(NotificationEvent notification, CancellationToken cancellationToken = default)
    {
       cancellationToken.ThrowIfCancellationRequested();
 
-      var json = JsonSerializer.Serialize(notification, JsonOptions);
+      var envelope = IntegrationEvent<NotificationEvent>.Create(
+         SharedConst.Event.Name.NotificationRequested,
+         SharedConst.Event.Version,
+         notification);
+      var json = JsonSerializer.Serialize(envelope, JsonOptions);
       await _subscriber.PublishAsync(RedisChannel.Literal(SharedConst.Redis.NotificationEventsChannel), json);
 
       _logger.LogDebug("Published notification {NotificationId}", notification.Id);

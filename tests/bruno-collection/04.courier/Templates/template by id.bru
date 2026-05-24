@@ -1,0 +1,15 @@
+meta {
+  name: template by id
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{host.courier}}/api/{{version}}/templates/019e5ae4-ad1d-77ec-ab88-4f8bd1e37b95
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}

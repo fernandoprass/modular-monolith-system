@@ -23,16 +23,7 @@ public class GlobalExceptionHandler(
 
       var exceptionResponse = ExceptionResponseFactory.Create(exception);
 
-      using var scope = _serviceProvider.CreateScope();
-      var systemLogPublisher = scope.ServiceProvider.GetRequiredService<IExceptionSystemLogPublisher>();
-
-      await systemLogPublisher.PublishAsync(
-         IamConst.System.ModuleName,
-         exception,
-         exceptionResponse.StatusCode,
-         httpContext.TraceIdentifier,
-         httpContext.Request.Path.ToString(),
-         cancellationToken);
+      await PublishSystemLogAsync(httpContext, exception, exceptionResponse.StatusCode, cancellationToken);
 
       httpContext.Response.StatusCode = exceptionResponse.StatusCode;
       var response = new
@@ -43,5 +34,30 @@ public class GlobalExceptionHandler(
 
       await httpContext.Response.WriteAsJsonAsync(response, cancellationToken);
       return true;
+   }
+
+   private async Task PublishSystemLogAsync(
+      HttpContext httpContext,
+      Exception exception,
+      int statusCode,
+      CancellationToken cancellationToken)
+   {
+      try
+      {
+         using var scope = _serviceProvider.CreateScope();
+         var publisher = scope.ServiceProvider.GetRequiredService<IExceptionSystemLogPublisher>();
+
+         await publisher.PublishAsync(
+            IamConst.System.ModuleName,
+            exception,
+            statusCode,
+            httpContext.TraceIdentifier,
+            httpContext.Request.Path.ToString(),
+            cancellationToken);
+      }
+      catch (Exception publishException)
+      {
+         _logger.LogError(publishException, "Failed to publish IAM exception log");
+      }
    }
 }

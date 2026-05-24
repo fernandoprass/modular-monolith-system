@@ -22,7 +22,7 @@ public class AuditLogConsumerTests
       var consumer = CreateConsumer(unitOfWork);
       var auditEvent = new AuditLogEvent
       {
-         Timestamp = DateTime.UtcNow,
+         CreatedAt = DateTime.UtcNow,
          Module = "iam",
          Feature = "users",
          Action = "create",
@@ -40,7 +40,7 @@ public class AuditLogConsumerTests
 
       await auditLogRepository.Received(1).AddAsync(
          Arg.Is<AuditLog>(log =>
-            log.Timestamp == auditEvent.Timestamp &&
+            log.CreatedAt == auditEvent.CreatedAt &&
             log.Module == auditEvent.Module &&
             log.Feature == auditEvent.Feature &&
             log.Action == auditEvent.Action &&

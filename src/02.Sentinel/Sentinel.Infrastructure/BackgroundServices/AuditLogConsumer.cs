@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Sentinel.Domain;
 using Sentinel.Domain.Entities;
 using Sentinel.Domain.Interfaces;
+using Shared.Domain;
 using Shared.Domain.Events;
 using StackExchange.Redis;
 
@@ -21,6 +22,7 @@ public class AuditLogConsumer(
    protected override string ConsumerNamePrefix => SentinelConst.Redis.AuditConsumerNamePrefix;
    protected override string ConsumerDisplayName => "Audit event consumer";
    protected override string ProcessingErrorMessage => "Error processing audit event";
+   protected override string ExpectedEventName => SharedConst.Event.Name.AuditLogRequested;
 
    protected override async Task ProcessEventAsync(AuditLogEvent auditEvent, CancellationToken cancellationToken)
    {
@@ -29,7 +31,7 @@ public class AuditLogConsumer(
 
       var auditLog = AuditLog.Create(
          auditEvent.Id,
-         auditEvent.Timestamp,
+         auditEvent.CreatedAt,
          auditEvent.Module,
          auditEvent.Feature,
          auditEvent.Action,

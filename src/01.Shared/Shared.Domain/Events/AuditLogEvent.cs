@@ -6,7 +6,7 @@ public record AuditLogEvent
 {
    public Guid Id { get; init; } = Guid.CreateVersion7();
    public Guid OrganizationId { get; init; }
-   public DateTime Timestamp { get; init; } = DateTime.UtcNow;
+   public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
    public string Module { get; init; } = string.Empty;
    public string Feature { get; init; } = string.Empty;
    public string Action { get; init; } = string.Empty;

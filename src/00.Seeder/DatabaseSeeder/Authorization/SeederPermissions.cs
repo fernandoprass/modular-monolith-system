@@ -1,10 +1,11 @@
+using Courier.Domain;
 using IAM.Domain;
 using IAM.Domain.Entities;
 using IAM.Domain.Interfaces;
 using IAM.Domain.Repositories;
 using Sentinel.Domain;
 
-namespace DatabaseSeeder;
+namespace DatabaseSeeder.Authorization;
 
 public class SeederPermissions(
    IPermissionRepository permissionRepository,
@@ -21,6 +22,8 @@ public class SeederPermissions(
       await AddIamPermissions(cancellationToken);
 
       await AddSentinelPermissions(cancellationToken);
+
+      await AddCourierPermissions(cancellationToken);
 
       await iamUnitOfWork.SaveChangesAsync(cancellationToken);
 
@@ -66,10 +69,22 @@ public class SeederPermissions(
       await AddPermissionAsync(IamPermission.Parameters.DeleteOverride, "Delete Parameter Overrides", "Allows deleting parameter overrides.", cancellationToken);
 
       await AddPermissionAsync(IamPermission.Permissions.List, "List Permissions", "Allows listing permissions.", cancellationToken);
-      await AddPermissionAsync(IamPermission.Permissions.Create, "Create Permissions", "Allows creating permissions.", cancellationToken);
       await AddPermissionAsync(IamPermission.Permissions.Update, "Update Permissions", "Allows updating permissions.", cancellationToken);
-      await AddPermissionAsync(IamPermission.Permissions.Delete, "Delete Permissions", "Allows deleting permissions.", cancellationToken);
       await AddPermissionAsync(IamPermission.Permissions.Assign, "Assign Permissions", "Allows assigning permissions to roles.", cancellationToken);
+   }
+
+   private async Task AddCourierPermissions(CancellationToken cancellationToken)
+   {
+      Console.WriteLine("Adding Courier permissions...");
+      await AddPermissionAsync(CourierPermission.Emails.List, "List Emails", "Allows listing Courier emails.", cancellationToken);
+      await AddPermissionAsync(CourierPermission.Emails.View, "View Emails", "Allows viewing Courier emails.", cancellationToken);
+      await AddPermissionAsync(CourierPermission.Emails.Create, "Create Emails", "Allows creating Courier emails.", cancellationToken);
+
+      await AddPermissionAsync(CourierPermission.Templates.List, "List Templates", "Allows listing templates.", cancellationToken);
+      await AddPermissionAsync(CourierPermission.Templates.View, "View Templates", "Allows viewing templates.", cancellationToken);
+      await AddPermissionAsync(CourierPermission.Templates.Create, "Create Templates", "Allows creating templates.", cancellationToken);
+      await AddPermissionAsync(CourierPermission.Templates.Update, "Update Templates", "Allows updating templates.", cancellationToken);
+      await AddPermissionAsync(CourierPermission.Templates.Delete, "Delete Templates", "Allows deleting templates.", cancellationToken);
    }
 
    private async Task AddPermissionAsync(string code, string title, string description, CancellationToken cancellationToken)

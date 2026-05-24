@@ -20,12 +20,27 @@ public static partial class SharedConst
    public static class Redis
    {
       public const string ConnectionString = "Redis";
+      public const string EventFieldName = "event";
 
       public const string AuditLogEventsStream = "audit-log-events";
       public const string SystemLogEventsStream = "system-log-events";
+      public const string EmailRequestsStream = "courier-email-requests";
       public const string NotificationEventsChannel = "notification-events";
       public const string CacheKeyPrefixForParameter = "param:";
       public const string CacheKeyPrefixForRole = "role:";
+   }
+
+   public static class Event
+   {
+      public const int Version = 1;
+
+      public static class Name
+      {
+         public const string AuditLogRequested = "sentinel.audit-log.requested";
+         public const string SystemLogRequested = "sentinel.system-log.requested";
+         public const string EmailRequested = "courier.email.requested";
+         public const string NotificationRequested = "courier.notification.requested";
+      }
    }
 
    public class Security
@@ -36,6 +51,7 @@ public static partial class SharedConst
          public const string IsSystemAdmin = "isSystemAdmin";
          public const string Issuer = "IAM.API";
          public const string Audience = "IAM.Client";
+         public const string Language = "language";
          public const string Role = "role";
       }
    }
@@ -43,5 +59,6 @@ public static partial class SharedConst
    public static class System
    {
       public const string ModuleName = "Shared";
+      public const string DefaultLanguage = "en";
    }
 }

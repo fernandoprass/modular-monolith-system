@@ -12,6 +12,7 @@ Communicate with me using only short sentences; caveman language is enough. Do n
 - If file location, project layer, test project, naming, or design ownership is unclear, ask before changing files.
 - Do not choose a test project, endpoint shape, permission name, or folder location without confirmation.
 - If I ask for discussion or review, do not edit files until I approve the plan.
+- Classes, Enums, and records should be internal instead public when it doesn't need to be accessed from other modules.
 - When you see a better name, suggest it with a short reason before changing it.
 
 ---
@@ -593,6 +594,7 @@ builder.Services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHand
 - Prefer small code snippets only when they teach the pattern.
 - Use current project names, file paths, class names, and stream/cache names.
 - If renaming or moving docs, keep module readmes and docs index aligned.
+- Rule should be: names that can repeat must be constants.
 - Each module should have a `readme.md` in its module folder.
 - The `docs/readme.md` file should act as an index for the docs folder.
 - Module readmes should explain purpose, structure, flows, important services/entities, integration points, and design rules.

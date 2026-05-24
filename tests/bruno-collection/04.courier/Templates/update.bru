@@ -1,0 +1,24 @@
+meta {
+  name: update
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{host.courier}}/api/{{version}}/templates/019e5a82-59ea-7dc5-b87d-ea8d29765f7b
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "key": "welcome-email",
+    "name": "Welcome email",
+    "type": 1,
+    "retentionPolicy": 3
+  }
+}

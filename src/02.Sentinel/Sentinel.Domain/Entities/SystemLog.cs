@@ -5,7 +5,7 @@ namespace Sentinel.Domain.Entities;
 
 public class SystemLog : Entity
 {
-   public DateTime Timestamp { get; private set; }
+   public DateTime CreatedAt { get; private set; }
    public SystemLogLevel Level { get; private set; }
    public SystemLogStatus Status { get; private set; } = SystemLogStatus.Unknown;
    public string Source { get; private set; } = string.Empty;
@@ -21,7 +21,7 @@ public class SystemLog : Entity
 
    public static SystemLog Create(
       Guid id,
-      DateTime timestamp,
+      DateTime createdAt,
       SystemLogLevel level,
       SystemLogStatus status,
       string source,
@@ -36,7 +36,7 @@ public class SystemLog : Entity
       return new SystemLog
       {
          Id = id,
-         Timestamp = timestamp,
+         CreatedAt = createdAt,
          Level = level,
          Status = status,
          Source = source,

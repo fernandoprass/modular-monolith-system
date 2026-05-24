@@ -5,9 +5,9 @@ This repository documents the architecture for a distributed system designed for
 |**System**  | **Role** |**Technology Stack**|**Status**|
 |--|--|--|--|
 | **Shared** | Common utilities, models, and interfaces | .NET Standard | Ongoing |
-| **Sentinel** | Centralized Logging & Auditing | .NET, MongoDB, Redis | Planned |
+| **Sentinel** | Centralized Logging & Auditing | .NET, MongoDB, Redis | Ongoing |
 | **IAM** | Identity & Access Management | .NET, PostgreSQL, Redis | Ongoing |
-| **Courier** | Communication & Notification Hub | .NET, MongoDB, Redis | Planned |
+| **Courier** | Communication & Notification Hub | .NET, MongoDB, Redis | Ongoing |
 
 > **Current Focus:** Engineering efforts are currently dedicated **exclusively** to the **IAM module**. The specifications below for CommHub and Sentinel define the architectural blueprint for future expansion.
 

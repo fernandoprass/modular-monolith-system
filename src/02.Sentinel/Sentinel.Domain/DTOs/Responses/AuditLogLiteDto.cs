@@ -4,7 +4,7 @@ namespace Sentinel.Domain.DTOs.Responses;
 
 public record AuditLogLiteDto(
    Guid Id,
-   DateTime Timestamp,
+   DateTime CreatedAt,
    string Module,
    string Feature,
    string Action,

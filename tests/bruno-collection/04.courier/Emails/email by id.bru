@@ -1,0 +1,15 @@
+meta {
+  name: email by id
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{host.courier}}/api/{{version}}/emails/{{emailId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}

@@ -9,7 +9,7 @@ public static class AuditLogMappers
    {
       return new AuditLogDto(
          auditLog.Id,
-         auditLog.Timestamp,
+         auditLog.CreatedAt,
          auditLog.Module,
          auditLog.Feature,
          auditLog.Action,

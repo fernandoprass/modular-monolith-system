@@ -1,9 +1,10 @@
+using Courier.Domain;
 using IAM.Domain;
 using IAM.Domain.Interfaces;
 using IAM.Domain.Repositories;
 using Sentinel.Domain;
 
-namespace DatabaseSeeder;
+namespace DatabaseSeeder.Authorization;
 
 public class SeederRolePermissions(
    IRoleRepository roleRepository,
@@ -60,8 +61,8 @@ public class SeederRolePermissions(
    {
       Console.WriteLine("Adding System Admin permissions...");
       var sysAdminPermissions = GetIamSystemAdminPermissions();
-
       sysAdminPermissions.AddRange(GetSentinelSystemAdminPermissions());
+      sysAdminPermissions.AddRange(GetCourierSystemAdminPermissions());
 
       return sysAdminPermissions.Distinct().ToList();
    }
@@ -70,8 +71,8 @@ public class SeederRolePermissions(
    {
       Console.WriteLine("Adding Organization Admin permissions...");
       var orgAdminPermissions = GetIamOrganizationPermissions();
-
       orgAdminPermissions.AddRange(GetSentinelOrganizationPermissions());
+      orgAdminPermissions.AddRange(GetCourierOrganizationPermissions());
 
       return orgAdminPermissions.Distinct().ToList();
    }
@@ -81,6 +82,7 @@ public class SeederRolePermissions(
       Console.WriteLine("Adding User permissions...");
       var userPermissions = GetIamUserPermissions().ToList();
       userPermissions.AddRange(GetSentinelUserPermissions());
+      userPermissions.AddRange(GetCourierUserPermissions());
 
       return userPermissions.Distinct().ToList();
    }
@@ -116,8 +118,6 @@ public class SeederRolePermissions(
    {
       return [];
    }
-
-
    #endregion
 
    #region Iam Permissions
@@ -151,9 +151,7 @@ public class SeederRolePermissions(
          IamPermission.Parameters.SaveOverride,
          IamPermission.Parameters.DeleteOverride,
          IamPermission.Permissions.List,
-         IamPermission.Permissions.Create,
          IamPermission.Permissions.Update,
-         IamPermission.Permissions.Delete,
          IamPermission.Permissions.Assign,
          IamPermission.Users.List,
          IamPermission.Users.View,
@@ -172,6 +170,41 @@ public class SeederRolePermissions(
          IamPermission.Users.Update,
          IamPermission.Users.Delete,
       ];
+   }
+   #endregion
+
+   #region Courier Permissions
+   private static List<string> GetCourierSystemAdminPermissions()
+   {
+      var courierSystemAdminPermissions = new List<string>
+      {
+         CourierPermission.Emails.List,
+         CourierPermission.Emails.Create,
+         CourierPermission.Emails.View,
+         CourierPermission.Templates.List,
+         CourierPermission.Templates.Create,
+         CourierPermission.Templates.View,
+         CourierPermission.Templates.Update,
+         CourierPermission.Templates.Delete
+      };
+
+      courierSystemAdminPermissions.AddRange(GetCourierOrganizationPermissions());
+
+      return courierSystemAdminPermissions;
+   }
+
+   private static List<string> GetCourierOrganizationPermissions()
+   {
+      List<string> courierOrgPermissions =[];
+
+      courierOrgPermissions.AddRange(GetCourierUserPermissions());
+
+      return courierOrgPermissions;
+   }
+
+   private static List<string> GetCourierUserPermissions()
+   {
+      return [];
    }
    #endregion
 }

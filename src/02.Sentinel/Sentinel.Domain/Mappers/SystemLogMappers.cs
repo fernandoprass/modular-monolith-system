@@ -9,7 +9,7 @@ public static class SystemLogMappers
    {
       return new SystemLogDto(
          systemLog.Id,
-         systemLog.Timestamp,
+         systemLog.CreatedAt,
          systemLog.Level,
          systemLog.Status,
          systemLog.Source,

@@ -35,7 +35,7 @@ public static class SystemLogEventFactory
       return new SystemLogEvent
       {
          Id = Guid.CreateVersion7(),
-         Timestamp = DateTime.UtcNow,
+         CreatedAt = DateTime.UtcNow,
          Level = SystemLogLevel.Error,
          Status = GetStatus(statusCode),
          Source = source,

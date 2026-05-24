@@ -22,7 +22,7 @@ public class SystemLogConsumerTests
       var consumer = CreateConsumer(unitOfWork);
       var systemLogEvent = new SystemLogEvent
       {
-         Timestamp = DateTime.UtcNow,
+         CreatedAt = DateTime.UtcNow,
          Level = SystemLogLevel.Error,
          Status = SystemLogStatus.Unauthorized,
          Source = "Sentinel.Tests",
@@ -42,7 +42,7 @@ public class SystemLogConsumerTests
 
       await systemLogRepository.Received(1).AddAsync(
          Arg.Is<SystemLog>(log =>
-            log.Timestamp == systemLogEvent.Timestamp &&
+            log.CreatedAt == systemLogEvent.CreatedAt &&
             log.Level == systemLogEvent.Level &&
             log.Status == systemLogEvent.Status &&
             log.Source == systemLogEvent.Source &&

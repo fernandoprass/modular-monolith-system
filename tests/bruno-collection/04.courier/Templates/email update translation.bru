@@ -1,0 +1,27 @@
+meta {
+  name: email update translation
+  type: http
+  seq: 6
+}
+
+put {
+  url: {{host.courier}}/api/{{version}}/templates/019e5ae4-ad1d-77ec-ab88-4f8bd1e37b95/email-translations/en
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "language": "en",
+    "subject": "Welcome, {{user.name}}",
+    "body": "<p>Welcome, {{user.name}}.</p>."
+  }
+}
+
+vars:pre-request {
+  language: en
+}

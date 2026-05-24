@@ -1,0 +1,19 @@
+meta {
+  name: remove translation
+  type: http
+  seq: 7
+}
+
+delete {
+  url: {{host.courier}}/api/{{version}}/templates/{{templateId}}/translations/{{language}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+vars:pre-request {
+  language: en
+}
