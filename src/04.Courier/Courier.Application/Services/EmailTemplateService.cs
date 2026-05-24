@@ -9,10 +9,11 @@ using Courier.Domain.Messages;
 using Myce.Response;
 using Shared.Application.Contracts;
 using Shared.Domain.Messages;
+using System.Text.RegularExpressions;
 
 namespace Courier.Application.Services;
 
-public class EmailTemplateService(
+public partial class EmailTemplateService(
    IEmailTemplateWriteRepository emailTemplateRepository,
    IEmailTemplateValidator emailTemplateValidator,
    IUserContext userContext) : IEmailTemplateService
@@ -56,7 +57,7 @@ public class EmailTemplateService(
          return Result<EmailTemplateDto>.Failure(validation.Messages);
       }
 
-      var template = EmailTemplate.Create(request.Key, request.RetentionPolicy, _userContext.UserId);
+      var template = EmailTemplate.Create(request.Key, request.Name, request.RetentionPolicy, _userContext.UserId);
 
       await _emailTemplateRepository.AddAsync(template, cancellationToken);
 
@@ -74,7 +75,7 @@ public class EmailTemplateService(
          return Result.Failure(validation.Messages);
       }
 
-      template!.Update(request.Key, request.RetentionPolicy, _userContext.UserId);
+      template!.Update(request.Key, request.Name, request.RetentionPolicy, _userContext.UserId);
       await _emailTemplateRepository.UpdateAsync(template, cancellationToken);
 
       return Result.Success(new SuccessInfo());
@@ -109,7 +110,9 @@ public class EmailTemplateService(
          return Result.Failure(new NotFoundError(CourierConst.Entity.EmailTemplate));
       }
 
-      if (!template.AddTranslation(request.Language, request.Name, request.Subject, request.Body, _userContext.UserId))
+      var sanitizedBody = SanitizeTemplateBody(request.Body);
+
+      if (!template.AddTranslation(request.Language, request.Subject, sanitizedBody, _userContext.UserId))
       {
          return Result.Failure(new EmailTemplateTranslationAlreadyExistsError(request.Language));
       }
@@ -134,7 +137,9 @@ public class EmailTemplateService(
          return Result.Failure(new NotFoundError(CourierConst.Entity.EmailTemplate));
       }
 
-      if (!template.UpdateTranslation(language, request.Name, request.Subject, request.Body, _userContext.UserId))
+      var sanitizedBody = SanitizeTemplateBody(request.Body);
+
+      if (!template.UpdateTranslation(language, request.Subject, sanitizedBody, _userContext.UserId))
       {
          return Result.Failure(new EmailTemplateTranslationNotFoundError(language));
       }
@@ -160,4 +165,50 @@ public class EmailTemplateService(
       await _emailTemplateRepository.UpdateAsync(template, cancellationToken);
       return Result.Success(new SuccessInfo());
    }
+
+   private static string SanitizeTemplateBody(string body)
+   {
+      var sanitized = DangerousElementRegex().Replace(body, string.Empty);
+      sanitized = EventAttributeRegex().Replace(sanitized, string.Empty);
+      sanitized = UnsafeUrlAttributeRegex().Replace(sanitized, match =>
+      {
+         var attribute = match.Groups["attribute"].Value;
+         var quote = match.Groups["quote"].Value;
+         var url = match.Groups["url"].Value.Trim();
+
+         return IsSafeUrl(url)
+            ? $"{attribute}={quote}{url}{quote}"
+            : string.Empty;
+      });
+
+      return sanitized;
+   }
+
+   private static bool IsSafeUrl(string url)
+   {
+      if (string.IsNullOrWhiteSpace(url))
+      {
+         return false;
+      }
+
+      var normalizedUrl = url.Trim().ToLowerInvariant();
+
+      return normalizedUrl.StartsWith("http://", StringComparison.Ordinal)
+         || normalizedUrl.StartsWith("https://", StringComparison.Ordinal)
+         || normalizedUrl.StartsWith("mailto:", StringComparison.Ordinal)
+         || normalizedUrl.StartsWith("tel:", StringComparison.Ordinal)
+         || normalizedUrl.StartsWith("cid:", StringComparison.Ordinal)
+         || normalizedUrl.StartsWith("/", StringComparison.Ordinal)
+         || normalizedUrl.StartsWith("#", StringComparison.Ordinal)
+         || normalizedUrl.StartsWith("data:image/", StringComparison.Ordinal);
+   }
+
+   [GeneratedRegex(@"<\s*(script|style|iframe|object|embed|svg|math|form|input|button|textarea|select|link|meta|base)\b[^>]*>.*?<\s*/\s*\1\s*>|<\s*(script|style|iframe|object|embed|svg|math|form|input|button|textarea|select|link|meta|base)\b[^>]*\/?>", RegexOptions.IgnoreCase | RegexOptions.Singleline)]
+   private static partial Regex DangerousElementRegex();
+
+   [GeneratedRegex(@"\s+on[a-z]+\s*=\s*(""[^""]*""|'[^']*'|[^\s>]+)", RegexOptions.IgnoreCase)]
+   private static partial Regex EventAttributeRegex();
+
+   [GeneratedRegex(@"\s+(?<attribute>href|src|action|formaction|xlink:href)\s*=\s*(?<quote>[""'])(?<url>.*?)(\k<quote>)", RegexOptions.IgnoreCase | RegexOptions.Singleline)]
+   private static partial Regex UnsafeUrlAttributeRegex();
 }

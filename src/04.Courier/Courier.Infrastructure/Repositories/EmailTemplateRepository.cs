@@ -46,6 +46,20 @@ public class EmailTemplateRepository(CourierDbContext dbContext) : IEmailTemplat
          .SingleOrDefaultAsync(cancellationToken);
    }
 
+   public async Task<EmailTemplate?> GetByKeyAsync(string key, CancellationToken cancellationToken = default)
+   {
+      if (string.IsNullOrWhiteSpace(key))
+      {
+         return null;
+      }
+
+      var normalizedKey = key.ToLowerInvariant().Trim();
+
+      return await _dbContext.EmailTemplates
+         .Find(t => t.Key == normalizedKey)
+         .SingleOrDefaultAsync(cancellationToken);
+   }
+
    public async Task<bool> KeyExistsAsync(string key, Guid? excludedId = null, CancellationToken cancellationToken = default)
    {
       if (string.IsNullOrWhiteSpace(key))

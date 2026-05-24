@@ -11,6 +11,7 @@ public static class EmailTemplateMappers
       return new EmailTemplateDto(
          template.Id,
          template.Key,
+         template.Name,
          template.RetentionPolicy,
          template.CreatedAt,
          template.CreatedBy,
@@ -21,9 +22,10 @@ public static class EmailTemplateMappers
 
    private static EmailTemplateTranslationDto ToEmailTemplateTranslationDto(this EmailTemplateTranslation translation)
    {
-      return new EmailTemplateTranslationDto(
+      return new 
+         EmailTemplateTranslationDto(
+         translation.IsHtml,
          translation.Language,
-         translation.Name,
          translation.Subject,
          translation.Body);
    }

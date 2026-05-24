@@ -7,7 +7,7 @@ public record EmailSearchRequest(
    string? Feature,
    string? Subject,
    string? Recipient,
-   DateTime? DateFrom,
-   DateTime? DateTo,
+   DateTime DateFrom,
+   DateTime DateTo,
    int PageNumber = 1,
    int PageSize = 25);

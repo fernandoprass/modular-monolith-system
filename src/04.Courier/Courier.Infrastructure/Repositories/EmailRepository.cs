@@ -1,6 +1,7 @@
 using Courier.Domain.DTOs.Requests;
 using Courier.Domain.DTOs.Responses;
 using Courier.Domain.Entities;
+using Courier.Domain.Enums;
 using Courier.Domain.Interfaces.Repositories;
 using MongoDB.Driver;
 
@@ -33,13 +34,9 @@ public class EmailRepository(CourierDbContext dbContext) : IEmailRepository
             e.TemplateKey,
             e.Recipient,
             e.Subject,
-            e.IsHtml,
             e.CreatedAt,
             e.SentAt,
-            e.ExpiresAt,
-            e.Status,
-            e.RetryCount,
-            e.NextAttemptAt))
+            e.Status))
          .ToListAsync(cancellationToken);
 
       var totalPages = totalCount == 0 ? 0 : (int)Math.Ceiling(totalCount / (double)pageSize);
@@ -54,16 +51,40 @@ public class EmailRepository(CourierDbContext dbContext) : IEmailRepository
          .SingleOrDefaultAsync(cancellationToken);
    }
 
+   public async Task<Email?> ClaimNextPendingAsync(DateTime utcNow, CancellationToken cancellationToken = default)
+   {
+      var builder = Builders<Email>.Filter;
+      var filter = builder.Eq(e => e.Status, EmailStatus.Pending)
+         & builder.Lte(e => e.NextAttemptAt, utcNow);
+
+      var update = Builders<Email>.Update.Set(e => e.Status, EmailStatus.Processing);
+      var options = new FindOneAndUpdateOptions<Email>
+      {
+         Sort = Builders<Email>.Sort.Ascending(e => e.CreatedAt),
+         ReturnDocument = ReturnDocument.After
+      };
+
+      return await _dbContext.Emails.FindOneAndUpdateAsync(filter, update, options, cancellationToken);
+   }
+
    public async Task<Guid> AddAsync(Email email, CancellationToken cancellationToken = default)
    {
       await _dbContext.Emails.InsertOneAsync(email, cancellationToken: cancellationToken);
       return email.Id;
    }
 
+   public async Task UpdateAsync(Email email, CancellationToken cancellationToken = default)
+   {
+      await _dbContext.Emails.ReplaceOneAsync(e => e.Id == email.Id, email, cancellationToken: cancellationToken);
+   }
+
    private static FilterDefinition<Email> BuildFilter(EmailSearchRequest request)
    {
       var builder = Builders<Email>.Filter;
       var filter = builder.Empty;
+
+      filter &= builder.Gte(e => e.CreatedAt, request.DateFrom);
+      filter &= builder.Lte(e => e.CreatedAt, request.DateTo);
 
       if (request.OrganizationId.HasValue)
       {
@@ -93,16 +114,6 @@ public class EmailRepository(CourierDbContext dbContext) : IEmailRepository
       if (!string.IsNullOrWhiteSpace(request.Recipient))
       {
          filter &= builder.Regex(e => e.Recipient, new MongoDB.Bson.BsonRegularExpression(request.Recipient.Trim(), "i"));
-      }
-
-      if (request.DateFrom.HasValue)
-      {
-         filter &= builder.Gte(e => e.CreatedAt, request.DateFrom.Value);
-      }
-
-      if (request.DateTo.HasValue)
-      {
-         filter &= builder.Lte(e => e.CreatedAt, request.DateTo.Value);
       }
 
       return filter;

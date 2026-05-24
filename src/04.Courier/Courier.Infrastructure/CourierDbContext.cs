@@ -37,9 +37,9 @@ public class CourierDbContext
       await _database.RunCommandAsync((Command<BsonDocument>)"{ping:1}", cancellationToken: cancellationToken);
    }
 
-   public IMongoCollection<Email> Emails => _database.GetCollection<Email>(CourierConst.Collection.Emails);
+   public IMongoCollection<Email> Emails => _database.GetCollection<Email>(CourierConst.Database.Collection.Emails);
 
-   internal IMongoCollection<EmailTemplate> EmailTemplates => _database.GetCollection<EmailTemplate>(CourierConst.Collection.EmailTemplates);
+   internal IMongoCollection<EmailTemplate> EmailTemplates => _database.GetCollection<EmailTemplate>(CourierConst.Database.Collection.EmailTemplates);
 
    public async Task ConfigureIndexesAsync(CancellationToken cancellationToken = default)
    {
@@ -53,6 +53,8 @@ public class CourierDbContext
             Builders<Email>.IndexKeys.Ascending(e => e.OrganizationId).Ascending(e => e.Module).Ascending(e => e.Feature).Descending(e => e.CreatedAt)),
          new CreateIndexModel<Email>(
             Builders<Email>.IndexKeys.Ascending(e => e.OrganizationId).Ascending(e => e.Recipient).Descending(e => e.CreatedAt)),
+         new CreateIndexModel<Email>(
+            Builders<Email>.IndexKeys.Ascending(e => e.Status).Ascending(e => e.NextAttemptAt).Ascending(e => e.CreatedAt)),
          new CreateIndexModel<Email>(
             Builders<Email>.IndexKeys.Ascending(e => e.ExpiresAt),
             new CreateIndexOptions { ExpireAfter = TimeSpan.Zero, Name = "ttl_emails_expires_at" })

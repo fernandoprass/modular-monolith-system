@@ -23,7 +23,11 @@ public class RedisEventPublisher(IConnectionMultiplexer redis, ILogger<RedisEven
    {
       cancellationToken.ThrowIfCancellationRequested();
 
-      var json = JsonSerializer.Serialize(auditLogEvent, JsonOptions);
+      var envelope = IntegrationEvent<AuditLogEvent>.Create(
+         SharedConst.Event.Name.AuditLogRequested,
+         SharedConst.Event.Version,
+         auditLogEvent);
+      var json = JsonSerializer.Serialize(envelope, JsonOptions);
       var streamId = await _database.StreamAddAsync(SharedConst.Redis.AuditLogEventsStream, "event", json);
 
       _logger.LogDebug("Published audit event {EventId} to stream {StreamId}", auditLogEvent.Id, streamId);
@@ -33,7 +37,11 @@ public class RedisEventPublisher(IConnectionMultiplexer redis, ILogger<RedisEven
    {
       cancellationToken.ThrowIfCancellationRequested();
 
-      var json = JsonSerializer.Serialize(systemLogEvent, JsonOptions);
+      var envelope = IntegrationEvent<SystemLogEvent>.Create(
+         SharedConst.Event.Name.SystemLogRequested,
+         SharedConst.Event.Version,
+         systemLogEvent);
+      var json = JsonSerializer.Serialize(envelope, JsonOptions);
       var streamId = await _database.StreamAddAsync(SharedConst.Redis.SystemLogEventsStream, "event", json);
 
       _logger.LogDebug("Published system log {EventId} to stream {StreamId}", systemLogEvent.Id, streamId);
@@ -43,7 +51,11 @@ public class RedisEventPublisher(IConnectionMultiplexer redis, ILogger<RedisEven
    {
       cancellationToken.ThrowIfCancellationRequested();
 
-      var json = JsonSerializer.Serialize(notification, JsonOptions);
+      var envelope = IntegrationEvent<NotificationEvent>.Create(
+         SharedConst.Event.Name.NotificationRequested,
+         SharedConst.Event.Version,
+         notification);
+      var json = JsonSerializer.Serialize(envelope, JsonOptions);
       await _subscriber.PublishAsync(RedisChannel.Literal(SharedConst.Redis.NotificationEventsChannel), json);
 
       _logger.LogDebug("Published notification {NotificationId}", notification.Id);

@@ -38,12 +38,8 @@ public static class EmailMappers
          email.TemplateKey,
          email.Recipient,
          email.Subject,
-         email.IsHtml,
          email.CreatedAt,
          email.SentAt,
-         email.ExpiresAt,
-         email.Status,
-         email.RetryCount,
-         email.NextAttemptAt);
+         email.Status);
    }
 }

@@ -9,13 +9,14 @@ public class EmailTemplate : EntityAudited<Guid>
    private List<EmailTemplateTranslation> _translations = [];
 
    public string Key { get; private set; } = string.Empty;
+   public string Name { get; private set; } = string.Empty;
    public EmailRetentionPolicy RetentionPolicy { get; private set; } = EmailRetentionPolicy.Operational;
 
    public IReadOnlyCollection<EmailTemplateTranslation> Translations => _translations.AsReadOnly();
 
    private EmailTemplate() { }
 
-   public static EmailTemplate Create(string key, EmailRetentionPolicy retentionPolicy, Guid createdBy)
+   public static EmailTemplate Create(string key, string name, EmailRetentionPolicy retentionPolicy, Guid createdBy)
    {
       var now = DateTime.UtcNow;
 
@@ -23,20 +24,22 @@ public class EmailTemplate : EntityAudited<Guid>
       {
          Id = Guid.CreateVersion7(),
          Key = NormalizeKey(key),
+         Name = name.Trim(),
          RetentionPolicy = retentionPolicy,
          CreatedAt = now,
          CreatedBy = createdBy
       };
    }
 
-   public void Update(string key, EmailRetentionPolicy retentionPolicy, Guid updatedBy)
+   public void Update(string key, string name, EmailRetentionPolicy retentionPolicy, Guid updatedBy)
    {
       Key = NormalizeKey(key);
+      Name = name.Trim();
       RetentionPolicy = retentionPolicy;
       MarkUpdated(updatedBy);
    }
 
-   public bool AddTranslation(string language, string name, string subject, string body, Guid updatedBy)
+   public bool AddTranslation(string language, string subject, string body, Guid updatedBy)
    {
       var normalizedLanguage = NormalizeLanguage(language);
 
@@ -45,12 +48,12 @@ public class EmailTemplate : EntityAudited<Guid>
          return false;
       }
 
-      _translations.Add(EmailTemplateTranslation.Create(normalizedLanguage, name, subject, body));
+      _translations.Add(EmailTemplateTranslation.Create(normalizedLanguage, subject, body));
       MarkUpdated(updatedBy);
       return true;
    }
 
-   public bool UpdateTranslation(string language, string name, string subject, string body, Guid updatedBy)
+   public bool UpdateTranslation(string language, string subject, string body, Guid updatedBy)
    {
       var normalizedLanguage = NormalizeLanguage(language);
       var translation = _translations.SingleOrDefault(t => t.Language == normalizedLanguage);
@@ -60,7 +63,7 @@ public class EmailTemplate : EntityAudited<Guid>
          return false;
       }
 
-      translation.Update(name, subject, body);
+      translation.Update(subject, body);
       MarkUpdated(updatedBy);
       return true;
    }

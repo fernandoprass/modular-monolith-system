@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Sentinel.Domain;
 using Sentinel.Domain.Entities;
 using Sentinel.Domain.Interfaces;
+using Shared.Domain;
 using Shared.Domain.Events;
 using StackExchange.Redis;
 using System.Text.Json;
@@ -22,6 +23,7 @@ public class SystemLogConsumer(
    protected override string ConsumerNamePrefix => SentinelConst.Redis.SystemLogConsumerNamePrefix;
    protected override string ConsumerDisplayName => "System log consumer";
    protected override string ProcessingErrorMessage => "Error processing system log";
+   protected override string ExpectedEventName => SharedConst.Event.Name.SystemLogRequested;
 
    protected override async Task ProcessEventAsync(SystemLogEvent systemLogEvent, CancellationToken cancellationToken)
    {

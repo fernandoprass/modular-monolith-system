@@ -2,24 +2,6 @@ using Myce.Response.Messages;
 
 namespace Courier.Domain.Messages;
 
-public class EmailInvalidDateRangeError : ErrorMessage
-{
-   public EmailInvalidDateRangeError()
-      : base("EmailInvalidDateRangeError", "DateFrom must be before DateTo.") { }
-}
-
-public class EmailInvalidPageNumberError : ErrorMessage
-{
-   public EmailInvalidPageNumberError()
-      : base("EmailInvalidPageNumberError", "PageNumber must be greater than zero.") { }
-}
-
-public class EmailInvalidPageSizeError : ErrorMessage
-{
-   public EmailInvalidPageSizeError()
-      : base("EmailInvalidPageSizeError", "PageSize must be greater than zero.") { }
-}
-
 public class EmailTemplateDuplicateKeyError : ErrorMessage
 {
    public EmailTemplateDuplicateKeyError(string key)
@@ -45,4 +27,27 @@ public class EmailTemplateTranslationNotFoundError : ErrorMessage
    {
       AddVariable("language", language);
    }
+}
+
+public class EmailTemplatePlaceholderMissingError : ErrorMessage
+{
+   public EmailTemplatePlaceholderMissingError(string placeholder)
+      : base("EmailTemplatePlaceholderMissingError", "Email template placeholder is missing: {placeholder}.")
+   {
+      AddVariable("placeholder", placeholder);
+   }
+}
+
+public class EmailTemplateLanguageNotFoundError : ErrorMessage
+{
+   public EmailTemplateLanguageNotFoundError(string key, string language)
+      : base("EmailTemplateLanguageNotFoundError", "Email template {key} does not have translation for language: {language}.")
+   {
+      AddVariable("key", key);
+      AddVariable("language", language);
+   }
+}
+
+public class EmailDeliveryFailedError(string message) : ErrorMessage("EmailDeliveryFailedError", message)
+{
 }

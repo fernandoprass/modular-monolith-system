@@ -1,6 +1,8 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Sentinel.Domain;
+using Shared.Domain;
+using Shared.Domain.Events;
 using StackExchange.Redis;
 using System.Text.Json;
 
@@ -18,6 +20,8 @@ public abstract class RedisStreamConsumer<TEvent>(
    protected abstract string ConsumerNamePrefix { get; }
    protected abstract string ConsumerDisplayName { get; }
    protected abstract string ProcessingErrorMessage { get; }
+   protected abstract string ExpectedEventName { get; }
+   protected virtual int ExpectedEventVersion => SharedConst.Event.Version;
    protected abstract Task ProcessEventAsync(TEvent eventData, CancellationToken cancellationToken);
 
    protected virtual JsonSerializerOptions JsonOptions { get; } = new()
@@ -94,15 +98,26 @@ public abstract class RedisStreamConsumer<TEvent>(
             return;
          }
 
-         var eventData = JsonSerializer.Deserialize<TEvent>(json.ToString(), JsonOptions);
+         var envelope = JsonSerializer.Deserialize<IntegrationEvent<TEvent>>(json.ToString(), JsonOptions);
 
-         if (eventData == null)
+         if (envelope == null)
          {
             await AcknowledgeAsync(entry);
             return;
          }
 
-         await ProcessEventAsync(eventData, cancellationToken);
+         if (envelope.EventName != ExpectedEventName || envelope.Version != ExpectedEventVersion)
+         {
+            _logger.LogWarning(
+               "Unsupported event {EventName} version {Version} in {ConsumerDisplayName}",
+               envelope.EventName,
+               envelope.Version,
+               ConsumerDisplayName);
+            await AcknowledgeAsync(entry);
+            return;
+         }
+
+         await ProcessEventAsync(envelope.Payload, cancellationToken);
          await AcknowledgeAsync(entry);
       }
       catch (Exception ex)

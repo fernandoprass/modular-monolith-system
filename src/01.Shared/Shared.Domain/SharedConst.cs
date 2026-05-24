@@ -28,6 +28,18 @@ public static partial class SharedConst
       public const string CacheKeyPrefixForRole = "role:";
    }
 
+   public static class Event
+   {
+      public const int Version = 1;
+
+      public static class Name
+      {
+         public const string AuditLogRequested = "sentinel.audit-log.requested";
+         public const string SystemLogRequested = "sentinel.system-log.requested";
+         public const string NotificationRequested = "courier.notification.requested";
+      }
+   }
+
    public class Security
    {
       public static class Claim

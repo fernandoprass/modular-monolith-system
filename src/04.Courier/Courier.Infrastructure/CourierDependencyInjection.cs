@@ -4,6 +4,7 @@ using Courier.Application.Contracts;
 using Courier.Application.Services;
 using Courier.Application.Validators;
 using Courier.Infrastructure.BackgroundServices;
+using Courier.Infrastructure.EmailSenders;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Courier.Infrastructure.Repositories;
@@ -28,10 +29,16 @@ public static class CourierDependencyInjection
       services.AddScoped<IEmailService, EmailService>();
       services.AddScoped<IEmailValidator, EmailValidator>();
       services.AddScoped<IEmailTemplateService, EmailTemplateService>();
+      services.AddScoped<IEmailTemplateRenderer, SimpleEmailTemplateRenderer>();
       services.AddScoped<IEmailTemplateValidator, EmailTemplateValidator>();
+      services.AddScoped<IEmailOutboxService, EmailOutboxService>();
+      services.AddScoped<IEmailSender, NoopEmailSender>();
+      services.AddScoped<ICourierLogger, CourierLogger>();
       services.AddScoped<IEventPublisher, RedisEventPublisher>();
       services.AddScoped<IExceptionSystemLogPublisher, ExceptionSystemLogPublisher>();
       services.AddHostedService<CourierIndexInitializer>();
+      services.AddHostedService<EmailRequestConsumer>();
+      services.AddHostedService<EmailDeliveryWorker>();
 
       return services;
    }

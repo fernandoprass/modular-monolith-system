@@ -42,23 +42,27 @@
     <Project Path="src/00.Seeder/DatabaseSeeder/DatabaseSeeder.csproj" Id="82fafb8b-1d81-4240-af9c-e9fc62396eb1" />
   </Folder>
    <Folder Name="/src/01.Shared/">
+     <File Path="src/01.Shared/readme.md" />
      <Project Path="src/01.Shared/Shared.Application/Shared.Application.csproj" />
      <Project Path="src/01.Shared/Shared.Domain/Shared.Domain.csproj" />
      <Project Path="src/01.Shared/Shared.Infrastructure/Shared.Infrastructure.csproj" />
    </Folder>
   <Folder Name="/src/02.Sentinel/">
+    <File Path="src/02.Sentinel/readme.md" />
     <Project Path="src/02.Sentinel/Sentinel.API/Sentinel.API.csproj" />
     <Project Path="src/02.Sentinel/Sentinel.Application/Sentinel.Application.csproj" />
     <Project Path="src/02.Sentinel/Sentinel.Domain/Sentinel.Domain.csproj" />
     <Project Path="src/02.Sentinel/Sentinel.Infrastructure/Sentinel.Infrastructure.csproj" />
   </Folder>
    <Folder Name="/src/03.IAM/">
+     <File Path="src/03.IAM/readme.md" />
      <Project Path="src/03.IAM/IAM.API/IAM.API.csproj" />
      <Project Path="src/03.IAM/IAM.Application/IAM.Application.csproj" />
      <Project Path="src/03.IAM/IAM.Domain/IAM.Domain.csproj" />
      <Project Path="src/03.IAM/IAM.Infrastructure/IAM.Infrastructure.csproj" />
    </Folder>
   <Folder Name="/src/04.Courier/">
+    <File Path="src/04.Courier/readme.md" />
     <Project Path="src/04.Courier/Courier.API/Courier.API.csproj" />
     <Project Path="src/04.Courier/Courier.Application/Courier.Application.csproj" />
     <Project Path="src/04.Courier/Courier.Domain/Courier.Domain.csproj" />

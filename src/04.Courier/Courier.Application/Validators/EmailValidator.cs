@@ -1,6 +1,5 @@
 using Courier.Application.Contracts;
 using Courier.Domain.DTOs.Requests;
-using Courier.Domain.Messages;
 using Myce.FluentValidator;
 using Myce.Response;
 
@@ -28,10 +27,10 @@ public class EmailValidator : IEmailValidator
    public Result ValidateSearch(EmailSearchRequest request)
    {
       var validator = new FluentValidator<EmailSearchRequest>()
-         .RuleFor(x => x.PageNumber).Custom(x => x > 0, new EmailInvalidPageNumberError())
-         .RuleFor(x => x.PageSize).Custom(x => x > 0, new EmailInvalidPageSizeError())
-         .RuleForValue(request.DateFrom <= request.DateTo || request.DateFrom == null || request.DateTo == null)
-         .IsTrue(new EmailInvalidDateRangeError());
+         .RuleFor(x => x.DateFrom).IsRequired()
+         .RuleFor(x => x.DateTo).IsRequired().IsGreaterThanOrEqualTo(x => x.DateFrom)
+         .RuleFor(x => x.PageNumber).IsGreaterThan(0)
+         .RuleFor(x => x.PageSize).IsGreaterThan(0);
 
       var isValid = validator.Validate(request);
 
