@@ -2,7 +2,7 @@ using IAM.Domain.Entities;
 using IAM.Domain.Interfaces;
 using IAM.Domain.Repositories;
 
-namespace DatabaseSeeder;
+namespace DatabaseSeeder.Authorization;
 
 public class SeederRoles(
    IRoleRepository roleRepository,

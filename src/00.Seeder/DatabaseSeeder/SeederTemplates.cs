@@ -1,0 +1,17 @@
+using Courier.Domain.Interfaces.Repositories;
+using Courier.Infrastructure;
+using DatabaseSeeder.Templates;
+
+namespace DatabaseSeeder;
+
+public class SeederTemplates(
+   CourierDbContext courierDbContext,
+   ITemplateRepository templateRepository,
+   ITemplateWriteRepository templateWriteRepository)
+{
+   public async Task SeedAsync(CancellationToken cancellationToken = default)
+   {
+      await courierDbContext.ConfigureIndexesAsync(cancellationToken);
+      await new EmailTemplates(templateRepository, templateWriteRepository).SeedAsync(cancellationToken);
+   }
+}

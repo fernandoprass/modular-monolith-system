@@ -12,6 +12,7 @@
     <ProjectReference Include="..\..\02.Sentinel\Sentinel.Domain\Sentinel.Domain.csproj" />
     <ProjectReference Include="..\..\03.IAM\IAM.Infrastructure\IAM.Infrastructure.csproj" />
     <ProjectReference Include="..\..\04.Courier\Courier.Domain\Courier.Domain.csproj" />
+    <ProjectReference Include="..\..\04.Courier\Courier.Infrastructure\Courier.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

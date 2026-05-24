@@ -5,7 +5,7 @@ using IAM.Domain.Interfaces;
 using IAM.Domain.Repositories;
 using Sentinel.Domain;
 
-namespace DatabaseSeeder;
+namespace DatabaseSeeder.Authorization;
 
 public class SeederPermissions(
    IPermissionRepository permissionRepository,
@@ -80,11 +80,11 @@ public class SeederPermissions(
       await AddPermissionAsync(CourierPermission.Emails.View, "View Emails", "Allows viewing Courier emails.", cancellationToken);
       await AddPermissionAsync(CourierPermission.Emails.Create, "Create Emails", "Allows creating Courier emails.", cancellationToken);
 
-      await AddPermissionAsync(CourierPermission.EmailTemplates.List, "List Email Templates", "Allows listing email templates.", cancellationToken);
-      await AddPermissionAsync(CourierPermission.EmailTemplates.View, "View Email Templates", "Allows viewing email templates.", cancellationToken);
-      await AddPermissionAsync(CourierPermission.EmailTemplates.Create, "Create Email Templates", "Allows creating email templates.", cancellationToken);
-      await AddPermissionAsync(CourierPermission.EmailTemplates.Update, "Update Email Templates", "Allows updating email templates.", cancellationToken);
-      await AddPermissionAsync(CourierPermission.EmailTemplates.Delete, "Delete Email Templates", "Allows deleting email templates.", cancellationToken);
+      await AddPermissionAsync(CourierPermission.Templates.List, "List Templates", "Allows listing templates.", cancellationToken);
+      await AddPermissionAsync(CourierPermission.Templates.View, "View Templates", "Allows viewing templates.", cancellationToken);
+      await AddPermissionAsync(CourierPermission.Templates.Create, "Create Templates", "Allows creating templates.", cancellationToken);
+      await AddPermissionAsync(CourierPermission.Templates.Update, "Update Templates", "Allows updating templates.", cancellationToken);
+      await AddPermissionAsync(CourierPermission.Templates.Delete, "Delete Templates", "Allows deleting templates.", cancellationToken);
    }
 
    private async Task AddPermissionAsync(string code, string title, string description, CancellationToken cancellationToken)

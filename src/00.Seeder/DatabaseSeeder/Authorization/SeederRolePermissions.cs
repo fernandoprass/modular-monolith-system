@@ -4,7 +4,7 @@ using IAM.Domain.Interfaces;
 using IAM.Domain.Repositories;
 using Sentinel.Domain;
 
-namespace DatabaseSeeder;
+namespace DatabaseSeeder.Authorization;
 
 public class SeederRolePermissions(
    IRoleRepository roleRepository,
@@ -181,11 +181,11 @@ public class SeederRolePermissions(
          CourierPermission.Emails.List,
          CourierPermission.Emails.Create,
          CourierPermission.Emails.View,
-         CourierPermission.EmailTemplates.List,
-         CourierPermission.EmailTemplates.Create,
-         CourierPermission.EmailTemplates.View,
-         CourierPermission.EmailTemplates.Update,
-         CourierPermission.EmailTemplates.Delete
+         CourierPermission.Templates.List,
+         CourierPermission.Templates.Create,
+         CourierPermission.Templates.View,
+         CourierPermission.Templates.Update,
+         CourierPermission.Templates.Delete
       };
 
       courierSystemAdminPermissions.AddRange(GetCourierOrganizationPermissions());

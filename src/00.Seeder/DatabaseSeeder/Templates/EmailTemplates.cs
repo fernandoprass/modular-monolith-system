@@ -1,0 +1,105 @@
+using Courier.Domain.Entities;
+using Courier.Domain.Enums;
+using Courier.Domain.Interfaces.Repositories;
+
+namespace DatabaseSeeder.Templates;
+
+public class EmailTemplates(
+   ITemplateRepository templateRepository,
+   ITemplateWriteRepository templateWriteRepository)
+{
+   private static readonly EmailTemplateSeed[] Templates =
+   [
+      new(
+         "orgazination-welcome",
+         "Organization welcome",
+         "Welcome to {{organization.name}}.",
+         "<p>Welcome to {{organization.name}}.</p>",
+         "Bem-vindo a {{organization.name}}.",
+         "<p>Bem-vindo a {{organization.name}}.</p>"),
+      new(
+         "orgazination-delete",
+         "Organization delete",
+         "{{organization.name}} was deleted.",
+         "<p>{{organization.name}} was deleted.</p>",
+         "{{organization.name}} foi removida.",
+         "<p>{{organization.name}} foi removida.</p>"),
+      new(
+         "user-welcome",
+         "User welcome",
+         "Welcome, {{user.name}}.",
+         "<p>Welcome, {{user.name}}.</p>",
+         "Bem-vindo, {{user.name}}.",
+         "<p>Bem-vindo, {{user.name}}.</p>"),
+      new(
+         "user-reset-password",
+         "User reset password",
+         "Use the reset password link to continue.",
+         "<p>Use the reset password link to continue.</p>",
+         "Use o link de redefinicao de senha para continuar.",
+         "<p>Use o link de redefinicao de senha para continuar.</p>"),
+      new(
+         "user-max-failed-login-attempts",
+         "User max failed login attempts",
+         "Your account was locked after too many failed login attempts.",
+         "<p>Your account was locked after too many failed login attempts.</p>",
+         "Sua conta foi bloqueada apos muitas tentativas de login sem sucesso.",
+         "<p>Sua conta foi bloqueada apos muitas tentativas de login sem sucesso.</p>"),
+      new(
+         "user-delete",
+         "User delete",
+         "The user {{user.email}} was deleted.",
+         "<p>The user {{user.email}} was deleted.</p>",
+         "O usuario {{user.email}} foi removido.",
+         "<p>O usuario {{user.email}} foi removido.</p>")
+   ];
+
+   public async Task SeedAsync(CancellationToken cancellationToken = default)
+   {
+      foreach (var seed in Templates)
+      {
+         await AddTemplateAsync(seed, cancellationToken);
+      }
+   }
+
+   private async Task AddTemplateAsync(EmailTemplateSeed seed, CancellationToken cancellationToken)
+   {
+      var template = await templateRepository.GetByKeyAsync(seed.Key, cancellationToken);
+
+      if (template == null)
+      {
+         template = Template.Create(seed.Key, seed.Name, TemplateType.Email, EmailRetentionPolicy.Standard, Guid.Empty);
+         template.AddEmailTranslation("en", seed.SubjectEn, seed.BodyEn, Guid.Empty);
+         template.AddEmailTranslation("pr", seed.SubjectPr, seed.BodyPr, Guid.Empty);
+
+         await templateWriteRepository.AddAsync(template, cancellationToken);
+         Console.WriteLine($"Template: {seed.Key}");
+         return;
+      }
+
+      if (template.Type != TemplateType.Email)
+      {
+         Console.WriteLine($"Template skipped: {seed.Key}");
+         return;
+      }
+
+      var changed = false;
+
+      changed |= template.AddEmailTranslation("en", seed.SubjectEn, seed.BodyEn, Guid.Empty);
+      changed |= template.AddEmailTranslation("pr", seed.SubjectPr, seed.BodyPr, Guid.Empty);
+
+      if (changed)
+      {
+         await templateWriteRepository.UpdateAsync(template, cancellationToken);
+         Console.WriteLine($"Template updated: {seed.Key}");
+      }
+   }
+
+   private sealed record EmailTemplateSeed(
+      string Key,
+      string Name,
+      string SubjectEn,
+      string BodyEn,
+      string SubjectPr,
+      string BodyPr);
+}
