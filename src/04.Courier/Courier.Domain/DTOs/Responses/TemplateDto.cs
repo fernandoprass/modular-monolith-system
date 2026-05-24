@@ -2,13 +2,14 @@ using Courier.Domain.Enums;
 
 namespace Courier.Domain.DTOs.Responses;
 
-public record EmailTemplateDto(
+public record TemplateDto(
    Guid Id,
    string Key,
    string Name,
-   EmailRetentionPolicy RetentionPolicy,
+   TemplateType Type,
+   RetentionPolicy RetentionPolicy,
    DateTime CreatedAt,
    Guid CreatedBy,
    DateTime? UpdatedAt,
    Guid? UpdatedBy,
-   IReadOnlyCollection<EmailTemplateTranslationDto> Translations);
+   IReadOnlyCollection<TemplateEmailTranslationDto> EmailTranslations);

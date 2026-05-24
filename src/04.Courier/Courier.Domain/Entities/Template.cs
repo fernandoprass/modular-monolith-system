@@ -4,59 +4,62 @@ using Shared.Domain.Entities;
 
 namespace Courier.Domain.Entities;
 
-public class EmailTemplate : EntityAudited<Guid>
+public class Template : EntityAudited<Guid>
 {
-   private List<EmailTemplateTranslation> _translations = [];
+   private List<TemplateEmailTranslation> _emailTranslations = [];
 
    public string Key { get; private set; } = string.Empty;
    public string Name { get; private set; } = string.Empty;
-   public EmailRetentionPolicy RetentionPolicy { get; private set; } = EmailRetentionPolicy.Operational;
+   public TemplateType Type { get; private set; } = TemplateType.Email;
+   public RetentionPolicy RetentionPolicy { get; private set; } = RetentionPolicy.Operational;
 
-   public IReadOnlyCollection<EmailTemplateTranslation> Translations => _translations.AsReadOnly();
+   public IReadOnlyCollection<TemplateEmailTranslation> EmailTranslations => _emailTranslations.AsReadOnly();
 
-   private EmailTemplate() { }
+   private Template() { }
 
-   public static EmailTemplate Create(string key, string name, EmailRetentionPolicy retentionPolicy, Guid createdBy)
+   public static Template Create(string key, string name, TemplateType type, RetentionPolicy retentionPolicy, Guid createdBy)
    {
       var now = DateTime.UtcNow;
 
-      return new EmailTemplate
+      return new Template
       {
          Id = Guid.CreateVersion7(),
          Key = NormalizeKey(key),
          Name = name.Trim(),
+         Type = type,
          RetentionPolicy = retentionPolicy,
          CreatedAt = now,
          CreatedBy = createdBy
       };
    }
 
-   public void Update(string key, string name, EmailRetentionPolicy retentionPolicy, Guid updatedBy)
+   public void Update(string key, string name, TemplateType type, RetentionPolicy retentionPolicy, Guid updatedBy)
    {
       Key = NormalizeKey(key);
       Name = name.Trim();
+      Type = type;
       RetentionPolicy = retentionPolicy;
       MarkUpdated(updatedBy);
    }
 
-   public bool AddTranslation(string language, string subject, string body, Guid updatedBy)
+   public bool AddEmailTranslation(string language, string subject, string body, Guid updatedBy)
    {
       var normalizedLanguage = NormalizeLanguage(language);
 
-      if (_translations.Any(t => t.Language == normalizedLanguage))
+      if (_emailTranslations.Any(t => t.Language == normalizedLanguage))
       {
          return false;
       }
 
-      _translations.Add(EmailTemplateTranslation.Create(normalizedLanguage, subject, body));
+      _emailTranslations.Add(TemplateEmailTranslation.Create(normalizedLanguage, subject, body));
       MarkUpdated(updatedBy);
       return true;
    }
 
-   public bool UpdateTranslation(string language, string subject, string body, Guid updatedBy)
+   public bool UpdateEmailTranslation(string language, string subject, string body, Guid updatedBy)
    {
       var normalizedLanguage = NormalizeLanguage(language);
-      var translation = _translations.SingleOrDefault(t => t.Language == normalizedLanguage);
+      var translation = _emailTranslations.SingleOrDefault(t => t.Language == normalizedLanguage);
 
       if (translation == null)
       {
@@ -71,7 +74,11 @@ public class EmailTemplate : EntityAudited<Guid>
    public bool RemoveTranslation(string language, Guid updatedBy)
    {
       var normalizedLanguage = NormalizeLanguage(language);
-      var removed = _translations.RemoveAll(t => t.Language == normalizedLanguage) > 0;
+      var removed = Type switch
+      {
+         TemplateType.Email => _emailTranslations.RemoveAll(t => t.Language == normalizedLanguage) > 0,
+         _ => false
+      };
 
       if (removed)
       {

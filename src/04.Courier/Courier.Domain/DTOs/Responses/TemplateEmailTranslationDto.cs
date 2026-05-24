@@ -1,6 +1,6 @@
 namespace Courier.Domain.DTOs.Responses;
 
-public record EmailTemplateTranslationDto(
+public record TemplateEmailTranslationDto(
    bool IsHtml,
    string Language,
    string Subject,

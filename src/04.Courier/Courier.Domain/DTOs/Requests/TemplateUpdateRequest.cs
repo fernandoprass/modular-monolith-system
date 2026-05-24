@@ -2,7 +2,8 @@ using Courier.Domain.Enums;
 
 namespace Courier.Domain.DTOs.Requests;
 
-public record EmailTemplateUpdateRequest(
+public record TemplateUpdateRequest(
    string Key,
    string Name,
-   EmailRetentionPolicy RetentionPolicy);
+   TemplateType Type,
+   RetentionPolicy RetentionPolicy);

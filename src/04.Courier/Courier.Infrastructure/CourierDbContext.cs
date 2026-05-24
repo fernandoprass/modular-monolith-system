@@ -39,7 +39,7 @@ public class CourierDbContext
 
    public IMongoCollection<Email> Emails => _database.GetCollection<Email>(CourierConst.Database.Collection.Emails);
 
-   internal IMongoCollection<EmailTemplate> EmailTemplates => _database.GetCollection<EmailTemplate>(CourierConst.Database.Collection.EmailTemplates);
+   internal IMongoCollection<Template> Templates => _database.GetCollection<Template>(CourierConst.Database.Collection.Templates);
 
    public async Task ConfigureIndexesAsync(CancellationToken cancellationToken = default)
    {
@@ -64,12 +64,12 @@ public class CourierDbContext
 
       var templateIndexes = new[]
       {
-         new CreateIndexModel<EmailTemplate>(
-            Builders<EmailTemplate>.IndexKeys.Ascending(t => t.Key),
-            new CreateIndexOptions { Unique = true, Name = "ux_email_templates_key" })
+         new CreateIndexModel<Template>(
+            Builders<Template>.IndexKeys.Ascending(t => t.Key),
+            new CreateIndexOptions { Unique = true, Name = "ux_templates_key" })
       };
 
-      await EmailTemplates.Indexes.CreateManyAsync(templateIndexes, cancellationToken);
+      await Templates.Indexes.CreateManyAsync(templateIndexes, cancellationToken);
    }
 
    private static void ConfigureMongoSerialization()
@@ -81,19 +81,19 @@ public class CourierDbContext
 
       BsonSerializer.RegisterSerializer(new GuidSerializer(GuidRepresentation.Standard));
 
-      if (!BsonClassMap.IsClassMapRegistered(typeof(EmailTemplate)))
+      if (!BsonClassMap.IsClassMapRegistered(typeof(Template)))
       {
-         BsonClassMap.RegisterClassMap<EmailTemplate>(cm =>
+         BsonClassMap.RegisterClassMap<Template>(cm =>
          {
             cm.AutoMap();
-            cm.MapField("_translations").SetElementName("translations");
-            cm.UnmapMember(t => t.Translations);
+            cm.MapField("_emailTranslations").SetElementName("emailTranslations");
+            cm.UnmapMember(t => t.EmailTranslations);
          });
       }
 
-      if (!BsonClassMap.IsClassMapRegistered(typeof(EmailTemplateTranslation)))
+      if (!BsonClassMap.IsClassMapRegistered(typeof(TemplateEmailTranslation)))
       {
-         BsonClassMap.RegisterClassMap<EmailTemplateTranslation>(cm =>
+         BsonClassMap.RegisterClassMap<TemplateEmailTranslation>(cm =>
          {
             cm.AutoMap();
          });

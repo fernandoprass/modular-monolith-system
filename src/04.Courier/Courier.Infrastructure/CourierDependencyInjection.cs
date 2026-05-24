@@ -24,13 +24,13 @@ public static class CourierDependencyInjection
 
       services.AddSingleton<CourierDbContext>();
       services.AddScoped<IEmailRepository, EmailRepository>();
-      services.AddScoped<IEmailTemplateRepository, EmailTemplateRepository>();
-      services.AddScoped<IEmailTemplateWriteRepository, EmailTemplateRepository>();
+      services.AddScoped<ITemplateRepository, TemplateRepository>();
+      services.AddScoped<ITemplateWriteRepository, TemplateRepository>();
       services.AddScoped<IEmailService, EmailService>();
       services.AddScoped<IEmailValidator, EmailValidator>();
-      services.AddScoped<IEmailTemplateService, EmailTemplateService>();
+      services.AddScoped<ITemplateService, TemplateService>();
       services.AddScoped<IEmailTemplateRenderer, SimpleEmailTemplateRenderer>();
-      services.AddScoped<IEmailTemplateValidator, EmailTemplateValidator>();
+      services.AddScoped<ITemplateValidator, TemplateValidator>();
       services.AddScoped<IEmailOutboxService, EmailOutboxService>();
       services.AddScoped<IEmailSender, NoopEmailSender>();
       services.AddScoped<ICourierLogger, CourierLogger>();

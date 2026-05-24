@@ -16,14 +16,14 @@ namespace Courier.Application.Tests.Services;
 public class EmailServiceTests
 {
    private readonly IEmailRepository _emailRepository = Substitute.For<IEmailRepository>();
-   private readonly IEmailTemplateRepository _emailTemplateRepository = Substitute.For<IEmailTemplateRepository>();
+   private readonly ITemplateRepository _templateRepository = Substitute.For<ITemplateRepository>();
    private readonly IEmailValidator _emailValidator = Substitute.For<IEmailValidator>();
    private readonly IUserContext _userContext = Substitute.For<IUserContext>();
    private readonly EmailService _service;
 
    public EmailServiceTests()
    {
-      _service = new EmailService(_emailRepository, _emailTemplateRepository, _emailValidator, _userContext);
+      _service = new EmailService(_emailRepository, _templateRepository, _emailValidator, _userContext);
    }
 
    [Fact]
@@ -111,8 +111,8 @@ public class EmailServiceTests
       var request = CreateRequest();
       var id = Guid.NewGuid();
       _emailValidator.ValidateCreate(request).Returns(Result.Success());
-      _emailTemplateRepository.GetRetentionPolicyByKeyAsync(request.TemplateKey, Arg.Any<CancellationToken>())
-         .Returns(EmailRetentionPolicy.Standard);
+      _templateRepository.GetRetentionPolicyByKeyAsync(request.TemplateKey, Arg.Any<CancellationToken>())
+         .Returns(RetentionPolicy.Standard);
       _emailRepository.AddAsync(Arg.Any<Email>(), Arg.Any<CancellationToken>()).Returns(id);
 
       var result = await _service.CreateAsync(request, TestContext.Current.CancellationToken);
@@ -169,6 +169,6 @@ public class EmailServiceTests
          "Subject",
          "Body",
          false,
-         EmailRetentionPolicy.Standard);
+         RetentionPolicy.Standard);
    }
 }

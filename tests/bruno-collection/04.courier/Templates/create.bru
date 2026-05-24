@@ -1,11 +1,11 @@
 meta {
-  name: update
+  name: create
   type: http
-  seq: 4
+  seq: 1
 }
 
-put {
-  url: {{host.courier}}/api/{{version}}/email-templates/{{emailTemplateId}}
+post {
+  url: {{host.courier}}/api/{{version}}/templates/
   body: json
   auth: bearer
 }
@@ -18,6 +18,7 @@ body:json {
   {
     "key": "welcome-email",
     "name": "Welcome email",
-    "retentionPolicy": 3
+    "type": 1,
+    "retentionPolicy": 2
   }
 }

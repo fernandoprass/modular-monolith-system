@@ -14,12 +14,12 @@ namespace Courier.Application.Services;
 
 public class EmailService(
    IEmailRepository emailRepository,
-   IEmailTemplateRepository emailTemplateRepository,
+   ITemplateRepository templateRepository,
    IEmailValidator emailValidator,
    IUserContext userContext) : BaseService(userContext), IEmailService
 {
    private readonly IEmailRepository _emailRepository = emailRepository;
-   private readonly IEmailTemplateRepository _emailTemplateRepository = emailTemplateRepository;
+   private readonly ITemplateRepository _templateRepository = templateRepository;
    private readonly IEmailValidator _emailValidator = emailValidator;
 
    public async Task<Result<PagedResultDto<EmailLiteDto>>> GetAsync(EmailSearchRequest request, CancellationToken cancellationToken = default)
@@ -61,11 +61,11 @@ public class EmailService(
          return Result<EmailCreateDto>.Failure(validation.Messages);
       }
 
-      var retentionPolicy = await _emailTemplateRepository.GetRetentionPolicyByKeyAsync(request.TemplateKey, cancellationToken);
+      var retentionPolicy = await _templateRepository.GetRetentionPolicyByKeyAsync(request.TemplateKey, cancellationToken);
 
       if (retentionPolicy == null)
       {
-         return Result<EmailCreateDto>.Failure(new NotFoundError(CourierConst.Entity.EmailTemplate));
+         return Result<EmailCreateDto>.Failure(new NotFoundError(CourierConst.Entity.Template));
       }
 
       var email = Email.Create(

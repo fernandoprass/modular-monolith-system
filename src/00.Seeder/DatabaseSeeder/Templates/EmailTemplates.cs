@@ -8,6 +8,9 @@ public class EmailTemplates(
    ITemplateRepository templateRepository,
    ITemplateWriteRepository templateWriteRepository)
 {
+   private const string LanguageEnglish = "en";
+   private const string LanguagePortuguese = "pt";
+
    private static readonly EmailTemplateSeed[] Templates =
    [
       new(
@@ -68,9 +71,9 @@ public class EmailTemplates(
 
       if (template == null)
       {
-         template = Template.Create(seed.Key, seed.Name, TemplateType.Email, EmailRetentionPolicy.Standard, Guid.Empty);
-         template.AddEmailTranslation("en", seed.SubjectEn, seed.BodyEn, Guid.Empty);
-         template.AddEmailTranslation("pr", seed.SubjectPr, seed.BodyPr, Guid.Empty);
+         template = Template.Create(seed.Key, seed.Name, TemplateType.Email, RetentionPolicy.Standard, Guid.Empty);
+         template.AddEmailTranslation(LanguageEnglish, seed.SubjectEn, seed.BodyEn, Guid.Empty);
+         template.AddEmailTranslation(LanguagePortuguese, seed.SubjectPr, seed.BodyPr, Guid.Empty);
 
          await templateWriteRepository.AddAsync(template, cancellationToken);
          Console.WriteLine($"Template: {seed.Key}");
@@ -85,8 +88,8 @@ public class EmailTemplates(
 
       var changed = false;
 
-      changed |= template.AddEmailTranslation("en", seed.SubjectEn, seed.BodyEn, Guid.Empty);
-      changed |= template.AddEmailTranslation("pr", seed.SubjectPr, seed.BodyPr, Guid.Empty);
+      changed |= template.AddEmailTranslation(LanguageEnglish, seed.SubjectEn, seed.BodyEn, Guid.Empty);
+      changed |= template.AddEmailTranslation(LanguagePortuguese, seed.SubjectPr, seed.BodyPr, Guid.Empty);
 
       if (changed)
       {

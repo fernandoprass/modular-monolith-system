@@ -9,20 +9,20 @@ using MongoDB.Driver;
 
 namespace Courier.Infrastructure.Repositories;
 
-public class EmailTemplateRepository(CourierDbContext dbContext) : IEmailTemplateRepository, IEmailTemplateWriteRepository
+public class TemplateRepository(CourierDbContext dbContext) : ITemplateRepository, ITemplateWriteRepository
 {
    private readonly CourierDbContext _dbContext = dbContext;
 
-   public async Task<PagedResultDto<EmailTemplateDto>> GetAsync(EmailTemplateSearchRequest request, CancellationToken cancellationToken = default)
+   public async Task<PagedResultDto<TemplateLiteDto>> GetAsync(TemplateSearchRequest request, CancellationToken cancellationToken = default)
    {
       var filter = BuildFilter(request);
       var pageNumber = request.PageNumber < 1 ? 1 : request.PageNumber;
       var pageSize = request.PageSize < 1 ? 25 : request.PageSize;
       var skip = (pageNumber - 1) * pageSize;
 
-      var totalCount = (int)await _dbContext.EmailTemplates.CountDocumentsAsync(filter, cancellationToken: cancellationToken);
+      var totalCount = (int)await _dbContext.Templates.CountDocumentsAsync(filter, cancellationToken: cancellationToken);
 
-      var templates = await _dbContext.EmailTemplates
+      var templates = await _dbContext.Templates
          .Find(filter)
          .SortBy(t => t.Key)
          .Skip(skip)
@@ -31,22 +31,22 @@ public class EmailTemplateRepository(CourierDbContext dbContext) : IEmailTemplat
 
       var totalPages = totalCount == 0 ? 0 : (int)Math.Ceiling(totalCount / (double)pageSize);
 
-      return new PagedResultDto<EmailTemplateDto>(
-         templates.Select(t => t.ToEmailTemplateDto()),
+      return new PagedResultDto<TemplateLiteDto>(
+         templates.Select(t => t.ToTemplateLiteDto()),
          pageNumber,
          pageSize,
          totalCount,
          totalPages);
    }
 
-   public async Task<EmailTemplate?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+   public async Task<Template?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
    {
-      return await _dbContext.EmailTemplates
+      return await _dbContext.Templates
          .Find(t => t.Id == id)
          .SingleOrDefaultAsync(cancellationToken);
    }
 
-   public async Task<EmailTemplate?> GetByKeyAsync(string key, CancellationToken cancellationToken = default)
+   public async Task<Template?> GetByKeyAsync(string key, CancellationToken cancellationToken = default)
    {
       if (string.IsNullOrWhiteSpace(key))
       {
@@ -55,7 +55,7 @@ public class EmailTemplateRepository(CourierDbContext dbContext) : IEmailTemplat
 
       var normalizedKey = key.ToLowerInvariant().Trim();
 
-      return await _dbContext.EmailTemplates
+      return await _dbContext.Templates
          .Find(t => t.Key == normalizedKey)
          .SingleOrDefaultAsync(cancellationToken);
    }
@@ -68,7 +68,7 @@ public class EmailTemplateRepository(CourierDbContext dbContext) : IEmailTemplat
       }
 
       var normalizedKey = key.ToLowerInvariant().Trim();
-      var builder = Builders<EmailTemplate>.Filter;
+      var builder = Builders<Template>.Filter;
       var filter = builder.Eq(t => t.Key, normalizedKey);
 
       if (excludedId.HasValue)
@@ -76,18 +76,18 @@ public class EmailTemplateRepository(CourierDbContext dbContext) : IEmailTemplat
          filter &= builder.Ne(t => t.Id, excludedId.Value);
       }
 
-      return await _dbContext.EmailTemplates.CountDocumentsAsync(filter, cancellationToken: cancellationToken) > 0;
+      return await _dbContext.Templates.CountDocumentsAsync(filter, cancellationToken: cancellationToken) > 0;
    }
 
-   public async Task<Guid> AddAsync(EmailTemplate template, CancellationToken cancellationToken = default)
+   public async Task<Guid> AddAsync(Template template, CancellationToken cancellationToken = default)
    {
-      await _dbContext.EmailTemplates.InsertOneAsync(template, cancellationToken: cancellationToken);
+      await _dbContext.Templates.InsertOneAsync(template, cancellationToken: cancellationToken);
       return template.Id;
    }
 
-   public async Task UpdateAsync(EmailTemplate template, CancellationToken cancellationToken = default)
+   public async Task UpdateAsync(Template template, CancellationToken cancellationToken = default)
    {
-      await _dbContext.EmailTemplates.ReplaceOneAsync(
+      await _dbContext.Templates.ReplaceOneAsync(
          t => t.Id == template.Id,
          template,
          cancellationToken: cancellationToken);
@@ -95,10 +95,10 @@ public class EmailTemplateRepository(CourierDbContext dbContext) : IEmailTemplat
 
    public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
    {
-      await _dbContext.EmailTemplates.DeleteOneAsync(t => t.Id == id, cancellationToken);
+      await _dbContext.Templates.DeleteOneAsync(t => t.Id == id, cancellationToken);
    }
 
-   public async Task<EmailRetentionPolicy?> GetRetentionPolicyByKeyAsync(string key, CancellationToken cancellationToken = default)
+   public async Task<RetentionPolicy?> GetRetentionPolicyByKeyAsync(string key, CancellationToken cancellationToken = default)
    {
       if (string.IsNullOrWhiteSpace(key))
       {
@@ -107,20 +107,30 @@ public class EmailTemplateRepository(CourierDbContext dbContext) : IEmailTemplat
 
       var normalizedKey = key.ToLowerInvariant().Trim();
 
-      return await _dbContext.EmailTemplates
-         .Find(t => t.Key == normalizedKey)
-         .Project(t => (EmailRetentionPolicy?)t.RetentionPolicy)
+      return await _dbContext.Templates
+         .Find(t => t.Key == normalizedKey && t.Type == TemplateType.Email)
+         .Project(t => (RetentionPolicy?)t.RetentionPolicy)
          .SingleOrDefaultAsync(cancellationToken);
    }
 
-   private static FilterDefinition<EmailTemplate> BuildFilter(EmailTemplateSearchRequest request)
+   private static FilterDefinition<Template> BuildFilter(TemplateSearchRequest request)
    {
-      var builder = Builders<EmailTemplate>.Filter;
+      var builder = Builders<Template>.Filter;
       var filter = builder.Empty;
 
       if (!string.IsNullOrWhiteSpace(request.Key))
       {
          filter &= builder.Regex(t => t.Key, new BsonRegularExpression(request.Key.Trim(), "i"));
+      }
+
+      if (!string.IsNullOrWhiteSpace(request.Name))
+      {
+         filter &= builder.Regex(t => t.Name, new BsonRegularExpression(request.Name.Trim(), "i"));
+      }
+
+      if (request.Type.HasValue)
+      {
+         filter &= builder.Eq(t => t.Type, request.Type.Value);
       }
 
       return filter;

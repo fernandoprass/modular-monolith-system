@@ -82,7 +82,49 @@ It includes the body.
 
 ---
 
-## 4. Email Write Flow
+## 4. Template Management
+
+Templates are stored in one MongoDB collection:
+
+```text
+templates
+```
+
+The main entity is:
+
+```csharp
+Template
+```
+
+For now, it has:
+- `Type`
+- `EmailTranslations`
+
+Future types can add their own translation lists.
+
+Template endpoints:
+
+```text
+GET    /api/v1/templates
+GET    /api/v1/templates/{id}
+POST   /api/v1/templates
+PUT    /api/v1/templates/{id}
+DELETE /api/v1/templates/{id}
+```
+
+Email translation endpoints:
+
+```text
+POST   /api/v1/templates/{id}/email-translations
+PUT    /api/v1/templates/{id}/email-translations/{language}
+DELETE /api/v1/templates/{id}/translations/{language}
+```
+
+Only one email translation is allowed per language.
+
+---
+
+## 5. Email Write Flow
 
 ```text
 HTTP request
@@ -105,7 +147,7 @@ It returns the generated ID.
 
 ---
 
-## 5. Email Delivery Flow
+## 6. Email Delivery Flow
 
 This is the normal async email flow.
 
@@ -118,7 +160,7 @@ Redis stream
   -> EmailRequestConsumer.ExecuteAsync(...)
     -> EmailRequestConsumer.ProcessEntryAsync(...)
       -> EmailOutboxService.QueueAsync(...)
-        -> EmailTemplateRepository.GetByKeyAsync(...)
+        -> TemplateRepository.GetByKeyAsync(...)
         -> SimpleEmailTemplateRenderer.Render(...)
         -> Email.Create(...)
         -> EmailRepository.AddAsync(...)
@@ -165,10 +207,12 @@ CourierConst.Redis.EventFieldName
 That field contains JSON for:
 
 ```csharp
-EmailQueueRequest
+IntegrationEvent<EmailQueueRequest>
 ```
 
-`ProcessEntryAsync(...)` deserializes the JSON.
+`ProcessEntryAsync(...)` deserializes the envelope.
+
+Then it validates the event name and version.
 
 If the JSON is invalid, Courier logs a system error and acknowledges the message.
 
@@ -183,7 +227,8 @@ EmailOutboxService.QueueAsync(...)
 ```
 
 This method:
-- Loads the template with `EmailTemplateRepository.GetByKeyAsync(...)`.
+- Loads the template with `TemplateRepository.GetByKeyAsync(...)`.
+- Verifies the template type is `TemplateType.Email`.
 - Finds the requested language translation.
 - Builds template values.
 - Adds the automatic `today` value.
@@ -382,7 +427,7 @@ CourierConst.Worker.DefaultMaxRetries
 | :--- | :--- |
 | `EmailRequestConsumer` | Reads email requests from Redis. |
 | `EmailOutboxService` | Queues and processes pending emails. |
-| `EmailTemplateRepository` | Loads templates from MongoDB. |
+| `TemplateRepository` | Loads templates from MongoDB. |
 | `SimpleEmailTemplateRenderer` | Replaces template placeholders. |
 | `EmailRepository` | Saves, claims, and updates email documents. |
 | `EmailDeliveryWorker` | Background worker that sends pending emails. |

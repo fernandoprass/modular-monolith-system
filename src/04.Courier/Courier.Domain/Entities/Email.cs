@@ -37,7 +37,7 @@ public class Email : Entity
       string subject,
       string body,
       bool isHtml,
-      EmailRetentionPolicy retentionPolicy)
+      RetentionPolicy retentionPolicy)
    {
       var now = DateTime.UtcNow;
 
@@ -62,15 +62,16 @@ public class Email : Entity
       };
    }
 
-   private static int GetRetentionDays(EmailRetentionPolicy retentionPolicy)
+   private static int GetRetentionDays(RetentionPolicy retentionPolicy)
    {
       return retentionPolicy switch
       {
-         EmailRetentionPolicy.Transient => CourierConst.EmailRetentionPoliciesTimeSpans.Transient,
-         EmailRetentionPolicy.Operational => CourierConst.EmailRetentionPoliciesTimeSpans.Operational,
-         EmailRetentionPolicy.Standard => CourierConst.EmailRetentionPoliciesTimeSpans.Standard,
-         EmailRetentionPolicy.Extended => CourierConst.EmailRetentionPoliciesTimeSpans.Extended,
-         EmailRetentionPolicy.Compliance => CourierConst.EmailRetentionPoliciesTimeSpans.Compliance,
+         RetentionPolicy.Transient => CourierConst.EmailRetentionPoliciesTimeSpans.Transient,
+         RetentionPolicy.Operational => CourierConst.EmailRetentionPoliciesTimeSpans.Operational,
+         RetentionPolicy.Standard => CourierConst.EmailRetentionPoliciesTimeSpans.Standard,
+         RetentionPolicy.Extended => CourierConst.EmailRetentionPoliciesTimeSpans.Extended,
+         RetentionPolicy.Compliance => CourierConst.EmailRetentionPoliciesTimeSpans.Compliance,
+         RetentionPolicy.Permanent => CourierConst.EmailRetentionPoliciesTimeSpans.Permanent,
          _ => CourierConst.EmailRetentionPoliciesTimeSpans.Standard
       };
    }

@@ -2,12 +2,21 @@ using Myce.Response.Messages;
 
 namespace Courier.Domain.Messages;
 
-public class EmailTemplateDuplicateKeyError : ErrorMessage
+public class TemplateDuplicateKeyError : ErrorMessage
 {
-   public EmailTemplateDuplicateKeyError(string key)
-      : base("EmailTemplateDuplicateKeyError", "Email template key already exists: {key}.")
+   public TemplateDuplicateKeyError(string key)
+      : base("TemplateDuplicateKeyError", "Template key already exists: {key}.")
    {
       AddVariable("key", key);
+   }
+}
+
+public class TemplateTypeMismatchError : ErrorMessage
+{
+   public TemplateTypeMismatchError(string expectedType)
+      : base("TemplateTypeMismatchError", "Template must be {expectedType}.")
+   {
+      AddVariable("expectedType", expectedType);
    }
 }
 
@@ -38,10 +47,10 @@ public class EmailTemplatePlaceholderMissingError : ErrorMessage
    }
 }
 
-public class EmailTemplateLanguageNotFoundError : ErrorMessage
+public class TemplateLanguageNotFoundError : ErrorMessage
 {
-   public EmailTemplateLanguageNotFoundError(string key, string language)
-      : base("EmailTemplateLanguageNotFoundError", "Email template {key} does not have translation for language: {language}.")
+   public TemplateLanguageNotFoundError(string key, string language)
+      : base("TemplateLanguageNotFoundError", "Email template {key} does not have translation for language: {language}.")
    {
       AddVariable("key", key);
       AddVariable("language", language);

@@ -2,18 +2,18 @@ namespace Courier.Domain.ValueObjects;
 
 using System.Text.RegularExpressions;
 
-public class EmailTemplateTranslation
+public class TemplateEmailTranslation
 {
    public bool IsHtml { get; private set; } = false;
    public string Language { get; private set; } = string.Empty;
    public string Subject { get; private set; } = string.Empty;
    public string Body { get; private set; } = string.Empty;
 
-   private EmailTemplateTranslation() { }
+   private TemplateEmailTranslation() { }
 
-   public static EmailTemplateTranslation Create(string language, string subject, string body)
+   public static TemplateEmailTranslation Create(string language, string subject, string body)
    {
-      return new EmailTemplateTranslation
+      return new TemplateEmailTranslation
       {
          Language = language.ToLowerInvariant().Trim(),
          Subject = subject.Trim(),

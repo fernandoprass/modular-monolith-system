@@ -5,7 +5,7 @@ meta {
 }
 
 get {
-  url: {{host.courier}}/api/{{version}}/email-templates
+  url: {{host.courier}}/api/{{version}}/templates
   body: json
   auth: bearer
 }
@@ -17,7 +17,8 @@ auth:bearer {
 body:json {
   {
     "key": "",
-    "name": "",
+    "name" : "",
+    "type": 2,
     "pageNumber": 1,
     "pageSize": 25
   }

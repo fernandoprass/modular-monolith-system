@@ -2,6 +2,7 @@ using Courier.Application.Contracts;
 using Courier.Domain;
 using Courier.Domain.DTOs.Requests;
 using Courier.Domain.Entities;
+using Courier.Domain.Enums;
 using Courier.Domain.Interfaces.Repositories;
 using Courier.Domain.Messages;
 using Myce.Response;
@@ -13,14 +14,14 @@ namespace Courier.Application.Services;
 
 public class EmailOutboxService(
    IEmailRepository emailRepository,
-   IEmailTemplateRepository emailTemplateRepository,
+   ITemplateRepository templateRepository,
    IEmailTemplateRenderer emailTemplateRenderer,
    IEmailSender emailSender,
    IParameterService parameterService,
    ICourierLogger courierLogger) : IEmailOutboxService
 {
    private readonly IEmailRepository _emailRepository = emailRepository;
-   private readonly IEmailTemplateRepository _emailTemplateRepository = emailTemplateRepository;
+   private readonly ITemplateRepository _templateRepository = templateRepository;
    private readonly IEmailTemplateRenderer _emailTemplateRenderer = emailTemplateRenderer;
    private readonly IEmailSender _emailSender = emailSender;
    private readonly IParameterService _parameterService = parameterService;
@@ -28,19 +29,24 @@ public class EmailOutboxService(
 
    public async Task<Result<Guid>> QueueAsync(EmailQueueRequest request, CancellationToken cancellationToken = default)
    {
-      var template = await _emailTemplateRepository.GetByKeyAsync(request.TemplateKey, cancellationToken);
+      var template = await _templateRepository.GetByKeyAsync(request.TemplateKey, cancellationToken);
 
       if (template == null)
       {
-         return Result<Guid>.Failure(new NotFoundError(CourierConst.Entity.EmailTemplate));
+         return Result<Guid>.Failure(new NotFoundError(CourierConst.Entity.Template));
       }
 
-      var translation = template.Translations.SingleOrDefault(t =>
+      if (template.Type != TemplateType.Email)
+      {
+         return Result<Guid>.Failure(new TemplateTypeMismatchError(TemplateType.Email.ToString()));
+      }
+
+      var translation = template.EmailTranslations.SingleOrDefault(t =>
          t.Language == request.Language.ToLowerInvariant().Trim());
 
       if (translation == null)
       {
-         return Result<Guid>.Failure(new EmailTemplateLanguageNotFoundError(request.TemplateKey, request.Language));
+         return Result<Guid>.Failure(new TemplateLanguageNotFoundError(request.TemplateKey, request.Language));
       }
 
       var values = BuildTemplateValues(request.Values);
