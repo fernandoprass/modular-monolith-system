@@ -19,13 +19,13 @@ public class OrganizationService(
     IOrganizationValidator organizationValidator,
     IIamUnitOfWork iamUnitOfWork,
     IUserContext userContext,
-    IIamAuditLogger auditLogger) : BaseService(userContext), IOrganizationService
+    IIamEventPublisher eventPublisher) : BaseService(userContext), IOrganizationService
 {
    private readonly IOrganizationQueryRepository _organizationQueryRepository = organizationQueryRepository;
    private readonly IOrganizationRepository _organizationRepository = organizationRepository;
    private readonly IOrganizationValidator _organizationValidator = organizationValidator;
    private readonly IIamUnitOfWork _iamUnitOfWork = iamUnitOfWork;
-   private readonly IIamAuditLogger _auditLogger = auditLogger;
+   private readonly IIamEventPublisher _eventPublisher = eventPublisher;
 
    public async Task<Result> ValidateCreateOrganizationAsync(OrganizationCreateRequest request, CancellationToken cancellationToken = default)
    {
@@ -77,7 +77,7 @@ public class OrganizationService(
 
          if (result.IsSuccess)
          {
-            await _auditLogger.LogAsync(
+            await _eventPublisher.NotifyAuditLogAsync(
                IamConst.Logger.Feature.Organizations,
                IamConst.Logger.Action.Update,
                AuditPrivacyLevel.Medium,
@@ -111,7 +111,7 @@ public class OrganizationService(
 
          if (result.IsSuccess)
          {
-            await _auditLogger.LogAsync(
+            await _eventPublisher.NotifyAuditLogAsync(
                IamConst.Logger.Feature.Organizations,
                IamConst.Logger.Action.UpdateCode,
                AuditPrivacyLevel.Medium,

@@ -22,7 +22,7 @@ public class RoleServiceTests
    private readonly IUserContext _userContextMock;
    private readonly IRoleValidator _roleValidatorMock;
    private readonly IRoleQueryRepository _roleQueryRepositoryMock;
-   private readonly IIamAuditLogger _auditLoggerMock;
+   private readonly IIamEventPublisher _eventPublisherMock;
    private readonly RoleService _roleService;
 
    public RoleServiceTests()
@@ -31,14 +31,14 @@ public class RoleServiceTests
       _userContextMock = Substitute.For<IUserContext>();
       _roleValidatorMock = Substitute.For<IRoleValidator>();
       _roleQueryRepositoryMock = Substitute.For<IRoleQueryRepository>();
-      _auditLoggerMock = Substitute.For<IIamAuditLogger>();
+      _eventPublisherMock = Substitute.For<IIamEventPublisher>();
 
       _roleService = new RoleService(
          _unitOfWorkMock,
          _userContextMock,
          _roleValidatorMock,
          _roleQueryRepositoryMock,
-         _auditLoggerMock);
+         _eventPublisherMock);
    }
 
    #region CreateAsync Tests
@@ -56,7 +56,7 @@ public class RoleServiceTests
       Assert.True(result.IsSuccess);
       await _unitOfWorkMock.Roles.Received(1).AddAsync(Arg.Any<Role>(), Arg.Any<CancellationToken>());
       await _unitOfWorkMock.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
-      await _auditLoggerMock.Received(1).LogAsync(
+      await _eventPublisherMock.Received(1).NotifyAuditLogAsync(
          IamConst.Logger.Feature.Roles,
          IamConst.Logger.Action.Create,
          AuditPrivacyLevel.Medium,
@@ -130,7 +130,7 @@ public class RoleServiceTests
       Assert.True(result.IsSuccess);
       _unitOfWorkMock.Roles.Received(1).Update(Arg.Any<Role>());
       await _unitOfWorkMock.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
-      await _auditLoggerMock.Received(1).LogAsync(
+      await _eventPublisherMock.Received(1).NotifyAuditLogAsync(
          IamConst.Logger.Feature.Roles,
          IamConst.Logger.Action.Update,
          AuditPrivacyLevel.Medium,
@@ -207,7 +207,7 @@ public class RoleServiceTests
       Assert.True(result.IsSuccess);
       _unitOfWorkMock.Users.Received(1).Update(Arg.Any<User>());
       await _unitOfWorkMock.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
-      await _auditLoggerMock.Received(1).LogAsync(
+      await _eventPublisherMock.Received(1).NotifyAuditLogAsync(
          IamConst.Logger.Feature.Roles,
          IamConst.Logger.Action.Assign,
          AuditPrivacyLevel.High,
@@ -353,7 +353,7 @@ public class RoleServiceTests
       Assert.True(result.IsSuccess);
       _unitOfWorkMock.Users.Received(1).Update(Arg.Any<User>());
       await _unitOfWorkMock.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
-      await _auditLoggerMock.Received(1).LogAsync(
+      await _eventPublisherMock.Received(1).NotifyAuditLogAsync(
          IamConst.Logger.Feature.Roles,
          IamConst.Logger.Action.Unassign,
          AuditPrivacyLevel.High,

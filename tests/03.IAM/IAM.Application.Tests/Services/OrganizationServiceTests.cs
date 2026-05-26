@@ -24,7 +24,7 @@ public class OrganizationServiceTests
    private readonly IOrganizationValidator _organizationValidator;
    private readonly IIamUnitOfWork _unitOfWork;
    private readonly IUserContext _userContext;
-   private readonly IIamAuditLogger _auditLogger;
+   private readonly IIamEventPublisher _eventPublisher;
    private readonly OrganizationService _service;
 
    public OrganizationServiceTests()
@@ -34,7 +34,7 @@ public class OrganizationServiceTests
       _organizationValidator = Substitute.For<IOrganizationValidator>();
       _unitOfWork = Substitute.For<IIamUnitOfWork>();
       _userContext = Substitute.For<IUserContext>();
-      _auditLogger = Substitute.For<IIamAuditLogger>();
+      _eventPublisher = Substitute.For<IIamEventPublisher>();
 
       _service = new OrganizationService(
           _organizationQueryRepository,
@@ -42,7 +42,7 @@ public class OrganizationServiceTests
           _organizationValidator,
           _unitOfWork,
           _userContext,
-          _auditLogger);
+          _eventPublisher);
    }
 
    [Fact]
@@ -126,7 +126,7 @@ public class OrganizationServiceTests
       Assert.True(result.IsSuccess);
       _unitOfWork.Organizations.Received(1).Update(organization);
       await _unitOfWork.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
-      await _auditLogger.Received(1).LogAsync(
+      await _eventPublisher.NotifyAuditLogAsync(
          IamConst.Logger.Feature.Organizations,
          IamConst.Logger.Action.Update,
          AuditPrivacyLevel.Medium,
@@ -168,7 +168,7 @@ public class OrganizationServiceTests
 
       Assert.True(result.IsSuccess);
       Assert.Equal("NEWCODE", organization.Code);
-      await _auditLogger.Received(1).LogAsync(
+      await _eventPublisher.NotifyAuditLogAsync(
          IamConst.Logger.Feature.Organizations,
          IamConst.Logger.Action.UpdateCode,
          AuditPrivacyLevel.Medium,

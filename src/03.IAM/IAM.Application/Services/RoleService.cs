@@ -19,12 +19,12 @@ public class RoleService(
    IUserContext userContext,
    IRoleValidator roleValidator,
    IRoleQueryRepository roleQueryRepository,
-   IIamAuditLogger auditLogger) : BaseService(userContext), IRoleService
+   IIamEventPublisher eventPublisher) : BaseService(userContext), IRoleService
 {
    private readonly IIamUnitOfWork _iamUnitOfWork = iamUnitOfWork;
    private readonly IRoleValidator _roleValidator = roleValidator;
    private readonly IRoleQueryRepository _roleQueryRepository = roleQueryRepository;
-   private readonly IIamAuditLogger _auditLogger = auditLogger;
+   private readonly IIamEventPublisher _eventPublisher = eventPublisher;
 
    public async Task<Result<RoleDto>> CreateAsync(RoleCreateRequest request, CancellationToken cancellationToken = default)
    {
@@ -39,7 +39,7 @@ public class RoleService(
       await _iamUnitOfWork.Roles.AddAsync(role, cancellationToken);
       await _iamUnitOfWork.SaveChangesAsync(cancellationToken);
 
-      await _auditLogger.LogAsync(
+      await _eventPublisher.NotifyAuditLogAsync(
          IamConst.Logger.Feature.Roles,
          IamConst.Logger.Action.Create,
          AuditPrivacyLevel.Medium,
@@ -67,7 +67,7 @@ public class RoleService(
          _iamUnitOfWork.Roles.Update(role);
          await _iamUnitOfWork.SaveChangesAsync(ct);
 
-         await _auditLogger.LogAsync(
+         await _eventPublisher.NotifyAuditLogAsync(
             IamConst.Logger.Feature.Roles,
             IamConst.Logger.Action.Update,
             AuditPrivacyLevel.Medium,
@@ -109,7 +109,7 @@ public class RoleService(
          _iamUnitOfWork.Users.Update(user);
          await _iamUnitOfWork.SaveChangesAsync(ct);
 
-         await _auditLogger.LogAsync(
+         await _eventPublisher.NotifyAuditLogAsync(
             IamConst.Logger.Feature.Roles,
             IamConst.Logger.Action.Assign,
             AuditPrivacyLevel.High,
@@ -157,7 +157,7 @@ public class RoleService(
          _iamUnitOfWork.Users.Update(user);
          await _iamUnitOfWork.SaveChangesAsync(ct);
 
-         await _auditLogger.LogAsync(
+         await _eventPublisher.NotifyAuditLogAsync(
             IamConst.Logger.Feature.Roles,
             IamConst.Logger.Action.Unassign,
             AuditPrivacyLevel.High,

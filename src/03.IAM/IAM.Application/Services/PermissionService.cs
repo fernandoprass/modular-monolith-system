@@ -20,13 +20,13 @@ public class PermissionService(
    IPermissionValidator permissionValidator,
    IPermissionQueryRepository permissionQueryRepository,
    IRolePermissionCacheInvalidator rolePermissionAuthorizationCache,
-   IIamAuditLogger auditLogger) : BaseService(userContext), IPermissionService
+   IIamEventPublisher eventPublisher) : BaseService(userContext), IPermissionService
 {
    private readonly IIamUnitOfWork _iamUnitOfWork = iamUnitOfWork;
    private readonly IPermissionValidator _permissionValidator = permissionValidator;
    private readonly IPermissionQueryRepository _permissionQueryRepository = permissionQueryRepository;
    private readonly IRolePermissionCacheInvalidator _rolePermissionAuthorizationCache = rolePermissionAuthorizationCache;
-   private readonly IIamAuditLogger _auditLogger = auditLogger;
+   private readonly IIamEventPublisher _eventPublisher = eventPublisher;
 
    public async Task<Result<PermissionDto>> CreateAsync(PermissionCreateRequest request, CancellationToken cancellationToken = default)
    {
@@ -106,7 +106,7 @@ public class PermissionService(
          await _iamUnitOfWork.SaveChangesAsync(ct);
          await _rolePermissionAuthorizationCache.RemoveAsync(role!.Id, ct);
 
-         await _auditLogger.LogAsync(
+         await _eventPublisher.NotifyAuditLogAsync(
             IamConst.Logger.Feature.Permissions,
             IamConst.Logger.Action.Assign,
             AuditPrivacyLevel.High,
@@ -142,7 +142,7 @@ public class PermissionService(
          await _iamUnitOfWork.SaveChangesAsync(ct);
          await _rolePermissionAuthorizationCache.RemoveAsync(role!.Id, ct);
 
-         await _auditLogger.LogAsync(
+         await _eventPublisher.NotifyAuditLogAsync(
             IamConst.Logger.Feature.Permissions,
             IamConst.Logger.Action.Unassign,
             AuditPrivacyLevel.High,

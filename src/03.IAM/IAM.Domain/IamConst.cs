@@ -54,6 +54,7 @@ public static partial class IamConst
       public const string OrganizationWelcome = "orgazination-welcome";
       public const string OrganizationDelete = "orgazination-delete";
       public const string UserWelcome = "user-welcome";
+      public const string UserPasswordUpdated = "user-password-updated";
       public const string UserResetPassword = "user-reset-password";
       public const string UserMaxFailedLoginAttempts = "user-max-failed-login-attempts";
       public const string UserDelete = "user-delete";

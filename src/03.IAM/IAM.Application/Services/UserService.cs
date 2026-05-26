@@ -24,16 +24,14 @@ public class UserService(
     IUserValidator userValidator,
     IUserRepository userRepository,
     IUserQueryRepository userQueryRepository,
-    IIamAuditLogger auditLogger,
-    IIamEmailNotifier emailNotifier) : BaseService(userContext), IUserService
+    IIamEventPublisher eventPublisher) : BaseService(userContext), IUserService
 {
    private readonly IIamUnitOfWork _iamUnitOfWork = iamUnitOfWork;
    private readonly IParameterService _parameterService = parameterService;
    private readonly IUserValidator _userValidator = userValidator;
    private readonly IUserRepository _userRepository = userRepository;
    private readonly IUserQueryRepository _userQueryRepository = userQueryRepository;
-   private readonly IIamAuditLogger _auditLogger = auditLogger;
-   private readonly IIamEmailNotifier _emailNotifier = emailNotifier;
+   private readonly IIamEventPublisher _eventPublisher = eventPublisher;
 
    public async Task<UserDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
    {
@@ -75,7 +73,7 @@ public class UserService(
          await _iamUnitOfWork.Users.AddAsync(user, ct);
          await _iamUnitOfWork.SaveChangesAsync(ct);
 
-         await _emailNotifier.NotifyAsync(
+         await _eventPublisher.NotifyEmailAsync(
             IamConst.EmailTemplate.UserWelcome,
             user.OrganizationId,
             user.Id,
@@ -105,7 +103,7 @@ public class UserService(
 
          if (result.IsSuccess)
          {
-            await _auditLogger.LogAsync(
+            await _eventPublisher.NotifyAuditLogAsync(
                IamConst.Logger.Feature.Users,
                IamConst.Logger.Action.Update,
                AuditPrivacyLevel.Medium,
@@ -137,13 +135,22 @@ public class UserService(
 
       if (result.IsSuccess)
       {
-         await _auditLogger.LogAsync(
+         await _eventPublisher.NotifyAuditLogAsync(
             IamConst.Logger.Feature.Users,
             IamConst.Logger.Action.UpdatePassword,
             AuditPrivacyLevel.High,
             $"Updated user password {user.Id}",
             user.Id,
             new { user.Id, user.Email },
+            cancellationToken);
+
+         await _eventPublisher.NotifyEmailAsync(
+            IamConst.EmailTemplate.UserPasswordUpdated,
+            user.OrganizationId,
+            user.Id,
+            user.Email,
+            IamConst.Logger.Feature.Users,
+            BuildUserTemplateValues(user),
             cancellationToken);
       }
 
@@ -172,7 +179,7 @@ public class UserService(
          await _iamUnitOfWork.Users.DeleteAsync(id, ct);
          await _iamUnitOfWork.SaveChangesAsync(ct);
 
-         await _auditLogger.LogAsync(
+         await _eventPublisher.NotifyAuditLogAsync(
             IamConst.Logger.Feature.Users,
             IamConst.Logger.Action.Delete,
             AuditPrivacyLevel.High,
@@ -181,7 +188,7 @@ public class UserService(
             new { user.Id, user.Email },
             ct);
 
-         await _emailNotifier.NotifyAsync(
+         await _eventPublisher.NotifyEmailAsync(
             IamConst.EmailTemplate.UserDelete,
             user.OrganizationId,
             user.Id,
@@ -223,7 +230,7 @@ public class UserService(
 
       if (result.IsSuccess && !wasLocked && user.LockedOutUntil.HasValue)
       {
-         await _emailNotifier.NotifyAsync(
+         await _eventPublisher.NotifyEmailAsync(
             IamConst.EmailTemplate.UserMaxFailedLoginAttempts,
             user.OrganizationId,
             user.Id,
