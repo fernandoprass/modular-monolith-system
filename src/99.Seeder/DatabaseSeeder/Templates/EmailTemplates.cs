@@ -42,6 +42,13 @@ public class EmailTemplates(
          "Use o link de redefinicao de senha para continuar.",
          "<p>Use o link de redefinicao de senha para continuar.</p>"),
       new(
+         "user-password-updated",
+         "User password updated",
+         "Your password has been updated.",
+         "<p>{{user.name}}</p><p>Your password has been updated.</p>",
+         "Sua senha foi atualizada.",
+         "<p>{{user.name}}</p><p>Sua senha foi atualizada.</p>"),
+      new(
          "user-max-failed-login-attempts",
          "User max failed login attempts",
          "Your account was locked after too many failed login attempts.",
