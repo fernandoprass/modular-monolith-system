@@ -53,7 +53,7 @@ public class OrganizationService(
           .Select(s => s[random.Next(s.Length)]).ToArray());
    }
 
-   public async Task<IEnumerable<OrganizationDto>> GetByNameAsync(string name, CancellationToken cancellationToken = default)
+   public async Task<IEnumerable<OrganizationDto>> GetByNameAsync(string? name, CancellationToken cancellationToken = default)
    {
       return await _organizationQueryRepository.GetByNameAsync(name, cancellationToken);
    }

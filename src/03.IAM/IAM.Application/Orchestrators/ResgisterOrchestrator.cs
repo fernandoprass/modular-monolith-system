@@ -20,6 +20,7 @@ namespace IAM.Application.Orchestrators;
 public class ResgisterOrchestrator(
    IOrganizationService organizationService,
    IOrganizationQueryRepository organizationQueryRepository,
+   IParameterService parameterService,
    IUserContext userContext,
    IUserRepository userRepository,
    IUserService userService,
@@ -28,6 +29,7 @@ public class ResgisterOrchestrator(
 {
    private readonly IOrganizationService _organizationService = organizationService;
    private readonly IOrganizationQueryRepository _organizationQueryRepository = organizationQueryRepository;
+   private readonly IParameterService _parameterService = parameterService;
    private readonly IUserRepository _userRepository = userRepository;
    private readonly IUserService _userService = userService;
    private readonly IIamUnitOfWork _iamUnitOfWork = iamUnitOfWork;
@@ -84,6 +86,8 @@ public class ResgisterOrchestrator(
        organization.Id
       );
 
+      user.AddRole(await _parameterService.GetGuidAsync(IamParam.Role.DefaultRoleIdForNewOrganization, cancellationToken), null);
+
       organization.CreatedBy = user.Id;
 
       await _iamUnitOfWork.Organizations.AddAsync(organization, cancellationToken);
@@ -105,15 +109,6 @@ public class ResgisterOrchestrator(
          user.Id,
          user.Email,
          IamConst.Logger.Feature.Organizations,
-         BuildOrganizationTemplateValues(organization, user),
-         cancellationToken);
-
-      await _eventPublisher.NotifyEmailAsync(
-         IamConst.EmailTemplate.UserWelcome,
-         organization.Id,
-         user.Id,
-         user.Email,
-         IamConst.Logger.Feature.Users,
          BuildOrganizationTemplateValues(organization, user),
          cancellationToken);
 

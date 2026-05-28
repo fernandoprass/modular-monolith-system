@@ -259,6 +259,9 @@ internal class ParameterService(
       return await GetResolvedValueAsync(key, cancellationToken) ?? string.Empty;
    }
 
+   public Task<Guid> GetGuidAsync(string key, CancellationToken cancellationToken = default)
+      => GetAndParseAsync<Guid>(key, (string s, out Guid result) => Guid.TryParse(s, out result), cancellationToken);
+
    private delegate bool TryParseDelegate<T>(string s, out T result);
 
    private async Task<T> GetAndParseAsync<T>(string key, TryParseDelegate<T> parser, CancellationToken cancellationToken)

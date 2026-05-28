@@ -17,13 +17,18 @@ public class OrganizationQueryRepository(IamDbContext dbContext) : IOrganization
           .SingleOrDefaultAsync(cancellationToken);
    }
 
-   public async Task<IEnumerable<OrganizationDto>> GetByNameAsync(string name, CancellationToken cancellationToken = default)
+   public async Task<IEnumerable<OrganizationDto>> GetByNameAsync(string? name, CancellationToken cancellationToken = default)
    {
-      return await _dbContext.Organizations
-          .AsNoTracking()
-          .Where(c => c.Name.Contains(name, StringComparison.InvariantCultureIgnoreCase))
-          .Select(c => new OrganizationDto(c.Id, c.Type, c.Code, c.Name, c.Description, c.IsActive))
-          .ToListAsync(cancellationToken);
+      var query = _dbContext.Organizations.AsNoTracking();
+
+      if (!string.IsNullOrWhiteSpace(name))
+      {
+         query = query.Where(c => EF.Functions.ILike(c.Name, $"%{name}%"));
+      }
+
+      return await query
+         .Select(c => new OrganizationDto(c.Id, c.Type, c.Code, c.Name, c.Description, c.IsActive))
+         .ToListAsync(cancellationToken);
    }
 
    public async Task<IEnumerable<OrganizationDto>> GetAllAsync(CancellationToken cancellationToken = default)

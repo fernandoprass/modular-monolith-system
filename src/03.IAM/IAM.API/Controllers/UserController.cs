@@ -33,7 +33,7 @@ public class UserController(
 
    [HttpGet("me")]
    [Authorize]
-   public async Task<IActionResult> GetByCurrentUser( CancellationToken cancellationToken)
+   public async Task<IActionResult> GetByCurrentUser(CancellationToken cancellationToken)
    {
       var user = await _userService.GetByIdAsync(_userContext.UserId, cancellationToken);
       return OkOrNotFound(user);

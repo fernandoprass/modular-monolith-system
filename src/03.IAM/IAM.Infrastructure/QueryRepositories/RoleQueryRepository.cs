@@ -3,6 +3,7 @@ using IAM.Domain.Entities;
 using IAM.Domain.Mappers;
 using IAM.Domain.QueryRepositories;
 using Microsoft.EntityFrameworkCore;
+using Myce.Response;
 using Shared.Application.Contracts;
 
 namespace IAM.Infrastructure.QueryRepositories;
@@ -47,6 +48,15 @@ public class RoleQueryRepository(IamDbContext dbContext) : IRoleQueryRepository
       return await query
           .Select(r => r.ToRoleDto())
           .ToListAsync(cancellationToken);
+   }
+
+   public async Task<IEnumerable<Guid>> GetDefaultRolesByOrganizationIdAsync(Guid organizationId, CancellationToken cancellationToken = default)
+   {
+      return await _dbContext.Roles
+         .AsNoTracking()
+         .Where(r => r.OrganizationId == organizationId && r.IsDefault && r.IsActive)
+         .Select(r =>  r.Id)
+         .ToListAsync(cancellationToken);
    }
 
    public async Task<IEnumerable<Permission>> GetRolePermissionsByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)

@@ -1,4 +1,5 @@
 using Courier.Domain;
+using DatabaseSeeder.Interfaces;
 using IAM.Domain;
 using IAM.Domain.Interfaces;
 using IAM.Domain.Repositories;
@@ -12,9 +13,7 @@ public class SeederRolePermissions(
    IIamUnitOfWork iamUnitOfWork)
 {
    public async Task SeedAsync(
-      string systemAdminRoleName,
-      string organizationAdminRoleName,
-      string userRoleName,
+      ISeederData seederData,
       CancellationToken cancellationToken = default)
    {
       Console.WriteLine("Starting to assign permissions to roles...");
@@ -26,9 +25,9 @@ public class SeederRolePermissions(
       var permissions = await permissionRepository.GetAll(cancellationToken);
       var permissionsByCode = permissions.ToDictionary(permission => permission.Code, permission => permission.Id);
 
-      await AssignAsync(roles.FirstOrDefault(role => role.Name == systemAdminRoleName)?.Id, permissionsByCode, SystemAdminPermissions(), cancellationToken);
-      await AssignAsync(roles.FirstOrDefault(role => role.Name == organizationAdminRoleName)?.Id, permissionsByCode, OrganizationAdminPermissions(), cancellationToken);
-      await AssignAsync(roles.FirstOrDefault(role => role.Name == userRoleName)?.Id, permissionsByCode, UserPermissions(), cancellationToken);
+      await AssignAsync(roles.FirstOrDefault(role => role.Name == seederData.SystemAdminRoleName)?.Id, permissionsByCode, SystemAdminPermissions(), cancellationToken);
+      await AssignAsync(roles.FirstOrDefault(role => role.Name == seederData.OrganizationAdminRoleName)?.Id, permissionsByCode, OrganizationAdminPermissions(), cancellationToken);
+      await AssignAsync(roles.FirstOrDefault(role => role.Name == seederData.UserRoleName)?.Id, permissionsByCode, UserPermissions(), cancellationToken);
 
       Console.WriteLine("Finished assigning permissions to roles...");
       Console.WriteLine();

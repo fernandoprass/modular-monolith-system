@@ -1,7 +1,6 @@
-using DatabaseSeeder.Authorization;
-using DatabaseSeeder.Interfaces;
 using Courier.Domain.Interfaces.Repositories;
 using Courier.Infrastructure;
+using DatabaseSeeder.Interfaces;
 using IAM.Domain.Interfaces;
 using IAM.Domain.Repositories;
 using Shared.Infrastructure;
@@ -16,17 +15,14 @@ public class DatabaseSeeder(
    CourierDbContext courierDbContext,
    ITemplateRepository templateRepository,
    ITemplateWriteRepository templateWriteRepository,
+   ISeederData seederData,
    IIamUnitOfWork iamUnitOfWork) : IDatabaseSeeder
 {
-   private const string SystemAdminRoleName = "System Admin";
-   private const string OrganizationAdminRoleName = "Organization Admin";
-   private const string UserRoleName = "User";
-
    public async Task SeedAsync(CancellationToken cancellationToken = default)
    {
-      await new SeederAuthorization(roleRepository, permissionRepository, iamUnitOfWork).SeedAsync(SystemAdminRoleName, OrganizationAdminRoleName, UserRoleName, cancellationToken);
-      await new SeederParameters(sharedDbContext).SeedAsync(cancellationToken);
+      await new SeederAuthorization(roleRepository, permissionRepository, iamUnitOfWork).SeedAsync( seederData, cancellationToken);
+      await new SeederParameters(seederData, sharedDbContext).SeedAsync(cancellationToken);
       await new SeederTemplates(courierDbContext, templateRepository, templateWriteRepository).SeedAsync(cancellationToken);
-      await new SeederOrganizations(organizationRepository, roleRepository, iamUnitOfWork).SeedAsync(SystemAdminRoleName, OrganizationAdminRoleName, UserRoleName, cancellationToken);
+      await new SeederOrganizations(organizationRepository, roleRepository, iamUnitOfWork, seederData).SeedAsync(cancellationToken);
    }
 }

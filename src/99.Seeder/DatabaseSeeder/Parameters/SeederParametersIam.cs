@@ -1,10 +1,11 @@
+using DatabaseSeeder.Interfaces;
 using IAM.Domain;
 using Shared.Domain.Enums;
 using Shared.Infrastructure;
 
 namespace DatabaseSeeder.Parameters;
 
-public class SeederParametersIam(SharedDbContext dbContext) : SeederParametersBase(dbContext)
+public class SeederParametersIam(ISeederData seederData,SharedDbContext dbContext) : SeederParametersBase(dbContext)
 {
    public async Task SeedAsync(CancellationToken cancellationToken = default)
    {
@@ -46,6 +47,26 @@ public class SeederParametersIam(SharedDbContext dbContext) : SeederParametersBa
          value: "24",
          ParameterOverrideType.None,
          isVisible: true,
+         cancellationToken);
+
+      await AddParameterAsync(
+         IamParam.Role.DefaultRoleIdForNewOrganization,
+         "Default Roles for Organization",
+         "The default role Id assigned to the organization's administrator user when it is created.",
+         ParameterType.UUID,
+         value: seederData.OrganizationAdminRoleId.ToString(),
+         ParameterOverrideType.None,
+         isVisible: false,
+         cancellationToken);
+
+      await AddParameterAsync(
+         IamParam.Role.DefaultRoleIdForNewUser,
+         "Default Roles for User",
+         "The default role Id assigned to the user when it is created.",
+         ParameterType.UUID,
+         value: seederData.UserRoleId.ToString(),
+         ParameterOverrideType.None,
+         isVisible: false,
          cancellationToken);
    }
 }

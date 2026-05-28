@@ -16,10 +16,19 @@ auth:bearer {
 
 body:json {
   {
-    "name": "RoleName Inactive",
+    "name": "RoleName Active",
     "description": "Api test",
     "isDefault": true,
-    "isActive": false,
-    "organizationId": "019dd545-21f2-7a37-a398-6c3f06738666"
+    "isActive": true,
+    "organizationId": "{{organizationId}}"
+  }
+}
+
+script:post-response {
+  if (res.getStatus() === 200) {
+    const body = res.getBody();
+    if (body && body.data) {
+      bru.setVar("roleId", body.data.id);
+    }
   }
 }

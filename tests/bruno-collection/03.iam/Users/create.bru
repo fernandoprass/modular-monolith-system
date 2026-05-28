@@ -19,6 +19,15 @@ body:json {
     "name": "Paul",
     "email": "paul@beatles.com",
     "password": "Beatle@4",
-    "customerId": "550e8400-e29b-41d4-a716-446655440000"
+    "OrganizationId": {{OrganizationId}}
+  }
+}
+
+script:post-response {
+  if (res.getStatus() === 200) {
+    const body = res.getBody();
+    if (body && body.data) {
+      bru.setVar("userId", body.data.id);
+    }
   }
 }

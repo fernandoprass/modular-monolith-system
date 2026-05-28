@@ -10,7 +10,6 @@ public class Organization : EntityAudited
    public string Name { get; set; }
    public string? Description { get; set; }
    public bool IsActive { get; set; } = true;
-   public bool IsMaster { get; set; } = false;
 
    // Navigation property
    public ICollection<User> Users { get; set; } = new List<User>();
@@ -27,7 +26,6 @@ public class Organization : EntityAudited
          Name = name,
          Description = description,
          IsActive = true,
-         IsMaster = false
       };
    }
 

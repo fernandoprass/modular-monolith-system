@@ -19,6 +19,7 @@ public class UserServiceTests
 {
    private readonly IIamUnitOfWork _unitOfWorkMock;
    private readonly IParameterService _parameterServiceMock;
+   private readonly IRoleService _roleServiceMock;
    private readonly IUserValidator _userValidatorMock;
    private readonly IUserContext _userContextMock;
    private readonly IUserRepository _userRepositoryMock;
@@ -30,6 +31,7 @@ public class UserServiceTests
    {
       _unitOfWorkMock = Substitute.For<IIamUnitOfWork>();
       _parameterServiceMock = Substitute.For<IParameterService>();
+      _roleServiceMock = Substitute.For<IRoleService>();
       _userContextMock = Substitute.For<IUserContext>();
       _userValidatorMock = Substitute.For<IUserValidator>();
       _userRepositoryMock = Substitute.For<IUserRepository>();
@@ -42,6 +44,7 @@ public class UserServiceTests
       _userService = new UserService(
           _unitOfWorkMock,
           _parameterServiceMock,
+          _roleServiceMock,
           _userContextMock,
           _userValidatorMock,
           _userRepositoryMock,
@@ -55,6 +58,8 @@ public class UserServiceTests
       var request = new UserCreateRequest(string.Empty, "test@test.com", string.Empty, Guid.NewGuid());
 
       _parameterServiceMock.GetShortIntAsync(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns((short)30);
+      _parameterServiceMock.GetGuidAsync(IamParam.Role.DefaultRoleIdForNewUser, Arg.Any<CancellationToken>()).Returns(Guid.CreateVersion7());
+      _roleServiceMock.GetDefaultRolesByOrganizationIdAsync(request.OrganizationId, Arg.Any<CancellationToken>()).Returns(new List<Guid>());
 
       var result = await _userService.CreateUserAsync(request, true, TestContext.Current.CancellationToken);
 
@@ -72,6 +77,8 @@ public class UserServiceTests
       _userQueryRepositoryMock.GetIdByEmailAsync(request.Email, Arg.Any<CancellationToken>()).Returns(Guid.NewGuid());
 
       _parameterServiceMock.GetShortIntAsync(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns((short)30);
+      _parameterServiceMock.GetGuidAsync(IamParam.Role.DefaultRoleIdForNewUser, Arg.Any<CancellationToken>()).Returns(Guid.CreateVersion7());
+      _roleServiceMock.GetDefaultRolesByOrganizationIdAsync(request.OrganizationId, Arg.Any<CancellationToken>()).Returns(new List<Guid>());
 
       _userValidatorMock.ValidateCreate(request, organizationExists: true, emailAlreadyExists: true)
           .Returns(Result.Failure(new EmailAlreadyExistError(request.Email)));
@@ -91,6 +98,8 @@ public class UserServiceTests
       _userQueryRepositoryMock.GetIdByEmailAsync(request.Email, Arg.Any<CancellationToken>()).Returns(Guid.Empty);
 
       _parameterServiceMock.GetShortIntAsync(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns((short)30);
+      _parameterServiceMock.GetGuidAsync(IamParam.Role.DefaultRoleIdForNewUser, Arg.Any<CancellationToken>()).Returns(Guid.CreateVersion7());
+      _roleServiceMock.GetDefaultRolesByOrganizationIdAsync(request.OrganizationId, Arg.Any<CancellationToken>()).Returns(new List<Guid> { Guid.CreateVersion7() });
 
       _userValidatorMock.ValidateCreate(request, organizationExists: true, emailAlreadyExists: false).Returns(Result.Success());
 

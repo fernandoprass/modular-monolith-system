@@ -43,6 +43,7 @@ services.AddDbContext<IamDbContext>(options => options.UseNpgsql(connectionStrin
 services.AddDbContext<SharedDbContext>(options => options.UseNpgsql(connectionString).UseSnakeCaseNamingConvention());
 
 services.AddSingleton<IConfiguration>(configuration);
+services.AddSingleton<ISeederData,SeederData>();
 services.AddScoped<IUserContext, SeederUserContext>();
 services.AddScoped<IIamUnitOfWork, IamUnitOfWork>();
 services.AddScoped<IOrganizationRepository, OrganizationRepository>();

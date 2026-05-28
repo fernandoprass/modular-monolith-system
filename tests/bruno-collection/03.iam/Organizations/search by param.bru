@@ -5,13 +5,13 @@ meta {
 }
 
 get {
-  url: {{host.iam}}/api/{{version}}/iam/organizations/019db54c-44cc-73a5-a889-7264d342ce5b?nome=a
+  url: {{host.iam}}/api/{{version}}/iam/organizations/
   body: none
   auth: bearer
 }
 
 params:query {
-  nome: a
+  ~name: sa
 }
 
 auth:bearer {

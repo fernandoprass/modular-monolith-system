@@ -16,7 +16,7 @@ public class RoleValidator(IUserContext userContext) : IRoleValidator
       var validator = new FluentValidator<RoleCreateRequest>()
          .RuleFor(x => x.Name).ApplyTemplate(ValidatorTemplates.NameRules)
          .RuleForValue(nameAlreadyExists).IsFalse(new RoleDuplicateNameError(request.Name))
-         .If(r => r.OrganizationId is not null, then => then.RuleFor(r => r.OrganizationId).IsEqualTo(userContext.UserOwnerId, new OrganizationForbiddenError()));
+         .If(!userContext.IsSystemAdmin, then => then.RuleFor(r => r.OrganizationId).IsEqualTo(userContext.UserOwnerId, new OrganizationForbiddenError()));
 
       var isValid = validator.Validate(request);
 

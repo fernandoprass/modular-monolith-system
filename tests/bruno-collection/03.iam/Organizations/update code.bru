@@ -5,7 +5,7 @@ meta {
 }
 
 patch {
-  url: {{host.iam}}/api/{{version}}/iam/organizations/019db54c-44cc-73a5-a889-7264d342ce5b/code
+  url: {{host.iam}}/api/{{version}}/iam/organizations/{{organizationId}}/code
   body: json
   auth: bearer
 }
@@ -16,6 +16,6 @@ auth:bearer {
 
 body:json {
   {
-    "code": "SAASADMIN"
+    "code": "NewOrgCode"
   }
 }

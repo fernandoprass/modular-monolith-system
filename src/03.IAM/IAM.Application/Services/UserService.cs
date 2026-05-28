@@ -20,6 +20,7 @@ namespace IAM.Application.Services;
 public class UserService(
     IIamUnitOfWork iamUnitOfWork,
     IParameterService parameterService,
+    IRoleService roleService,
     IUserContext userContext,
     IUserValidator userValidator,
     IUserRepository userRepository,
@@ -28,6 +29,7 @@ public class UserService(
 {
    private readonly IIamUnitOfWork _iamUnitOfWork = iamUnitOfWork;
    private readonly IParameterService _parameterService = parameterService;
+   private readonly IRoleService _roleService = roleService;
    private readonly IUserValidator _userValidator = userValidator;
    private readonly IUserRepository _userRepository = userRepository;
    private readonly IUserQueryRepository _userQueryRepository = userQueryRepository;
@@ -70,6 +72,8 @@ public class UserService(
              passwordExpiresAt,
              request.OrganizationId);
 
+         await AddDefaultRolesAsync(user, ct);
+
          await _iamUnitOfWork.Users.AddAsync(user, ct);
          await _iamUnitOfWork.SaveChangesAsync(ct);
 
@@ -84,6 +88,20 @@ public class UserService(
 
          return Result<UserDto>.Success(user.ToUserDto());
       }, cancellationToken);
+   }
+
+   private async Task AddDefaultRolesAsync( User user, CancellationToken ct)
+   {
+      user.AddRole(await _parameterService.GetGuidAsync(IamParam.Role.DefaultRoleIdForNewUser, ct), null);
+
+      var rolesIds = await _roleService.GetDefaultRolesByOrganizationIdAsync(user.OrganizationId, ct);
+      if (rolesIds != null)
+      {
+         foreach (var id in rolesIds)
+         {
+            user.AddRole(id, null);
+         }
+      }
    }
 
    public async Task<Result> UpdateAsync(Guid id, UserUpdateRequest request, CancellationToken cancellationToken = default)
