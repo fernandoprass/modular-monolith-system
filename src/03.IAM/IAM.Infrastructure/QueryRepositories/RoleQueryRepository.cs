@@ -1,24 +1,24 @@
 using IAM.Domain.DTOs.Responses;
+using IAM.Domain.DTOs.Requests;
 using IAM.Domain.Entities;
 using IAM.Domain.Mappers;
 using IAM.Domain.QueryRepositories;
 using Microsoft.EntityFrameworkCore;
-using Myce.Response;
 using Shared.Application.Contracts;
 
 namespace IAM.Infrastructure.QueryRepositories;
 
-public class RoleQueryRepository(IamDbContext dbContext) : IRoleQueryRepository
+public class RoleQueryRepository(IamDbContext dbContext, IUserContext userContext) : IRoleQueryRepository
 {
    private readonly IamDbContext _dbContext = dbContext;
+   private readonly IUserContext _userContext = userContext;
 
    public async Task<int> CountRolesByRoleIdsAsync(
     IEnumerable<Guid> ids,
     Guid organizationId,
-    IUserContext userContext,
     CancellationToken cancellationToken = default)
    {
-      var query = CreateQueryWithSecurityContextFilter(organizationId, userContext);
+      var query = CreateQueryWithSecurityContextFilter();
 
       return await query.CountAsync(r => ids.Contains(r.Id) && r.IsActive, cancellationToken);
    }
@@ -32,17 +32,28 @@ public class RoleQueryRepository(IamDbContext dbContext) : IRoleQueryRepository
          .FirstOrDefaultAsync(r => r.Id == id, cancellationToken);
    }
 
-   public async Task<IEnumerable<RoleDto>> GetByNameAsync(
-       string? name,
-       Guid? organizationId,
-       IUserContext userContext,
-       CancellationToken cancellationToken = default)
+   public async Task<IEnumerable<RoleDto>> GetAsync(RoleSearchRequest request, CancellationToken cancellationToken = default)
    {
-      var query = CreateQueryWithSecurityContextFilter(organizationId, userContext);
+      var query = CreateQueryWithSecurityContextFilter();
 
-      if (!string.IsNullOrWhiteSpace(name))
+      if (!string.IsNullOrWhiteSpace(request.Name))
       {
-         query = query.Where(r => EF.Functions.ILike(r.Name, $"%{name}%"));
+         query = query.Where(r => EF.Functions.ILike(r.Name, $"%{request.Name}%"));
+      }
+
+      if (request.UserId.HasValue)
+      {
+         query = query.Where(r => r.UserRoles.Any(ur => ur.UserId == request.UserId.Value));
+      }
+
+      if (request.OrganizationId.HasValue)
+      {
+         query = query.Where(r => r.OrganizationId == request.OrganizationId.Value);
+      }
+
+      if (request.IsActive.HasValue)
+      {
+         query = query.Where(r => r.IsActive == request.IsActive.Value);
       }
 
       return await query
@@ -85,30 +96,23 @@ public class RoleQueryRepository(IamDbContext dbContext) : IRoleQueryRepository
    public async Task<bool> NameExistsAsync(
       string name,
       Guid? organizationId,
-      IUserContext userContext,
       CancellationToken cancellationToken = default)
    {
-      var query = CreateQueryWithSecurityContextFilter(organizationId, userContext);
-
-      return await query.AnyAsync(r => r.Name == name, cancellationToken);
+      return await _dbContext.Roles.AsNoTracking()
+         .AnyAsync(r => r.Name == name && r.OrganizationId == organizationId, cancellationToken);
    }
 
-   private IQueryable<Role> CreateQueryWithSecurityContextFilter(Guid? organizationId, IUserContext userContext)
+   private IQueryable<Role> CreateQueryWithSecurityContextFilter()
    {
       var query = _dbContext.Roles.AsNoTracking();
 
-      if (!userContext.IsSystemAdmin)
+      if (!_userContext.IsSystemAdmin)
       {
          //if user is not system admin, we need to filter roles based on user's organization and their assigned roles
          query = from role in query
-                 join rp in _dbContext.UserRoles on role.Id equals rp.RoleId
-                 where rp.UserId ==  userContext.UserId && 
-                       role.OrganizationId == (organizationId.Equals(Guid.Empty) ? null : organizationId)
+                 join ru in _dbContext.UserRoles on role.Id equals ru.RoleId
+                 where ru.UserId == _userContext.UserId
                  select role;
-      }
-      else
-      {
-         query = query.Where(r => r.OrganizationId == null || r.OrganizationId == organizationId);
       }
 
       return query;

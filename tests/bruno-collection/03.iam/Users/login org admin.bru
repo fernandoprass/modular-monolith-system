@@ -1,5 +1,5 @@
 meta {
-  name: login user
+  name: login org admin
   type: http
   seq: 6
 }
@@ -13,17 +13,17 @@ post {
 body:json {
   {
     "email": "alan.turing@enigma.org",
-    "password": "Password123!h"
+    "password": "Password123!"
   }
 }
 
 script:post-response {
   if (res.getStatus() === 200) {
     const body = res.getBody();
-    if (body && body.data && body.data.token) {
-      bru.setEnvVar("token", body.data.token);
-      bru.setEnvVar("organizationId", body.data.user.organizationId);
-      bru.setVar("loggedUserId", body.data.user.id);
+    if (body && body.data) {
+      bru.setVar("token", body.data.token);
+      bru.setVar("organizationId", body.data.user.organizationId);
+      bru.setVar("userId", body.data.user.id);
     }
   }
 }

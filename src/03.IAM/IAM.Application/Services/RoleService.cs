@@ -28,7 +28,7 @@ public class RoleService(
 
    public async Task<Result<RoleDto>> CreateAsync(RoleCreateRequest request, CancellationToken cancellationToken = default)
    {
-      var nameExists = await _roleQueryRepository.NameExistsAsync(request.Name, request.OrganizationId, _userContext, cancellationToken);
+      var nameExists = await _roleQueryRepository.NameExistsAsync(request.Name, request.OrganizationId, cancellationToken);
       var validation = _roleValidator.ValidateCreate(request, nameExists);
 
       if (!validation.IsSuccess)
@@ -128,7 +128,7 @@ public class RoleService(
    private async Task<bool> ValidateRolesAvailability(RoleAssignRequest request, Guid organizationId, CancellationToken cancellationToken)
    {
       var requestedRoleIds = request.Roles.Select(r => r.RoleId).Distinct().ToList();
-      var numberOfRolesToAssign = await _roleQueryRepository.CountRolesByRoleIdsAsync(requestedRoleIds, organizationId, _userContext, cancellationToken);
+      var numberOfRolesToAssign = await _roleQueryRepository.CountRolesByRoleIdsAsync(requestedRoleIds, organizationId, cancellationToken);
 
       var allRequestedRolesExist = requestedRoleIds.Count == numberOfRolesToAssign;
       return allRequestedRolesExist;
@@ -170,10 +170,9 @@ public class RoleService(
       }, cancellationToken);
    }
 
-   public async Task<Result<IEnumerable<RoleDto>>> GetByNameAsync(string? name, CancellationToken cancellationToken = default)
+   public async Task<Result<IEnumerable<RoleDto>>> GetAsync(RoleSearchRequest request, CancellationToken cancellationToken = default)
    {
-      var roles = await _roleQueryRepository.GetByNameAsync(name, _userContext.UserOwnerId, _userContext, cancellationToken);
-
+      var roles = await _roleQueryRepository.GetAsync(request, cancellationToken);
       return Result<IEnumerable<RoleDto>>.Success(roles);
    }
 

@@ -18,22 +18,15 @@ public class SeederOrganizations(
    public async Task SeedAsync(CancellationToken cancellationToken = default)
    {
       Console.WriteLine("Starting to add organizations...");
-      var roles = (await roleRepository.GetAllByOrganizationAsync(null, cancellationToken))
-         .Where(role => role != null)
-         .Select(role => role!)
-         .ToArray();
 
-      await SeedAdminOrgAsync(seederData.SystemAdminRoleName, roles, cancellationToken);
-      await SeedScientistsOrgAsync(seederData.OrganizationAdminRoleName, seederData.UserRoleName, roles, cancellationToken);
+      await SeedAdminOrgAsync(cancellationToken);
+      await SeedScientistsOrgAsync(cancellationToken);
 
       Console.WriteLine("Finished adding organizations...");
       Console.WriteLine();
    }
 
-   private async Task SeedAdminOrgAsync(
-      string systemAdminRoleName,
-      IReadOnlyCollection<Role> roles,
-      CancellationToken cancellationToken)
+   private async Task SeedAdminOrgAsync(CancellationToken cancellationToken)
    {
       const string organizationCode = "SAASADMIN";
 
@@ -54,16 +47,16 @@ public class SeederOrganizations(
       seederData.SaaSOrganizationId= organization.Id;
 
       var passwordHash = Argon2.Hash(DefaultPassword);
-      var systemRoleId = roles.First(role => role.Name == systemAdminRoleName).Id;
 
       var superUser = User.Create("System Root", "admin@saas.com", passwordHash, DateTime.UtcNow.AddDays(30), organization.Id);
       superUser.IsSystemAdmin = true;
+      superUser.IsOrganizationAdmin = true;
 
-      superUser.AddRole(systemRoleId, null);
+      superUser.AddRole(seederData.SysAdminRoleId, null);
       organization.CreatedBy = superUser.Id;
 
       var supportUser = User.Create("Internal Support", "support@saas.com", passwordHash, DateTime.UtcNow.AddDays(30), organization.Id);
-      supportUser.AddRole(systemRoleId, null);
+      supportUser.AddRole(seederData.SysAdminRoleId, null);
 
       Console.WriteLine($"Adding organization: {organization.Name}");
       await iamUnitOfWork.Organizations.AddAsync(organization, cancellationToken);
@@ -78,11 +71,7 @@ public class SeederOrganizations(
       await iamUnitOfWork.SaveChangesAsync(cancellationToken);
    }
 
-   private async Task SeedScientistsOrgAsync(
-      string organizationAdminRoleName,
-      string userRoleName,
-      IReadOnlyCollection<Role> roles,
-      CancellationToken cancellationToken)
+   private async Task SeedScientistsOrgAsync(CancellationToken cancellationToken)
    {
       const string organizationCode = "SCIENTISTS";
 
@@ -106,8 +95,6 @@ public class SeederOrganizations(
       await iamUnitOfWork.Organizations.AddAsync(organization, cancellationToken);
 
       var passwordHash = Argon2.Hash(DefaultPassword);
-      var adminRoleId = roles.First(role => role.Name == organizationAdminRoleName).Id;
-      var userRoleId = roles.First(role => role.Name == userRoleName).Id;
 
       var alanTuring = User.Create("Alan Turing", "alan.turing@enigma.org", passwordHash, DateTime.UtcNow.AddDays(30), organization.Id);
       var adaLovelace = User.Create("Ada Lovelace", "ada.lovelace@analytical.org", passwordHash, DateTime.UtcNow.AddDays(30), organization.Id);
@@ -119,12 +106,13 @@ public class SeederOrganizations(
 
 
       Console.WriteLine($"Adding admin role to {alanTuring.Email}");
-      alanTuring.AddRole(adminRoleId, null);
+      alanTuring.AddRole(seederData.OrganizationAdminRoleId, null);
+      alanTuring.IsOrganizationAdmin = true;
 
       foreach (var user in users.Skip(1))
       {
          Console.WriteLine($"Adding user role to {user.Email}");
-         user.AddRole(userRoleId, null);
+         user.AddRole(seederData.UserRoleId, null);
       }
 
       Console.WriteLine($"Adding users for organization: {organization.Name}");

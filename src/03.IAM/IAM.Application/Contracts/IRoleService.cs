@@ -11,7 +11,7 @@ public interface IRoleService
    Task<Result> AssignToUserAsync(RoleAssignRequest request, CancellationToken cancellationToken = default);
    Task<Result> UnassignFromUserAsync(RoleUnassignRequest request, CancellationToken cancellationToken = default);
    Task<IEnumerable<Guid>> GetDefaultRolesByOrganizationIdAsync(Guid organizationId, CancellationToken cancellationToken = default);
-   Task<Result<IEnumerable<RoleDto>>> GetByNameAsync(string? name, CancellationToken cancellationToken = default);
+   Task<Result<IEnumerable<RoleDto>>> GetAsync(RoleSearchRequest request, CancellationToken cancellationToken = default);
    Task<Result<IEnumerable<PermissionDto>>> GetRolePermissionsByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
    Task<IEnumerable<PermissionDto>> GetPermissionsByRoleIdAsync(Guid roleId, CancellationToken cancellationToken = default);
 }

@@ -18,9 +18,9 @@ public class RoleController(IRoleService roleService) : BaseController
    [HttpGet("")]
    [Authorize]
    [RequirePermission(IamPermission.Roles.List)]
-   public async Task<IActionResult> GetByName(string? name, CancellationToken cancellationToken)
+   public async Task<IActionResult> Get([FromQuery] RoleSearchRequest request, CancellationToken cancellationToken)
    {
-      var result = await _roleService.GetByNameAsync(name, cancellationToken);
+      var result = await _roleService.GetAsync(request, cancellationToken);
       return OkOrNotFound(result);
    }
 
