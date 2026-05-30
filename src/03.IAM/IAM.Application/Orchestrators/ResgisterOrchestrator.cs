@@ -78,11 +78,12 @@ public class ResgisterOrchestrator(
          return Result<OrganizationDto>.Failure(result.Messages);
       }
 
-      var user = User.Create(
+      var user = User.CreateOrganizationAdmin(
        organizationCreate.User.Name,
        organizationCreate.User.Email,
        Argon2.Hash(organizationCreate.User.Password),
        DateTime.UtcNow.AddDays(30),
+       isOrganizationAdmin: true,
        organization.Id
       );
 

@@ -13,12 +13,19 @@ public class AspNetUserContext(IHttpContextAccessor accessor) : IUserContext
    public Guid UserOwnerId => GetOrganizationId();
    public bool IsAuthenticated => _accessor.HttpContext?.User.Identity?.IsAuthenticated ?? false;
    public bool IsSystemAdmin => GetIsSystemAdmin();
+   public bool IsOrganizationAdmin => GetIsOrganizationAdmin();
    public string? IpAddress => _accessor.HttpContext?.Connection.RemoteIpAddress?.ToString();
    public string? UserAgent => _accessor.HttpContext?.Request.Headers[HeaderNames.UserAgent].ToString();
    public string Language => GetLanguage();
 
    public Guid UserId => GetUserId();
    public IEnumerable<string> Roles => GetRoles();
+
+   private bool GetIsOrganizationAdmin()
+   {
+      var value = _accessor.HttpContext?.User.FindFirst(SharedConst.Security.Claim.IsOrganizationAdmin)?.Value;
+      return bool.TryParse(value, out var isOrganizationAdmin) && isOrganizationAdmin;
+   }
 
    private Guid GetOrganizationId()
    {
