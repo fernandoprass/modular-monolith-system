@@ -8,7 +8,9 @@ using IAM.Domain.Repositories;
 using Myce.Response;
 using Shared.Application.Contracts;
 using Shared.Application.Services;
+using Shared.Domain.DTOs.Responses;
 using Shared.Domain.Enums;
+using Shared.Domain.Interfaces;
 using Shared.Domain.Messages;
 
 namespace IAM.Application.Services;
@@ -19,7 +21,8 @@ public class OrganizationService(
     IOrganizationValidator organizationValidator,
     IIamUnitOfWork iamUnitOfWork,
     IUserContext userContext,
-    IIamEventPublisher eventPublisher) : BaseService(userContext), IOrganizationService
+    IIamEventPublisher eventPublisher,
+    IEventPublisher? sharedEventPublisher = null) : BaseService(userContext, sharedEventPublisher), IOrganizationService
 {
    private readonly IOrganizationQueryRepository _organizationQueryRepository = organizationQueryRepository;
    private readonly IOrganizationRepository _organizationRepository = organizationRepository;
@@ -40,9 +43,13 @@ public class OrganizationService(
       return Result.Success();
    }
 
-   public async Task<OrganizationDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+   public async Task<Result<OrganizationDto?>> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
    {
-      return await _organizationQueryRepository.GetByIdAsync(id, cancellationToken);
+      return await ExecuteIfUserOwnsAsync(id, async (ct) =>
+      { 
+         var organizationDTo = await _organizationQueryRepository.GetByIdAsync(id, ct);
+         return Result<OrganizationDto?>.Success(organizationDTo);
+      }, cancellationToken);
    }
 
    public string GetRandomCode()
@@ -53,9 +60,16 @@ public class OrganizationService(
           .Select(s => s[random.Next(s.Length)]).ToArray());
    }
 
-   public async Task<IEnumerable<OrganizationDto>> GetByNameAsync(string? name, CancellationToken cancellationToken = default)
+   public async Task<Result<PagedResultDto<OrganizationDto>>> GetAsync(OrganizationSearchRequest request, CancellationToken cancellationToken = default)
    {
-      return await _organizationQueryRepository.GetByNameAsync(name, cancellationToken);
+      var searchRequest = request with
+      {
+         OrganizationId = _userContext.IsSystemAdmin ? request.OrganizationId : _userContext.UserOwnerId
+      };
+
+      var organizations = await _organizationQueryRepository.GetAsync(searchRequest, cancellationToken);
+
+      return Result<PagedResultDto<OrganizationDto>>.Success(organizations);
    }
 
    public async Task<Result> UpdateAsync(Guid id, OrganizationUpdateRequest request, CancellationToken cancellationToken = default)
@@ -71,7 +85,7 @@ public class OrganizationService(
             return Result.Failure(validation.Messages);
          }
 
-         organization.Update(request.Name, request.Description, request.IsActive);
+         organization!.Update(request.Name, request.Description, request.IsActive);
 
          var result = await CommitUpdateAsync(organization, ct);
 

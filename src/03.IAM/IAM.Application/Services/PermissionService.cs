@@ -10,6 +10,7 @@ using Myce.Response;
 using Shared.Application.Contracts;
 using Shared.Application.Services;
 using Shared.Domain.Enums;
+using Shared.Domain.Interfaces;
 using Shared.Domain.Messages;
 
 namespace IAM.Application.Services;
@@ -20,7 +21,8 @@ public class PermissionService(
    IPermissionValidator permissionValidator,
    IPermissionQueryRepository permissionQueryRepository,
    IRolePermissionCacheInvalidator rolePermissionAuthorizationCache,
-   IIamEventPublisher eventPublisher) : BaseService(userContext), IPermissionService
+   IIamEventPublisher eventPublisher,
+   IEventPublisher? sharedEventPublisher = null) : BaseService(userContext, sharedEventPublisher), IPermissionService
 {
    private readonly IIamUnitOfWork _iamUnitOfWork = iamUnitOfWork;
    private readonly IPermissionValidator _permissionValidator = permissionValidator;
@@ -48,7 +50,7 @@ public class PermissionService(
    {
       var permission = await _iamUnitOfWork.Permissions.GetByIdAsync(id, cancellationToken);
       bool codeExists = await GetCodeExistsAsync(request.Module, request.Resource, request.Action, id, cancellationToken);
-      var validation = _permissionValidator.ValidateUpdate(request, codeExists, permission != null);
+      var validation = _permissionValidator.ValidateUpdate(request, codeExists, permissionExists: permission != null);
 
       if (!validation.IsSuccess)
          return validation;

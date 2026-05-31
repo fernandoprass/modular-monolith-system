@@ -7,12 +7,12 @@ using IAM.Domain.Entities;
 using IAM.Domain.Interfaces;
 using IAM.Domain.Mappers;
 using IAM.Domain.QueryRepositories;
-using IAM.Domain.Repositories;
 using Isopoh.Cryptography.Argon2;
 using Myce.Response;
 using Shared.Application.Contracts;
 using Shared.Application.Services;
 using Shared.Domain.Enums;
+using Shared.Domain.Interfaces;
 using Shared.Domain.Messages;
 
 namespace IAM.Application.Services;
@@ -23,15 +23,14 @@ public class UserService(
     IRoleService roleService,
     IUserContext userContext,
     IUserValidator userValidator,
-    IUserRepository userRepository,
     IUserQueryRepository userQueryRepository,
-    IIamEventPublisher eventPublisher) : BaseService(userContext), IUserService
+    IIamEventPublisher eventPublisher,
+    IEventPublisher? sharedEventPublisher = null) : BaseService(userContext, sharedEventPublisher), IUserService
 {
    private readonly IIamUnitOfWork _iamUnitOfWork = iamUnitOfWork;
    private readonly IParameterService _parameterService = parameterService;
    private readonly IRoleService _roleService = roleService;
    private readonly IUserValidator _userValidator = userValidator;
-   private readonly IUserRepository _userRepository = userRepository;
    private readonly IUserQueryRepository _userQueryRepository = userQueryRepository;
    private readonly IIamEventPublisher _eventPublisher = eventPublisher;
 
@@ -111,7 +110,7 @@ public class UserService(
 
    public async Task<Result> UpdateAsync(Guid id, UserUpdateRequest request, CancellationToken cancellationToken = default)
    {
-      var user = await _userRepository.GetByIdAsync(id, cancellationToken);
+      var user = await _iamUnitOfWork.Users.GetByIdAsync(id, cancellationToken);
       return await ExecuteIfUserOwnsAsync(user?.OrganizationId, async (ct) =>
       {
          var validator = _userValidator.ValidateUpdate(user?.Id, request);
@@ -147,7 +146,7 @@ public class UserService(
 
    public async Task<Result> UpdatePasswordAsync(UserUpdatePasswordRequest request, CancellationToken cancellationToken = default)
    {
-      var user = await _userRepository.GetByIdAsync(_userContext.UserId, cancellationToken);
+      var user = await _iamUnitOfWork.Users.GetByIdAsync(_userContext.UserId, cancellationToken);
 
       var validator = _userValidator.ValidateUpdatePassword(user, request);
       if (validator.HasError)
@@ -187,7 +186,7 @@ public class UserService(
 
    public async Task<Result> UpdateOrganizationAdminAsync(Guid id, UserUpdateOrganizationAdminRequest request, CancellationToken cancellationToken = default)
    {
-      var user = await _userRepository.GetByIdAsync(id, cancellationToken);
+      var user = await _iamUnitOfWork.Users.GetByIdAsync(id, cancellationToken);
 
       var validator = _userValidator.ValidateUpdateOrganizationAdmin(user, _userContext, request);
       if (validator.HasError)
@@ -224,7 +223,7 @@ public class UserService(
 
    public async Task<Result> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
    {
-      var user = await _userRepository.GetByIdAsync(id, cancellationToken);
+      var user = await _iamUnitOfWork.Users.GetByIdAsync(id, cancellationToken);
 
       return await ExecuteIfUserOwnsAsync(user?.OrganizationId, async (ct) =>
       {
@@ -265,7 +264,7 @@ public class UserService(
 
    public async Task<Result> UpdateLastLoginAsync(Guid id, CancellationToken cancellationToken = default)
    {
-      var user = await _userRepository.GetByIdAsync(id, cancellationToken);
+      var user = await _iamUnitOfWork.Users.GetByIdAsync(id, cancellationToken);
 
       if (user == null) return Result.Failure(new NotFoundError(IamConst.Entity.User));
 
@@ -276,7 +275,7 @@ public class UserService(
 
    public async Task<Result> UpdateFailedLoginAsync(Guid id, CancellationToken cancellationToken = default)
    {
-      var user = await _userRepository.GetByIdAsync(id, cancellationToken);
+      var user = await _iamUnitOfWork.Users.GetByIdAsync(id, cancellationToken);
 
       if (user == null) return Result.Failure(new NotFoundError(IamConst.Entity.User));
 

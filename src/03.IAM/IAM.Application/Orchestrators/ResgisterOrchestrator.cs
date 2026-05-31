@@ -13,6 +13,7 @@ using Myce.Response;
 using Shared.Application.Contracts;
 using Shared.Application.Services;
 using Shared.Domain.Enums;
+using Shared.Domain.Interfaces;
 using Shared.Domain.Messages;
 
 namespace IAM.Application.Orchestrators;
@@ -25,7 +26,8 @@ public class ResgisterOrchestrator(
    IUserRepository userRepository,
    IUserService userService,
    IIamUnitOfWork iamUnitOfWork,
-   IIamEventPublisher eventPublisher) : BaseService(userContext), IRegisterOrchestrator
+   IIamEventPublisher eventPublisher,
+   IEventPublisher? sharedEventPublisher = null) : BaseService(userContext, sharedEventPublisher), IRegisterOrchestrator
 {
    private readonly IOrganizationService _organizationService = organizationService;
    private readonly IOrganizationQueryRepository _organizationQueryRepository = organizationQueryRepository;

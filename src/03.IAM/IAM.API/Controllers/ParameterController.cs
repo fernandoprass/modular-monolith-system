@@ -27,7 +27,7 @@ public class ParameterController(IParameterService parameterService) : BaseContr
    [HttpGet]
    [Authorize]
    [RequirePermission(IamPermission.Parameters.List)]
-   public async Task<IActionResult> GetByParams(ParameterSearchRequest request, CancellationToken cancellationToken)
+   public async Task<IActionResult> GetByParams([FromQuery] ParameterSearchRequest request, CancellationToken cancellationToken)
    {
       var parameters = await _parameterService.GetAsync(request, cancellationToken);
       return OkOrNotFound(parameters);

@@ -10,6 +10,7 @@ using Myce.Response;
 using Shared.Application.Contracts;
 using Shared.Application.Services;
 using Shared.Domain.Enums;
+using Shared.Domain.Interfaces;
 using Shared.Domain.Messages;
 
 namespace IAM.Application.Services;
@@ -19,7 +20,8 @@ public class RoleService(
    IUserContext userContext,
    IRoleValidator roleValidator,
    IRoleQueryRepository roleQueryRepository,
-   IIamEventPublisher eventPublisher) : BaseService(userContext), IRoleService
+   IIamEventPublisher eventPublisher,
+   IEventPublisher? sharedEventPublisher = null) : BaseService(userContext, sharedEventPublisher), IRoleService
 {
    private readonly IIamUnitOfWork _iamUnitOfWork = iamUnitOfWork;
    private readonly IRoleValidator _roleValidator = roleValidator;
