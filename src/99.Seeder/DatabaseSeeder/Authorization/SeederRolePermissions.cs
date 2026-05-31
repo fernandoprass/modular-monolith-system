@@ -155,6 +155,7 @@ public class SeederRolePermissions(
          IamPermission.Users.List,
          IamPermission.Users.View,
          IamPermission.Users.Create,
+         IamPermission.Users.UpdateOrganizationAdmin,
       ];
 
       organizationPermissions.AddRange(GetIamUserPermissions());

@@ -220,6 +220,131 @@ public class UserServiceTests
    }
 
    [Fact]
+   public async Task UpdateOrganizationAdminAsync_ShouldUpdateAndAudit_WhenUserIsSystemAdmin()
+   {
+      var request = new UserUpdateOrganizationAdminRequest(true);
+      var user = User.Create("Name", "test@test.com", "hash", DateTime.UtcNow, Guid.NewGuid());
+
+      _userContextMock.IsSystemAdmin.Returns(true);
+      _userRepositoryMock.GetByIdAsync(user.Id, Arg.Any<CancellationToken>()).Returns(user);
+      _userValidatorMock.ValidateUpdateOrganizationAdmin(
+         user,
+         true,
+         Arg.Any<bool>(),
+         Arg.Any<Guid>(),
+         request)
+         .Returns(Result.Success());
+
+      var result = await _userService.UpdateOrganizationAdminAsync(user.Id, request, TestContext.Current.CancellationToken);
+
+      result.IsSuccess.Should().BeTrue();
+      user.IsOrganizationAdmin.Should().BeTrue();
+      await _unitOfWorkMock.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+      await _eventPublisherMock.Received(1).NotifyAuditLogAsync(
+         IamConst.Logger.Feature.Users,
+         IamConst.Logger.Action.UpdateOrganizationAdmin,
+         AuditPrivacyLevel.High,
+         Arg.Any<string>(),
+         user.Id,
+         Arg.Any<object>(),
+         Arg.Any<CancellationToken>());
+   }
+
+   [Fact]
+   public async Task UpdateOrganizationAdminAsync_ShouldUpdateAndAudit_WhenUserIsOrganizationAdminForSameOrganization()
+   {
+      var organizationId = _userContextMock.UserOwnerId;
+      var request = new UserUpdateOrganizationAdminRequest(true);
+      var user = User.Create("Name", "test@test.com", "hash", DateTime.UtcNow, organizationId);
+
+      _userContextMock.IsSystemAdmin.Returns(false);
+      _userContextMock.IsOrganizationAdmin.Returns(true);
+      _userRepositoryMock.GetByIdAsync(user.Id, Arg.Any<CancellationToken>()).Returns(user);
+      _userValidatorMock.ValidateUpdateOrganizationAdmin(
+         user,
+         false,
+         true,
+         organizationId,
+         request)
+         .Returns(Result.Success());
+
+      var result = await _userService.UpdateOrganizationAdminAsync(user.Id, request, TestContext.Current.CancellationToken);
+
+      result.IsSuccess.Should().BeTrue();
+      user.IsOrganizationAdmin.Should().BeTrue();
+      await _unitOfWorkMock.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+   }
+
+   [Fact]
+   public async Task UpdateOrganizationAdminAsync_ShouldReturnForbidden_WhenCurrentUserIsNotAdmin()
+   {
+      var request = new UserUpdateOrganizationAdminRequest(true);
+
+      _userContextMock.IsSystemAdmin.Returns(false);
+      _userContextMock.IsOrganizationAdmin.Returns(false);
+      _userValidatorMock.ValidateUpdateOrganizationAdmin(
+         null,
+         false,
+         false,
+         _userContextMock.UserOwnerId,
+         request)
+         .Returns(Result.Failure(new Shared.Domain.Messages.UnauthorizedAccessError()));
+
+      var result = await _userService.UpdateOrganizationAdminAsync(Guid.NewGuid(), request, TestContext.Current.CancellationToken);
+
+      result.IsSuccess.Should().BeFalse();
+      result.Messages.Should().ContainSingle(m => m is Shared.Domain.Messages.UnauthorizedAccessError);
+      await _unitOfWorkMock.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
+   }
+
+   [Fact]
+   public async Task UpdateOrganizationAdminAsync_ShouldReturnForbidden_WhenOrganizationAdminUpdatesAnotherOrganization()
+   {
+      var request = new UserUpdateOrganizationAdminRequest(true);
+      var user = User.Create("Name", "test@test.com", "hash", DateTime.UtcNow, Guid.NewGuid());
+
+      _userContextMock.IsSystemAdmin.Returns(false);
+      _userContextMock.IsOrganizationAdmin.Returns(true);
+      _userRepositoryMock.GetByIdAsync(user.Id, Arg.Any<CancellationToken>()).Returns(user);
+      _userValidatorMock.ValidateUpdateOrganizationAdmin(
+         user,
+         false,
+         true,
+         _userContextMock.UserOwnerId,
+         request)
+         .Returns(Result.Failure(new Shared.Domain.Messages.UnauthorizedAccessError()));
+
+      var result = await _userService.UpdateOrganizationAdminAsync(user.Id, request, TestContext.Current.CancellationToken);
+
+      result.IsSuccess.Should().BeFalse();
+      result.Messages.Should().ContainSingle(m => m is Shared.Domain.Messages.UnauthorizedAccessError);
+      await _unitOfWorkMock.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
+   }
+
+   [Fact]
+   public async Task UpdateOrganizationAdminAsync_ShouldReturnNotFound_WhenUserDoesNotExist()
+   {
+      var request = new UserUpdateOrganizationAdminRequest(true);
+      var userId = Guid.NewGuid();
+
+      _userContextMock.IsSystemAdmin.Returns(true);
+      _userRepositoryMock.GetByIdAsync(userId, Arg.Any<CancellationToken>()).Returns((User?)null);
+      _userValidatorMock.ValidateUpdateOrganizationAdmin(
+         null,
+         true,
+         Arg.Any<bool>(),
+         Arg.Any<Guid>(),
+         request)
+         .Returns(Result.Failure(new Shared.Domain.Messages.NotFoundError(IamConst.Entity.User)));
+
+      var result = await _userService.UpdateOrganizationAdminAsync(userId, request, TestContext.Current.CancellationToken);
+
+      result.IsSuccess.Should().BeFalse();
+      result.Messages.Should().ContainSingle(m => m is Shared.Domain.Messages.NotFoundError);
+      await _unitOfWorkMock.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
+   }
+
+   [Fact]
    public async Task UpdateLastLoginAsync_ShouldUpdateTimestampAndSave()
    {
       var userId = Guid.NewGuid();

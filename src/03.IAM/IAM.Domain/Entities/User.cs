@@ -59,6 +59,11 @@ public class User : EntityAudited
       PasswordExpiresAt = expiresAt;
    }
 
+   public void UpdateOrganizationAdmin(bool isOrganizationAdmin)
+   {
+      IsOrganizationAdmin = isOrganizationAdmin;
+   }
+
    public void RegisterLastSuccessfullyLogin()
    {
       LastLoginAt = DateTime.UtcNow;

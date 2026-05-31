@@ -112,6 +112,64 @@ public class UserValidatorTests
       Assert.Contains(result.Messages, m => m is NotFoundError);
    }
 
+   [Fact]
+   public void ValidateUpdateOrganizationAdmin_ShouldBeSuccess_WhenUserIsSystemAdmin()
+   {
+      var user = User.Create("User Test", "test@email.com", "hash", DateTime.UtcNow.AddDays(30), Guid.NewGuid());
+      var request = new UserUpdateOrganizationAdminRequest(true);
+
+      var result = _validator.ValidateUpdateOrganizationAdmin(user, true, false, Guid.NewGuid(), request);
+
+      result.IsSuccess.Should().BeTrue();
+   }
+
+   [Fact]
+   public void ValidateUpdateOrganizationAdmin_ShouldBeSuccess_WhenUserIsOrganizationAdminForSameOrganization()
+   {
+      var organizationId = Guid.NewGuid();
+      var user = User.Create("User Test", "test@email.com", "hash", DateTime.UtcNow.AddDays(30), organizationId);
+      var request = new UserUpdateOrganizationAdminRequest(true);
+
+      var result = _validator.ValidateUpdateOrganizationAdmin(user, false, true, organizationId, request);
+
+      result.IsSuccess.Should().BeTrue();
+   }
+
+   [Fact]
+   public void ValidateUpdateOrganizationAdmin_ShouldHaveError_WhenTargetUserNotFound()
+   {
+      var request = new UserUpdateOrganizationAdminRequest(true);
+
+      var result = _validator.ValidateUpdateOrganizationAdmin(null, true, false, Guid.NewGuid(), request);
+
+      result.IsSuccess.Should().BeFalse();
+      result.Messages.Should().Contain(m => m is NotFoundError);
+   }
+
+   [Fact]
+   public void ValidateUpdateOrganizationAdmin_ShouldHaveError_WhenCurrentUserIsNotAdmin()
+   {
+      var user = User.Create("User Test", "test@email.com", "hash", DateTime.UtcNow.AddDays(30), Guid.NewGuid());
+      var request = new UserUpdateOrganizationAdminRequest(true);
+
+      var result = _validator.ValidateUpdateOrganizationAdmin(user, false, false, user.OrganizationId, request);
+
+      result.IsSuccess.Should().BeFalse();
+      result.Messages.Should().Contain(m => m is Domain.Messages.UnauthorizedAccessError);
+   }
+
+   [Fact]
+   public void ValidateUpdateOrganizationAdmin_ShouldHaveError_WhenOrganizationAdminUpdatesAnotherOrganization()
+   {
+      var user = User.Create("User Test", "test@email.com", "hash", DateTime.UtcNow.AddDays(30), Guid.NewGuid());
+      var request = new UserUpdateOrganizationAdminRequest(true);
+
+      var result = _validator.ValidateUpdateOrganizationAdmin(user, false, true, Guid.NewGuid(), request);
+
+      result.IsSuccess.Should().BeFalse();
+      result.Messages.Should().Contain(m => m is Domain.Messages.UnauthorizedAccessError);
+   }
+
    [Theory]
    [InlineData("Valid User", "test@domain.com", "Pass123!", false, true)]      // Case 1: Everything is valid and email is unique 
    [InlineData("Valid User", "duplicate@domain.com", "Pass123!", true, false)] // Case 2: Data is valid but email ALREADY exists in the database

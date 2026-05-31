@@ -193,7 +193,7 @@ public class PermissionServiceTests
          CreatePermissionDto("update")
       };
 
-      _permissionQueryRepositoryMock.GetByParams(request, _userContextMock, Arg.Any<CancellationToken>()).Returns(permissions);
+      _permissionQueryRepositoryMock.GetByParams(request, Arg.Any<CancellationToken>()).Returns(permissions);
 
       var result = await _permissionService.GetByParams(request);
 

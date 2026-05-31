@@ -9,9 +9,10 @@ using static IAM.Domain.IamPermission;
 
 namespace IAM.Infrastructure.QueryRepositories;
 
-public class PermissionQueryRepository(IamDbContext dbContext) : IPermissionQueryRepository
+public class PermissionQueryRepository(IamDbContext dbContext, IUserContext userContext) : IPermissionQueryRepository
 {
    private readonly IamDbContext _dbContext = dbContext;
+   private readonly IUserContext _userContext = userContext;
 
    public async Task<PermissionDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
    {
@@ -22,16 +23,16 @@ public class PermissionQueryRepository(IamDbContext dbContext) : IPermissionQuer
       return permission?.ToPermissionDto();
    }
 
-   public async Task<IEnumerable<PermissionDto>> GetByParams(PermissionSearchRequest request, IUserContext userContext, CancellationToken cancellationToken = default)
+   public async Task<IEnumerable<PermissionDto>> GetByParams(PermissionSearchRequest request, CancellationToken cancellationToken = default)
    {
       var query = _dbContext.Permissions.AsNoTracking();
 
-      if (!userContext.IsSystemAdmin)
+      if (!_userContext.IsSystemAdmin)
       {
             query = from p in query
                     join rp in _dbContext.RolePermissions on p.Id equals rp.PermissionId
                     where rp.RoleId == (request.roleId.HasValue ? request.roleId : rp.RoleId) &&
-                          p.RolePermissions.Any(rp => rp.Role.UserRoles.Any(ur => ur.UserId == userContext.UserId))
+                          p.RolePermissions.Any(rp => rp.Role.UserRoles.Any(ur => ur.UserId == _userContext.UserId))
                     select p;
       }
 

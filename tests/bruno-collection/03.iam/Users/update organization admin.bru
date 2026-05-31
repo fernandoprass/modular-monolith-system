@@ -1,0 +1,21 @@
+meta {
+  name: update organization admin
+  type: http
+  seq: 9
+}
+
+patch {
+  url: {{host.iam}}/api/{{version}}/iam/users/{{userId}}/organization-admin
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "isOrganizationAdmin": true
+  }
+}

@@ -175,6 +175,41 @@ public class UserService(
       return result;
    }
 
+   public async Task<Result> UpdateOrganizationAdminAsync(Guid id, UserUpdateOrganizationAdminRequest request, CancellationToken cancellationToken = default)
+   {
+      var user = await _userRepository.GetByIdAsync(id, cancellationToken);
+
+      var validation = _userValidator.ValidateUpdateOrganizationAdmin(
+         user,
+         _userContext.IsSystemAdmin,
+         _userContext.IsOrganizationAdmin,
+         _userContext.UserOwnerId,
+         request);
+
+      if (validation.HasError)
+      {
+         return Result.Failure(validation.Messages);
+      }
+
+      user.UpdateOrganizationAdmin(request.IsOrganizationAdmin);
+
+      var result = await CommitUpdateAsync(user, cancellationToken);
+
+      if (result.IsSuccess)
+      {
+         await _eventPublisher.NotifyAuditLogAsync(
+            IamConst.Logger.Feature.Users,
+            IamConst.Logger.Action.UpdateOrganizationAdmin,
+            AuditPrivacyLevel.High,
+            $"Updated user organization admin flag {user.Id}",
+            user.Id,
+            new { user.Id, user.Email, request.IsOrganizationAdmin },
+            cancellationToken);
+      }
+
+      return result;
+   }
+
    private async Task<DateTime> GetPasswordExpiresAt(CancellationToken cancellationToken)
    {
       short numberOfDay = await _parameterService.GetShortIntAsync(IamParam.Security.MaxPasswordAgeInDays, cancellationToken);

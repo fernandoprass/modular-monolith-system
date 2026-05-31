@@ -77,6 +77,16 @@ public class UserController(
       return OkOrNotFound(result);
    }
 
+   [HttpPatch("{id:guid}/organization-admin")]
+   [Authorize]
+   [RequirePermission(IamPermission.Users.UpdateOrganizationAdmin)]
+   public async Task<IActionResult> UpdateOrganizationAdmin(Guid id, [FromBody] UserUpdateOrganizationAdminRequest request, CancellationToken cancellationToken)
+   {
+      var result = await _userService.UpdateOrganizationAdminAsync(id, request, cancellationToken);
+
+      return OkOrNotFound(result);
+   }
+
    [HttpDelete("{id:guid}")]
    [Authorize]
    [RequirePermission(IamPermission.Users.Delete)]

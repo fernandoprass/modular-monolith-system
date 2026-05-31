@@ -13,6 +13,7 @@ public interface IUserService
    Task<Result<UserDto>> CreateUserAsync(UserCreateRequest request, bool organizationExists, CancellationToken cancellationToken = default);
    Task<Result> DeleteAsync(Guid id, CancellationToken cancellationToken = default);
    Task<Result> UpdateAsync(Guid id, UserUpdateRequest request, CancellationToken cancellationToken = default);
+   Task<Result> UpdateOrganizationAdminAsync(Guid id, UserUpdateOrganizationAdminRequest request, CancellationToken cancellationToken = default);
    Task<Result> UpdatePasswordAsync(Guid id, UserUpdatePasswordRequest request, CancellationToken cancellationToken = default);
    Task<Result> UpdateLastLoginAsync(Guid id, CancellationToken cancellationToken = default);
    Task<Result> UpdateFailedLoginAsync(Guid id, CancellationToken cancellationToken = default);

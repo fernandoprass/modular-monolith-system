@@ -13,4 +13,11 @@ public interface IUserValidator
    Result ValidateUpdate(Guid? id, UserUpdateRequest request);
 
    Result ValidateUpdatePassword(User? user, Guid loggedUserId, UserUpdatePasswordRequest request);
+
+   Result ValidateUpdateOrganizationAdmin(
+      User? user,
+      bool isSystemAdmin,
+      bool isOrganizationAdmin,
+      Guid userOwnerId,
+      UserUpdateOrganizationAdminRequest request);
 }

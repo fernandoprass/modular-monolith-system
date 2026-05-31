@@ -70,5 +70,24 @@ public class UserValidator : IUserValidator
       return isValid ? Result.Success() : Result.Failure(validator.Messages);
    }
 
+   public Result ValidateUpdateOrganizationAdmin(
+      User? user,
+      bool isSystemAdmin,
+      bool isOrganizationAdmin,
+      Guid userOwnerId,
+      UserUpdateOrganizationAdminRequest request)
+   {
+      var isAllowedOperator = isSystemAdmin || isOrganizationAdmin;
+      var userBelongsToOperatorOrganization = isSystemAdmin || user?.OrganizationId == userOwnerId;
+
+      var validator = new FluentValidator<UserUpdateOrganizationAdminRequest>()
+         .RuleForValue(user).IsNotNull(new NotFoundError(IamConst.Entity.User))
+         .RuleForValue(isAllowedOperator).IsTrue(new Domain.Messages.UnauthorizedAccessError())
+         .RuleForValue(userBelongsToOperatorOrganization).IsTrue(new Domain.Messages.UnauthorizedAccessError());
+
+      var isValid = validator.Validate(request);
+
+      return isValid ? Result.Success() : Result.Failure(validator.Messages);
+   }
 
 }

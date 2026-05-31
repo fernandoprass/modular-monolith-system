@@ -23,6 +23,7 @@ public static class IamPermission
       public const string View = $"{Module}.{Resource}.view";
       public const string Create = $"{Module}.{Resource}.create";
       public const string Update = $"{Module}.{Resource}.update";
+      public const string UpdateOrganizationAdmin = $"{Module}.{Resource}.updateorganizationadmin";
       public const string Delete = $"{Module}.{Resource}.delete";
    }
 

@@ -106,15 +106,16 @@ public class RoleQueryRepository(IamDbContext dbContext, IUserContext userContex
    {
       var query = _dbContext.Roles.AsNoTracking();
 
-      if (!_userContext.IsSystemAdmin)
+      // 1. System Admins bypass security filters entirely
+      if (_userContext.IsSystemAdmin)
       {
-         //if user is not system admin, we need to filter roles based on user's organization and their assigned roles
-         query = from role in query
-                 join ru in _dbContext.UserRoles on role.Id equals ru.RoleId
-                 where ru.UserId == _userContext.UserId
-                 select role;
+         return query;
       }
 
-      return query;
+      // 2. Regular users must be explicitly assigned to the role.
+      //    Organization admins also get roles belonging to their organization.
+      return query.Where(role =>
+          _dbContext.UserRoles.Any(ru => ru.RoleId == role.Id && ru.UserId == _userContext.UserId) ||
+          (_userContext.IsOrganizationAdmin && role.OrganizationId == _userContext.UserOwnerId));
    }
 }
