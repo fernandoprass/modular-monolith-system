@@ -56,6 +56,42 @@ public class BaseService
       return await actionAsync(cancellationToken);
    }
 
+   /// <summary>
+   /// Validates resource ownership before executing a task that returns a single object.
+   /// </summary>
+   /// <typeparam name="T">The object type to be returned.</typeparam>
+   /// <param name="resourceOwnerId">The unique identifier of the resource owner to be validated against the current user context.</param>
+   /// <param name="actionAsync">The asynchronous function to execute if ownership validation succeeds.</param>
+   /// <param name="cancellationToken">The cancellation token.</param>
+   /// <returns></returns>
+   protected async Task<T?> ExecuteIfUserOwnSingleObjectAsync<T>(Guid? resourceOwnerId, Func<CancellationToken, Task<T?>> actionAsync, CancellationToken cancellationToken = default)
+   {
+      if (!IsUserAlllowedToAccess(resourceOwnerId))
+      {
+         return default;
+      }
+
+      return await actionAsync(cancellationToken);
+   }
+   /// <summary>
+   /// Validates resorce ownership before executing a task that returns a collection of objects.
+   /// </summary>
+   /// <typeparam name="T">The collection type to be returned.</typeparam>
+   /// <param name="resourceOwnerId">The unique identifier of the resource owner to be validated against the current user context.</param>
+   /// <param name="actionAsync">The asynchronous function to execute if ownership validation succeeds.</param>
+   /// <param name="cancellationToken">The cancellation token.</param>
+   /// <returns></returns>
+
+   protected async Task<IEnumerable<T>> ExecuteIfUserOwnsCollectionAsync<T>(Guid? resourceOwnerId, Func<CancellationToken, Task<IEnumerable<T>>> actionAsync, CancellationToken cancellationToken = default)
+   {
+      if (!IsUserAlllowedToAccess(resourceOwnerId))
+      {
+         return [];
+      }
+
+      return await actionAsync(cancellationToken);
+   }
+
    private bool IsUserAlllowedToAccess(Guid? resourceOwnerId)
    {
       return _userContext.IsSystemAdmin ||

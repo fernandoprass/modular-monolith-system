@@ -37,7 +37,9 @@ public class UserService(
 
    public async Task<UserDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
    {
-      return await _userQueryRepository.GetByIdAsync(id, cancellationToken);
+      var user = await _userQueryRepository.GetByIdAsync(id, cancellationToken);
+
+      return await ExecuteIfUserOwnSingleObjectAsync(user?.OrganizationId, _ => Task.FromResult(user), cancellationToken);
    }
 
    public async Task<UserPasswordDto?> GetByEmailWithPasswordAsync(string email, CancellationToken cancellationToken = default)
@@ -47,7 +49,10 @@ public class UserService(
 
    public async Task<IEnumerable<UserLiteDto>> GetByOrganizationIdAsync(Guid organizationId, CancellationToken cancellationToken = default)
    {
-      return await _userQueryRepository.GetByOrganizationIdAsync(organizationId, cancellationToken);
+      return await ExecuteIfUserOwnsCollectionAsync(
+         organizationId,
+         ct => _userQueryRepository.GetByOrganizationIdAsync(organizationId, ct),
+         cancellationToken);
    }
 
    public async Task<Result<UserDto>> CreateUserAsync(UserCreateRequest request,
@@ -115,7 +120,7 @@ public class UserService(
             return Result.Failure(validator.Messages);
          }
 
-         user.Update(request.Name, request.IsActive);
+         user!.Update(request.Name, request.IsActive);
 
          var result = await CommitUpdateAsync(user, ct);
 
@@ -135,11 +140,16 @@ public class UserService(
       }, cancellationToken);
    }
 
-   public async Task<Result> UpdatePasswordAsync(Guid id, UserUpdatePasswordRequest request, CancellationToken cancellationToken = default)
+   public async Task<Result> UpdateMeAsync(UserUpdateRequest request, CancellationToken cancellationToken = default)
    {
-      var user = await _userRepository.GetByIdAsync(id, cancellationToken);
+      return await UpdateAsync(_userContext.UserId, request, cancellationToken);
+   }
 
-      var validator = _userValidator.ValidateUpdatePassword(user, _userContext.UserId, request);
+   public async Task<Result> UpdatePasswordAsync(UserUpdatePasswordRequest request, CancellationToken cancellationToken = default)
+   {
+      var user = await _userRepository.GetByIdAsync(_userContext.UserId, cancellationToken);
+
+      var validator = _userValidator.ValidateUpdatePassword(user, request);
       if (validator.HasError)
       {
          return Result.Failure(validator.Messages);
@@ -179,19 +189,13 @@ public class UserService(
    {
       var user = await _userRepository.GetByIdAsync(id, cancellationToken);
 
-      var validation = _userValidator.ValidateUpdateOrganizationAdmin(
-         user,
-         _userContext.IsSystemAdmin,
-         _userContext.IsOrganizationAdmin,
-         _userContext.UserOwnerId,
-         request);
-
-      if (validation.HasError)
+      var validator = _userValidator.ValidateUpdateOrganizationAdmin(user, _userContext, request);
+      if (validator.HasError)
       {
-         return Result.Failure(validation.Messages);
+         return Result.Failure(validator.Messages);
       }
 
-      user.UpdateOrganizationAdmin(request.IsOrganizationAdmin);
+      user!.UpdateOrganizationAdmin(request.IsOrganizationAdmin);
 
       var result = await CommitUpdateAsync(user, cancellationToken);
 
@@ -252,6 +256,11 @@ public class UserService(
 
          return Result.Success(new SuccessInfo());
       }, cancellationToken);
+   }
+
+   public async Task<Result> DeleteMeAsync(CancellationToken cancellationToken = default)
+   {
+      return await DeleteAsync(_userContext.UserId, cancellationToken);
    }
 
    public async Task<Result> UpdateLastLoginAsync(Guid id, CancellationToken cancellationToken = default)

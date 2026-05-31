@@ -68,11 +68,22 @@ public class UserController(
       return OkOrNotFound(response);
    }
 
-   [HttpPatch("{id:guid}/password")]
+   [HttpPut("me")]
    [Authorize]
-   public async Task<IActionResult> UpdatePassword(Guid id, [FromBody] UserUpdatePasswordRequest request, CancellationToken cancellationToken)
+   [RequirePermission(IamPermission.Users.UpdateMe)]
+   public async Task<IActionResult> UpdateMe([FromBody] UserUpdateRequest request, CancellationToken cancellationToken)
    {
-      var result = await _userService.UpdatePasswordAsync(id, request, cancellationToken);
+      var response = await _userService.UpdateMeAsync(request, cancellationToken);
+
+      return OkOrNotFound(response);
+   }
+
+   [HttpPatch("me/password")]
+   [Authorize]
+   [RequirePermission(IamPermission.Users.UpdatePassword)]
+   public async Task<IActionResult> UpdatePassword([FromBody] UserUpdatePasswordRequest request, CancellationToken cancellationToken)
+   {
+      var result = await _userService.UpdatePasswordAsync(request, cancellationToken);
 
       return OkOrNotFound(result);
    }
@@ -93,6 +104,16 @@ public class UserController(
    public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
    {
       var response = await _userService.DeleteAsync(id, cancellationToken);
+
+      return OkOrNotFound(response);
+   }
+
+   [HttpDelete("me")]
+   [Authorize]
+   [RequirePermission(IamPermission.Users.DeleteMe)]
+   public async Task<IActionResult> DeleteMe(CancellationToken cancellationToken)
+   {
+      var response = await _userService.DeleteMeAsync(cancellationToken);
 
       return OkOrNotFound(response);
    }

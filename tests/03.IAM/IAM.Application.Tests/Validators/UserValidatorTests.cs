@@ -5,6 +5,8 @@ using IAM.Domain.DTOs.Requests;
 using IAM.Domain.Entities;
 using IAM.Domain.Messages;
 using Isopoh.Cryptography.Argon2;
+using NSubstitute;
+using Shared.Application.Contracts;
 using Shared.Domain.Messages;
 
 
@@ -69,7 +71,7 @@ public class UserValidatorTests
       var user = User.Create("User Test", "test@email.com", Argon2.Hash(oldPassword), DateTime.UtcNow.AddDays(30), Guid.NewGuid());
       var request = new UserUpdatePasswordRequest(oldPassword, "New#StrongPass88");
 
-      var result = _validator.ValidateUpdatePassword(user, user.Id, request);
+      var result = _validator.ValidateUpdatePassword(user, request);
 
       Assert.True(result.IsSuccess);
       Assert.Empty(result.Messages);
@@ -81,35 +83,10 @@ public class UserValidatorTests
       var user = User.Create("User Test", "test@email.com", Argon2.Hash("Correct#123"), DateTime.UtcNow.AddDays(30), Guid.NewGuid());
       var request = new UserUpdatePasswordRequest("Wrong#123", "New#StrongPass88");
 
-      var result = _validator.ValidateUpdatePassword(user, user.Id, request);
+      var result = _validator.ValidateUpdatePassword(user, request);
 
       Assert.False(result.IsSuccess);
       Assert.Contains(result.Messages, m => m is PasswordNotValidError);
-   }
-
-   [Fact]
-   public void ValidateUpdatePassword_ShouldHaveError_WhenUserIsDifferentOfLoggedUser()
-   {
-      var oldPassword = "Old#Password123";
-      var user = User.Create("User Test", "test@email.com", Argon2.Hash(oldPassword), DateTime.UtcNow.AddDays(30), Guid.NewGuid());
-
-      var request = new UserUpdatePasswordRequest(oldPassword, "New#StrongPass88");
-
-      var result = _validator.ValidateUpdatePassword(user, Guid.NewGuid(), request);
-
-      Assert.False(result.IsSuccess);
-      Assert.Contains(result.Messages, m => m is Domain.Messages.UnauthorizedAccessError);
-   }
-
-   [Fact]
-   public void ValidateUpdatePassword_ShouldHaveError_WhenUserNotFound()
-   {
-      var request = new UserUpdatePasswordRequest("any", "New#StrongPass88");
-
-      var result = _validator.ValidateUpdatePassword(null, Guid.NewGuid(), request);
-
-      Assert.False(result.IsSuccess);
-      Assert.Contains(result.Messages, m => m is NotFoundError);
    }
 
    [Fact]
@@ -117,8 +94,9 @@ public class UserValidatorTests
    {
       var user = User.Create("User Test", "test@email.com", "hash", DateTime.UtcNow.AddDays(30), Guid.NewGuid());
       var request = new UserUpdateOrganizationAdminRequest(true);
+      var userContext = CreateUserContext(isSystemAdmin: true, isOrganizationAdmin: false, userOwnerId: Guid.NewGuid());
 
-      var result = _validator.ValidateUpdateOrganizationAdmin(user, true, false, Guid.NewGuid(), request);
+      var result = _validator.ValidateUpdateOrganizationAdmin(user, userContext, request);
 
       result.IsSuccess.Should().BeTrue();
    }
@@ -129,8 +107,9 @@ public class UserValidatorTests
       var organizationId = Guid.NewGuid();
       var user = User.Create("User Test", "test@email.com", "hash", DateTime.UtcNow.AddDays(30), organizationId);
       var request = new UserUpdateOrganizationAdminRequest(true);
+      var userContext = CreateUserContext(isSystemAdmin: false, isOrganizationAdmin: true, userOwnerId: organizationId);
 
-      var result = _validator.ValidateUpdateOrganizationAdmin(user, false, true, organizationId, request);
+      var result = _validator.ValidateUpdateOrganizationAdmin(user, userContext, request);
 
       result.IsSuccess.Should().BeTrue();
    }
@@ -139,8 +118,9 @@ public class UserValidatorTests
    public void ValidateUpdateOrganizationAdmin_ShouldHaveError_WhenTargetUserNotFound()
    {
       var request = new UserUpdateOrganizationAdminRequest(true);
+      var userContext = CreateUserContext(isSystemAdmin: true, isOrganizationAdmin: false, userOwnerId: Guid.NewGuid());
 
-      var result = _validator.ValidateUpdateOrganizationAdmin(null, true, false, Guid.NewGuid(), request);
+      var result = _validator.ValidateUpdateOrganizationAdmin(null, userContext, request);
 
       result.IsSuccess.Should().BeFalse();
       result.Messages.Should().Contain(m => m is NotFoundError);
@@ -151,8 +131,9 @@ public class UserValidatorTests
    {
       var user = User.Create("User Test", "test@email.com", "hash", DateTime.UtcNow.AddDays(30), Guid.NewGuid());
       var request = new UserUpdateOrganizationAdminRequest(true);
+      var userContext = CreateUserContext(isSystemAdmin: false, isOrganizationAdmin: false, userOwnerId: user.OrganizationId);
 
-      var result = _validator.ValidateUpdateOrganizationAdmin(user, false, false, user.OrganizationId, request);
+      var result = _validator.ValidateUpdateOrganizationAdmin(user, userContext, request);
 
       result.IsSuccess.Should().BeFalse();
       result.Messages.Should().Contain(m => m is Domain.Messages.UnauthorizedAccessError);
@@ -163,8 +144,9 @@ public class UserValidatorTests
    {
       var user = User.Create("User Test", "test@email.com", "hash", DateTime.UtcNow.AddDays(30), Guid.NewGuid());
       var request = new UserUpdateOrganizationAdminRequest(true);
+      var userContext = CreateUserContext(isSystemAdmin: false, isOrganizationAdmin: true, userOwnerId: Guid.NewGuid());
 
-      var result = _validator.ValidateUpdateOrganizationAdmin(user, false, true, Guid.NewGuid(), request);
+      var result = _validator.ValidateUpdateOrganizationAdmin(user, userContext, request);
 
       result.IsSuccess.Should().BeFalse();
       result.Messages.Should().Contain(m => m is Domain.Messages.UnauthorizedAccessError);
@@ -208,6 +190,16 @@ public class UserValidatorTests
       error.Should().NotBeNull();
       // Ensuring the error message contains the specific email passed in the request
       result.Messages.First().Show().Should().Contain(email);
+   }
+
+   private static IUserContext CreateUserContext(bool isSystemAdmin, bool isOrganizationAdmin, Guid userOwnerId)
+   {
+      var userContext = Substitute.For<IUserContext>();
+      userContext.IsSystemAdmin.Returns(isSystemAdmin);
+      userContext.IsOrganizationAdmin.Returns(isOrganizationAdmin);
+      userContext.UserOwnerId.Returns(userOwnerId);
+
+      return userContext;
    }
 }
 

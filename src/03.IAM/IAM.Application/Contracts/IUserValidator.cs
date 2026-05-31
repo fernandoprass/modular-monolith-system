@@ -1,6 +1,7 @@
 ﻿using IAM.Domain.DTOs.Requests;
 using IAM.Domain.Entities;
 using Myce.Response;
+using Shared.Application.Contracts;
 
 namespace IAM.Application.Contracts;
 
@@ -12,12 +13,7 @@ public interface IUserValidator
 
    Result ValidateUpdate(Guid? id, UserUpdateRequest request);
 
-   Result ValidateUpdatePassword(User? user, Guid loggedUserId, UserUpdatePasswordRequest request);
+   Result ValidateUpdatePassword(User? user, UserUpdatePasswordRequest request);
 
-   Result ValidateUpdateOrganizationAdmin(
-      User? user,
-      bool isSystemAdmin,
-      bool isOrganizationAdmin,
-      Guid userOwnerId,
-      UserUpdateOrganizationAdminRequest request);
+   Result ValidateUpdateOrganizationAdmin(User? user, IUserContext userContext, UserUpdateOrganizationAdminRequest request);
 }

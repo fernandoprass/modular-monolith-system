@@ -1,10 +1,10 @@
 meta {
-  name: user logged
+  name: delete me
   type: http
-  seq: 13
+  seq: 7
 }
 
-get {
+delete {
   url: {{host.iam}}/api/{{version}}/iam/users/me
   body: json
   auth: bearer
@@ -12,11 +12,4 @@ get {
 
 auth:bearer {
   token: {{token}}
-}
-
-body:json {
-  {
-    "name": "User Test",
-    "isActive": false
-  }
 }

@@ -46,6 +46,7 @@ public class SystemLogEventFactoryTests
       public Guid UserId { get; } = userId;
       public Guid UserOwnerId { get; } = userOwnerId;
       public bool IsSystemAdmin => false;
+      public bool IsOrganizationAdmin => false;
       public bool IsAuthenticated => true;
       public string? IpAddress => "127.0.0.1";
       public string? UserAgent => "test-agent";

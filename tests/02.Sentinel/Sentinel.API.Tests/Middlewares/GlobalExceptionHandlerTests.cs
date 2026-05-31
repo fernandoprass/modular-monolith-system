@@ -137,6 +137,7 @@ public class GlobalExceptionHandlerTests
       public Guid UserId { get; } = userId;
       public Guid UserOwnerId { get; } = userOwnerId;
       public bool IsSystemAdmin => false;
+      public bool IsOrganizationAdmin => false;
       public bool IsAuthenticated => true;
       public string? Language => "en";
       public string? IpAddress => "127.0.0.1";

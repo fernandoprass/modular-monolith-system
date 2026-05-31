@@ -1,10 +1,10 @@
 meta {
-  name: user logged
+  name: update me
   type: http
-  seq: 13
+  seq: 3
 }
 
-get {
+put {
   url: {{host.iam}}/api/{{version}}/iam/users/me
   body: json
   auth: bearer
@@ -16,7 +16,7 @@ auth:bearer {
 
 body:json {
   {
-    "name": "User Test",
-    "isActive": false
+    "name": "Alan Turing",
+    "isActive": true
   }
 }

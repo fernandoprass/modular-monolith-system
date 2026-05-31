@@ -12,9 +12,11 @@ public interface IUserService
    Task<IEnumerable<UserLiteDto>> GetByOrganizationIdAsync(Guid organizationId, CancellationToken cancellationToken = default);
    Task<Result<UserDto>> CreateUserAsync(UserCreateRequest request, bool organizationExists, CancellationToken cancellationToken = default);
    Task<Result> DeleteAsync(Guid id, CancellationToken cancellationToken = default);
+   Task<Result> DeleteMeAsync(CancellationToken cancellationToken = default);
    Task<Result> UpdateAsync(Guid id, UserUpdateRequest request, CancellationToken cancellationToken = default);
+   Task<Result> UpdateMeAsync(UserUpdateRequest request, CancellationToken cancellationToken = default);
    Task<Result> UpdateOrganizationAdminAsync(Guid id, UserUpdateOrganizationAdminRequest request, CancellationToken cancellationToken = default);
-   Task<Result> UpdatePasswordAsync(Guid id, UserUpdatePasswordRequest request, CancellationToken cancellationToken = default);
+   Task<Result> UpdatePasswordAsync(UserUpdatePasswordRequest request, CancellationToken cancellationToken = default);
    Task<Result> UpdateLastLoginAsync(Guid id, CancellationToken cancellationToken = default);
    Task<Result> UpdateFailedLoginAsync(Guid id, CancellationToken cancellationToken = default);
    Task<Result> ValidateUserForNewOrganizationAsync(OrganizationUserCreateRequest request, CancellationToken cancellationToken = default);

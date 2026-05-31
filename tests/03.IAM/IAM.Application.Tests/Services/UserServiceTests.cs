@@ -142,9 +142,9 @@ public class UserServiceTests
       _userContextMock.UserId.Returns(user.Id);
       _userRepositoryMock.GetByIdAsync(user.Id, Arg.Any<CancellationToken>()).Returns(user);
       _parameterServiceMock.GetShortIntAsync(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns((short)90); // 90 days
-      _userValidatorMock.ValidateUpdatePassword(user, user.Id, request).Returns(Result.Success());
+      _userValidatorMock.ValidateUpdatePassword(user, request).Returns(Result.Success());
 
-      var result = await _userService.UpdatePasswordAsync(user.Id, request, TestContext.Current.CancellationToken);
+      var result = await _userService.UpdatePasswordAsync(request, TestContext.Current.CancellationToken);
 
       result.IsSuccess.Should().BeTrue();
       user.PasswordExpiresAt.Should().BeCloseTo(DateTime.UtcNow.AddDays(90), TimeSpan.FromSeconds(5));
@@ -167,11 +167,13 @@ public class UserServiceTests
       var user = User.Create("Name", "test@test.com", "OldHash", DateTime.UtcNow, _userContextMock.UserOwnerId);
 
       _userContextMock.UserId.Returns(Guid.NewGuid());
+      user.Id = _userContextMock.UserId;
+
       _userRepositoryMock.GetByIdAsync(user.Id, Arg.Any<CancellationToken>()).Returns(user);
       _parameterServiceMock.GetShortIntAsync(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns((short)90); // 90 days
-      _userValidatorMock.ValidateUpdatePassword(user, _userContextMock.UserId, request).Returns(Result.Failure(new Shared.Domain.Messages.UnauthorizedAccessError()));
+      _userValidatorMock.ValidateUpdatePassword(user, request).Returns(Result.Failure(new Shared.Domain.Messages.UnauthorizedAccessError()));
 
-      var result = await _userService.UpdatePasswordAsync(user.Id, request, TestContext.Current.CancellationToken);
+      var result = await _userService.UpdatePasswordAsync(request, TestContext.Current.CancellationToken);
 
       result.IsSuccess.Should().BeFalse();
       result.Messages.Should().ContainSingle(m => m is Shared.Domain.Messages.UnauthorizedAccessError);
@@ -229,9 +231,7 @@ public class UserServiceTests
       _userRepositoryMock.GetByIdAsync(user.Id, Arg.Any<CancellationToken>()).Returns(user);
       _userValidatorMock.ValidateUpdateOrganizationAdmin(
          user,
-         true,
-         Arg.Any<bool>(),
-         Arg.Any<Guid>(),
+         _userContextMock,
          request)
          .Returns(Result.Success());
 
@@ -262,9 +262,7 @@ public class UserServiceTests
       _userRepositoryMock.GetByIdAsync(user.Id, Arg.Any<CancellationToken>()).Returns(user);
       _userValidatorMock.ValidateUpdateOrganizationAdmin(
          user,
-         false,
-         true,
-         organizationId,
+         _userContextMock,
          request)
          .Returns(Result.Success());
 
@@ -284,9 +282,7 @@ public class UserServiceTests
       _userContextMock.IsOrganizationAdmin.Returns(false);
       _userValidatorMock.ValidateUpdateOrganizationAdmin(
          null,
-         false,
-         false,
-         _userContextMock.UserOwnerId,
+         _userContextMock,
          request)
          .Returns(Result.Failure(new Shared.Domain.Messages.UnauthorizedAccessError()));
 
@@ -308,9 +304,7 @@ public class UserServiceTests
       _userRepositoryMock.GetByIdAsync(user.Id, Arg.Any<CancellationToken>()).Returns(user);
       _userValidatorMock.ValidateUpdateOrganizationAdmin(
          user,
-         false,
-         true,
-         _userContextMock.UserOwnerId,
+         _userContextMock,
          request)
          .Returns(Result.Failure(new Shared.Domain.Messages.UnauthorizedAccessError()));
 
@@ -331,9 +325,7 @@ public class UserServiceTests
       _userRepositoryMock.GetByIdAsync(userId, Arg.Any<CancellationToken>()).Returns((User?)null);
       _userValidatorMock.ValidateUpdateOrganizationAdmin(
          null,
-         true,
-         Arg.Any<bool>(),
-         Arg.Any<Guid>(),
+         _userContextMock,
          request)
          .Returns(Result.Failure(new Shared.Domain.Messages.NotFoundError(IamConst.Entity.User)));
 

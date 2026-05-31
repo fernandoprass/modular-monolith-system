@@ -155,7 +155,9 @@ public class SeederRolePermissions(
          IamPermission.Users.List,
          IamPermission.Users.View,
          IamPermission.Users.Create,
-         IamPermission.Users.UpdateOrganizationAdmin,
+         IamPermission.Users.Update,
+         IamPermission.Users.Delete,
+         IamPermission.Users.UpdateOrganizationAdmin
       ];
 
       organizationPermissions.AddRange(GetIamUserPermissions());
@@ -167,8 +169,9 @@ public class SeederRolePermissions(
    {
       return
       [
-         IamPermission.Users.Update,
-         IamPermission.Users.Delete,
+         IamPermission.Users.UpdateMe,
+         IamPermission.Users.DeleteMe,
+         IamPermission.Users.UpdatePassword
       ];
    }
    #endregion
