@@ -18,7 +18,7 @@ public class EmailController(IEmailService emailService) : BaseController
    [HttpGet("")]
    [Authorize]
    [RequirePermission(CourierPermission.Emails.List)]
-   public async Task<IActionResult> GetByParams([FromBody] EmailSearchRequest request, CancellationToken cancellationToken)
+   public async Task<IActionResult> GetByParams([FromQuery] EmailSearchRequest request, CancellationToken cancellationToken)
    {
       var result = await _emailService.GetAsync(request, cancellationToken);
       return OkOrNotFound(result);

@@ -1,6 +1,7 @@
 using Courier.Domain.DTOs.Requests;
 using Courier.Domain.DTOs.Responses;
 using Courier.Domain.Entities;
+using Shared.Domain.DTOs.Responses;
 
 namespace Courier.Domain.Interfaces.Repositories;
 

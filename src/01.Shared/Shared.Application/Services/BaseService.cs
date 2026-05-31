@@ -1,16 +1,23 @@
 using Myce.Response;
 using Shared.Application.Contracts;
+using Shared.Domain;
+using Shared.Domain.Enums;
+using Shared.Domain.Events;
+using Shared.Domain.Interfaces;
 using Shared.Domain.Messages;
+using System.Text.Json;
 
 namespace Shared.Application.Services;
 
 public class BaseService
 {
    protected readonly IUserContext _userContext;
+   private readonly IEventPublisher? _eventPublisher;
 
-   protected BaseService(IUserContext userContext)
+   protected BaseService(IUserContext userContext, IEventPublisher? eventPublisher = null)
    {
       _userContext = userContext;
+      _eventPublisher = eventPublisher;
    }
 
    /// <summary>
@@ -26,6 +33,7 @@ public class BaseService
    {
       if (!IsUserAlllowedToAccess(resourceOwnerId))
       {
+         await PublishUnauthorizedResourceAccessAuditLogAsync(resourceOwnerId, cancellationToken);
          return Result.Failure(new UnauthorizedAccessError());
       }
 
@@ -46,6 +54,7 @@ public class BaseService
    {
       if (!IsUserAlllowedToAccess(resourceOwnerId))
       {
+         await PublishUnauthorizedResourceAccessAuditLogAsync(resourceOwnerId, cancellationToken);
          var result = Activator.CreateInstance<TResult>()!;
 
          result.AddMessage(new UnauthorizedAccessError());
@@ -68,6 +77,7 @@ public class BaseService
    {
       if (!IsUserAlllowedToAccess(resourceOwnerId))
       {
+         await PublishUnauthorizedResourceAccessAuditLogAsync(resourceOwnerId, cancellationToken);
          return default;
       }
 
@@ -86,6 +96,7 @@ public class BaseService
    {
       if (!IsUserAlllowedToAccess(resourceOwnerId))
       {
+         await PublishUnauthorizedResourceAccessAuditLogAsync(resourceOwnerId, cancellationToken);
          return [];
       }
 
@@ -96,5 +107,35 @@ public class BaseService
    {
       return _userContext.IsSystemAdmin ||
              (resourceOwnerId.HasValue && resourceOwnerId == _userContext.UserOwnerId);
+   }
+
+   private async Task PublishUnauthorizedResourceAccessAuditLogAsync(Guid? resourceOwnerId, CancellationToken cancellationToken)
+   {
+      if (_eventPublisher is null)
+      {
+         return;
+      }
+
+      var metadata = new
+      {
+         ResourceOwnerId = resourceOwnerId,
+         _userContext.UserOwnerId,
+         _userContext.UserId
+      };
+
+      await _eventPublisher.PublishAuditLogEventAsync(new AuditLogEvent
+      {
+         Module = SharedConst.System.ModuleName.ToLowerInvariant(),
+         Feature = SharedConst.Logger.Feature.Security,
+         Action = SharedConst.Logger.Action.UnauthorizedResourceAccess,
+         PrivacyLevel = AuditPrivacyLevel.High,
+         Description = "User tried to access a resource owned by another tenant.",
+         UserId = _userContext.UserId,
+         OrganizationId = _userContext.UserOwnerId,
+         IpAddress = _userContext.IpAddress,
+         UserAgent = _userContext.UserAgent,
+         TargetId = resourceOwnerId ?? Guid.Empty,
+         Metadata = JsonSerializer.Serialize(metadata)
+      }, cancellationToken);
    }
 }

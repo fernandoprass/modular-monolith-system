@@ -1,6 +1,7 @@
 using Myce.Response;
 using Sentinel.Domain.DTOs.Requests;
 using Sentinel.Domain.DTOs.Responses;
+using Shared.Domain.DTOs.Responses;
 
 namespace Sentinel.Application.Contracts;
 

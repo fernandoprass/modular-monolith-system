@@ -62,4 +62,21 @@ public static partial class SharedConst
       public const string ModuleName = "Shared";
       public const string DefaultLanguage = "en";
    }
+
+   public static class Logger
+   {
+      public static class Feature
+      {
+         public const string Parameters = "parameters";
+         public const string Security = "security";
+      }
+
+      public static class Action
+      {
+         public const string DeleteOverride = "delete-override";
+         public const string SaveOverride = "save-override";
+         public const string Update = "update";
+         public const string UnauthorizedResourceAccess = "unauthorized-resource-access";
+      }
+   }
 }

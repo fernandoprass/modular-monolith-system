@@ -6,20 +6,18 @@ meta {
 
 get {
   url: {{host.courier}}/api/{{version}}/templates
-  body: json
+  body: none
   auth: bearer
+}
+
+params:query {
+  ~key:
+  ~name:
+  ~type: 2
+  pageNumber: 1
+  pageSize: 25
 }
 
 auth:bearer {
   token: {{token}}
-}
-
-body:json {
-  {
-    "key": "",
-    "name" : "",
-    "type": 2,
-    "pageNumber": 1,
-    "pageSize": 25
-  }
 }

@@ -6,20 +6,18 @@ meta {
 
 get {
   url: {{host.iam}}/api/{{version}}/iam/permissions
-  body: json
+  body: none
   auth: bearer
+}
+
+params:query {
+  ~roleId: {{roleId}}
+  ~module: iam
+  ~resource: users
+  ~action: view
+  includeInactive: true
 }
 
 auth:bearer {
   token: {{token}}
-}
-
-body:json {
-  {
-    "roleId": null,
-    "module": "",
-    "resource": "",
-    "action": "",
-    "includeInactive": true
-  }
 }

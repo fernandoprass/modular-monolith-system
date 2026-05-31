@@ -6,22 +6,19 @@ meta {
 
 get {
   url: {{host.iam}}/api/{{version}}/iam/parameters
-  body: json
+  body: none
   auth: bearer
+}
+
+params:query {
+  ~module: IAM
+  ~group: Security
+  ~name:
+  ~key:
+  ~title:
+  ~description:
 }
 
 auth:bearer {
   token: {{token}}
 }
-
-body:json {
-  {
-    "module": "IAM",
-    "group": "Security",
-    "name": "",
-    "key": "",
-    "title": "",
-    "description": ""
-  }
-}
-

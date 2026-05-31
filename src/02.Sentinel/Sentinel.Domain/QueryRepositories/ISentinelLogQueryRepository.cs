@@ -1,6 +1,7 @@
 using Sentinel.Domain.DTOs.Requests;
 using Sentinel.Domain.DTOs.Responses;
 using Shared.Application.Contracts;
+using Shared.Domain.DTOs.Responses;
 
 namespace Sentinel.Domain.QueryRepositories;
 

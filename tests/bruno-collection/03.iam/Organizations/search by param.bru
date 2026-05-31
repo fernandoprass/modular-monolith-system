@@ -11,7 +11,12 @@ get {
 }
 
 params:query {
+  ~type: 1
+  ~code: sa
   ~name: sa
+  ~organizationId: {{organizationId}}
+  pageNumber: 1
+  pageSize: 25
 }
 
 auth:bearer {

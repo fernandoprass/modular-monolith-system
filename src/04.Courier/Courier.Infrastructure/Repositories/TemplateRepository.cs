@@ -6,6 +6,7 @@ using Courier.Domain.Interfaces.Repositories;
 using Courier.Domain.Mappers;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using Shared.Domain.DTOs.Responses;
 
 namespace Courier.Infrastructure.Repositories;
 
@@ -32,7 +33,7 @@ public class TemplateRepository(CourierDbContext dbContext) : ITemplateRepositor
       var totalPages = totalCount == 0 ? 0 : (int)Math.Ceiling(totalCount / (double)pageSize);
 
       return new PagedResultDto<TemplateLiteDto>(
-         templates.Select(t => t.ToTemplateLiteDto()),
+         templates.Select(t => t.ToTemplateLiteDto()).ToList(),
          pageNumber,
          pageSize,
          totalCount,

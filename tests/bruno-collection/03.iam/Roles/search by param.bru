@@ -6,23 +6,17 @@ meta {
 
 get {
   url: {{host.iam}}/api/{{version}}/iam/roles/
-  body: json
+  body: none
   auth: bearer
 }
 
 params:query {
   ~name: sys
+  ~isActive: true
+  ~userId: {{userId}}
+  ~organizationId: {{organizationId}}
 }
 
 auth:bearer {
   token: {{token}}
-}
-
-body:json {
-  {
-    "name": "",
-    "isActive": null,
-    "userId": null,
-    "organizationId" : null
-  }
 }

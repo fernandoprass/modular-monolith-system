@@ -47,7 +47,6 @@ public class UserServiceTests
           _roleServiceMock,
           _userContextMock,
           _userValidatorMock,
-          _userRepositoryMock,
           _userQueryRepositoryMock,
           _eventPublisherMock);
    }

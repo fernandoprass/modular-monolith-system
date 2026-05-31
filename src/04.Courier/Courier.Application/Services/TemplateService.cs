@@ -9,6 +9,7 @@ using Courier.Domain.Mappers;
 using Courier.Domain.Messages;
 using Myce.Response;
 using Shared.Application.Contracts;
+using Shared.Domain.DTOs.Responses;
 using Shared.Domain.Messages;
 using System.Text.RegularExpressions;
 

@@ -122,7 +122,11 @@ public class SeederRolePermissions(
    #region Iam Permissions
    private static List<string> GetIamSystemAdminPermissions()
    {
-      List<string> sysAdminPermissions = [];
+      List<string> sysAdminPermissions = [
+         IamPermission.Organizations.Create,
+         IamPermission.Organizations.List,
+         IamPermission.Permissions.Update,
+      ];
 
       sysAdminPermissions.AddRange(GetIamOrganizationPermissions());
       sysAdminPermissions.AddRange(GetIamUserPermissions());
@@ -135,8 +139,6 @@ public class SeederRolePermissions(
       List<string> organizationPermissions =
       [
          IamPermission.Organizations.View,
-         IamPermission.Organizations.List,
-         IamPermission.Organizations.Create,
          IamPermission.Organizations.Update,
          IamPermission.Organizations.Delete,
          IamPermission.Roles.View,
@@ -150,7 +152,6 @@ public class SeederRolePermissions(
          IamPermission.Parameters.SaveOverride,
          IamPermission.Parameters.DeleteOverride,
          IamPermission.Permissions.List,
-         IamPermission.Permissions.Update,
          IamPermission.Permissions.Assign,
          IamPermission.Users.List,
          IamPermission.Users.View,

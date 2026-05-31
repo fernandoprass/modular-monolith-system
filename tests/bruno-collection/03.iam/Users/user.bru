@@ -6,17 +6,10 @@ meta {
 
 get {
   url: {{host.iam}}/api/{{version}}/iam/users/{{userId}}
-  body: json
+  body: none
   auth: bearer
 }
 
 auth:bearer {
   token: {{token}}
-}
-
-body:json {
-  {
-    "name": "User Test",
-    "isActive": false
-  }
 }
