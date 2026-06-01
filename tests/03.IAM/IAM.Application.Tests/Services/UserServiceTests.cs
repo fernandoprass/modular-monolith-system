@@ -119,7 +119,7 @@ public class UserServiceTests
    }
 
    [Fact]
-   public async Task DeleteAsync_ShouldReturnForbiddenOrganizationError_EvenWhenUserDoesNotExist()
+   public async Task DeleteAsync_ShouldReturnUnauthorized_WhenUserDoesNotExistAndCurrentUserIsNotSystemAdmin()
    {
       var userId = Guid.NewGuid();
       _userRepositoryMock.GetByIdAsync(userId, Arg.Any<CancellationToken>()).Returns((User)null);
@@ -130,6 +130,23 @@ public class UserServiceTests
       result.Messages.Should().ContainSingle(m => m is Shared.Domain.Messages.UnauthorizedAccessError);
 
       await _unitOfWorkMock.Users.DidNotReceive().DeleteAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>());
+   }
+
+   [Fact]
+   public async Task DeleteAsync_ShouldReturnNotFound_WhenUserDoesNotExistAndCurrentUserIsSystemAdmin()
+   {
+      var userId = Guid.NewGuid();
+
+      _userContextMock.IsSystemAdmin.Returns(true);
+      _userRepositoryMock.GetByIdAsync(userId, Arg.Any<CancellationToken>()).Returns((User?)null);
+
+      var result = await _userService.DeleteAsync(userId, TestContext.Current.CancellationToken);
+
+      result.IsSuccess.Should().BeFalse();
+      result.Messages.Should().ContainSingle(m => m is Shared.Domain.Messages.NotFoundError);
+
+      await _unitOfWorkMock.Users.DidNotReceive().DeleteAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>());
+      await _unitOfWorkMock.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
    }
 
    [Fact]

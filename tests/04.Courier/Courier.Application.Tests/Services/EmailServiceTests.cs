@@ -9,6 +9,7 @@ using FluentAssertions;
 using Myce.Response;
 using NSubstitute;
 using Shared.Application.Contracts;
+using Shared.Domain.DTOs.Responses;
 using Shared.Domain.Messages;
 
 namespace Courier.Application.Tests.Services;

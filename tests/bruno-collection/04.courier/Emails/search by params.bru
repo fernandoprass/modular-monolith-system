@@ -5,22 +5,22 @@ meta {
 }
 
 get {
-  url: {{host.courier}}/api/{{version}}/emails
+  url: {{host.courier}}/api/{{version}}/emails?pageNumber=1&pageSize=25
   body: none
   auth: bearer
 }
 
 params:query {
+  pageNumber: 1
+  pageSize: 25
   ~organizationId: {{organizationId}}
   ~userId: {{userId}}
   ~module: IAM
   ~feature: users
-  ~subject:
-  ~recipient:
-  ~dateFrom:
-  ~dateTo:
-  pageNumber: 1
-  pageSize: 25
+  ~subject: 
+  ~recipient: 
+  ~dateFrom: 
+  ~dateTo: 
 }
 
 auth:bearer {

@@ -66,12 +66,11 @@ public class Email : Entity
    {
       return retentionPolicy switch
       {
-         RetentionPolicy.Transient => CourierConst.EmailRetentionPoliciesTimeSpans.Transient,
          RetentionPolicy.Operational => CourierConst.EmailRetentionPoliciesTimeSpans.Operational,
          RetentionPolicy.Standard => CourierConst.EmailRetentionPoliciesTimeSpans.Standard,
          RetentionPolicy.Extended => CourierConst.EmailRetentionPoliciesTimeSpans.Extended,
          RetentionPolicy.Compliance => CourierConst.EmailRetentionPoliciesTimeSpans.Compliance,
-         RetentionPolicy.Permanent => CourierConst.EmailRetentionPoliciesTimeSpans.Permanent,
+         RetentionPolicy.LongTerm => CourierConst.EmailRetentionPoliciesTimeSpans.LongTerm,
          _ => CourierConst.EmailRetentionPoliciesTimeSpans.Standard
       };
    }
