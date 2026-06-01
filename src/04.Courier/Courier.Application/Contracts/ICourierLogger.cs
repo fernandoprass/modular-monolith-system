@@ -8,6 +8,7 @@ public interface ICourierLogger
       string feature,
       string action,
       AuditPrivacyLevel privacyLevel,
+      RetentionPolicy retentionPolicy,
       string description,
       Guid organizationId,
       Guid userId,

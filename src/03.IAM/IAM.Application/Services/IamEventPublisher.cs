@@ -20,25 +20,26 @@ public class IamEventPublisher(
       string feature,
       string action,
       AuditPrivacyLevel privacyLevel,
+      RetentionPolicy retentionPolicy,
       string description,
       Guid? targetId = null,
       object? metadata = null,
       CancellationToken cancellationToken = default)
    {
-      var auditLog = new AuditLogEvent
-      {
-         Module = IamConst.System.ModuleName.ToLowerInvariant(),
-         Feature = feature,
-         Action = action,
-         PrivacyLevel = privacyLevel,
-         Description = description,
-         UserId = _userContext.UserId,
-         OrganizationId = _userContext.UserOwnerId,
-         IpAddress = _userContext.IpAddress,
-         UserAgent = _userContext.UserAgent,
-         TargetId = targetId ?? Guid.Empty,
-         Metadata = JsonSerializer.Serialize(metadata ?? new { })
-      };
+      var auditLog = AuditLogEvent.Create(
+         module: IamConst.System.ModuleName.ToLowerInvariant(),
+         feature: feature,
+         action: action,
+         description: "User tried to access a resource owned by another tenant.",
+         privacyLevel: AuditPrivacyLevel.High,
+         retentionPolicy: retentionPolicy,
+         ipAddress: _userContext.IpAddress,
+         userAgent: _userContext.UserAgent,
+         userId: _userContext.UserId,
+         targetId: targetId ?? Guid.Empty,
+         organizationId: _userContext.UserOwnerId,
+         metadata: JsonSerializer.Serialize(metadata ?? new { })
+      );
 
       await _eventPublisher.PublishAuditLogEventAsync(auditLog, cancellationToken);
    }

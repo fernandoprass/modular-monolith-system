@@ -80,6 +80,7 @@ public class AuthService(
          IamConst.Logger.Feature.Authentication,
          action,
          AuditPrivacyLevel.Medium,
+         RetentionPolicy.Extended,
          description,
          user?.Id,
          metadata,

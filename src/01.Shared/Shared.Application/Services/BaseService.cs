@@ -123,19 +123,20 @@ public class BaseService
          _userContext.UserId
       };
 
-      await _eventPublisher.PublishAuditLogEventAsync(new AuditLogEvent
-      {
-         Module = SharedConst.System.ModuleName.ToLowerInvariant(),
-         Feature = SharedConst.Logger.Feature.Security,
-         Action = SharedConst.Logger.Action.UnauthorizedResourceAccess,
-         PrivacyLevel = AuditPrivacyLevel.High,
-         Description = "User tried to access a resource owned by another tenant.",
-         UserId = _userContext.UserId,
-         OrganizationId = _userContext.UserOwnerId,
-         IpAddress = _userContext.IpAddress,
-         UserAgent = _userContext.UserAgent,
-         TargetId = resourceOwnerId ?? Guid.Empty,
-         Metadata = JsonSerializer.Serialize(metadata)
-      }, cancellationToken);
+      var auditLogEvent = AuditLogEvent.Create(
+         module: SharedConst.System.ModuleName.ToLowerInvariant(),
+         feature: SharedConst.Logger.Feature.Security,
+         action: SharedConst.Logger.Action.UnauthorizedResourceAccess,
+         description: "User tried to access a resource owned by another tenant.",
+         privacyLevel: AuditPrivacyLevel.High,
+         retentionPolicy: RetentionPolicy.Compliance,
+         ipAddress: _userContext.IpAddress,
+         userAgent: _userContext.UserAgent,
+         userId: _userContext.UserId,
+         targetId: resourceOwnerId ?? Guid.Empty,
+         organizationId: _userContext.UserOwnerId,
+         metadata: JsonSerializer.Serialize(metadata));
+
+      await _eventPublisher.PublishAuditLogEventAsync(auditLogEvent, cancellationToken);
    }
 }

@@ -1,8 +1,10 @@
 using Courier.Application.Contracts;
 using Courier.Domain;
+using Shared.Application.Contracts;
 using Shared.Domain.Enums;
 using Shared.Domain.Events;
 using Shared.Domain.Interfaces;
+using System.Runtime.CompilerServices;
 using System.Text.Json;
 
 namespace Courier.Application.Services;
@@ -15,6 +17,7 @@ public class CourierLogger(IEventPublisher eventPublisher) : ICourierLogger
       string feature,
       string action,
       AuditPrivacyLevel privacyLevel,
+      RetentionPolicy retentionPolicy,
       string description,
       Guid organizationId,
       Guid userId,
@@ -22,18 +25,21 @@ public class CourierLogger(IEventPublisher eventPublisher) : ICourierLogger
       object? metadata = null,
       CancellationToken cancellationToken = default)
    {
-      var auditLog = new AuditLogEvent
-      {
-         Module = CourierConst.System.ModuleName.ToLowerInvariant(),
-         Feature = feature,
-         Action = action,
-         PrivacyLevel = privacyLevel,
-         Description = description,
-         OrganizationId = organizationId,
-         UserId = userId,
-         TargetId = targetId ?? Guid.Empty,
-         Metadata = JsonSerializer.Serialize(metadata ?? new { })
-      };
+
+      var auditLog = AuditLogEvent.Create(
+         module: CourierConst.System.ModuleName.ToLowerInvariant(),
+         feature: feature,
+         action: action,
+         description: description,
+         privacyLevel: privacyLevel,
+         retentionPolicy: retentionPolicy,
+         ipAddress: null,
+         userAgent: null,
+         userId: userId,
+         targetId: targetId ?? Guid.Empty,
+         organizationId: organizationId,
+         metadata: JsonSerializer.Serialize(metadata ?? new { })
+      );
 
       await _eventPublisher.PublishAuditLogEventAsync(auditLog, cancellationToken);
    }
