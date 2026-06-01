@@ -3,13 +3,13 @@ using Courier.Application.Services;
 using Courier.Domain.DTOs.Requests;
 using Courier.Domain.DTOs.Responses;
 using Courier.Domain.Entities;
-using Courier.Domain.Enums;
 using Courier.Domain.Interfaces.Repositories;
 using FluentAssertions;
 using Myce.Response;
 using NSubstitute;
 using Shared.Application.Contracts;
 using Shared.Domain.DTOs.Responses;
+using Shared.Domain.Enums;
 using Shared.Domain.Messages;
 
 namespace Courier.Application.Tests.Services;

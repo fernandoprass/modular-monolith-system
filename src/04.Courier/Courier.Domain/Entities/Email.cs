@@ -1,6 +1,7 @@
 using Courier.Domain.Enums;
 using Courier.Domain.ValueObjects;
 using Shared.Domain.Entities;
+using Shared.Domain.Enums;
 
 namespace Courier.Domain.Entities;
 

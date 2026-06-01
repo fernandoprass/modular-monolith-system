@@ -3,6 +3,7 @@ using Courier.Domain.DTOs.Requests;
 using Courier.Domain.Enums;
 using Courier.Domain.Messages;
 using FluentAssertions;
+using Shared.Domain.Enums;
 using Shared.Domain.Messages;
 
 namespace Courier.Application.Tests.Validators;

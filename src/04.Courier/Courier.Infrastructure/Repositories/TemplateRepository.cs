@@ -7,6 +7,7 @@ using Courier.Domain.Mappers;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using Shared.Domain.DTOs.Responses;
+using Shared.Domain.Enums;
 
 namespace Courier.Infrastructure.Repositories;
 

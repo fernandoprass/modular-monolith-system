@@ -1,4 +1,4 @@
-﻿namespace Courier.Domain.Enums
+﻿namespace Shared.Domain.Enums
 {
    public enum RetentionPolicy : byte
    {  
