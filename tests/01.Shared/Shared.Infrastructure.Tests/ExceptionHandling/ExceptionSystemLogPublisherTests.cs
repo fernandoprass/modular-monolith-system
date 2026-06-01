@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Shared.Application.Contracts;
+using Shared.Domain.Enums;
 using Shared.Domain.Events;
 using Shared.Domain.Interfaces;
 using Shared.Infrastructure.ExceptionHandling;
@@ -24,6 +25,7 @@ public class ExceptionSystemLogPublisherTests
          500,
          "request-id",
          "/api/test",
+         RetentionPolicy.Standard,
          TestContext.Current.CancellationToken);
 
       await eventPublisher.Received(1).PublishSystemLogEventAsync(
@@ -45,6 +47,7 @@ public class ExceptionSystemLogPublisherTests
          500,
          "request-id",
          "/api/test",
+         RetentionPolicy.Standard,
          TestContext.Current.CancellationToken);
 
       await act();

@@ -26,11 +26,6 @@ public static partial class SentinelConst
       public const string SystemLog = nameof(Entities.SystemLog);
    }
 
-   public static class System
-   {
-      public const string ModuleName = "Sentinel";
-   }
-
    public static class Redis
    {
       public const string AuditLogEventsStream = SharedConst.Redis.AuditLogEventsStream;
@@ -49,5 +44,31 @@ public static partial class SentinelConst
       public const int ReadBatchSize = 10;
       public const int EmptyStreamDelaySeconds = 1;
       public const int ErrorDelaySeconds = 5;
+   }
+
+   public static class RetentionPoliciesTimeSpans
+   {
+      public static class AuditLog
+      {
+         public const int Operational = 30;  // 1 month
+         public const int Standard = 90;     // 3 months
+         public const int Extended = 365;    // 1 year
+         public const int Compliance = 1825; // 5 years
+         public const int LongTerm = 3965;   // 10 years
+      }
+
+      public static class SystemLog
+      {
+         public const int Operational = 7;  // 1 week
+         public const int Standard = 30;    // 1 month
+         public const int Extended = 90;    // 3 months
+         public const int Compliance = 180; // 6 months
+         public const int LongTerm = 365;   // 1 year
+      }
+   }
+
+   public static class System
+   {
+      public const string ModuleName = "Sentinel";
    }
 }

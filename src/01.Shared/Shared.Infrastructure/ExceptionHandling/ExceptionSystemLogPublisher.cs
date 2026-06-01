@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Shared.Application.Contracts;
+using Shared.Domain.Enums;
 using Shared.Domain.Interfaces;
 
 namespace Shared.Infrastructure.ExceptionHandling;
@@ -19,6 +20,7 @@ public class ExceptionSystemLogPublisher(
       int statusCode,
       string? requestId,
       string? path,
+      RetentionPolicy retentionPolicy,
       CancellationToken cancellationToken = default)
    {
       try

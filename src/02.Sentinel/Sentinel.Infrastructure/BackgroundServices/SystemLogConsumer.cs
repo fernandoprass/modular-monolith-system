@@ -33,9 +33,9 @@ public class SystemLogConsumer(
       var propertiesJson = JsonSerializer.Serialize(systemLogEvent.Properties, JsonOptions);
       var systemLog = SystemLog.Create(
          systemLogEvent.Id,
-         systemLogEvent.CreatedAt,
          systemLogEvent.Level,
          systemLogEvent.Status,
+         systemLogEvent.RetentionPolicy,
          systemLogEvent.Source,
          systemLogEvent.Message,
          systemLogEvent.Exception,

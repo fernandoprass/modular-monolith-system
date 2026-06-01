@@ -1,5 +1,6 @@
 using Courier.Domain;
 using Microsoft.AspNetCore.Diagnostics;
+using Shared.Domain.Enums;
 using Shared.Domain.Interfaces;
 using Shared.Infrastructure.ExceptionHandling;
 
@@ -21,8 +22,9 @@ public class GlobalExceptionHandler(
 
       httpContext.Response.ContentType = "application/json";
       var exceptionResponse = ExceptionResponseFactory.Create(exception);
+      var retentionPolicy = ExceptionRetentionPolicyResolver.Resolve(exception, exceptionResponse.StatusCode);
 
-      await PublishSystemLogAsync(httpContext, exception, exceptionResponse.StatusCode, cancellationToken);
+      await PublishSystemLogAsync(httpContext, exception, exceptionResponse.StatusCode, retentionPolicy, cancellationToken);
 
       httpContext.Response.StatusCode = exceptionResponse.StatusCode;
       var response = new
@@ -39,6 +41,7 @@ public class GlobalExceptionHandler(
       HttpContext httpContext,
       Exception exception,
       int statusCode,
+      RetentionPolicy retentionPolicy,
       CancellationToken cancellationToken)
    {
       try
@@ -52,6 +55,7 @@ public class GlobalExceptionHandler(
             statusCode,
             httpContext.TraceIdentifier,
             httpContext.Request.Path.ToString(),
+            retentionPolicy,
             cancellationToken);
       }
       catch (Exception publishException)

@@ -1,3 +1,5 @@
+using Shared.Domain.Enums;
+
 namespace Shared.Domain.Interfaces;
 
 public interface IExceptionSystemLogPublisher
@@ -8,5 +10,6 @@ public interface IExceptionSystemLogPublisher
       int statusCode,
       string? requestId,
       string? path,
+      RetentionPolicy retentionPolicy,
       CancellationToken cancellationToken = default);
 }

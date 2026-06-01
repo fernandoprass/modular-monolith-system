@@ -7,19 +7,24 @@ namespace Shared.Infrastructure.Tests.ExceptionHandling;
 public class SystemLogEventFactoryTests
 {
    [Theory]
-   [InlineData(401, SystemLogStatus.Unauthorized)]
-   [InlineData(500, SystemLogStatus.Failure)]
-   public void Create_ShouldMapExceptionToSystemLogEvent(int statusCode, SystemLogStatus expectedStatus)
+   [InlineData("unauthorized", 401, SystemLogStatus.Unauthorized, RetentionPolicy.Extended)]
+   [InlineData("generic", 500, SystemLogStatus.Failure, RetentionPolicy.Operational)]
+   public void Create_ShouldMapExceptionToSystemLogEvent(
+      string exceptionType,
+      int statusCode,
+      SystemLogStatus expectedStatus,
+      RetentionPolicy expectedPolicy)
    {
       var userId = Guid.CreateVersion7();
       var organizationId = Guid.CreateVersion7();
       var userContext = new FakeUserContext(userId, organizationId);
-      var exception = new InvalidOperationException("Boom");
+      var exception = CreateException(exceptionType);
 
       var logEvent = SystemLogEventFactory.Create("IAM", exception, statusCode, "request-1", "/api/test", userContext);
 
       Assert.Equal(SystemLogLevel.Error, logEvent.Level);
       Assert.Equal(expectedStatus, logEvent.Status);
+      Assert.Equal(expectedPolicy, logEvent.RetentionPolicy);
       Assert.Equal("IAM", logEvent.Source);
       Assert.Equal(exception.Message, logEvent.Message);
       Assert.Equal(exception.GetType().Name, logEvent.Exception);
@@ -39,6 +44,15 @@ public class SystemLogEventFactoryTests
 
       Assert.Null(logEvent.UserId);
       Assert.Null(logEvent.OrganizationId);
+   }
+
+   private static Exception CreateException(string exceptionType)
+   {
+      return exceptionType switch
+      {
+         "unauthorized" => new UnauthorizedAccessException("Denied"),
+         _ => new InvalidOperationException("Boom")
+      };
    }
 
    private class FakeUserContext(Guid userId, Guid userOwnerId) : IUserContext

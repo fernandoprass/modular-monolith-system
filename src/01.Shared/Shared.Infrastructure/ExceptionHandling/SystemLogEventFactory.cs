@@ -17,10 +17,9 @@ public static class SystemLogEventFactory
    {
       return Create(
          source,
+         httpContext,
          exception,
          statusCode,
-         httpContext.TraceIdentifier,
-         httpContext.Request.Path.ToString(),
          userContext);
    }
 
@@ -32,12 +31,14 @@ public static class SystemLogEventFactory
       string? path,
       IUserContext userContext)
    {
+      var retentionPolicy = ExceptionRetentionPolicyResolver.Resolve(exception, statusCode);
+
       return new SystemLogEvent
       {
          Id = Guid.CreateVersion7(),
-         CreatedAt = DateTime.UtcNow,
          Level = SystemLogLevel.Error,
          Status = GetStatus(statusCode),
+         RetentionPolicy = retentionPolicy,
          Source = source,
          Message = exception.Message,
          Exception = exception.GetType().Name,

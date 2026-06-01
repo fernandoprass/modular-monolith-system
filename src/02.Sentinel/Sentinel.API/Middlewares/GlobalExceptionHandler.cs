@@ -55,9 +55,9 @@ public class GlobalExceptionHandler(
 
          var systemLog = SystemLog.Create(
             systemLogEvent.Id,
-            systemLogEvent.CreatedAt,
             systemLogEvent.Level,
             systemLogEvent.Status,
+            systemLogEvent.RetentionPolicy,
             systemLogEvent.Source,
             systemLogEvent.Message,
             systemLogEvent.Exception,
