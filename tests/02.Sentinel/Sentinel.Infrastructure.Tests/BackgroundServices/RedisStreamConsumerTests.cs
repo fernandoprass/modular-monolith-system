@@ -45,6 +45,54 @@ public class RedisStreamConsumerTests
       await database.Received(1).StreamAcknowledgeAsync("test-stream", "test-group", "1-0", Arg.Any<CommandFlags>());
    }
 
+   [Theory]
+   [InlineData("other.event", 1)]
+   [InlineData(TestRedisStreamConsumer.TestEventName, 999)]
+   public async Task ExecuteAsync_ShouldAcknowledgeUnsupportedEnvelope(string eventName, int version)
+   {
+      var database = Substitute.For<IDatabase>();
+      var redis = CreateRedis(database);
+      var consumer = new TestRedisStreamConsumer(redis);
+      var payload = JsonSerializer.Serialize(IntegrationEvent<TestEvent>.Create(
+         eventName,
+         version,
+         new TestEvent("created")));
+      var entry = new StreamEntry("1-0", [new NameValueEntry(SentinelConst.Redis.EventFieldName, payload)]);
+
+      await InvokeProcessEntryAsync(consumer, entry);
+
+      Assert.Empty(consumer.ProcessedEvents);
+      await database.Received(1).StreamAcknowledgeAsync("test-stream", "test-group", "1-0", Arg.Any<CommandFlags>());
+   }
+
+   [Fact]
+   public async Task ExecuteAsync_ShouldAcknowledgeNullEnvelope()
+   {
+      var database = Substitute.For<IDatabase>();
+      var redis = CreateRedis(database);
+      var consumer = new TestRedisStreamConsumer(redis);
+      var entry = new StreamEntry("1-0", [new NameValueEntry(SentinelConst.Redis.EventFieldName, "null")]);
+
+      await InvokeProcessEntryAsync(consumer, entry);
+
+      Assert.Empty(consumer.ProcessedEvents);
+      await database.Received(1).StreamAcknowledgeAsync("test-stream", "test-group", "1-0", Arg.Any<CommandFlags>());
+   }
+
+   [Fact]
+   public async Task ExecuteAsync_ShouldNotAcknowledgeInvalidJson()
+   {
+      var database = Substitute.For<IDatabase>();
+      var redis = CreateRedis(database);
+      var consumer = new TestRedisStreamConsumer(redis);
+      var entry = new StreamEntry("1-0", [new NameValueEntry(SentinelConst.Redis.EventFieldName, "{ invalid json")]);
+
+      await InvokeProcessEntryAsync(consumer, entry);
+
+      Assert.Empty(consumer.ProcessedEvents);
+      await database.DidNotReceive().StreamAcknowledgeAsync(Arg.Any<RedisKey>(), Arg.Any<RedisValue>(), Arg.Any<RedisValue>(), Arg.Any<CommandFlags>());
+   }
+
    [Fact]
    public async Task ExecuteAsync_ShouldNotAcknowledge_WhenProcessingFails()
    {

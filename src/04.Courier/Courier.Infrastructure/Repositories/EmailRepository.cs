@@ -4,6 +4,7 @@ using Courier.Domain.Entities;
 using Courier.Domain.Enums;
 using Courier.Domain.Interfaces.Repositories;
 using MongoDB.Driver;
+using Shared.Domain.DTOs.Responses;
 
 namespace Courier.Infrastructure.Repositories;
 

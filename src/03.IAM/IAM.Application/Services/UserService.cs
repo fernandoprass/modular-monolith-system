@@ -7,12 +7,12 @@ using IAM.Domain.Entities;
 using IAM.Domain.Interfaces;
 using IAM.Domain.Mappers;
 using IAM.Domain.QueryRepositories;
-using IAM.Domain.Repositories;
 using Isopoh.Cryptography.Argon2;
 using Myce.Response;
 using Shared.Application.Contracts;
 using Shared.Application.Services;
 using Shared.Domain.Enums;
+using Shared.Domain.Interfaces;
 using Shared.Domain.Messages;
 
 namespace IAM.Application.Services;
@@ -20,24 +20,25 @@ namespace IAM.Application.Services;
 public class UserService(
     IIamUnitOfWork iamUnitOfWork,
     IParameterService parameterService,
+    IRoleService roleService,
     IUserContext userContext,
     IUserValidator userValidator,
-    IUserRepository userRepository,
     IUserQueryRepository userQueryRepository,
-    IIamAuditLogger auditLogger,
-    IIamEmailNotifier emailNotifier) : BaseService(userContext), IUserService
+    IIamEventPublisher eventPublisher,
+    IEventPublisher? sharedEventPublisher = null) : BaseService(userContext, sharedEventPublisher), IUserService
 {
    private readonly IIamUnitOfWork _iamUnitOfWork = iamUnitOfWork;
    private readonly IParameterService _parameterService = parameterService;
+   private readonly IRoleService _roleService = roleService;
    private readonly IUserValidator _userValidator = userValidator;
-   private readonly IUserRepository _userRepository = userRepository;
    private readonly IUserQueryRepository _userQueryRepository = userQueryRepository;
-   private readonly IIamAuditLogger _auditLogger = auditLogger;
-   private readonly IIamEmailNotifier _emailNotifier = emailNotifier;
+   private readonly IIamEventPublisher _eventPublisher = eventPublisher;
 
    public async Task<UserDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
    {
-      return await _userQueryRepository.GetByIdAsync(id, cancellationToken);
+      var user = await _userQueryRepository.GetByIdAsync(id, cancellationToken);
+
+      return await ExecuteIfUserOwnSingleObjectAsync(user?.OrganizationId, _ => Task.FromResult(user), cancellationToken);
    }
 
    public async Task<UserPasswordDto?> GetByEmailWithPasswordAsync(string email, CancellationToken cancellationToken = default)
@@ -47,7 +48,10 @@ public class UserService(
 
    public async Task<IEnumerable<UserLiteDto>> GetByOrganizationIdAsync(Guid organizationId, CancellationToken cancellationToken = default)
    {
-      return await _userQueryRepository.GetByOrganizationIdAsync(organizationId, cancellationToken);
+      return await ExecuteIfUserOwnsCollectionAsync(
+         organizationId,
+         ct => _userQueryRepository.GetByOrganizationIdAsync(organizationId, ct),
+         cancellationToken);
    }
 
    public async Task<Result<UserDto>> CreateUserAsync(UserCreateRequest request,
@@ -72,10 +76,12 @@ public class UserService(
              passwordExpiresAt,
              request.OrganizationId);
 
+         await AddDefaultRolesAsync(user, ct);
+
          await _iamUnitOfWork.Users.AddAsync(user, ct);
          await _iamUnitOfWork.SaveChangesAsync(ct);
 
-         await _emailNotifier.NotifyAsync(
+         await _eventPublisher.NotifyEmailAsync(
             IamConst.EmailTemplate.UserWelcome,
             user.OrganizationId,
             user.Id,
@@ -88,9 +94,23 @@ public class UserService(
       }, cancellationToken);
    }
 
+   private async Task AddDefaultRolesAsync( User user, CancellationToken ct)
+   {
+      user.AddRole(await _parameterService.GetGuidAsync(IamParam.Role.DefaultRoleIdForNewUser, ct), null);
+
+      var rolesIds = await _roleService.GetDefaultRolesByOrganizationIdAsync(user.OrganizationId, ct);
+      if (rolesIds != null)
+      {
+         foreach (var id in rolesIds)
+         {
+            user.AddRole(id, null);
+         }
+      }
+   }
+
    public async Task<Result> UpdateAsync(Guid id, UserUpdateRequest request, CancellationToken cancellationToken = default)
    {
-      var user = await _userRepository.GetByIdAsync(id, cancellationToken);
+      var user = await _iamUnitOfWork.Users.GetByIdAsync(id, cancellationToken);
       return await ExecuteIfUserOwnsAsync(user?.OrganizationId, async (ct) =>
       {
          var validator = _userValidator.ValidateUpdate(user?.Id, request);
@@ -99,13 +119,13 @@ public class UserService(
             return Result.Failure(validator.Messages);
          }
 
-         user.Update(request.Name, request.IsActive);
+         user!.Update(request.Name, request.IsActive);
 
          var result = await CommitUpdateAsync(user, ct);
 
          if (result.IsSuccess)
          {
-            await _auditLogger.LogAsync(
+            await _eventPublisher.NotifyAuditLogAsync(
                IamConst.Logger.Feature.Users,
                IamConst.Logger.Action.Update,
                AuditPrivacyLevel.Medium,
@@ -119,11 +139,16 @@ public class UserService(
       }, cancellationToken);
    }
 
-   public async Task<Result> UpdatePasswordAsync(Guid id, UserUpdatePasswordRequest request, CancellationToken cancellationToken = default)
+   public async Task<Result> UpdateMeAsync(UserUpdateRequest request, CancellationToken cancellationToken = default)
    {
-      var user = await _userRepository.GetByIdAsync(id, cancellationToken);
+      return await UpdateAsync(_userContext.UserId, request, cancellationToken);
+   }
 
-      var validator = _userValidator.ValidateUpdatePassword(user, _userContext.UserId, request);
+   public async Task<Result> UpdatePasswordAsync(UserUpdatePasswordRequest request, CancellationToken cancellationToken = default)
+   {
+      var user = await _iamUnitOfWork.Users.GetByIdAsync(_userContext.UserId, cancellationToken);
+
+      var validator = _userValidator.ValidateUpdatePassword(user, request);
       if (validator.HasError)
       {
          return Result.Failure(validator.Messages);
@@ -137,13 +162,51 @@ public class UserService(
 
       if (result.IsSuccess)
       {
-         await _auditLogger.LogAsync(
+         await _eventPublisher.NotifyAuditLogAsync(
             IamConst.Logger.Feature.Users,
             IamConst.Logger.Action.UpdatePassword,
             AuditPrivacyLevel.High,
             $"Updated user password {user.Id}",
             user.Id,
             new { user.Id, user.Email },
+            cancellationToken);
+
+         await _eventPublisher.NotifyEmailAsync(
+            IamConst.EmailTemplate.UserPasswordUpdated,
+            user.OrganizationId,
+            user.Id,
+            user.Email,
+            IamConst.Logger.Feature.Users,
+            BuildUserTemplateValues(user),
+            cancellationToken);
+      }
+
+      return result;
+   }
+
+   public async Task<Result> UpdateOrganizationAdminAsync(Guid id, UserUpdateOrganizationAdminRequest request, CancellationToken cancellationToken = default)
+   {
+      var user = await _iamUnitOfWork.Users.GetByIdAsync(id, cancellationToken);
+
+      var validator = _userValidator.ValidateUpdateOrganizationAdmin(user, _userContext, request);
+      if (validator.HasError)
+      {
+         return Result.Failure(validator.Messages);
+      }
+
+      user!.UpdateOrganizationAdmin(request.IsOrganizationAdmin);
+
+      var result = await CommitUpdateAsync(user, cancellationToken);
+
+      if (result.IsSuccess)
+      {
+         await _eventPublisher.NotifyAuditLogAsync(
+            IamConst.Logger.Feature.Users,
+            IamConst.Logger.Action.UpdateOrganizationAdmin,
+            AuditPrivacyLevel.High,
+            $"Updated user organization admin flag {user.Id}",
+            user.Id,
+            new { user.Id, user.Email, request.IsOrganizationAdmin },
             cancellationToken);
       }
 
@@ -160,7 +223,7 @@ public class UserService(
 
    public async Task<Result> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
    {
-      var user = await _userRepository.GetByIdAsync(id, cancellationToken);
+      var user = await _iamUnitOfWork.Users.GetByIdAsync(id, cancellationToken);
 
       return await ExecuteIfUserOwnsAsync(user?.OrganizationId, async (ct) =>
       {
@@ -172,7 +235,7 @@ public class UserService(
          await _iamUnitOfWork.Users.DeleteAsync(id, ct);
          await _iamUnitOfWork.SaveChangesAsync(ct);
 
-         await _auditLogger.LogAsync(
+         await _eventPublisher.NotifyAuditLogAsync(
             IamConst.Logger.Feature.Users,
             IamConst.Logger.Action.Delete,
             AuditPrivacyLevel.High,
@@ -181,7 +244,7 @@ public class UserService(
             new { user.Id, user.Email },
             ct);
 
-         await _emailNotifier.NotifyAsync(
+         await _eventPublisher.NotifyEmailAsync(
             IamConst.EmailTemplate.UserDelete,
             user.OrganizationId,
             user.Id,
@@ -194,9 +257,14 @@ public class UserService(
       }, cancellationToken);
    }
 
+   public async Task<Result> DeleteMeAsync(CancellationToken cancellationToken = default)
+   {
+      return await DeleteAsync(_userContext.UserId, cancellationToken);
+   }
+
    public async Task<Result> UpdateLastLoginAsync(Guid id, CancellationToken cancellationToken = default)
    {
-      var user = await _userRepository.GetByIdAsync(id, cancellationToken);
+      var user = await _iamUnitOfWork.Users.GetByIdAsync(id, cancellationToken);
 
       if (user == null) return Result.Failure(new NotFoundError(IamConst.Entity.User));
 
@@ -207,7 +275,7 @@ public class UserService(
 
    public async Task<Result> UpdateFailedLoginAsync(Guid id, CancellationToken cancellationToken = default)
    {
-      var user = await _userRepository.GetByIdAsync(id, cancellationToken);
+      var user = await _iamUnitOfWork.Users.GetByIdAsync(id, cancellationToken);
 
       if (user == null) return Result.Failure(new NotFoundError(IamConst.Entity.User));
 
@@ -223,7 +291,7 @@ public class UserService(
 
       if (result.IsSuccess && !wasLocked && user.LockedOutUntil.HasValue)
       {
-         await _emailNotifier.NotifyAsync(
+         await _eventPublisher.NotifyEmailAsync(
             IamConst.EmailTemplate.UserMaxFailedLoginAttempts,
             user.OrganizationId,
             user.Id,

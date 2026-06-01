@@ -1,6 +1,7 @@
 using Courier.Domain.DTOs.Requests;
 using Courier.Domain.DTOs.Responses;
 using Myce.Response;
+using Shared.Domain.DTOs.Responses;
 
 namespace Courier.Application.Contracts;
 

@@ -12,6 +12,7 @@ using IAM.Domain.Repositories;
 using Myce.Response;
 using NSubstitute;
 using Shared.Application.Contracts;
+using Shared.Domain.DTOs.Responses;
 using Shared.Domain.Enums;
 using Shared.Domain.Messages;
 
@@ -24,7 +25,7 @@ public class OrganizationServiceTests
    private readonly IOrganizationValidator _organizationValidator;
    private readonly IIamUnitOfWork _unitOfWork;
    private readonly IUserContext _userContext;
-   private readonly IIamAuditLogger _auditLogger;
+   private readonly IIamEventPublisher _eventPublisher;
    private readonly OrganizationService _service;
 
    public OrganizationServiceTests()
@@ -34,7 +35,7 @@ public class OrganizationServiceTests
       _organizationValidator = Substitute.For<IOrganizationValidator>();
       _unitOfWork = Substitute.For<IIamUnitOfWork>();
       _userContext = Substitute.For<IUserContext>();
-      _auditLogger = Substitute.For<IIamAuditLogger>();
+      _eventPublisher = Substitute.For<IIamEventPublisher>();
 
       _service = new OrganizationService(
           _organizationQueryRepository,
@@ -42,7 +43,7 @@ public class OrganizationServiceTests
           _organizationValidator,
           _unitOfWork,
           _userContext,
-          _auditLogger);
+          _eventPublisher);
    }
 
    [Fact]
@@ -77,11 +78,13 @@ public class OrganizationServiceTests
       var id = Guid.NewGuid();
       var expected = new OrganizationDto(Id: id, Type: OrganizationType.Company, Code: "ABC", Name: "Test", Description: null, IsActive: true);
 
+      _userContext.UserOwnerId.Returns(id);
       _organizationQueryRepository.GetByIdAsync(id, Arg.Any<CancellationToken>()).Returns(expected);
 
       var result = await _service.GetByIdAsync(id, TestContext.Current.CancellationToken);
 
-      Assert.Equal(expected, result);
+      Assert.True(result.IsSuccess);
+      Assert.Equal(expected, result.Data);
    }
 
    [Fact]
@@ -94,19 +97,45 @@ public class OrganizationServiceTests
    }
 
    [Fact]
-   public async Task GetByNameAsync_WhenCalled_ReturnsIEnumerableOrganizationDto()
+   public async Task GetAsync_WhenUserIsSystemAdmin_ShouldUseRequestedFilters()
    {
-      var name = "SearchName";
-      var expected = new List<OrganizationDto>
-      {
-         new(Id: Guid.Empty, Type: OrganizationType.Company, Code: "ABC", Name: name, Description: null, IsActive: true)
-      };
+      var organizationId = Guid.NewGuid();
+      var request = new OrganizationSearchRequest(Code: "ABC", Name: "SearchName", OrganizationId: organizationId);
+      var expected = new PagedResultDto<OrganizationDto>(
+         [new(Id: organizationId, Type: OrganizationType.Company, Code: "ABC", Name: request.Name!, Description: null, IsActive: true)],
+         1,
+         25,
+         1,
+         1);
 
-      _organizationQueryRepository.GetByNameAsync(name, Arg.Any<CancellationToken>()).Returns(expected);
+      _userContext.IsSystemAdmin.Returns(true);
+      _organizationQueryRepository.GetAsync(request, Arg.Any<CancellationToken>()).Returns(expected);
 
-      var result = await _service.GetByNameAsync(name, TestContext.Current.CancellationToken);
+      var result = await _service.GetAsync(request, TestContext.Current.CancellationToken);
 
-      Assert.Equal(expected, result);
+      Assert.True(result.IsSuccess);
+      Assert.Equal(expected, result.Data);
+      await _organizationQueryRepository.Received(1).GetAsync(request, Arg.Any<CancellationToken>());
+   }
+
+   [Fact]
+   public async Task GetAsync_WhenUserIsNotSystemAdmin_ShouldForceUserOwnerId()
+   {
+      var userOwnerId = Guid.NewGuid();
+      var requestedOrganizationId = Guid.NewGuid();
+      var request = new OrganizationSearchRequest(Code: "ABC", Name: "SearchName", OrganizationId: requestedOrganizationId);
+      var expectedRequest = request with { OrganizationId = userOwnerId };
+      var expected = new PagedResultDto<OrganizationDto>([], 1, 25, 0, 0);
+
+      _userContext.IsSystemAdmin.Returns(false);
+      _userContext.UserOwnerId.Returns(userOwnerId);
+      _organizationQueryRepository.GetAsync(expectedRequest, Arg.Any<CancellationToken>()).Returns(expected);
+
+      var result = await _service.GetAsync(request, TestContext.Current.CancellationToken);
+
+      Assert.True(result.IsSuccess);
+      Assert.Equal(expected, result.Data);
+      await _organizationQueryRepository.Received(1).GetAsync(expectedRequest, Arg.Any<CancellationToken>());
    }
 
    [Fact]
@@ -126,7 +155,7 @@ public class OrganizationServiceTests
       Assert.True(result.IsSuccess);
       _unitOfWork.Organizations.Received(1).Update(organization);
       await _unitOfWork.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
-      await _auditLogger.Received(1).LogAsync(
+      await _eventPublisher.NotifyAuditLogAsync(
          IamConst.Logger.Feature.Organizations,
          IamConst.Logger.Action.Update,
          AuditPrivacyLevel.Medium,
@@ -168,7 +197,7 @@ public class OrganizationServiceTests
 
       Assert.True(result.IsSuccess);
       Assert.Equal("NEWCODE", organization.Code);
-      await _auditLogger.Received(1).LogAsync(
+      await _eventPublisher.NotifyAuditLogAsync(
          IamConst.Logger.Feature.Organizations,
          IamConst.Logger.Action.UpdateCode,
          AuditPrivacyLevel.Medium,

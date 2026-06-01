@@ -22,7 +22,7 @@ public class PermissionServiceTests
    private readonly IPermissionValidator _permissionValidatorMock;
    private readonly IPermissionQueryRepository _permissionQueryRepositoryMock;
    private readonly IRolePermissionCacheInvalidator _rolePermissionAuthorizationCacheMock;
-   private readonly IIamAuditLogger _auditLoggerMock;
+   private readonly IIamEventPublisher _eventPublisherMock;
    private readonly PermissionService _permissionService;
 
    public PermissionServiceTests()
@@ -32,7 +32,7 @@ public class PermissionServiceTests
       _permissionValidatorMock = Substitute.For<IPermissionValidator>();
       _permissionQueryRepositoryMock = Substitute.For<IPermissionQueryRepository>();
       _rolePermissionAuthorizationCacheMock = Substitute.For<IRolePermissionCacheInvalidator>();
-      _auditLoggerMock = Substitute.For<IIamAuditLogger>();
+      _eventPublisherMock = Substitute.For<IIamEventPublisher>();
 
       _permissionService = new PermissionService(
          _unitOfWorkMock,
@@ -40,7 +40,7 @@ public class PermissionServiceTests
          _permissionValidatorMock,
          _permissionQueryRepositoryMock,
          _rolePermissionAuthorizationCacheMock,
-         _auditLoggerMock);
+         _eventPublisherMock);
    }
 
    #region CreateAsync Tests
@@ -193,7 +193,7 @@ public class PermissionServiceTests
          CreatePermissionDto("update")
       };
 
-      _permissionQueryRepositoryMock.GetByParams(request, _userContextMock, Arg.Any<CancellationToken>()).Returns(permissions);
+      _permissionQueryRepositoryMock.GetByParams(request, Arg.Any<CancellationToken>()).Returns(permissions);
 
       var result = await _permissionService.GetByParams(request);
 
@@ -231,7 +231,7 @@ public class PermissionServiceTests
       _unitOfWorkMock.Roles.Received(1).Update(role);
       await _unitOfWorkMock.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
       await _rolePermissionAuthorizationCacheMock.Received(1).RemoveAsync(role.Id, Arg.Any<CancellationToken>());
-      await _auditLoggerMock.Received(1).LogAsync(
+      await _eventPublisherMock.Received(1).NotifyAuditLogAsync(
          IamConst.Logger.Feature.Permissions,
          IamConst.Logger.Action.Assign,
          AuditPrivacyLevel.High,
@@ -303,7 +303,7 @@ public class PermissionServiceTests
       _unitOfWorkMock.Roles.Received(1).Update(role);
       await _unitOfWorkMock.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
       await _rolePermissionAuthorizationCacheMock.Received(1).RemoveAsync(role.Id, Arg.Any<CancellationToken>());
-      await _auditLoggerMock.Received(1).LogAsync(
+      await _eventPublisherMock.Received(1).NotifyAuditLogAsync(
          IamConst.Logger.Feature.Permissions,
          IamConst.Logger.Action.Unassign,
          AuditPrivacyLevel.High,

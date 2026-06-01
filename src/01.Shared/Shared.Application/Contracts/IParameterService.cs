@@ -30,5 +30,7 @@ namespace Shared.Application.Contracts
       Task<decimal> GetDecimalAsync(string key, CancellationToken cancellationToken = default);
       Task<DateTime> GetDateTimeAsync(string key, CancellationToken cancellationToken = default);
       Task<string> GetStringAsync(string key, CancellationToken cancellationToken = default);
+      Task<Guid> GetGuidAsync(string key, CancellationToken cancellationToken = default);
+
    }
 }

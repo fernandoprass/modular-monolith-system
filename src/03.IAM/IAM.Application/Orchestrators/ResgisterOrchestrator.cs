@@ -13,6 +13,7 @@ using Myce.Response;
 using Shared.Application.Contracts;
 using Shared.Application.Services;
 using Shared.Domain.Enums;
+using Shared.Domain.Interfaces;
 using Shared.Domain.Messages;
 
 namespace IAM.Application.Orchestrators;
@@ -20,20 +21,21 @@ namespace IAM.Application.Orchestrators;
 public class ResgisterOrchestrator(
    IOrganizationService organizationService,
    IOrganizationQueryRepository organizationQueryRepository,
+   IParameterService parameterService,
    IUserContext userContext,
    IUserRepository userRepository,
    IUserService userService,
    IIamUnitOfWork iamUnitOfWork,
-   IIamAuditLogger auditLogger,
-   IIamEmailNotifier emailNotifier) : BaseService(userContext), IRegisterOrchestrator
+   IIamEventPublisher eventPublisher,
+   IEventPublisher? sharedEventPublisher = null) : BaseService(userContext, sharedEventPublisher), IRegisterOrchestrator
 {
    private readonly IOrganizationService _organizationService = organizationService;
    private readonly IOrganizationQueryRepository _organizationQueryRepository = organizationQueryRepository;
+   private readonly IParameterService _parameterService = parameterService;
    private readonly IUserRepository _userRepository = userRepository;
    private readonly IUserService _userService = userService;
    private readonly IIamUnitOfWork _iamUnitOfWork = iamUnitOfWork;
-   private readonly IIamAuditLogger _auditLogger = auditLogger;
-   private readonly IIamEmailNotifier _emailNotifier = emailNotifier;
+   private readonly IIamEventPublisher _eventPublisher = eventPublisher;
 
    public async Task<Result<UserDto>> RegisterUserAsync(UserCreateRequest request, CancellationToken cancellationToken = default)
    {
@@ -46,7 +48,7 @@ public class ResgisterOrchestrator(
       if (result.IsSuccess)
       {
          result.Data!.OrganizationName = organizationDto?.Name ?? string.Empty;
-         await _auditLogger.LogAsync(
+         await _eventPublisher.NotifyAuditLogAsync(
             IamConst.Logger.Feature.Users,
             IamConst.Logger.Action.Create,
             AuditPrivacyLevel.High,
@@ -78,13 +80,16 @@ public class ResgisterOrchestrator(
          return Result<OrganizationDto>.Failure(result.Messages);
       }
 
-      var user = User.Create(
+      var user = User.CreateOrganizationAdmin(
        organizationCreate.User.Name,
        organizationCreate.User.Email,
        Argon2.Hash(organizationCreate.User.Password),
        DateTime.UtcNow.AddDays(30),
+       isOrganizationAdmin: true,
        organization.Id
       );
+
+      user.AddRole(await _parameterService.GetGuidAsync(IamParam.Role.DefaultRoleIdForNewOrganization, cancellationToken), null);
 
       organization.CreatedBy = user.Id;
 
@@ -92,7 +97,7 @@ public class ResgisterOrchestrator(
       await _iamUnitOfWork.Users.AddAsync(user, cancellationToken);
       await _iamUnitOfWork.SaveChangesAsync(cancellationToken);
 
-      await _auditLogger.LogAsync(
+      await _eventPublisher.NotifyAuditLogAsync(
          IamConst.Logger.Feature.Organizations,
          IamConst.Logger.Action.Create,
          AuditPrivacyLevel.Medium,
@@ -101,21 +106,12 @@ public class ResgisterOrchestrator(
          organizationCreate,
          cancellationToken);
 
-      await _emailNotifier.NotifyAsync(
+      await _eventPublisher.NotifyEmailAsync(
          IamConst.EmailTemplate.OrganizationWelcome,
          organization.Id,
          user.Id,
          user.Email,
          IamConst.Logger.Feature.Organizations,
-         BuildOrganizationTemplateValues(organization, user),
-         cancellationToken);
-
-      await _emailNotifier.NotifyAsync(
-         IamConst.EmailTemplate.UserWelcome,
-         organization.Id,
-         user.Id,
-         user.Email,
-         IamConst.Logger.Feature.Users,
          BuildOrganizationTemplateValues(organization, user),
          cancellationToken);
 
@@ -142,7 +138,7 @@ public class ResgisterOrchestrator(
 
          await _iamUnitOfWork.SaveChangesAsync(ct);
 
-         await _auditLogger.LogAsync(
+         await _eventPublisher.NotifyAuditLogAsync(
             IamConst.Logger.Feature.Organizations,
             IamConst.Logger.Action.Delete,
             AuditPrivacyLevel.Medium,
@@ -153,7 +149,7 @@ public class ResgisterOrchestrator(
 
          foreach (var user in users)
          {
-            await _emailNotifier.NotifyAsync(
+            await _eventPublisher.NotifyEmailAsync(
                IamConst.EmailTemplate.OrganizationDelete,
                organization.Id,
                user.Id,

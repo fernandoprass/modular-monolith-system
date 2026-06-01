@@ -1,16 +1,23 @@
 using Myce.Response;
 using Shared.Application.Contracts;
+using Shared.Domain;
+using Shared.Domain.Enums;
+using Shared.Domain.Events;
+using Shared.Domain.Interfaces;
 using Shared.Domain.Messages;
+using System.Text.Json;
 
 namespace Shared.Application.Services;
 
 public class BaseService
 {
    protected readonly IUserContext _userContext;
+   private readonly IEventPublisher? _eventPublisher;
 
-   protected BaseService(IUserContext userContext)
+   protected BaseService(IUserContext userContext, IEventPublisher? eventPublisher = null)
    {
       _userContext = userContext;
+      _eventPublisher = eventPublisher;
    }
 
    /// <summary>
@@ -26,6 +33,7 @@ public class BaseService
    {
       if (!IsUserAlllowedToAccess(resourceOwnerId))
       {
+         await PublishUnauthorizedResourceAccessAuditLogAsync(resourceOwnerId, cancellationToken);
          return Result.Failure(new UnauthorizedAccessError());
       }
 
@@ -46,6 +54,7 @@ public class BaseService
    {
       if (!IsUserAlllowedToAccess(resourceOwnerId))
       {
+         await PublishUnauthorizedResourceAccessAuditLogAsync(resourceOwnerId, cancellationToken);
          var result = Activator.CreateInstance<TResult>()!;
 
          result.AddMessage(new UnauthorizedAccessError());
@@ -56,9 +65,77 @@ public class BaseService
       return await actionAsync(cancellationToken);
    }
 
+   /// <summary>
+   /// Validates resource ownership before executing a task that returns a single object.
+   /// </summary>
+   /// <typeparam name="T">The object type to be returned.</typeparam>
+   /// <param name="resourceOwnerId">The unique identifier of the resource owner to be validated against the current user context.</param>
+   /// <param name="actionAsync">The asynchronous function to execute if ownership validation succeeds.</param>
+   /// <param name="cancellationToken">The cancellation token.</param>
+   /// <returns></returns>
+   protected async Task<T?> ExecuteIfUserOwnSingleObjectAsync<T>(Guid? resourceOwnerId, Func<CancellationToken, Task<T?>> actionAsync, CancellationToken cancellationToken = default)
+   {
+      if (!IsUserAlllowedToAccess(resourceOwnerId))
+      {
+         await PublishUnauthorizedResourceAccessAuditLogAsync(resourceOwnerId, cancellationToken);
+         return default;
+      }
+
+      return await actionAsync(cancellationToken);
+   }
+   /// <summary>
+   /// Validates resorce ownership before executing a task that returns a collection of objects.
+   /// </summary>
+   /// <typeparam name="T">The collection type to be returned.</typeparam>
+   /// <param name="resourceOwnerId">The unique identifier of the resource owner to be validated against the current user context.</param>
+   /// <param name="actionAsync">The asynchronous function to execute if ownership validation succeeds.</param>
+   /// <param name="cancellationToken">The cancellation token.</param>
+   /// <returns></returns>
+
+   protected async Task<IEnumerable<T>> ExecuteIfUserOwnsCollectionAsync<T>(Guid? resourceOwnerId, Func<CancellationToken, Task<IEnumerable<T>>> actionAsync, CancellationToken cancellationToken = default)
+   {
+      if (!IsUserAlllowedToAccess(resourceOwnerId))
+      {
+         await PublishUnauthorizedResourceAccessAuditLogAsync(resourceOwnerId, cancellationToken);
+         return [];
+      }
+
+      return await actionAsync(cancellationToken);
+   }
+
    private bool IsUserAlllowedToAccess(Guid? resourceOwnerId)
    {
       return _userContext.IsSystemAdmin ||
              (resourceOwnerId.HasValue && resourceOwnerId == _userContext.UserOwnerId);
+   }
+
+   private async Task PublishUnauthorizedResourceAccessAuditLogAsync(Guid? resourceOwnerId, CancellationToken cancellationToken)
+   {
+      if (_eventPublisher is null)
+      {
+         return;
+      }
+
+      var metadata = new
+      {
+         ResourceOwnerId = resourceOwnerId,
+         _userContext.UserOwnerId,
+         _userContext.UserId
+      };
+
+      await _eventPublisher.PublishAuditLogEventAsync(new AuditLogEvent
+      {
+         Module = SharedConst.System.ModuleName.ToLowerInvariant(),
+         Feature = SharedConst.Logger.Feature.Security,
+         Action = SharedConst.Logger.Action.UnauthorizedResourceAccess,
+         PrivacyLevel = AuditPrivacyLevel.High,
+         Description = "User tried to access a resource owned by another tenant.",
+         UserId = _userContext.UserId,
+         OrganizationId = _userContext.UserOwnerId,
+         IpAddress = _userContext.IpAddress,
+         UserAgent = _userContext.UserAgent,
+         TargetId = resourceOwnerId ?? Guid.Empty,
+         Metadata = JsonSerializer.Serialize(metadata)
+      }, cancellationToken);
    }
 }

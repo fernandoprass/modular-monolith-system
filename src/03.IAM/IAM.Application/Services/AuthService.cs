@@ -25,14 +25,14 @@ public class AuthService(
    IUserService userService,
    IParameterService parameterService,
    SharedPermissionService permissionService,
-   IIamAuditLogger auditLogger,
+   IIamEventPublisher eventPublisher,
    IConfiguration configuration) : IAuthService
 {
    private readonly IRoleQueryRepository _roleQueryRepository = roleQueryRepository;
    private readonly IUserService _userService = userService;
    private readonly IParameterService _parameterService = parameterService;
    private readonly SharedPermissionService _permissionService = permissionService;
-   private readonly IIamAuditLogger _auditLogger = auditLogger;
+   private readonly IIamEventPublisher _eventPublisher = eventPublisher;
    private readonly string _jwtSecret = configuration["Jwt:Secret"] ?? "your-super-secret-jwt-key-here-make-it-long-and-secure";
 
    public async Task<Result<LoginResponse?>> LoginAsync(UserLoginRequest request, CancellationToken cancellationToken = default)
@@ -76,7 +76,7 @@ public class AuthService(
          Reasons = result.Messages.Select(message => message.GetType().Name)
       };
 
-      await _auditLogger.LogAsync(
+      await _eventPublisher.NotifyAuditLogAsync(
          IamConst.Logger.Feature.Authentication,
          action,
          AuditPrivacyLevel.Medium,
@@ -150,6 +150,7 @@ public class AuthService(
             new (JwtRegisteredClaimNames.Email, user.Email),
             new (JwtRegisteredClaimNames.Name, user.Name),
             new (SharedConst.Security.Claim.IsSystemAdmin, user.IsSystemAdmin.ToString()),
+            new (SharedConst.Security.Claim.IsOrganizationAdmin, user.IsOrganizationAdmin.ToString()),
             new (SharedConst.Security.Claim.UserOwnerId, user.OrganizationId.ToString()),
             new (JwtRegisteredClaimNames.Jti, Guid.CreateVersion7().ToString())
         };

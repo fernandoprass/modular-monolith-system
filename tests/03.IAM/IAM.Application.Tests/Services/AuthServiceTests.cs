@@ -22,7 +22,7 @@ public class AuthServiceTests
    private readonly IUserService _userServiceMock;
    private readonly IParameterService _parameterServiceMock;
    private readonly SharedPermissionService _permissionServiceMock;
-   private readonly IIamAuditLogger _auditLoggerMock;
+   private readonly IIamEventPublisher _eventPublisherMock;
    private readonly IConfiguration _configurationMock;
    private readonly AuthService _authService;
 
@@ -33,7 +33,7 @@ public class AuthServiceTests
       _configurationMock = Substitute.For<IConfiguration>();
       _parameterServiceMock = Substitute.For<IParameterService>();
       _permissionServiceMock = Substitute.For<SharedPermissionService>();
-      _auditLoggerMock = Substitute.For<IIamAuditLogger>();
+      _eventPublisherMock = Substitute.For<IIamEventPublisher>();
 
       _configurationMock["Jwt:Secret"].Returns("dummy-secret-key-with-at-least-32-characters-used-only-for-test");
       _configurationMock["Jwt:ExpirationHours"].Returns("24");
@@ -43,7 +43,7 @@ public class AuthServiceTests
          _userServiceMock,
          _parameterServiceMock,
          _permissionServiceMock,
-         _auditLoggerMock,
+         _eventPublisherMock,
          _configurationMock);
    }
 
@@ -62,7 +62,7 @@ public class AuthServiceTests
       Assert.NotNull(result.Data?.Token);
       Assert.Equal(user.Email, result.Data.User.Email);
       await _userServiceMock.Received(1).UpdateLastLoginAsync(user.Id, Arg.Any<CancellationToken>());
-      await _auditLoggerMock.Received(1).LogAsync(
+      await _eventPublisherMock.Received(1).NotifyAuditLogAsync(
          IamConst.Logger.Feature.Authentication,
          IamConst.Logger.Action.LoginSuccess,
          AuditPrivacyLevel.Medium,
@@ -105,7 +105,7 @@ public class AuthServiceTests
 
       Assert.False(result.IsSuccess);
       Assert.IsType<InvalidEmailPasswordError>(result.Messages.First());
-      await _auditLoggerMock.Received(1).LogAsync(
+      await _eventPublisherMock.Received(1).NotifyAuditLogAsync(
          IamConst.Logger.Feature.Authentication,
          IamConst.Logger.Action.LoginFail,
          AuditPrivacyLevel.Medium,
@@ -129,7 +129,7 @@ public class AuthServiceTests
 
       Assert.False(result.IsSuccess);
       Assert.IsType<InvalidEmailPasswordError>(result.Messages.First());
-      await _auditLoggerMock.Received(1).LogAsync(
+      await _eventPublisherMock.Received(1).NotifyAuditLogAsync(
          IamConst.Logger.Feature.Authentication,
          IamConst.Logger.Action.LoginFail,
          AuditPrivacyLevel.Medium,

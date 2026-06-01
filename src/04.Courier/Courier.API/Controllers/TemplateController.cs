@@ -18,7 +18,7 @@ public class TemplateController(ITemplateService templateService) : BaseControll
    [HttpGet("")]
    [Authorize]
    [RequirePermission(CourierPermission.Templates.List)]
-   public async Task<IActionResult> GetByParams([FromBody] TemplateSearchRequest request, CancellationToken cancellationToken)
+   public async Task<IActionResult> GetByParams([FromQuery] TemplateSearchRequest request, CancellationToken cancellationToken)
    {
       var result = await _templateService.GetAsync(request, cancellationToken);
       return OkOrNotFound(result);

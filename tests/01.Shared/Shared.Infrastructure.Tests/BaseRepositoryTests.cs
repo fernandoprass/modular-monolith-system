@@ -29,6 +29,17 @@ public class BaseRepositoryTests
    }
 
    [Fact]
+   public async Task GetByIdAsync_WhenEntityDoesNotExist_ShouldReturnNull()
+   {
+      using var context = new TestDbContext(_options);
+      var repository = new BaseRepository<TestEntity>(context);
+
+      var result = await repository.GetByIdAsync(Guid.NewGuid(), TestContext.Current.CancellationToken);
+
+      result.Should().BeNull();
+   }
+
+   [Fact]
    public async Task AddAsync_ShouldAddEntityToContext()
    {
       using var context = new TestDbContext(_options);
@@ -58,6 +69,18 @@ public class BaseRepositoryTests
    }
 
    [Fact]
+   public void Update_WhenEntityIsDetached_ShouldAttachAsModified()
+   {
+      using var context = new TestDbContext(_options);
+      var repository = new BaseRepository<TestEntity>(context);
+      var entity = new TestEntity { Id = Guid.NewGuid(), Name = "Detached" };
+
+      repository.Update(entity);
+
+      context.Entry(entity).State.Should().Be(EntityState.Modified);
+   }
+
+   [Fact]
    public async Task DeleteAsync_WhenEntityExists_ShouldRemoveFromContext()
    {
       using var context = new TestDbContext(_options);
@@ -70,6 +93,22 @@ public class BaseRepositoryTests
       await context.SaveChangesAsync(TestContext.Current.CancellationToken);
 
       context.TestEntities.Should().NotContain(entity);
+   }
+
+   [Fact]
+   public async Task DeleteAsync_WhenEntityDoesNotExist_ShouldNotChangeContext()
+   {
+      using var context = new TestDbContext(_options);
+      var entity = new TestEntity { Id = Guid.NewGuid(), Name = "Keep" };
+      context.TestEntities.Add(entity);
+      await context.SaveChangesAsync(TestContext.Current.CancellationToken);
+      var repository = new BaseRepository<TestEntity>(context);
+
+      await repository.DeleteAsync(Guid.NewGuid(), TestContext.Current.CancellationToken);
+      await context.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+      context.TestEntities.Should().ContainSingle();
+      context.TestEntities.Single().Name.Should().Be("Keep");
    }
 
    [Fact]
@@ -95,6 +134,21 @@ public class BaseRepositoryTests
       var exists = await repository.ExistsAsync(Guid.NewGuid(), TestContext.Current.CancellationToken);
 
       exists.Should().BeFalse();
+   }
+
+   [Fact]
+   public async Task GenericRepository_WhenEntityUsesStringId_ShouldFindEntity()
+   {
+      using var context = new TestDbContext(_options);
+      var entity = new StringIdTestEntity { Id = "key-1", Name = "String Id" };
+      context.StringIdTestEntities.Add(entity);
+      await context.SaveChangesAsync(TestContext.Current.CancellationToken);
+      var repository = new BaseRepository<StringIdTestEntity, string>(context);
+
+      var result = await repository.GetByIdAsync(entity.Id, TestContext.Current.CancellationToken);
+
+      result.Should().NotBeNull();
+      result!.Name.Should().Be("String Id");
    }
 
    [Fact]
@@ -155,14 +209,21 @@ public class BaseRepositoryTests
       public string Name { get; set; } = string.Empty;
    }
 
+   private class StringIdTestEntity : Entity<string>
+   {
+      public string Name { get; set; } = string.Empty;
+   }
+
    private class TestDbContext : DbContext
    {
       public TestDbContext(DbContextOptions<TestDbContext> options) : base(options) { }
       public DbSet<TestEntity> TestEntities { get; set; }
+      public DbSet<StringIdTestEntity> StringIdTestEntities { get; set; }
 
       protected override void OnModelCreating(ModelBuilder modelBuilder)
       {
          modelBuilder.Entity<TestEntity>().HasKey(e => e.Id);
+         modelBuilder.Entity<StringIdTestEntity>().HasKey(e => e.Id);
       }
    }
 }

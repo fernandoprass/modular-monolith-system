@@ -5,6 +5,7 @@ using Sentinel.Domain.DTOs.Responses;
 using Sentinel.Domain.Entities;
 using Sentinel.Domain.QueryRepositories;
 using Shared.Application.Contracts;
+using Shared.Domain.DTOs.Responses;
 using System.Text.RegularExpressions;
 
 namespace Sentinel.Infrastructure.QueryRepositories;
@@ -42,7 +43,7 @@ public class SentinelLogQueryRepository(SentinelDbContext dbContext) : ISentinel
          a.PrivacyLevel,
          a.Description,
          a.UserId,
-         a.TargetId));
+         a.TargetId)).ToList();
 
       return new PagedResultDto<AuditLogLiteDto>(
          items,
@@ -77,7 +78,7 @@ public class SentinelLogQueryRepository(SentinelDbContext dbContext) : ISentinel
          s.Message,
          s.RequestId,
          s.UserId,
-         s.OrganizationId));
+         s.OrganizationId)).ToList();
 
       return new PagedResultDto<SystemLogLiteDto>(
          items,

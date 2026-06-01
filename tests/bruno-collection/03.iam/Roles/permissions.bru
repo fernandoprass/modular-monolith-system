@@ -5,8 +5,8 @@ meta {
 }
 
 get {
-  url: {{host.iam}}/api/{{version}}/iam/roles/user/019dd545-247d-7ddb-aaff-edfe350859ea/permissions
-  body: json
+  url: {{host.iam}}/api/{{version}}/iam/roles/user/{{userId}}/permissions
+  body: none
   auth: bearer
 }
 

@@ -6,6 +6,7 @@ using IAM.Domain.Messages;
 using Isopoh.Cryptography.Argon2;
 using Myce.FluentValidator;
 using Myce.Response;
+using Shared.Application.Contracts;
 using Shared.Domain.Messages;
 
 namespace IAM.Application.Validators;
@@ -46,21 +47,20 @@ public class UserValidator : IUserValidator
    {
       var validator = new FluentValidator<UserUpdateRequest>()
          .RuleFor(x => x.Name).ApplyTemplate(ValidatorTemplates.NameRules)
-         .Custom(id is not null, new NotFoundError(IamConst.Entity.User));
+         .RuleForValue(id).IsNotNull(new NotFoundError(IamConst.Entity.User));
 
       var isValid = validator.Validate(request);
 
       return isValid ? Result.Success() : Result.Failure(validator.Messages);
    }
 
-   public Result ValidateUpdatePassword(User? user, Guid loggedUserId, UserUpdatePasswordRequest request)
+   public Result ValidateUpdatePassword(User? user, UserUpdatePasswordRequest request)
    {
       var isOldPasswordCorrect = user != null &&
                                  Argon2.Verify(user.PasswordHash, request.PasswordOld);
 
       var validator = new FluentValidator<UserUpdatePasswordRequest>()
          .RuleForValue(user).IsNotNull(new NotFoundError(IamConst.Entity.User))
-         .RuleForValue(user?.Id).IsEqualTo(loggedUserId, new Domain.Messages.UnauthorizedAccessError())
          .RuleFor(x => x.PasswordOld).IsRequired()
          .RuleForValue(isOldPasswordCorrect).IsTrue(new PasswordNotValidError())
          .RuleFor(x => x.PasswordNew).ApplyTemplate(ValidatorTemplates.PasswordRules);
@@ -70,5 +70,22 @@ public class UserValidator : IUserValidator
       return isValid ? Result.Success() : Result.Failure(validator.Messages);
    }
 
+   public Result ValidateUpdateOrganizationAdmin(
+      User? user,
+      IUserContext userContext,
+      UserUpdateOrganizationAdminRequest request)
+   {
+      var isAdminUser = userContext.IsSystemAdmin || userContext.IsOrganizationAdmin;
+      var userBelongsToOperatorOrganization = userContext.IsSystemAdmin || user?.OrganizationId == userContext.UserOwnerId;
+
+      var validator = new FluentValidator<UserUpdateOrganizationAdminRequest>()
+         .RuleForValue(user).IsNotNull(new NotFoundError(IamConst.Entity.User))
+         .RuleForValue(isAdminUser).IsTrue(new Domain.Messages.UnauthorizedAccessError())
+         .RuleForValue(userBelongsToOperatorOrganization).IsTrue(new Domain.Messages.UnauthorizedAccessError());
+
+      var isValid = validator.Validate(request);
+
+      return isValid ? Result.Success() : Result.Failure(validator.Messages);
+   }
 
 }

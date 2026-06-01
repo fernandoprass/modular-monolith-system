@@ -22,7 +22,7 @@ internal class ParameterService(
     IParameterOverrideRepository parameterOverrideRepository,
     IParameterQueryRepository parameterQueryRepository,
     IEventPublisher eventPublisher,
-    IParameterCacheRespository parameterValueCache) : BaseService(userContext), IParameterService
+    IParameterCacheRespository parameterValueCache) : BaseService(userContext, eventPublisher), IParameterService
 {
    private readonly ISharedUnitOfWork _unitOfWork = unitOfWork;
    private readonly IParameterValidator _parameterValidator = parameterValidator;
@@ -98,7 +98,7 @@ internal class ParameterService(
       await _parameterValueCache.RemoveOverrideAsync(parameter.Key, ownerId, cancellationToken);
 
       await PublishParameterAuditLogAsync(
-         "save-override",
+         SharedConst.Logger.Action.SaveOverride,
          $"Saved parameter override {parameter.Key}",
          parameterOverride.Id,
          request,
@@ -125,7 +125,7 @@ internal class ParameterService(
          await _parameterValueCache.RemoveOverrideAsync(parameter.Key, parameterOverride.OwnerId, ct);
 
          await PublishParameterAuditLogAsync(
-            "delete-override",
+            SharedConst.Logger.Action.DeleteOverride,
             $"Deleted parameter override {parameter.Key}",
             parameterOverride.Id,
             parameterOverride,
@@ -197,7 +197,7 @@ internal class ParameterService(
       await _parameterValueCache.RemoveAsync(parameter.Key, cancellationToken);
 
       await PublishParameterAuditLogAsync(
-         "update",
+         SharedConst.Logger.Action.Update,
          $"Updated parameter {parameter.Key}",
          parameter.Id,
          request,
@@ -259,6 +259,9 @@ internal class ParameterService(
       return await GetResolvedValueAsync(key, cancellationToken) ?? string.Empty;
    }
 
+   public Task<Guid> GetGuidAsync(string key, CancellationToken cancellationToken = default)
+      => GetAndParseAsync<Guid>(key, (string s, out Guid result) => Guid.TryParse(s, out result), cancellationToken);
+
    private delegate bool TryParseDelegate<T>(string s, out T result);
 
    private async Task<T> GetAndParseAsync<T>(string key, TryParseDelegate<T> parser, CancellationToken cancellationToken)
@@ -316,7 +319,7 @@ internal class ParameterService(
       await _eventPublisher.PublishAuditLogEventAsync(new AuditLogEvent
       {
          Module = SharedConst.System.ModuleName.ToLowerInvariant(),
-         Feature = "parameters",
+         Feature = SharedConst.Logger.Feature.Parameters,
          Action = action,
          PrivacyLevel = AuditPrivacyLevel.Medium,
          Description = description,

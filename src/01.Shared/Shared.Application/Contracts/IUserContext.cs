@@ -4,6 +4,7 @@ public interface IUserContext
 {
    bool IsAuthenticated { get; }
    bool IsSystemAdmin { get; }
+   bool IsOrganizationAdmin { get; }
    string? IpAddress { get; }
    string? UserAgent { get; }
    string Language { get; }

@@ -18,7 +18,7 @@ public class PermissionController(IPermissionService permissionService) : BaseCo
    [HttpGet]
    [Authorize]
    [RequirePermission(IamPermission.Permissions.List)]
-   public async Task<IActionResult> GetByParams(PermissionSearchRequest request, CancellationToken cancellationToken)
+   public async Task<IActionResult> GetByParams([FromQuery] PermissionSearchRequest request, CancellationToken cancellationToken)
    {
       var result = await _permissionService.GetByParams(request, cancellationToken);
       return OkOrNotFound(result);

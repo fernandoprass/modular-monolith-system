@@ -10,6 +10,7 @@ using Myce.Response;
 using Shared.Application.Contracts;
 using Shared.Application.Services;
 using Shared.Domain.Enums;
+using Shared.Domain.Interfaces;
 using Shared.Domain.Messages;
 
 namespace IAM.Application.Services;
@@ -19,16 +20,17 @@ public class RoleService(
    IUserContext userContext,
    IRoleValidator roleValidator,
    IRoleQueryRepository roleQueryRepository,
-   IIamAuditLogger auditLogger) : BaseService(userContext), IRoleService
+   IIamEventPublisher eventPublisher,
+   IEventPublisher? sharedEventPublisher = null) : BaseService(userContext, sharedEventPublisher), IRoleService
 {
    private readonly IIamUnitOfWork _iamUnitOfWork = iamUnitOfWork;
    private readonly IRoleValidator _roleValidator = roleValidator;
    private readonly IRoleQueryRepository _roleQueryRepository = roleQueryRepository;
-   private readonly IIamAuditLogger _auditLogger = auditLogger;
+   private readonly IIamEventPublisher _eventPublisher = eventPublisher;
 
    public async Task<Result<RoleDto>> CreateAsync(RoleCreateRequest request, CancellationToken cancellationToken = default)
    {
-      var nameExists = await _roleQueryRepository.NameExistsAsync(request.Name, request.OrganizationId, _userContext, cancellationToken);
+      var nameExists = await _roleQueryRepository.NameExistsAsync(request.Name, request.OrganizationId, cancellationToken);
       var validation = _roleValidator.ValidateCreate(request, nameExists);
 
       if (!validation.IsSuccess)
@@ -39,7 +41,7 @@ public class RoleService(
       await _iamUnitOfWork.Roles.AddAsync(role, cancellationToken);
       await _iamUnitOfWork.SaveChangesAsync(cancellationToken);
 
-      await _auditLogger.LogAsync(
+      await _eventPublisher.NotifyAuditLogAsync(
          IamConst.Logger.Feature.Roles,
          IamConst.Logger.Action.Create,
          AuditPrivacyLevel.Medium,
@@ -67,7 +69,7 @@ public class RoleService(
          _iamUnitOfWork.Roles.Update(role);
          await _iamUnitOfWork.SaveChangesAsync(ct);
 
-         await _auditLogger.LogAsync(
+         await _eventPublisher.NotifyAuditLogAsync(
             IamConst.Logger.Feature.Roles,
             IamConst.Logger.Action.Update,
             AuditPrivacyLevel.Medium,
@@ -109,7 +111,7 @@ public class RoleService(
          _iamUnitOfWork.Users.Update(user);
          await _iamUnitOfWork.SaveChangesAsync(ct);
 
-         await _auditLogger.LogAsync(
+         await _eventPublisher.NotifyAuditLogAsync(
             IamConst.Logger.Feature.Roles,
             IamConst.Logger.Action.Assign,
             AuditPrivacyLevel.High,
@@ -128,7 +130,7 @@ public class RoleService(
    private async Task<bool> ValidateRolesAvailability(RoleAssignRequest request, Guid organizationId, CancellationToken cancellationToken)
    {
       var requestedRoleIds = request.Roles.Select(r => r.RoleId).Distinct().ToList();
-      var numberOfRolesToAssign = await _roleQueryRepository.CountRolesByRoleIdsAsync(requestedRoleIds, organizationId, _userContext, cancellationToken);
+      var numberOfRolesToAssign = await _roleQueryRepository.CountRolesByRoleIdsAsync(requestedRoleIds, organizationId, cancellationToken);
 
       var allRequestedRolesExist = requestedRoleIds.Count == numberOfRolesToAssign;
       return allRequestedRolesExist;
@@ -157,7 +159,7 @@ public class RoleService(
          _iamUnitOfWork.Users.Update(user);
          await _iamUnitOfWork.SaveChangesAsync(ct);
 
-         await _auditLogger.LogAsync(
+         await _eventPublisher.NotifyAuditLogAsync(
             IamConst.Logger.Feature.Roles,
             IamConst.Logger.Action.Unassign,
             AuditPrivacyLevel.High,
@@ -170,9 +172,32 @@ public class RoleService(
       }, cancellationToken);
    }
 
-   public async Task<Result<IEnumerable<RoleDto>>> GetByNameAsync(string? name, CancellationToken cancellationToken = default)
+   public async Task<Result<IEnumerable<RoleDto>>> GetAsync(RoleSearchRequest request, CancellationToken cancellationToken = default)
    {
-      var roles = await _roleQueryRepository.GetByNameAsync(name, _userContext.UserOwnerId, _userContext, cancellationToken);
+      if (request.UserId.HasValue)
+      {
+         var user = await _iamUnitOfWork.Users.GetByIdAsync(request.UserId.Value, cancellationToken);
+
+         if (user == null) return Result<IEnumerable<RoleDto>>.Failure(new NotFoundError(IamConst.Entity.User));
+
+         return await ExecuteIfUserOwnsAsync(user.OrganizationId, async (ct) =>
+         {
+            var userRequest = request with
+            {
+               OrganizationId = _userContext.IsSystemAdmin ? request.OrganizationId ?? user.OrganizationId : _userContext.UserOwnerId
+            };
+
+            var userRoles = await _roleQueryRepository.GetAsync(userRequest, ct);
+            return Result<IEnumerable<RoleDto>>.Success(userRoles);
+         }, cancellationToken);
+      }
+
+      var searchRequest = request with
+      {
+         OrganizationId = _userContext.IsSystemAdmin ? request.OrganizationId : _userContext.UserOwnerId
+      };
+
+      var roles = await _roleQueryRepository.GetAsync(searchRequest, cancellationToken);
 
       return Result<IEnumerable<RoleDto>>.Success(roles);
    }
@@ -194,5 +219,10 @@ public class RoleService(
    public async Task<IEnumerable<PermissionDto>> GetPermissionsByRoleIdAsync(Guid roleId, CancellationToken cancellationToken = default)
    {
       return await _roleQueryRepository.GetPermissionsByRoleIdAsync(roleId, cancellationToken);
+   }
+
+   public async Task<IEnumerable<Guid>> GetDefaultRolesByOrganizationIdAsync(Guid organizationId, CancellationToken cancellationToken = default)
+   {
+      return await _roleQueryRepository.GetDefaultRolesByOrganizationIdAsync(organizationId, cancellationToken);
    }
 }

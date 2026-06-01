@@ -6,25 +6,10 @@ meta {
 
 get {
   url: {{host.sentinel}}/api/{{version}}/sentinel/logs/system/019e41ad-735f-7971-be8d-f6aab44976c4
-  body: json
+  body: none
   auth: bearer
 }
 
 auth:bearer {
   token: {{token}}
-}
-
-body:json {
-  {
-    "organizationId": null,
-    "userId": null,
-    "level": null,
-    "status": null,
-    "source": "",
-    "requestId": "",
-    "from": null,
-    "to": null,
-    "pageNumber": 1,
-    "pageSize": 50
-  }
 }

@@ -6,25 +6,23 @@ meta {
 
 get {
   url: {{host.sentinel}}/api/{{version}}/sentinel/logs/system
-  body: json
+  body: none
   auth: bearer
+}
+
+params:query {
+  ~organizationId: {{organizationId}}
+  ~userId: {{userId}}
+  ~level:
+  ~status:
+  ~source:
+  ~requestId:
+  ~from:
+  ~to:
+  pageNumber: 1
+  pageSize: 50
 }
 
 auth:bearer {
   token: {{token}}
-}
-
-body:json {
-  {
-    "organizationId": null,
-    "userId": null,
-    "level": null,
-    "status": null,
-    "source": "",
-    "requestId": "",
-    "from": null,
-    "to": null,
-    "pageNumber": 1,
-    "pageSize": 50
-  }
 }

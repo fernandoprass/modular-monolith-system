@@ -1,0 +1,29 @@
+meta {
+  name: login org user
+  type: http
+  seq: 11
+}
+
+post {
+  url: {{host.iam}}/api/{{version}}/iam/users/login
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "ada.lovelace@analytical.org",
+    "password": "Password123!"
+  }
+}
+
+script:post-response {
+  if (res.getStatus() === 200) {
+    const body = res.getBody();
+    if (body && body.data && body.data) {
+      bru.setVar("token", body.data.token);
+      bru.setVar("organizationId", body.data.user.organizationId);
+      bru.setVar("userId", body.data.user.id);
+    }
+  }
+}

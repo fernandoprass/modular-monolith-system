@@ -29,9 +29,9 @@ public class OrganizationController(
    [HttpGet()]
    [Authorize]
    [RequirePermission(IamPermission.Organizations.List)]
-   public async Task<IActionResult> GetByName(string name, CancellationToken cancellationToken)
+   public async Task<IActionResult> Get([FromQuery] OrganizationSearchRequest request, CancellationToken cancellationToken)
    {
-      var organization = await _organizationService.GetByNameAsync(name, cancellationToken);
+      var organization = await _organizationService.GetAsync(request, cancellationToken);
       return OkOrNotFound(organization);
    }
 

@@ -19,24 +19,24 @@ public class UserServiceTests
 {
    private readonly IIamUnitOfWork _unitOfWorkMock;
    private readonly IParameterService _parameterServiceMock;
+   private readonly IRoleService _roleServiceMock;
    private readonly IUserValidator _userValidatorMock;
    private readonly IUserContext _userContextMock;
    private readonly IUserRepository _userRepositoryMock;
    private readonly IUserQueryRepository _userQueryRepositoryMock;
-   private readonly IIamAuditLogger _auditLoggerMock;
-   private readonly IIamEmailNotifier _emailNotifierMock;
+   private readonly IIamEventPublisher _eventPublisherMock;
    private readonly UserService _userService;
 
    public UserServiceTests()
    {
       _unitOfWorkMock = Substitute.For<IIamUnitOfWork>();
       _parameterServiceMock = Substitute.For<IParameterService>();
+      _roleServiceMock = Substitute.For<IRoleService>();
       _userContextMock = Substitute.For<IUserContext>();
       _userValidatorMock = Substitute.For<IUserValidator>();
       _userRepositoryMock = Substitute.For<IUserRepository>();
       _userQueryRepositoryMock = Substitute.For<IUserQueryRepository>();
-      _auditLoggerMock = Substitute.For<IIamAuditLogger>();
-      _emailNotifierMock = Substitute.For<IIamEmailNotifier>();
+      _eventPublisherMock = Substitute.For<IIamEventPublisher>();
 
       _unitOfWorkMock.Users.Returns(_userRepositoryMock);
       _userContextMock.UserOwnerId.Returns(Guid.CreateVersion7());
@@ -44,12 +44,11 @@ public class UserServiceTests
       _userService = new UserService(
           _unitOfWorkMock,
           _parameterServiceMock,
+          _roleServiceMock,
           _userContextMock,
           _userValidatorMock,
-          _userRepositoryMock,
           _userQueryRepositoryMock,
-          _auditLoggerMock,
-          _emailNotifierMock);
+          _eventPublisherMock);
    }
 
    [Fact]
@@ -58,6 +57,8 @@ public class UserServiceTests
       var request = new UserCreateRequest(string.Empty, "test@test.com", string.Empty, Guid.NewGuid());
 
       _parameterServiceMock.GetShortIntAsync(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns((short)30);
+      _parameterServiceMock.GetGuidAsync(IamParam.Role.DefaultRoleIdForNewUser, Arg.Any<CancellationToken>()).Returns(Guid.CreateVersion7());
+      _roleServiceMock.GetDefaultRolesByOrganizationIdAsync(request.OrganizationId, Arg.Any<CancellationToken>()).Returns(new List<Guid>());
 
       var result = await _userService.CreateUserAsync(request, true, TestContext.Current.CancellationToken);
 
@@ -75,6 +76,8 @@ public class UserServiceTests
       _userQueryRepositoryMock.GetIdByEmailAsync(request.Email, Arg.Any<CancellationToken>()).Returns(Guid.NewGuid());
 
       _parameterServiceMock.GetShortIntAsync(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns((short)30);
+      _parameterServiceMock.GetGuidAsync(IamParam.Role.DefaultRoleIdForNewUser, Arg.Any<CancellationToken>()).Returns(Guid.CreateVersion7());
+      _roleServiceMock.GetDefaultRolesByOrganizationIdAsync(request.OrganizationId, Arg.Any<CancellationToken>()).Returns(new List<Guid>());
 
       _userValidatorMock.ValidateCreate(request, organizationExists: true, emailAlreadyExists: true)
           .Returns(Result.Failure(new EmailAlreadyExistError(request.Email)));
@@ -94,6 +97,8 @@ public class UserServiceTests
       _userQueryRepositoryMock.GetIdByEmailAsync(request.Email, Arg.Any<CancellationToken>()).Returns(Guid.Empty);
 
       _parameterServiceMock.GetShortIntAsync(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns((short)30);
+      _parameterServiceMock.GetGuidAsync(IamParam.Role.DefaultRoleIdForNewUser, Arg.Any<CancellationToken>()).Returns(Guid.CreateVersion7());
+      _roleServiceMock.GetDefaultRolesByOrganizationIdAsync(request.OrganizationId, Arg.Any<CancellationToken>()).Returns(new List<Guid> { Guid.CreateVersion7() });
 
       _userValidatorMock.ValidateCreate(request, organizationExists: true, emailAlreadyExists: false).Returns(Result.Success());
 
@@ -103,7 +108,7 @@ public class UserServiceTests
 
       await _unitOfWorkMock.Users.Received(1).AddAsync(Arg.Any<User>(), Arg.Any<CancellationToken>());
       await _unitOfWorkMock.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
-      await _emailNotifierMock.Received(1).NotifyAsync(
+      await _eventPublisherMock.Received(1).NotifyEmailAsync(
          IamConst.EmailTemplate.UserWelcome,
          request.OrganizationId,
          Arg.Any<Guid>(),
@@ -114,7 +119,7 @@ public class UserServiceTests
    }
 
    [Fact]
-   public async Task DeleteAsync_ShouldReturnForbiddenOrganizationError_EvenWhenUserDoesNotExist()
+   public async Task DeleteAsync_ShouldReturnUnauthorized_WhenUserDoesNotExistAndCurrentUserIsNotSystemAdmin()
    {
       var userId = Guid.NewGuid();
       _userRepositoryMock.GetByIdAsync(userId, Arg.Any<CancellationToken>()).Returns((User)null);
@@ -128,6 +133,23 @@ public class UserServiceTests
    }
 
    [Fact]
+   public async Task DeleteAsync_ShouldReturnNotFound_WhenUserDoesNotExistAndCurrentUserIsSystemAdmin()
+   {
+      var userId = Guid.NewGuid();
+
+      _userContextMock.IsSystemAdmin.Returns(true);
+      _userRepositoryMock.GetByIdAsync(userId, Arg.Any<CancellationToken>()).Returns((User?)null);
+
+      var result = await _userService.DeleteAsync(userId, TestContext.Current.CancellationToken);
+
+      result.IsSuccess.Should().BeFalse();
+      result.Messages.Should().ContainSingle(m => m is Shared.Domain.Messages.NotFoundError);
+
+      await _unitOfWorkMock.Users.DidNotReceive().DeleteAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>());
+      await _unitOfWorkMock.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
+   }
+
+   [Fact]
    public async Task UpdatePasswordAsync_ShouldUpdateHashAndExpiration_WhenRequestIsValid()
    {
       var request = new UserUpdatePasswordRequest("OldPass123", "NewSecurePass123");
@@ -136,14 +158,14 @@ public class UserServiceTests
       _userContextMock.UserId.Returns(user.Id);
       _userRepositoryMock.GetByIdAsync(user.Id, Arg.Any<CancellationToken>()).Returns(user);
       _parameterServiceMock.GetShortIntAsync(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns((short)90); // 90 days
-      _userValidatorMock.ValidateUpdatePassword(user, user.Id, request).Returns(Result.Success());
+      _userValidatorMock.ValidateUpdatePassword(user, request).Returns(Result.Success());
 
-      var result = await _userService.UpdatePasswordAsync(user.Id, request, TestContext.Current.CancellationToken);
+      var result = await _userService.UpdatePasswordAsync(request, TestContext.Current.CancellationToken);
 
       result.IsSuccess.Should().BeTrue();
       user.PasswordExpiresAt.Should().BeCloseTo(DateTime.UtcNow.AddDays(90), TimeSpan.FromSeconds(5));
       await _unitOfWorkMock.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
-      await _auditLoggerMock.Received(1).LogAsync(
+      await _eventPublisherMock.Received(1).NotifyAuditLogAsync(
          IamConst.Logger.Feature.Users,
          IamConst.Logger.Action.UpdatePassword,
          AuditPrivacyLevel.High,
@@ -161,11 +183,13 @@ public class UserServiceTests
       var user = User.Create("Name", "test@test.com", "OldHash", DateTime.UtcNow, _userContextMock.UserOwnerId);
 
       _userContextMock.UserId.Returns(Guid.NewGuid());
+      user.Id = _userContextMock.UserId;
+
       _userRepositoryMock.GetByIdAsync(user.Id, Arg.Any<CancellationToken>()).Returns(user);
       _parameterServiceMock.GetShortIntAsync(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns((short)90); // 90 days
-      _userValidatorMock.ValidateUpdatePassword(user, _userContextMock.UserId, request).Returns(Result.Failure(new Shared.Domain.Messages.UnauthorizedAccessError()));
+      _userValidatorMock.ValidateUpdatePassword(user, request).Returns(Result.Failure(new Shared.Domain.Messages.UnauthorizedAccessError()));
 
-      var result = await _userService.UpdatePasswordAsync(user.Id, request, TestContext.Current.CancellationToken);
+      var result = await _userService.UpdatePasswordAsync(request, TestContext.Current.CancellationToken);
 
       result.IsSuccess.Should().BeFalse();
       result.Messages.Should().ContainSingle(m => m is Shared.Domain.Messages.UnauthorizedAccessError);
@@ -187,7 +211,7 @@ public class UserServiceTests
       user.Name.Should().Be("Updated Name");
       user.IsActive.Should().BeFalse();
       await _unitOfWorkMock.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
-      await _auditLoggerMock.Received(1).LogAsync(
+      await _eventPublisherMock.Received(1).NotifyAuditLogAsync(
          IamConst.Logger.Feature.Users,
          IamConst.Logger.Action.Update,
          AuditPrivacyLevel.Medium,
@@ -210,6 +234,121 @@ public class UserServiceTests
 
       result.IsSuccess.Should().BeFalse();
       result.Messages.Should().ContainSingle(m => m is Shared.Domain.Messages.UnauthorizedAccessError);
+      await _unitOfWorkMock.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
+   }
+
+   [Fact]
+   public async Task UpdateOrganizationAdminAsync_ShouldUpdateAndAudit_WhenUserIsSystemAdmin()
+   {
+      var request = new UserUpdateOrganizationAdminRequest(true);
+      var user = User.Create("Name", "test@test.com", "hash", DateTime.UtcNow, Guid.NewGuid());
+
+      _userContextMock.IsSystemAdmin.Returns(true);
+      _userRepositoryMock.GetByIdAsync(user.Id, Arg.Any<CancellationToken>()).Returns(user);
+      _userValidatorMock.ValidateUpdateOrganizationAdmin(
+         user,
+         _userContextMock,
+         request)
+         .Returns(Result.Success());
+
+      var result = await _userService.UpdateOrganizationAdminAsync(user.Id, request, TestContext.Current.CancellationToken);
+
+      result.IsSuccess.Should().BeTrue();
+      user.IsOrganizationAdmin.Should().BeTrue();
+      await _unitOfWorkMock.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+      await _eventPublisherMock.Received(1).NotifyAuditLogAsync(
+         IamConst.Logger.Feature.Users,
+         IamConst.Logger.Action.UpdateOrganizationAdmin,
+         AuditPrivacyLevel.High,
+         Arg.Any<string>(),
+         user.Id,
+         Arg.Any<object>(),
+         Arg.Any<CancellationToken>());
+   }
+
+   [Fact]
+   public async Task UpdateOrganizationAdminAsync_ShouldUpdateAndAudit_WhenUserIsOrganizationAdminForSameOrganization()
+   {
+      var organizationId = _userContextMock.UserOwnerId;
+      var request = new UserUpdateOrganizationAdminRequest(true);
+      var user = User.Create("Name", "test@test.com", "hash", DateTime.UtcNow, organizationId);
+
+      _userContextMock.IsSystemAdmin.Returns(false);
+      _userContextMock.IsOrganizationAdmin.Returns(true);
+      _userRepositoryMock.GetByIdAsync(user.Id, Arg.Any<CancellationToken>()).Returns(user);
+      _userValidatorMock.ValidateUpdateOrganizationAdmin(
+         user,
+         _userContextMock,
+         request)
+         .Returns(Result.Success());
+
+      var result = await _userService.UpdateOrganizationAdminAsync(user.Id, request, TestContext.Current.CancellationToken);
+
+      result.IsSuccess.Should().BeTrue();
+      user.IsOrganizationAdmin.Should().BeTrue();
+      await _unitOfWorkMock.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+   }
+
+   [Fact]
+   public async Task UpdateOrganizationAdminAsync_ShouldReturnForbidden_WhenCurrentUserIsNotAdmin()
+   {
+      var request = new UserUpdateOrganizationAdminRequest(true);
+
+      _userContextMock.IsSystemAdmin.Returns(false);
+      _userContextMock.IsOrganizationAdmin.Returns(false);
+      _userValidatorMock.ValidateUpdateOrganizationAdmin(
+         null,
+         _userContextMock,
+         request)
+         .Returns(Result.Failure(new Shared.Domain.Messages.UnauthorizedAccessError()));
+
+      var result = await _userService.UpdateOrganizationAdminAsync(Guid.NewGuid(), request, TestContext.Current.CancellationToken);
+
+      result.IsSuccess.Should().BeFalse();
+      result.Messages.Should().ContainSingle(m => m is Shared.Domain.Messages.UnauthorizedAccessError);
+      await _unitOfWorkMock.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
+   }
+
+   [Fact]
+   public async Task UpdateOrganizationAdminAsync_ShouldReturnForbidden_WhenOrganizationAdminUpdatesAnotherOrganization()
+   {
+      var request = new UserUpdateOrganizationAdminRequest(true);
+      var user = User.Create("Name", "test@test.com", "hash", DateTime.UtcNow, Guid.NewGuid());
+
+      _userContextMock.IsSystemAdmin.Returns(false);
+      _userContextMock.IsOrganizationAdmin.Returns(true);
+      _userRepositoryMock.GetByIdAsync(user.Id, Arg.Any<CancellationToken>()).Returns(user);
+      _userValidatorMock.ValidateUpdateOrganizationAdmin(
+         user,
+         _userContextMock,
+         request)
+         .Returns(Result.Failure(new Shared.Domain.Messages.UnauthorizedAccessError()));
+
+      var result = await _userService.UpdateOrganizationAdminAsync(user.Id, request, TestContext.Current.CancellationToken);
+
+      result.IsSuccess.Should().BeFalse();
+      result.Messages.Should().ContainSingle(m => m is Shared.Domain.Messages.UnauthorizedAccessError);
+      await _unitOfWorkMock.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
+   }
+
+   [Fact]
+   public async Task UpdateOrganizationAdminAsync_ShouldReturnNotFound_WhenUserDoesNotExist()
+   {
+      var request = new UserUpdateOrganizationAdminRequest(true);
+      var userId = Guid.NewGuid();
+
+      _userContextMock.IsSystemAdmin.Returns(true);
+      _userRepositoryMock.GetByIdAsync(userId, Arg.Any<CancellationToken>()).Returns((User?)null);
+      _userValidatorMock.ValidateUpdateOrganizationAdmin(
+         null,
+         _userContextMock,
+         request)
+         .Returns(Result.Failure(new Shared.Domain.Messages.NotFoundError(IamConst.Entity.User)));
+
+      var result = await _userService.UpdateOrganizationAdminAsync(userId, request, TestContext.Current.CancellationToken);
+
+      result.IsSuccess.Should().BeFalse();
+      result.Messages.Should().ContainSingle(m => m is Shared.Domain.Messages.NotFoundError);
       await _unitOfWorkMock.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
    }
 

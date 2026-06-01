@@ -33,11 +33,19 @@ public class User : EntityAudited
          PasswordExpiresAt = passwordExpiresAt,
          IsActive = true,
          IsSystemAdmin = false,
+         IsOrganizationAdmin = false,
          NumFailedLoginAttempts = 0,
          OrganizationId = organizationId
       };
    }
+   public static User CreateOrganizationAdmin(string name, string email, string passwordHash, DateTime passwordExpiresAt, bool isOrganizationAdmin, Guid organizationId)
+   {
+      var user = User.Create(name, email, passwordHash, passwordExpiresAt, organizationId);
 
+      user.IsOrganizationAdmin = isOrganizationAdmin;
+
+      return user;
+   }
    public void Update(string name, bool isActive)
    {
       Name = name;
@@ -49,6 +57,11 @@ public class User : EntityAudited
       PasswordHash = newPasswordHash;
       UpdatedAt = DateTime.UtcNow;
       PasswordExpiresAt = expiresAt;
+   }
+
+   public void UpdateOrganizationAdmin(bool isOrganizationAdmin)
+   {
+      IsOrganizationAdmin = isOrganizationAdmin;
    }
 
    public void RegisterLastSuccessfullyLogin()

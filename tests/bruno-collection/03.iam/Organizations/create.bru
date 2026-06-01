@@ -17,13 +17,22 @@ auth:bearer {
 body:json {
   {
     "type": 1,
-    "name": "Computing Pioneers Society",
-    "code": "Book",
-    "description": "Foundation of modern Computer Science",
+    "name": "Writer Society",
+    "code": "Writer",
+    "description": "The greatest writers of all time",
     "user": {
-      "name": "Alan Turing",
-      "email": "alan.turing5@enigma.org",
+      "name": "Mario Puzo",
+      "email": "mario.puzzo@goodfather.it",
       "password": "Password.1"
+    }
+  }
+}
+
+script:post-response {
+  if (res.getStatus() === 200) {
+    const body = res.getBody();
+    if (body && body.data) {
+      bru.setVar("organizationId", body.data.id);
     }
   }
 }

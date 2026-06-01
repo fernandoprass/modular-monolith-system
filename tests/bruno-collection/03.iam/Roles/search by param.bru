@@ -1,0 +1,22 @@
+meta {
+  name: search by param
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{host.iam}}/api/{{version}}/iam/roles/
+  body: none
+  auth: bearer
+}
+
+params:query {
+  ~name: sys
+  ~isActive: true
+  ~userId: {{userId}}
+  ~organizationId: {{organizationId}}
+}
+
+auth:bearer {
+  token: {{token}}
+}

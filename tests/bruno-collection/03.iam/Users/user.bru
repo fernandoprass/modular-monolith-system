@@ -1,22 +1,15 @@
 meta {
   name: user
   type: http
-  seq: 7
+  seq: 12
 }
 
 get {
-  url: {{host.iam}}/api/{{version}}/iam/users/019dd544-d24a-7ee7-a96b-1913ad186e3b
-  body: json
+  url: {{host.iam}}/api/{{version}}/iam/users/{{userId}}
+  body: none
   auth: bearer
 }
 
 auth:bearer {
   token: {{token}}
-}
-
-body:json {
-  {
-    "name": "User Test",
-    "isActive": false
-  }
 }

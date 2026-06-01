@@ -1,0 +1,22 @@
+meta {
+  name: update me
+  type: http
+  seq: 3
+}
+
+put {
+  url: {{host.iam}}/api/{{version}}/iam/users/me
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "name": "Alan Turing",
+    "isActive": true
+  }
+}

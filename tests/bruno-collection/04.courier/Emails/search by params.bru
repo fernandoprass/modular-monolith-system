@@ -5,26 +5,24 @@ meta {
 }
 
 get {
-  url: {{host.courier}}/api/{{version}}/emails
-  body: json
+  url: {{host.courier}}/api/{{version}}/emails?pageNumber=1&pageSize=25
+  body: none
   auth: bearer
+}
+
+params:query {
+  pageNumber: 1
+  pageSize: 25
+  ~organizationId: {{organizationId}}
+  ~userId: {{userId}}
+  ~module: IAM
+  ~feature: users
+  ~subject: 
+  ~recipient: 
+  ~dateFrom: 
+  ~dateTo: 
 }
 
 auth:bearer {
   token: {{token}}
-}
-
-body:json {
-  {
-    "organizationId": null,
-    "userId": null,
-    "module": "",
-    "feature": "",
-    "subject": "",
-    "recipient": "",
-    "dateFrom": null,
-    "dateTo": null,
-    "pageNumber": 1,
-    "pageSize": 25
-  }
 }

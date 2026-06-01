@@ -22,7 +22,7 @@ public class RoleServiceTests
    private readonly IUserContext _userContextMock;
    private readonly IRoleValidator _roleValidatorMock;
    private readonly IRoleQueryRepository _roleQueryRepositoryMock;
-   private readonly IIamAuditLogger _auditLoggerMock;
+   private readonly IIamEventPublisher _eventPublisherMock;
    private readonly RoleService _roleService;
 
    public RoleServiceTests()
@@ -31,14 +31,14 @@ public class RoleServiceTests
       _userContextMock = Substitute.For<IUserContext>();
       _roleValidatorMock = Substitute.For<IRoleValidator>();
       _roleQueryRepositoryMock = Substitute.For<IRoleQueryRepository>();
-      _auditLoggerMock = Substitute.For<IIamAuditLogger>();
+      _eventPublisherMock = Substitute.For<IIamEventPublisher>();
 
       _roleService = new RoleService(
          _unitOfWorkMock,
          _userContextMock,
          _roleValidatorMock,
          _roleQueryRepositoryMock,
-         _auditLoggerMock);
+         _eventPublisherMock);
    }
 
    #region CreateAsync Tests
@@ -48,7 +48,7 @@ public class RoleServiceTests
    {
       var request = CreateRoleCreateRequestRecord(name : "Admin");
 
-      _roleQueryRepositoryMock.NameExistsAsync(request.Name, request.OrganizationId, _userContextMock, Arg.Any<CancellationToken>()).Returns(false);
+      _roleQueryRepositoryMock.NameExistsAsync(request.Name, request.OrganizationId, Arg.Any<CancellationToken>()).Returns(false);
 
       _roleValidatorMock.ValidateCreate(request, false).Returns(Result.Success());
 
@@ -56,7 +56,7 @@ public class RoleServiceTests
       Assert.True(result.IsSuccess);
       await _unitOfWorkMock.Roles.Received(1).AddAsync(Arg.Any<Role>(), Arg.Any<CancellationToken>());
       await _unitOfWorkMock.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
-      await _auditLoggerMock.Received(1).LogAsync(
+      await _eventPublisherMock.Received(1).NotifyAuditLogAsync(
          IamConst.Logger.Feature.Roles,
          IamConst.Logger.Action.Create,
          AuditPrivacyLevel.Medium,
@@ -71,7 +71,7 @@ public class RoleServiceTests
    {
       var request = CreateRoleCreateRequestRecord(name: "Admin");
 
-      _roleQueryRepositoryMock.NameExistsAsync(request.Name, request.OrganizationId, _userContextMock, Arg.Any<CancellationToken>()).Returns(true);
+      _roleQueryRepositoryMock.NameExistsAsync(request.Name, request.OrganizationId, Arg.Any<CancellationToken>()).Returns(true);
 
       var validationError = new RoleDuplicateNameError(request.Name);
       _roleValidatorMock.ValidateCreate(request, true).Returns(Result.Failure(validationError));
@@ -86,7 +86,7 @@ public class RoleServiceTests
    {
       var request = CreateRoleCreateRequestRecord(name: string.Empty);
 
-      _roleQueryRepositoryMock.NameExistsAsync(Arg.Any<string>(), Arg.Any<Guid?>(), Arg.Any<IUserContext>(), Arg.Any<CancellationToken>()).Returns(false);
+      _roleQueryRepositoryMock.NameExistsAsync(Arg.Any<string>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>()).Returns(false);
 
       _roleValidatorMock.ValidateCreate(request, false).Returns(Result.Failure(new NotFoundError()));
 
@@ -130,7 +130,7 @@ public class RoleServiceTests
       Assert.True(result.IsSuccess);
       _unitOfWorkMock.Roles.Received(1).Update(Arg.Any<Role>());
       await _unitOfWorkMock.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
-      await _auditLoggerMock.Received(1).LogAsync(
+      await _eventPublisherMock.Received(1).NotifyAuditLogAsync(
          IamConst.Logger.Feature.Roles,
          IamConst.Logger.Action.Update,
          AuditPrivacyLevel.Medium,
@@ -199,7 +199,7 @@ public class RoleServiceTests
       _userContextMock.UserOwnerId.Returns(organizationId);
       _userContextMock.IsSystemAdmin.Returns(false);
       _unitOfWorkMock.Users.GetByIdWithRolesAsync(request.UserId, Arg.Any<CancellationToken>()).Returns(user);
-      _roleQueryRepositoryMock.CountRolesByRoleIdsAsync(Arg.Any<IEnumerable<Guid>>(), organizationId, _userContextMock, Arg.Any<CancellationToken>()).Returns(1);
+      _roleQueryRepositoryMock.CountRolesByRoleIdsAsync(Arg.Any<IEnumerable<Guid>>(), organizationId, Arg.Any<CancellationToken>()).Returns(1);
       _roleValidatorMock.ValidateAssign(request, true, true).Returns(Result.Success());
 
       var result = await _roleService.AssignToUserAsync(request);
@@ -207,7 +207,7 @@ public class RoleServiceTests
       Assert.True(result.IsSuccess);
       _unitOfWorkMock.Users.Received(1).Update(Arg.Any<User>());
       await _unitOfWorkMock.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
-      await _auditLoggerMock.Received(1).LogAsync(
+      await _eventPublisherMock.Received(1).NotifyAuditLogAsync(
          IamConst.Logger.Feature.Roles,
          IamConst.Logger.Action.Assign,
          AuditPrivacyLevel.High,
@@ -265,7 +265,7 @@ public class RoleServiceTests
       _userContextMock.UserOwnerId.Returns(organizationId);
       _userContextMock.IsSystemAdmin.Returns(false);
       _unitOfWorkMock.Users.GetByIdWithRolesAsync(request.UserId, Arg.Any<CancellationToken>()).Returns(user);
-      _roleQueryRepositoryMock.CountRolesByRoleIdsAsync(Arg.Any<IEnumerable<Guid>>(), organizationId, _userContextMock, Arg.Any<CancellationToken>()).Returns(0);
+      _roleQueryRepositoryMock.CountRolesByRoleIdsAsync(Arg.Any<IEnumerable<Guid>>(), organizationId, Arg.Any<CancellationToken>()).Returns(0);
       _roleValidatorMock.ValidateAssign(request, true, false).Returns(Result.Failure(new RolesCannotBeAssignedError()));
 
       var result = await _roleService.AssignToUserAsync(request);
@@ -303,6 +303,7 @@ public class RoleServiceTests
    {
       var organizationId = Guid.NewGuid();
       var roleId = Guid.NewGuid();
+      IEnumerable<Guid>? requestedRoleIds = null;
 
       // Same role ID listed twice
       var request = new RoleAssignRequest(
@@ -318,12 +319,18 @@ public class RoleServiceTests
       _userContextMock.UserOwnerId.Returns(organizationId);
       _userContextMock.IsSystemAdmin.Returns(false);
       _unitOfWorkMock.Users.GetByIdWithRolesAsync(request.UserId, Arg.Any<CancellationToken>()).Returns(user);
-      _roleQueryRepositoryMock.CountRolesByRoleIdsAsync(Arg.Any<IEnumerable<Guid>>(), organizationId, _userContextMock, Arg.Any<CancellationToken>()).Returns(1);
+      _roleQueryRepositoryMock.CountRolesByRoleIdsAsync(
+         Arg.Do<IEnumerable<Guid>>(ids => requestedRoleIds = ids.ToArray()),
+         organizationId,
+         Arg.Any<CancellationToken>()).Returns(1);
       _roleValidatorMock.ValidateAssign(request, true, true).Returns(Result.Success());
 
       var result = await _roleService.AssignToUserAsync(request);
 
       Assert.True(result.IsSuccess);
+      Assert.Equal([roleId], requestedRoleIds);
+      Assert.Single(user.UserRoles);
+      Assert.Equal(roleId, user.UserRoles.Single().RoleId);
    }
 
    #endregion
@@ -353,7 +360,7 @@ public class RoleServiceTests
       Assert.True(result.IsSuccess);
       _unitOfWorkMock.Users.Received(1).Update(Arg.Any<User>());
       await _unitOfWorkMock.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
-      await _auditLoggerMock.Received(1).LogAsync(
+      await _eventPublisherMock.Received(1).NotifyAuditLogAsync(
          IamConst.Logger.Feature.Roles,
          IamConst.Logger.Action.Unassign,
          AuditPrivacyLevel.High,
@@ -420,13 +427,14 @@ public class RoleServiceTests
 
    #endregion
 
-   #region GetByNameAsync Tests
+   #region GetAsync Tests
 
    [Fact]
-   public async Task GetByNameAsync_WithValidName_ShouldReturnRoles()
+   public async Task GetAsync_WithValidName_ShouldReturnRoles()
    {
       var organizationId = Guid.NewGuid();
       var roleName = "Admin";
+      var request = new RoleSearchRequest(roleName, null, null, null);
       var roles = new List<RoleDto>
       {
          CreateRoleDto(roleName, organizationId)
@@ -434,9 +442,12 @@ public class RoleServiceTests
 
       _userContextMock.UserOwnerId.Returns(organizationId);
       _userContextMock.IsSystemAdmin.Returns(false);
-      _roleQueryRepositoryMock.GetByNameAsync(roleName, organizationId, _userContextMock, Arg.Any<CancellationToken>()).Returns(roles);
+      _roleQueryRepositoryMock.GetAsync(
+         Arg.Is<RoleSearchRequest>(r => r.Name == roleName && r.OrganizationId == organizationId),
+         Arg.Any<CancellationToken>())
+         .Returns(roles);
 
-      var result = await _roleService.GetByNameAsync(roleName);
+      var result = await _roleService.GetAsync(request);
 
       Assert.True(result.IsSuccess);
       Assert.NotNull(result.Data);
@@ -444,9 +455,10 @@ public class RoleServiceTests
    }
 
    [Fact]
-   public async Task GetByNameAsync_WithNullName_ShouldReturnAllRoles()
+   public async Task GetAsync_WithNoFilters_ShouldReturnAllRoles()
    {
       var organizationId = Guid.NewGuid();
+      var request = new RoleSearchRequest(null, null, null, null);
       var roles = new List<RoleDto>
       {
          CreateRoleDto("Admin", organizationId),
@@ -455,9 +467,12 @@ public class RoleServiceTests
 
       _userContextMock.UserOwnerId.Returns(organizationId);
       _userContextMock.IsSystemAdmin.Returns(false);
-      _roleQueryRepositoryMock.GetByNameAsync(null, organizationId, _userContextMock, Arg.Any<CancellationToken>()).Returns(roles);
+      _roleQueryRepositoryMock.GetAsync(
+         Arg.Is<RoleSearchRequest>(r => r.Name == null && r.OrganizationId == organizationId),
+         Arg.Any<CancellationToken>())
+         .Returns(roles);
 
-      var result = await _roleService.GetByNameAsync(null);
+      var result = await _roleService.GetAsync(request);
 
       Assert.True(result.IsSuccess);
       Assert.NotNull(result.Data);
@@ -465,23 +480,83 @@ public class RoleServiceTests
    }
 
    [Fact]
-   public async Task GetByNameAsync_WithSystemAdmin_ShouldBypassOrganizationFilter()
+   public async Task GetAsync_WithSystemAdmin_ShouldKeepRequestedOrganizationFilter()
    {
-      var systemAdminId = Guid.NewGuid();
+      var organizationId = Guid.NewGuid();
+      var request = new RoleSearchRequest(null, null, null, organizationId);
       var roles = new List<RoleDto>
       {
          CreateRoleDto("Admin", Guid.NewGuid()),
          CreateRoleDto("User", Guid.NewGuid())
       };
 
-      _userContextMock.UserOwnerId.Returns(systemAdminId);
       _userContextMock.IsSystemAdmin.Returns(true);
-      _roleQueryRepositoryMock.GetByNameAsync(null, systemAdminId, _userContextMock, Arg.Any<CancellationToken>()).Returns(roles);
+      _roleQueryRepositoryMock.GetAsync(
+         Arg.Is<RoleSearchRequest>(r => r.OrganizationId == organizationId),
+         Arg.Any<CancellationToken>())
+         .Returns(roles);
 
-      var result = await _roleService.GetByNameAsync(null);
+      var result = await _roleService.GetAsync(request);
 
       Assert.True(result.IsSuccess);
-      await _roleQueryRepositoryMock.Received(1).GetByNameAsync(null, systemAdminId, _userContextMock, Arg.Any<CancellationToken>());
+      await _roleQueryRepositoryMock.Received(1).GetAsync(
+         Arg.Is<RoleSearchRequest>(r => r.OrganizationId == organizationId),
+         Arg.Any<CancellationToken>());
+   }
+
+   [Fact]
+   public async Task GetAsync_WithUserId_ShouldReturnUserRoles_WhenUserOwnsOrganization()
+   {
+      var organizationId = Guid.NewGuid();
+      var user = User.Create("Test User", "test@example.com", "hash", DateTime.UtcNow.AddMonths(1), organizationId);
+      var request = new RoleSearchRequest(null, user.Id, true, null);
+      var roles = new List<RoleDto>
+      {
+         CreateRoleDto("Admin", organizationId)
+      };
+
+      _userContextMock.UserOwnerId.Returns(organizationId);
+      _userContextMock.IsSystemAdmin.Returns(false);
+      _unitOfWorkMock.Users.GetByIdAsync(user.Id, Arg.Any<CancellationToken>()).Returns(user);
+      _roleQueryRepositoryMock.GetAsync(
+         Arg.Is<RoleSearchRequest>(r => r.UserId == user.Id && r.IsActive == true && r.OrganizationId == organizationId),
+         Arg.Any<CancellationToken>())
+         .Returns(roles);
+
+      var result = await _roleService.GetAsync(request);
+
+      Assert.True(result.IsSuccess);
+      Assert.Single(result.Data!);
+   }
+
+   [Fact]
+   public async Task GetAsync_WithUserId_ShouldReturnNotFound_WhenUserDoesNotExist()
+   {
+      var userId = Guid.NewGuid();
+      var request = new RoleSearchRequest(null, userId, null, null);
+
+      _unitOfWorkMock.Users.GetByIdAsync(userId, Arg.Any<CancellationToken>()).Returns((User?)null);
+
+      var result = await _roleService.GetAsync(request);
+
+      Assert.False(result.IsSuccess);
+      await _roleQueryRepositoryMock.DidNotReceive().GetAsync(Arg.Any<RoleSearchRequest>(), Arg.Any<CancellationToken>());
+   }
+
+   [Fact]
+   public async Task GetAsync_WithUserId_ShouldReturnUnauthorized_WhenUserDoesNotOwnOrganization()
+   {
+      var user = User.Create("Test User", "test@example.com", "hash", DateTime.UtcNow.AddMonths(1), Guid.NewGuid());
+      var request = new RoleSearchRequest(null, user.Id, null, null);
+
+      _userContextMock.UserOwnerId.Returns(Guid.NewGuid());
+      _userContextMock.IsSystemAdmin.Returns(false);
+      _unitOfWorkMock.Users.GetByIdAsync(user.Id, Arg.Any<CancellationToken>()).Returns(user);
+
+      var result = await _roleService.GetAsync(request);
+
+      Assert.False(result.IsSuccess);
+      await _roleQueryRepositoryMock.DidNotReceive().GetAsync(Arg.Any<RoleSearchRequest>(), Arg.Any<CancellationToken>());
    }
 
    #endregion
@@ -493,10 +568,10 @@ public class RoleServiceTests
    {
       var organizationId = Guid.NewGuid();
       var userId = Guid.NewGuid();
-      var permissions = new List<PermissionDto>
+      var permissions = new List<Permission>
       {
-         CreatePermissionDto("read"),
-         CreatePermissionDto("write")
+         Permission.Create("iam", "users", "read", "Read", "Read users", true),
+         Permission.Create("iam", "users", "write", "Write", "Write users", true)
       };
 
       var user = User.Create("Test User", "test@example.com", "hash", DateTime.UtcNow.AddMonths(1), organizationId);
@@ -504,11 +579,12 @@ public class RoleServiceTests
       _userContextMock.UserOwnerId.Returns(organizationId);
       _userContextMock.IsSystemAdmin.Returns(false);
       _unitOfWorkMock.Users.GetByIdAsync(userId, Arg.Any<CancellationToken>()).Returns(user);
-      _roleQueryRepositoryMock.GetRolePermissionsByUserIdAsync(userId, Arg.Any<CancellationToken>()).Returns(new List<Permission>());
+      _roleQueryRepositoryMock.GetRolePermissionsByUserIdAsync(userId, Arg.Any<CancellationToken>()).Returns(permissions);
 
       var result = await _roleService.GetRolePermissionsByUserIdAsync(userId);
 
       Assert.True(result.IsSuccess);
+      Assert.Equal(["iam.users.read", "iam.users.write"], result.Data!.Select(p => p.Code));
       await _roleQueryRepositoryMock.Received(1).GetRolePermissionsByUserIdAsync(userId, Arg.Any<CancellationToken>());
    }
 
@@ -590,7 +666,7 @@ public class RoleServiceTests
          OrganizationId: null);
 
       _userContextMock.IsSystemAdmin.Returns(true);
-      _roleQueryRepositoryMock.NameExistsAsync(request.Name, null, _userContextMock, Arg.Any<CancellationToken>()).Returns(false);
+      _roleQueryRepositoryMock.NameExistsAsync(request.Name, null, Arg.Any<CancellationToken>()).Returns(false);
       _roleValidatorMock.ValidateCreate(request, false).Returns(Result.Success());
 
       var result = await _roleService.CreateAsync(request);
@@ -627,10 +703,10 @@ public class RoleServiceTests
    #region Cancellation Token Tests
 
    [Fact]
-   public async Task CreateAsync_WithCancelledToken_ShouldRespectCancellation()
+   public async Task CreateAsync_ShouldPassCancellationTokenToRepository()
    {
       var cts = new CancellationTokenSource();
-      cts.Cancel();
+      var receivedToken = CancellationToken.None;
 
       var request = new RoleCreateRequest(
          Name: "Admin",
@@ -639,10 +715,16 @@ public class RoleServiceTests
          IsActive: true,
          OrganizationId: Guid.NewGuid());
 
-      _roleQueryRepositoryMock.NameExistsAsync(Arg.Any<string>(), Arg.Any<Guid?>(), Arg.Any<IUserContext>(), Arg.Any<CancellationToken>())
-         .Returns(Task.FromException<bool>(new OperationCanceledException()));
+      _roleQueryRepositoryMock.NameExistsAsync(
+            Arg.Any<string>(),
+            Arg.Any<Guid?>(),
+            Arg.Do<CancellationToken>(ct => receivedToken = ct))
+         .Returns(false);
+      _roleValidatorMock.ValidateCreate(request, false).Returns(Result.Failure(new NotFoundError()));
 
-      await Assert.ThrowsAsync<OperationCanceledException>(() => _roleService.CreateAsync(request, cts.Token));
+      await _roleService.CreateAsync(request, cts.Token);
+
+      Assert.Equal(cts.Token, receivedToken);
    }
 
    #endregion

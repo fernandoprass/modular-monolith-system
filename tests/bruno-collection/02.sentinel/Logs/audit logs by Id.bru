@@ -5,27 +5,11 @@ meta {
 }
 
 get {
-  url: {{host.sentinel}}/api/{{version}}/sentinel/logs/audit/019e367c-0010-7c9c-9a33-3050795a793d
-  body: json
+  url: {{host.sentinel}}/api/{{version}}/sentinel/logs/audit/019e7b2c-2f60-7839-a9e9-19ebd4424749
+  body: none
   auth: bearer
 }
 
 auth:bearer {
   token: {{token}}
-}
-
-body:json {
-  {
-    "organizationId": null,
-    "userId": null,
-    "module": "",
-    "feature": "",
-    "action": "",
-    "privacyLevel": null,
-    "targetId": null,
-    "from": null,
-    "to": null,
-    "pageNumber": 1,
-    "pageSize": 50
-  }
 }

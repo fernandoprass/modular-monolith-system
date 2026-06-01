@@ -8,6 +8,7 @@ using Courier.Domain.Mappers;
 using Myce.Response;
 using Shared.Application.Contracts;
 using Shared.Application.Services;
+using Shared.Domain.DTOs.Responses;
 using Shared.Domain.Messages;
 
 namespace Courier.Application.Services;

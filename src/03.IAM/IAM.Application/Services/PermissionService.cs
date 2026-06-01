@@ -10,6 +10,7 @@ using Myce.Response;
 using Shared.Application.Contracts;
 using Shared.Application.Services;
 using Shared.Domain.Enums;
+using Shared.Domain.Interfaces;
 using Shared.Domain.Messages;
 
 namespace IAM.Application.Services;
@@ -20,13 +21,14 @@ public class PermissionService(
    IPermissionValidator permissionValidator,
    IPermissionQueryRepository permissionQueryRepository,
    IRolePermissionCacheInvalidator rolePermissionAuthorizationCache,
-   IIamAuditLogger auditLogger) : BaseService(userContext), IPermissionService
+   IIamEventPublisher eventPublisher,
+   IEventPublisher? sharedEventPublisher = null) : BaseService(userContext, sharedEventPublisher), IPermissionService
 {
    private readonly IIamUnitOfWork _iamUnitOfWork = iamUnitOfWork;
    private readonly IPermissionValidator _permissionValidator = permissionValidator;
    private readonly IPermissionQueryRepository _permissionQueryRepository = permissionQueryRepository;
    private readonly IRolePermissionCacheInvalidator _rolePermissionAuthorizationCache = rolePermissionAuthorizationCache;
-   private readonly IIamAuditLogger _auditLogger = auditLogger;
+   private readonly IIamEventPublisher _eventPublisher = eventPublisher;
 
    public async Task<Result<PermissionDto>> CreateAsync(PermissionCreateRequest request, CancellationToken cancellationToken = default)
    {
@@ -48,7 +50,7 @@ public class PermissionService(
    {
       var permission = await _iamUnitOfWork.Permissions.GetByIdAsync(id, cancellationToken);
       bool codeExists = await GetCodeExistsAsync(request.Module, request.Resource, request.Action, id, cancellationToken);
-      var validation = _permissionValidator.ValidateUpdate(request, codeExists, permission != null);
+      var validation = _permissionValidator.ValidateUpdate(request, codeExists, permissionExists: permission != null);
 
       if (!validation.IsSuccess)
          return validation;
@@ -74,7 +76,7 @@ public class PermissionService(
 
    public async Task<Result<IEnumerable<PermissionDto>>> GetByParams(PermissionSearchRequest request, CancellationToken cancellationToken = default)
    {
-      var permissions = await _permissionQueryRepository.GetByParams(request, _userContext, cancellationToken);
+      var permissions = await _permissionQueryRepository.GetByParams(request, cancellationToken);
       return Result<IEnumerable<PermissionDto>>.Success(permissions);
    }
 
@@ -106,7 +108,7 @@ public class PermissionService(
          await _iamUnitOfWork.SaveChangesAsync(ct);
          await _rolePermissionAuthorizationCache.RemoveAsync(role!.Id, ct);
 
-         await _auditLogger.LogAsync(
+         await _eventPublisher.NotifyAuditLogAsync(
             IamConst.Logger.Feature.Permissions,
             IamConst.Logger.Action.Assign,
             AuditPrivacyLevel.High,
@@ -142,7 +144,7 @@ public class PermissionService(
          await _iamUnitOfWork.SaveChangesAsync(ct);
          await _rolePermissionAuthorizationCache.RemoveAsync(role!.Id, ct);
 
-         await _auditLogger.LogAsync(
+         await _eventPublisher.NotifyAuditLogAsync(
             IamConst.Logger.Feature.Permissions,
             IamConst.Logger.Action.Unassign,
             AuditPrivacyLevel.High,

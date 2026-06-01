@@ -16,6 +16,5 @@ public class OrganizationConfiguration : BaseAuditedConfiguration<Organization>
       builder.Property(c => c.Name).IsRequired().HasMaxLength(100);
       builder.Property(c => c.Description).HasMaxLength(1000);
       builder.Property(c => c.IsActive).IsRequired().HasDefaultValue(true);
-      builder.Property(c => c.IsMaster).IsRequired().HasDefaultValue(false);
    }
 }

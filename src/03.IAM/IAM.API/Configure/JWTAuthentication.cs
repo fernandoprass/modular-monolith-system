@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using Shared.Domain;
 using System.Text;
@@ -17,6 +18,7 @@ namespace IAM.API.Configure
          builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
              .AddJwtBearer(options =>
              {
+                options.MapInboundClaims = false;
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                    ValidateIssuer = true,
@@ -25,7 +27,9 @@ namespace IAM.API.Configure
                    ValidateIssuerSigningKey = true,
                    ValidIssuer = SharedConst.Security.Claim.Issuer,
                    ValidAudience = SharedConst.Security.Claim.Audience,
-                   IssuerSigningKey = new SymmetricSecurityKey(key)
+                   IssuerSigningKey = new SymmetricSecurityKey(key),
+                   NameClaimType = JwtRegisteredClaimNames.Sub,
+                   RoleClaimType = SharedConst.Security.Claim.Role
                 };
              });
       }

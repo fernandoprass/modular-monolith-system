@@ -41,6 +41,7 @@ public static partial class IamConst
          public const string Update = "update";
          public const string UpdateCode = "update-code";
          public const string UpdatePassword = "update-password";
+         public const string UpdateOrganizationAdmin = "update-organization-admin";
          public const string Delete = "delete";
          public const string LoginSuccess = "login-success";
          public const string LoginFail = "login-fail";
@@ -54,6 +55,7 @@ public static partial class IamConst
       public const string OrganizationWelcome = "orgazination-welcome";
       public const string OrganizationDelete = "orgazination-delete";
       public const string UserWelcome = "user-welcome";
+      public const string UserPasswordUpdated = "user-password-updated";
       public const string UserResetPassword = "user-reset-password";
       public const string UserMaxFailedLoginAttempts = "user-max-failed-login-attempts";
       public const string UserDelete = "user-delete";
