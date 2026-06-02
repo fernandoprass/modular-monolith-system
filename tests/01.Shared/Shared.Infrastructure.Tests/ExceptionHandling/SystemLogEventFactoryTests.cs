@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Http;
+using NSubstitute;
 using Shared.Application.Contracts;
 using Shared.Domain.Enums;
 using Shared.Infrastructure.ExceptionHandling;
@@ -20,7 +22,9 @@ public class SystemLogEventFactoryTests
       var userContext = new FakeUserContext(userId, organizationId);
       var exception = CreateException(exceptionType);
 
-      var logEvent = SystemLogEventFactory.Create("IAM", exception, statusCode, "request-1", "/api/test", userContext);
+      var request = CreateRequest();
+
+      var logEvent = SystemLogEventFactory.Create("IAM", request, exception, statusCode, "request-1", userContext);
 
       Assert.Equal(SystemLogLevel.Error, logEvent.Level);
       Assert.Equal(expectedStatus, logEvent.Status);
@@ -40,7 +44,9 @@ public class SystemLogEventFactoryTests
    {
       var userContext = new FakeUserContext(Guid.Empty, Guid.Empty);
 
-      var logEvent = SystemLogEventFactory.Create("IAM", new InvalidOperationException("Boom"), 500, "request-1", "/api/test", userContext);
+      var request = CreateRequest();
+
+      var logEvent = SystemLogEventFactory.Create("IAM", request, new InvalidOperationException("Boom"), 500, "request-1", userContext);
 
       Assert.Null(logEvent.UserId);
       Assert.Null(logEvent.OrganizationId);
@@ -53,6 +59,22 @@ public class SystemLogEventFactoryTests
          "unauthorized" => new UnauthorizedAccessException("Denied"),
          _ => new InvalidOperationException("Boom")
       };
+   }
+
+   private static HttpRequest CreateRequest()
+   {
+      var request = Substitute.For<HttpRequest>();
+      request.Method.Returns(HttpMethods.Get);
+      request.Path.Returns(new PathString("/api/test"));
+      request.Scheme.Returns("https");
+      request.Host.Returns(new HostString("localhost"));
+      request.QueryString.Returns(QueryString.Empty);
+      var query = Substitute.For<IQueryCollection>();
+      query.Count.Returns(0);
+      query.Keys.Returns([]);
+      request.Query.Returns(query);
+
+      return request;
    }
 
    private class FakeUserContext(Guid userId, Guid userOwnerId) : IUserContext

@@ -78,18 +78,6 @@ public class EmailOutboxService(
 
       var id = await _emailRepository.AddAsync(email, cancellationToken);
 
-      await _courierLogger.LogAuditAsync(
-         CourierConst.Logger.Feature.Emails,
-         CourierConst.Logger.Action.Queue,
-         AuditPrivacyLevel.Medium,
-         template.RetentionPolicy,
-         $"Queued email {id}",
-         email.OrganizationId,
-         email.UserId,
-         id,
-         new { email.TemplateKey, email.Recipient, email.Subject },
-         cancellationToken);
-
       return Result<Guid>.Success(id);
    }
 
@@ -130,18 +118,6 @@ public class EmailOutboxService(
    {
       email.MarkAsSent();
       await _emailRepository.UpdateAsync(email, cancellationToken);
-
-      await _courierLogger.LogAuditAsync(
-         CourierConst.Logger.Feature.Emails,
-         CourierConst.Logger.Action.Send,
-         AuditPrivacyLevel.Medium,
-         RetentionPolicy.Extended,
-         $"Sent email {email.Id}",
-         email.OrganizationId,
-         email.UserId,
-         email.Id,
-         new { email.TemplateKey, email.Recipient, email.Subject },
-         cancellationToken);
    }
 
    private async Task RecordFailureAsync(Email email, string message, string? stackTrace, CancellationToken cancellationToken)
@@ -150,18 +126,6 @@ public class EmailOutboxService(
 
       email.RecordFailure(message, stackTrace, maxRetries);
       await _emailRepository.UpdateAsync(email, cancellationToken);
-
-      await _courierLogger.LogAuditAsync(
-         CourierConst.Logger.Feature.Emails,
-         CourierConst.Logger.Action.Fail,
-         AuditPrivacyLevel.High,
-         RetentionPolicy.Extended,
-         $"Failed email {email.Id}",
-         email.OrganizationId,
-         email.UserId,
-         email.Id,
-         new { email.TemplateKey, email.Recipient, email.Subject, email.RetryCount, email.Status },
-         cancellationToken);
 
       await _courierLogger.LogSystemAsync(
          SystemLogLevel.Error,

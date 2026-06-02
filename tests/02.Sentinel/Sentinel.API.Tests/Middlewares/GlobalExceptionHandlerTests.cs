@@ -13,8 +13,10 @@ namespace Sentinel.API.Tests.Middlewares;
 
 public class GlobalExceptionHandlerTests
 {
+   public GlobalExceptionHandlerTests() { }
+
    [Theory]
-   [InlineData("unauthorized", StatusCodes.Status401Unauthorized, "Unauthorized access.", SystemLogStatus.Unauthorized, 7)]
+   [InlineData("unauthorized", StatusCodes.Status401Unauthorized, "Unauthorized access.", SystemLogStatus.Unauthorized, 180)]
    [InlineData("generic", StatusCodes.Status500InternalServerError, "An unexpected error occurred.", SystemLogStatus.Failure, 30)]
    public async Task TryHandleAsync_ShouldReturnErrorResponseAndPersistSystemLog(
       string exceptionType,
@@ -57,6 +59,8 @@ public class GlobalExceptionHandlerTests
       Assert.True(systemLog.ExpiresAt >= systemLog.CreatedAt.AddDays(expectedRetentionDays).AddSeconds(-1));
       Assert.True(systemLog.ExpiresAt <= systemLog.CreatedAt.AddDays(expectedRetentionDays).AddSeconds(1));
       Assert.Contains("statusCode", systemLog.PropertiesJson);
+      Assert.Contains("method", systemLog.PropertiesJson);
+      Assert.Contains("path", systemLog.PropertiesJson);
       Assert.Equal(1, unitOfWork.SaveChangesCount);
    }
 

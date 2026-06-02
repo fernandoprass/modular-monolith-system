@@ -1,6 +1,6 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Shared.Application.Contracts;
-using Shared.Domain.Enums;
 using Shared.Domain.Interfaces;
 
 namespace Shared.Infrastructure.ExceptionHandling;
@@ -16,16 +16,15 @@ public class ExceptionSystemLogPublisher(
 
    public async Task PublishAsync(
       string source,
+      HttpRequest httpRequest,
       Exception exception,
       int statusCode,
       string? requestId,
-      string? path,
-      RetentionPolicy retentionPolicy,
       CancellationToken cancellationToken = default)
    {
       try
       {
-         var systemLogEvent = SystemLogEventFactory.Create(source, exception, statusCode, requestId, path, _userContext);
+         var systemLogEvent = SystemLogEventFactory.Create(source, httpRequest, exception, statusCode, requestId, _userContext);
          await _eventPublisher.PublishSystemLogEventAsync(systemLogEvent, cancellationToken);
       }
       catch (Exception publishException)

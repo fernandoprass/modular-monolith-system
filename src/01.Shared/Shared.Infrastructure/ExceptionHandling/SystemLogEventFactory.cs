@@ -10,28 +10,14 @@ public static class SystemLogEventFactory
 {
    public static SystemLogEvent Create(
       string source,
-      HttpContext httpContext,
-      Exception exception,
-      int statusCode,
-      IUserContext userContext)
-   {
-      return Create(
-         source,
-         httpContext,
-         exception,
-         statusCode,
-         userContext);
-   }
-
-   public static SystemLogEvent Create(
-      string source,
+      HttpRequest request,
       Exception exception,
       int statusCode,
       string? requestId,
-      string? path,
       IUserContext userContext)
    {
       var retentionPolicy = ExceptionRetentionPolicyResolver.Resolve(exception, statusCode);
+      var properties = ExceptionRequestFactory.Create(request, statusCode);
 
       return new SystemLogEvent
       {
@@ -46,11 +32,7 @@ public static class SystemLogEventFactory
          RequestId = requestId,
          UserId = GetOptionalGuid(userContext.UserId),
          OrganizationId = GetOptionalGuid(userContext.UserOwnerId),
-         Properties = new Dictionary<string, object>
-         {
-            ["path"] = path ?? string.Empty,
-            ["statusCode"] = statusCode
-         }
+         Properties = properties
       };
    }
 

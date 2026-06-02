@@ -22,26 +22,15 @@ public class GlobalExceptionHandler(
    {
       _logger.LogError(exception, "An unhandled exception occurred: {Message}", exception.Message);
 
-      httpContext.Response.ContentType = "application/json";
-      var exceptionResponse = ExceptionResponseFactory.Create(exception);
+      await ExceptionResponseWriter.WriteAsync(httpContext, exception, cancellationToken);
 
-      await SaveSystemLogAsync(httpContext, exception, exceptionResponse.StatusCode, cancellationToken);
-
-      httpContext.Response.StatusCode = exceptionResponse.StatusCode;
-      var response = new
-      {
-         exceptionResponse.Message,
-         exceptionResponse.Details
-      };
-
-      await httpContext.Response.WriteAsJsonAsync(response, cancellationToken);
+      await SaveSystemLogAsync(httpContext, exception, cancellationToken);
       return true;
    }
 
    private async Task SaveSystemLogAsync(
       HttpContext httpContext,
       Exception exception,
-      int statusCode,
       CancellationToken cancellationToken)
    {
       try
@@ -50,7 +39,14 @@ public class GlobalExceptionHandler(
          var unitOfWork = scope.ServiceProvider.GetRequiredService<ISentinelUnitOfWork>();
          var userContext = scope.ServiceProvider.GetRequiredService<IUserContext>();
 
-         var systemLogEvent = SystemLogEventFactory.Create(SentinelConst.System.ModuleName, httpContext, exception, statusCode, userContext);
+         var systemLogEvent = SystemLogEventFactory.Create(
+            source: SentinelConst.System.ModuleName, 
+            request: httpContext.Request,
+            exception: exception, 
+            statusCode: httpContext.Response.StatusCode,
+            requestId: httpContext.TraceIdentifier,
+            userContext: userContext);
+         
          var propertiesJson = JsonSerializer.Serialize(systemLogEvent.Properties);
 
          var systemLog = SystemLog.Create(

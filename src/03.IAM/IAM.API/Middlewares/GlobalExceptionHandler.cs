@@ -1,6 +1,5 @@
 using IAM.Domain;
 using Microsoft.AspNetCore.Diagnostics;
-using Shared.Domain.Enums;
 using Shared.Domain.Interfaces;
 using Shared.Infrastructure.ExceptionHandling;
 
@@ -20,29 +19,15 @@ public class GlobalExceptionHandler(
    {
       _logger.LogError(exception, "An unhandled exception occurred: {Message}", exception.Message);
 
-      httpContext.Response.ContentType = "application/json";
+      await ExceptionResponseWriter.WriteAsync(httpContext, exception, cancellationToken);
 
-      var exceptionResponse = ExceptionResponseFactory.Create(exception);
-      var retentionPolicy = ExceptionRetentionPolicyResolver.Resolve(exception, exceptionResponse.StatusCode);
-
-      await PublishSystemLogAsync(httpContext, exception, exceptionResponse.StatusCode, retentionPolicy, cancellationToken);
-
-      httpContext.Response.StatusCode = exceptionResponse.StatusCode;
-      var response = new
-      {
-         exceptionResponse.Message,
-         exceptionResponse.Details
-      };
-
-      await httpContext.Response.WriteAsJsonAsync(response, cancellationToken);
+      await PublishSystemLogAsync(httpContext, exception, cancellationToken);
       return true;
    }
 
    private async Task PublishSystemLogAsync(
       HttpContext httpContext,
       Exception exception,
-      int statusCode,
-      RetentionPolicy retentionPolicy,
       CancellationToken cancellationToken)
    {
       try
@@ -50,13 +35,14 @@ public class GlobalExceptionHandler(
          using var scope = _serviceProvider.CreateScope();
          var publisher = scope.ServiceProvider.GetRequiredService<IExceptionSystemLogPublisher>();
 
+         var properties = ExceptionRequestFactory.Create(httpContext.Request, httpContext.Response.StatusCode);
+
          await publisher.PublishAsync(
             IamConst.System.ModuleName,
+            httpContext.Request,
             exception,
-            statusCode,
+            httpContext.Response.StatusCode,
             httpContext.TraceIdentifier,
-            httpContext.Request.Path.ToString(),
-            retentionPolicy,
             cancellationToken);
       }
       catch (Exception publishException)

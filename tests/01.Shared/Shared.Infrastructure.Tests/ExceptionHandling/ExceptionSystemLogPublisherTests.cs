@@ -1,7 +1,7 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Shared.Application.Contracts;
-using Shared.Domain.Enums;
 using Shared.Domain.Events;
 using Shared.Domain.Interfaces;
 using Shared.Infrastructure.ExceptionHandling;
@@ -21,11 +21,10 @@ public class ExceptionSystemLogPublisherTests
 
       await publisher.PublishAsync(
          "IAM",
+         CreateRequest(),
          new InvalidOperationException("Boom"),
          500,
          "request-id",
-         "/api/test",
-         RetentionPolicy.Standard,
          TestContext.Current.CancellationToken);
 
       await eventPublisher.Received(1).PublishSystemLogEventAsync(
@@ -43,13 +42,28 @@ public class ExceptionSystemLogPublisherTests
 
       var act = async () => await publisher.PublishAsync(
          "IAM",
+         CreateRequest(),
          new InvalidOperationException("Boom"),
          500,
          "request-id",
-         "/api/test",
-         RetentionPolicy.Standard,
          TestContext.Current.CancellationToken);
 
       await act();
+   }
+
+   private static HttpRequest CreateRequest()
+   {
+      var request = Substitute.For<HttpRequest>();
+      request.Method.Returns(HttpMethods.Get);
+      request.Path.Returns(new PathString("/api/test"));
+      request.Scheme.Returns("https");
+      request.Host.Returns(new HostString("localhost"));
+      request.QueryString.Returns(QueryString.Empty);
+      var query = Substitute.For<IQueryCollection>();
+      query.Count.Returns(0);
+      query.Keys.Returns([]);
+      request.Query.Returns(query);
+
+      return request;
    }
 }

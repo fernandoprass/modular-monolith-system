@@ -50,20 +50,20 @@ public static partial class SentinelConst
    {
       public static class AuditLog
       {
-         public const int Operational = 30;  // 1 month
-         public const int Standard = 90;     // 3 months
-         public const int Extended = 365;    // 1 year
-         public const int Compliance = 1825; // 5 years
-         public const int LongTerm = 3965;   // 10 years
+         public const int Operational = 365; // 1 year
+         public const int Standard = 1095;   // 3 years
+         public const int Extended = 1825;   // 5 years
+         public const int Compliance = 3965; // 10 years
+         public const int LongTerm = 7930;   // 20 years
       }
 
       public static class SystemLog
       {
-         public const int Operational = 7;  // 1 week
-         public const int Standard = 30;    // 1 month
-         public const int Extended = 90;    // 3 months
-         public const int Compliance = 180; // 6 months
-         public const int LongTerm = 365;   // 1 year
+         public const int Operational = 30; // 1 month
+         public const int Standard = 90;    // 3 months
+         public const int Extended = 180;   // 6 months
+         public const int Compliance = 365; // 1 year
+         public const int LongTerm = 730;   // 2 years
       }
    }
 

@@ -47,16 +47,17 @@ public class ResgisterOrchestrator(
 
       if (result.IsSuccess)
       {
-         result.Data!.OrganizationName = organizationDto?.Name ?? string.Empty;
+         var organizationName = organizationDto?.Name ?? string.Empty;
+         result.Data!.OrganizationName = organizationName;
          await _eventPublisher.NotifyAuditLogAsync(
             IamConst.Logger.Feature.Users,
             IamConst.Logger.Action.Create,
             AuditPrivacyLevel.High,
             RetentionPolicy.LongTerm,
-            $"Created user {request.Email}",
-            result.Data.Id,
-            new { request.Name, request.Email, request.OrganizationId },
-            cancellationToken);
+            description: $"Created user {request.Email} at {organizationName}",
+            targetId: result.Data.Id,
+            metadata: new { request.Name, request.Email, request.OrganizationId },
+            cancellationToken: cancellationToken);
       }
 
       return result;
@@ -103,10 +104,10 @@ public class ResgisterOrchestrator(
          IamConst.Logger.Action.Create,
          AuditPrivacyLevel.Medium,
          RetentionPolicy.LongTerm,
-         $"Created organization {organization.Code}",
-         organization.Id,
-         organizationCreate,
-         cancellationToken);
+         description: $"Created organization {organization.Name}",
+         targetId: organization.Id,
+         metadata: organizationCreate,
+         cancellationToken: cancellationToken);
 
       await _eventPublisher.NotifyEmailAsync(
          IamConst.EmailTemplate.OrganizationWelcome,
@@ -145,10 +146,10 @@ public class ResgisterOrchestrator(
             IamConst.Logger.Action.Delete,
             AuditPrivacyLevel.Medium,
             RetentionPolicy.Compliance,
-            $"Deleted organization {id}",
-            id,
-            new { OrganizationId = id },
-            ct);
+            description: $"Deleted organization {organization.Name}",
+            targetId: organization.Id,
+            metadata: new { Id = id, Code = organization.Code, Name = organization.Name},
+            cancellationToken: ct);
 
          foreach (var user in users)
          {
