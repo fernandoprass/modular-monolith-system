@@ -4,6 +4,7 @@ using IAM.Domain.Enums;
 using IAM.Domain.Interfaces;
 using IAM.Domain.Repositories;
 using Isopoh.Cryptography.Argon2;
+using Shared.Domain;
 
 namespace DatabaseSeeder;
 
@@ -42,20 +43,21 @@ public class SeederOrganizations(
          OrganizationType.Company,
          organizationCode,
          "SaaS Internal Administration",
-         "Internal system management and support");
+         "Internal system management and support", 
+         LanguageOptions.English);
 
       seederData.SaaSOrganizationId= organization.Id;
 
       var passwordHash = Argon2.Hash(DefaultPassword);
 
-      var superUser = User.Create("System Root", "admin@saas.com", passwordHash, DateTime.UtcNow.AddDays(30), organization.Id);
+      var superUser = User.Create("System Root", "admin@saas.com", passwordHash, DateTime.UtcNow.AddDays(30), LanguageOptions.English, organization.Id);
       superUser.IsSystemAdmin = true;
       superUser.IsOrganizationAdmin = true;
 
       superUser.AddRole(seederData.SysAdminRoleId, null);
       organization.CreatedBy = superUser.Id;
 
-      var supportUser = User.Create("Internal Support", "support@saas.com", passwordHash, DateTime.UtcNow.AddDays(30), organization.Id);
+      var supportUser = User.Create("Internal Support", "support@saas.com", passwordHash, DateTime.UtcNow.AddDays(30), LanguageOptions.English, organization.Id);
       supportUser.AddRole(seederData.SysAdminRoleId, null);
 
       Console.WriteLine($"Adding organization: {organization.Name}");
@@ -87,7 +89,8 @@ public class SeederOrganizations(
          OrganizationType.Company,
          organizationCode,
          "Computing Pioneers Society",
-         "Foundation of modern Computer Science");
+         "Foundation of modern Computer Science",
+         LanguageOptions.English);
 
       seederData.TestOrganizationId = organization.Id;
 
@@ -96,11 +99,11 @@ public class SeederOrganizations(
 
       var passwordHash = Argon2.Hash(DefaultPassword);
 
-      var alanTuring = User.Create("Alan Turing", "alan.turing@enigma.org", passwordHash, DateTime.UtcNow.AddDays(30), organization.Id);
-      var adaLovelace = User.Create("Ada Lovelace", "ada.lovelace@analytical.org", passwordHash, DateTime.UtcNow.AddDays(30), organization.Id);
-      var graceHopper = User.Create("Grace Hopper", "grace.hopper@cobol.org", passwordHash, DateTime.UtcNow.AddDays(30), organization.Id);
-      var johnVonNeumann = User.Create("John von Neumann", "john.vonneumann@architecture.org", passwordHash, DateTime.UtcNow.AddDays(30), organization.Id);
-      var claudeShannon = User.Create("Claude Shannon", "claude.shannon@entropy.org", passwordHash, DateTime.UtcNow.AddDays(30), organization.Id);
+      var alanTuring = User.Create("Alan Turing", "alan.turing@enigma.org", passwordHash, DateTime.UtcNow.AddDays(30), LanguageOptions.English, organization.Id);
+      var adaLovelace = User.Create("Ada Lovelace", "ada.lovelace@analytical.org", passwordHash, DateTime.UtcNow.AddDays(30), LanguageOptions.English, organization.Id);
+      var graceHopper = User.Create("Grace Hopper", "grace.hopper@cobol.org", passwordHash, DateTime.UtcNow.AddDays(30), LanguageOptions.English, organization.Id);
+      var johnVonNeumann = User.Create("John von Neumann", "john.vonneumann@architecture.org", passwordHash, DateTime.UtcNow.AddDays(30), LanguageOptions.English, organization.Id);
+      var claudeShannon = User.Create("Claude Shannon", "claude.shannon@entropy.org", passwordHash, DateTime.UtcNow.AddDays(30), LanguageOptions.English, organization.Id);
 
       var users = new[] { alanTuring, adaLovelace, graceHopper, johnVonNeumann, claudeShannon };
 

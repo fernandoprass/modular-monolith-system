@@ -18,7 +18,7 @@ public class Organization : EntityAudited
 
    public ICollection<Role> Roles { get; set; } = new List<Role>();
 
-   public static Organization Create(OrganizationType type, string code, string name, string? description, string? defaultLanguage = null)
+   public static Organization Create(OrganizationType type, string code, string name, string? description, string defaultLanguage)
    {
       return new Organization
       {
@@ -37,14 +37,11 @@ public class Organization : EntityAudited
       Code = code;
    }
 
-   public void Update(string name, string? description, bool isActive, string? defaultLanguage = null)
+   public void Update(string name, string? description, bool isActive, string defaultLanguage)
    {
       Name = name;
       Description = description;
       IsActive = isActive;
-      if (defaultLanguage != null)
-      {
-         DefaultLanguage = LanguageOptions.Normalize(defaultLanguage);
-      }
+      DefaultLanguage = LanguageOptions.Normalize(defaultLanguage);
    }
 }

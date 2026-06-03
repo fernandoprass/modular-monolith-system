@@ -10,6 +10,7 @@ using IAM.Domain.QueryRepositories;
 using Myce.Response;
 using NSubstitute;
 using Shared.Application.Contracts;
+using Shared.Domain;
 using Shared.Domain.Enums;
 using Shared.Domain.Messages;
 using static IAM.Domain.IamPermission;
@@ -196,7 +197,7 @@ public class RoleServiceTests
       var expiresAt = DateTime.UtcNow.AddMonths(1);
       var request = CreateRoleAssignRequestRecord(expiresAt);
 
-      var user = User.Create("Test User", "test@example.com", "hash", expiresAt, organizationId);
+      var user = User.Create("Test User", "test@example.com", "hash", expiresAt, LanguageOptions.English, organizationId);
 
       _userContextMock.UserOwnerId.Returns(organizationId);
       _userContextMock.IsSystemAdmin.Returns(false);
@@ -243,7 +244,7 @@ public class RoleServiceTests
          UserId: Guid.NewGuid(),
          Roles: [new RoleAssignRoleRequest(RoleId: Guid.NewGuid(), ExpiresAt: DateTime.UtcNow.AddDays(-1))]);
 
-      var user = User.Create("Test User", "test@example.com", "hash", DateTime.UtcNow.AddMonths(1), organizationId);
+      var user = User.Create("Test User", "test@example.com", "hash", DateTime.UtcNow.AddMonths(1), LanguageOptions.English, organizationId);
 
       _userContextMock.UserOwnerId.Returns(organizationId);
       _userContextMock.IsSystemAdmin.Returns(false);
@@ -263,7 +264,7 @@ public class RoleServiceTests
 
       var request = CreateRoleAssignRequestRecord(expiresAt: null);
 
-      var user = User.Create("Test User", "test@example.com", "hash", DateTime.UtcNow.AddMonths(1), organizationId);
+      var user = User.Create("Test User", "test@example.com", "hash", DateTime.UtcNow.AddMonths(1), LanguageOptions.English, organizationId);
 
       _userContextMock.UserOwnerId.Returns(organizationId);
       _userContextMock.IsSystemAdmin.Returns(false);
@@ -282,7 +283,7 @@ public class RoleServiceTests
    {
       var request = CreateRoleAssignRequestRecord(expiresAt: null);
 
-      var user = User.Create("Test User", "test@example.com", "hash", DateTime.UtcNow.AddMonths(1), organizationId: Guid.NewGuid());
+      var user = User.Create("Test User", "test@example.com", "hash", DateTime.UtcNow.AddMonths(1), LanguageOptions.English, organizationId: Guid.NewGuid());
 
       _userContextMock.UserOwnerId.Returns(Guid.NewGuid());
       _userContextMock.IsSystemAdmin.Returns(false);
@@ -317,7 +318,7 @@ public class RoleServiceTests
             new RoleAssignRoleRequest(roleId, null)
          ]);
 
-      var user = User.Create("Test User", "test@example.com", "hash", DateTime.UtcNow.AddMonths(1), organizationId);
+      var user = User.Create("Test User", "test@example.com", "hash", DateTime.UtcNow.AddMonths(1), LanguageOptions.English, organizationId);
 
       _userContextMock.UserOwnerId.Returns(organizationId);
       _userContextMock.IsSystemAdmin.Returns(false);
@@ -348,7 +349,7 @@ public class RoleServiceTests
 
       var request = new RoleUnassignRequest(UserId: Guid.NewGuid(), RoleIds: [roleId]);
 
-      var user = User.Create("Test User", "test@example.com", "hash", DateTime.UtcNow.AddMonths(1), organizationId);
+      var user = User.Create("Test User", "test@example.com", "hash", DateTime.UtcNow.AddMonths(1), LanguageOptions.English, organizationId);
       user.AddRole(roleId, null);
 
       _userContextMock.UserOwnerId.Returns(organizationId);
@@ -395,7 +396,7 @@ public class RoleServiceTests
       var organizationId = Guid.NewGuid();
       var request = new RoleUnassignRequest(UserId: Guid.NewGuid(), RoleIds: [Guid.NewGuid()]);
 
-      var user = User.Create("Test User", "test@example.com", "hash", DateTime.UtcNow.AddMonths(1), organizationId);
+      var user = User.Create("Test User", "test@example.com", "hash", DateTime.UtcNow.AddMonths(1), LanguageOptions.English, organizationId);
       // User doesn't have this role
 
       _userContextMock.UserOwnerId.Returns(organizationId);
@@ -416,7 +417,7 @@ public class RoleServiceTests
 
       var request = new RoleUnassignRequest(UserId: Guid.NewGuid(), RoleIds: [Guid.NewGuid()]);
 
-      var user = User.Create("Test User", "test@example.com", "hash", DateTime.UtcNow.AddMonths(1), organizationId:Guid.NewGuid());
+      var user = User.Create("Test User", "test@example.com", "hash", DateTime.UtcNow.AddMonths(1), LanguageOptions.English, organizationId:Guid.NewGuid());
       user.AddRole(roleId, null);
 
       _userContextMock.UserOwnerId.Returns(Guid.NewGuid());
@@ -512,7 +513,7 @@ public class RoleServiceTests
    public async Task GetAsync_WithUserId_ShouldReturnUserRoles_WhenUserOwnsOrganization()
    {
       var organizationId = Guid.NewGuid();
-      var user = User.Create("Test User", "test@example.com", "hash", DateTime.UtcNow.AddMonths(1), organizationId);
+      var user = User.Create("Test User", "test@example.com", "hash", DateTime.UtcNow.AddMonths(1), LanguageOptions.English, organizationId);
       var request = new RoleSearchRequest(null, user.Id, true, null);
       var roles = new List<RoleDto>
       {
@@ -550,7 +551,7 @@ public class RoleServiceTests
    [Fact]
    public async Task GetAsync_WithUserId_ShouldReturnUnauthorized_WhenUserDoesNotOwnOrganization()
    {
-      var user = User.Create("Test User", "test@example.com", "hash", DateTime.UtcNow.AddMonths(1), Guid.NewGuid());
+      var user = User.Create("Test User", "test@example.com", "hash", DateTime.UtcNow.AddMonths(1), LanguageOptions.English, Guid.NewGuid());
       var request = new RoleSearchRequest(null, user.Id, null, null);
 
       _userContextMock.UserOwnerId.Returns(Guid.NewGuid());
@@ -578,7 +579,7 @@ public class RoleServiceTests
          Permission.Create("iam", "users", "write", "Write", "Write users", true)
       };
 
-      var user = User.Create("Test User", "test@example.com", "hash", DateTime.UtcNow.AddMonths(1), organizationId);
+      var user = User.Create("Test User", "test@example.com", "hash", DateTime.UtcNow.AddMonths(1), LanguageOptions.English, organizationId);
 
       _userContextMock.UserOwnerId.Returns(organizationId);
       _userContextMock.IsSystemAdmin.Returns(false);
@@ -608,7 +609,7 @@ public class RoleServiceTests
    [Fact]
    public async Task GetRolePermissionsByUserIdAsync_WithUnauthorizedOrganization_ShouldReturnUnauthorized()
    {
-      var user = User.Create("Test User", "test@example.com", "hash", DateTime.UtcNow.AddMonths(1), organizationId: Guid.NewGuid());
+      var user = User.Create("Test User", "test@example.com", "hash", DateTime.UtcNow.AddMonths(1), LanguageOptions.English, organizationId: Guid.NewGuid());
 
       _userContextMock.UserOwnerId.Returns(Guid.NewGuid());
       _userContextMock.IsSystemAdmin.Returns(false);

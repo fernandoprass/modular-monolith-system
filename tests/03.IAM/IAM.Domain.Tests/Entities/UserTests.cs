@@ -1,5 +1,6 @@
 using FluentAssertions;
 using IAM.Domain.Entities;
+using Shared.Domain;
 
 namespace IAM.Domain.Tests.Entities;
 
@@ -11,7 +12,7 @@ public class UserTests
       var organizationId = Guid.NewGuid();
       var passwordExpiresAt = DateTime.UtcNow.AddDays(30);
 
-      var user = User.Create("Ana", " ANA@Example.COM ", "hash", passwordExpiresAt, organizationId);
+      var user = User.Create("Ana", " ANA@Example.COM ", "hash", passwordExpiresAt, LanguageOptions.English, organizationId);
 
       user.Email.Should().Be("ana@example.com");
       user.IsOrganizationAdmin.Should().BeFalse();
@@ -30,6 +31,7 @@ public class UserTests
          "hash",
          DateTime.UtcNow.AddDays(30),
          isOrganizationAdmin: true,
+         LanguageOptions.English,
          Guid.NewGuid());
 
       user.IsOrganizationAdmin.Should().BeTrue();
@@ -141,6 +143,7 @@ public class UserTests
          "ana@example.com",
          "hash",
          DateTime.UtcNow.AddDays(30),
+         LanguageOptions.English,
          Guid.NewGuid());
    }
 }

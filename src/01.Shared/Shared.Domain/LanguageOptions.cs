@@ -1,3 +1,5 @@
+using Myce.Extensions;
+
 namespace Shared.Domain;
 
 /// <summary>
@@ -6,7 +8,7 @@ namespace Shared.Domain;
 public static class LanguageOptions
 {
    public const string English = "en";
-   public const string PortugueseBrazil = "pt-BR";
+   public const string PortugueseBrazil = "pt-br";
    public const string Spanish = "es";
 
    public static readonly IReadOnlyList<string> AllowedLanguages =
@@ -29,6 +31,6 @@ public static class LanguageOptions
    /// </summary>
    public static string Normalize(string language)
    {
-      return string.IsNullOrEmpty(language) ? English : language.Trim().ToLowerInvariant();
+      return language.Trim().IsNullOrEmpty() ? English : language.Trim().ToLowerInvariant();
    }
 }

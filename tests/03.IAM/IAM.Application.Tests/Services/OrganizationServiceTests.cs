@@ -12,6 +12,7 @@ using IAM.Domain.Repositories;
 using Myce.Response;
 using NSubstitute;
 using Shared.Application.Contracts;
+using Shared.Domain;
 using Shared.Domain.DTOs.Responses;
 using Shared.Domain.Enums;
 using Shared.Domain.Messages;
@@ -76,7 +77,7 @@ public class OrganizationServiceTests
    public async Task GetByIdAsync_WhenOrganizationExists_ReturnsOrganizationDto()
    {
       var id = Guid.NewGuid();
-      var expected = new OrganizationDto(Id: id, Type: OrganizationType.Company, Code: "ABC", Name: "Test", Description: null, IsActive: true);
+      var expected = new OrganizationDto(Id: id, Type: OrganizationType.Company, Code: "ABC", Name: "Test", Description: null, LanguageOptions.English, IsActive: true);
 
       _userContext.UserOwnerId.Returns(id);
       _organizationQueryRepository.GetByIdAsync(id, Arg.Any<CancellationToken>()).Returns(expected);
@@ -102,7 +103,7 @@ public class OrganizationServiceTests
       var organizationId = Guid.NewGuid();
       var request = new OrganizationSearchRequest(Code: "ABC", Name: "SearchName", OrganizationId: organizationId);
       var expected = new PagedResultDto<OrganizationDto>(
-         [new(Id: organizationId, Type: OrganizationType.Company, Code: "ABC", Name: request.Name!, Description: null, IsActive: true)],
+         [new(Id: organizationId, Type: OrganizationType.Company, Code: "ABC", Name: request.Name!, Description: null, LanguageOptions.English, IsActive: true)],
          1,
          25,
          1,
@@ -144,7 +145,7 @@ public class OrganizationServiceTests
       var id = Guid.NewGuid();
       var request = GetOrganizationUpdateRequest("New Organization Name", "description", true);
 
-      var organization = Organization.Create(OrganizationType.Company, "OriginalCode", "Original Name", "description");
+      var organization = Organization.Create(OrganizationType.Company, "OriginalCode", "Original Name", "description", LanguageOptions.English);
 
       _userContext.UserOwnerId.Returns(id);
       _organizationRepository.GetByIdAsync(id, Arg.Any<CancellationToken>()).Returns(organization);
@@ -171,7 +172,7 @@ public class OrganizationServiceTests
    {
       var id = Guid.NewGuid();
       var request = GetOrganizationUpdateRequest(string.Empty, "description", true);
-      var organization = Organization.Create(OrganizationType.Company, "OriginalCode", "Original Name", "description");
+      var organization = Organization.Create(OrganizationType.Company, "OriginalCode", "Original Name", "description", LanguageOptions.English);
 
       _userContext.UserOwnerId.Returns(id);
       _organizationRepository.GetByIdAsync(id, Arg.Any<CancellationToken>()).Returns(organization);
@@ -187,7 +188,7 @@ public class OrganizationServiceTests
    {
       var id = Guid.NewGuid();
       var request = new OrganizationUpdateCodeRequest("NEWCODE");
-      var organization = Organization.Create(OrganizationType.Company, "OriginalCode", "Original Name", "description");
+      var organization = Organization.Create(OrganizationType.Company, "OriginalCode", "Original Name", "description", LanguageOptions.English);
 
       _userContext.UserOwnerId.Returns(id);
       _organizationRepository.GetByCodeAsync(request.Code, Arg.Any<CancellationToken>()).Returns((Organization)null);
@@ -214,7 +215,7 @@ public class OrganizationServiceTests
    {
       var id = Guid.NewGuid();
       var request = new OrganizationUpdateCodeRequest("EXISTING");
-      var existingOrganization = Organization.Create(OrganizationType.Company, "EXISTING", "Original Name", "description");
+      var existingOrganization = Organization.Create(OrganizationType.Company, "EXISTING", "Original Name", "description", LanguageOptions.English);
 
       _userContext.UserOwnerId.Returns(id);
       _organizationRepository.GetByCodeAsync(request.Code, Arg.Any<CancellationToken>()).Returns(existingOrganization);
@@ -228,13 +229,13 @@ public class OrganizationServiceTests
    private static OrganizationCreateRequest GetOrganizationCreateRequest(OrganizationType type, string name, string code)
    {
       var user = new OrganizationUserCreateRequest(string.Empty, string.Empty, string.Empty);
-      var request = new OrganizationCreateRequest(type, name, code, "some description", user);
+      var request = new OrganizationCreateRequest(type, name, code, "some description", LanguageOptions.English, user);
       return request;
    }
 
    private static OrganizationUpdateRequest GetOrganizationUpdateRequest(string name, string description, bool isActive)
    {
-      var request = new OrganizationUpdateRequest(name, description, isActive);
+      var request = new OrganizationUpdateRequest(name, description, isActive, LanguageOptions.English);
       return request;
    }
 }
