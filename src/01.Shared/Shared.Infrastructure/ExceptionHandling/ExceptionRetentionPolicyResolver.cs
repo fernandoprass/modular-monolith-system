@@ -12,7 +12,13 @@ public static class ExceptionRetentionPolicyResolver
       {
          UnauthorizedAccessException => RetentionPolicy.Extended,
          DbUpdateException => RetentionPolicy.Standard,
-         _ when statusCode == (int)HttpStatusCode.Unauthorized => RetentionPolicy.LongTerm,
+         NotImplementedException => RetentionPolicy.Standard,
+         TimeoutException => RetentionPolicy.Operational,
+         TaskCanceledException => RetentionPolicy.Operational,
+         OperationCanceledException => RetentionPolicy.Operational,
+         KeyNotFoundException => RetentionPolicy.Operational,
+         ArgumentException => RetentionPolicy.Operational,
+         _ when statusCode == (int)HttpStatusCode.Unauthorized => RetentionPolicy.Extended,
          _ => RetentionPolicy.Operational
       };
    }

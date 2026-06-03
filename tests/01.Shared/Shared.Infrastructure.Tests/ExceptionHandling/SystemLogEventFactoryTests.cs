@@ -22,14 +22,17 @@ public class SystemLogEventFactoryTests
       var userContext = new FakeUserContext(userId, organizationId);
       var exception = CreateException(exceptionType);
 
-      var request = CreateRequest();
+      var httpContext = CreateHttpContext();
 
-      var logEvent = SystemLogEventFactory.Create("IAM", request, exception, statusCode, "request-1", userContext);
+      httpContext.TraceIdentifier = "request-1";
+      httpContext.Response.StatusCode = statusCode;
+
+      var logEvent = SystemLogEventFactory.Create("IAM", httpContext, exception, userContext);
 
       Assert.Equal(SystemLogLevel.Error, logEvent.Level);
       Assert.Equal(expectedStatus, logEvent.Status);
       Assert.Equal(expectedPolicy, logEvent.RetentionPolicy);
-      Assert.Equal("IAM", logEvent.Source);
+      Assert.Equal("IAM", logEvent.Module);
       Assert.Equal(exception.Message, logEvent.Message);
       Assert.Equal(exception.GetType().Name, logEvent.Exception);
       Assert.Equal("request-1", logEvent.RequestId);
@@ -40,13 +43,34 @@ public class SystemLogEventFactoryTests
    }
 
    [Fact]
+   public void Create_ShouldIncludeSafeRequestProperties()
+   {
+      var userContext = new FakeUserContext(Guid.CreateVersion7(), Guid.CreateVersion7());
+      var httpContext = TestHttpContextFactory.Create(
+         statusCode: 500,
+         requestId: "request-1",
+         queryKeys: ["token", "page"],
+         contentType: "application/json",
+         contentLength: 42);
+
+      var logEvent = SystemLogEventFactory.Create("IAM", httpContext, new InvalidOperationException("Boom"), userContext);
+
+      Assert.Equal(["token", "page"], Assert.IsType<string[]>(logEvent.Properties["queryKeys"]));
+      Assert.Equal("application/json", logEvent.Properties["contentType"]);
+      Assert.Equal(42L, logEvent.Properties["contentLength"]);
+      Assert.False(logEvent.Properties.ContainsKey("queryString"));
+   }
+
+   [Fact]
    public void Create_ShouldSetNullUserValues_WhenUserContextHasEmptyIds()
    {
       var userContext = new FakeUserContext(Guid.Empty, Guid.Empty);
 
-      var request = CreateRequest();
+      var httpContext = CreateHttpContext();
+      httpContext.TraceIdentifier = "request-1";
+      httpContext.Response.StatusCode = 500;
 
-      var logEvent = SystemLogEventFactory.Create("IAM", request, new InvalidOperationException("Boom"), 500, "request-1", userContext);
+      var logEvent = SystemLogEventFactory.Create("IAM", httpContext, new InvalidOperationException("Boom"), userContext);
 
       Assert.Null(logEvent.UserId);
       Assert.Null(logEvent.OrganizationId);
@@ -61,20 +85,9 @@ public class SystemLogEventFactoryTests
       };
    }
 
-   private static HttpRequest CreateRequest()
+   private static HttpContext CreateHttpContext()
    {
-      var request = Substitute.For<HttpRequest>();
-      request.Method.Returns(HttpMethods.Get);
-      request.Path.Returns(new PathString("/api/test"));
-      request.Scheme.Returns("https");
-      request.Host.Returns(new HostString("localhost"));
-      request.QueryString.Returns(QueryString.Empty);
-      var query = Substitute.For<IQueryCollection>();
-      query.Count.Returns(0);
-      query.Keys.Returns([]);
-      request.Query.Returns(query);
-
-      return request;
+      return TestHttpContextFactory.Create();
    }
 
    private class FakeUserContext(Guid userId, Guid userOwnerId) : IUserContext

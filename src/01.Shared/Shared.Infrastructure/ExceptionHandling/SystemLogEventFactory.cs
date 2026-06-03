@@ -9,27 +9,25 @@ namespace Shared.Infrastructure.ExceptionHandling;
 public static class SystemLogEventFactory
 {
    public static SystemLogEvent Create(
-      string source,
-      HttpRequest request,
+      string module,
+      HttpContext httpContext,
       Exception exception,
-      int statusCode,
-      string? requestId,
       IUserContext userContext)
    {
-      var retentionPolicy = ExceptionRetentionPolicyResolver.Resolve(exception, statusCode);
-      var properties = ExceptionRequestFactory.Create(request, statusCode);
+      var retentionPolicy = ExceptionRetentionPolicyResolver.Resolve(exception, httpContext.Response.StatusCode);
+      var properties = ExceptionRequestFactory.Create(httpContext.Request, httpContext.Response.StatusCode);
 
       return new SystemLogEvent
       {
          Id = Guid.CreateVersion7(),
          Level = SystemLogLevel.Error,
-         Status = GetStatus(statusCode),
+         Status = GetStatus(httpContext.Response.StatusCode),
          RetentionPolicy = retentionPolicy,
-         Source = source,
+         Module = module,
          Message = exception.Message,
          Exception = exception.GetType().Name,
          StackTrace = exception.StackTrace,
-         RequestId = requestId,
+         RequestId = httpContext.TraceIdentifier,
          UserId = GetOptionalGuid(userContext.UserId),
          OrganizationId = GetOptionalGuid(userContext.UserOwnerId),
          Properties = properties
@@ -38,11 +36,9 @@ public static class SystemLogEventFactory
 
    private static SystemLogStatus GetStatus(int statusCode)
    {
-      return statusCode switch
-      {
-         (int)HttpStatusCode.Unauthorized => SystemLogStatus.Unauthorized,
-         _ => SystemLogStatus.Failure
-      };
+      return statusCode == (int)HttpStatusCode.Unauthorized 
+         ? SystemLogStatus.Unauthorized 
+         : SystemLogStatus.Failure;
    }
 
    private static Guid? GetOptionalGuid(Guid value)

@@ -23,7 +23,6 @@ public class GlobalExceptionHandler(
       _logger.LogError(exception, "An unhandled exception occurred: {Message}", exception.Message);
 
       await ExceptionResponseWriter.WriteAsync(httpContext, exception, cancellationToken);
-
       await SaveSystemLogAsync(httpContext, exception, cancellationToken);
       return true;
    }
@@ -40,11 +39,9 @@ public class GlobalExceptionHandler(
          var userContext = scope.ServiceProvider.GetRequiredService<IUserContext>();
 
          var systemLogEvent = SystemLogEventFactory.Create(
-            source: SentinelConst.System.ModuleName, 
-            request: httpContext.Request,
+            module: SentinelConst.System.ModuleName, 
+            httpContext: httpContext,
             exception: exception, 
-            statusCode: httpContext.Response.StatusCode,
-            requestId: httpContext.TraceIdentifier,
             userContext: userContext);
          
          var propertiesJson = JsonSerializer.Serialize(systemLogEvent.Properties);
@@ -54,7 +51,7 @@ public class GlobalExceptionHandler(
             systemLogEvent.Level,
             systemLogEvent.Status,
             systemLogEvent.RetentionPolicy,
-            systemLogEvent.Source,
+            systemLogEvent.Module,
             systemLogEvent.Message,
             systemLogEvent.Exception,
             systemLogEvent.StackTrace,

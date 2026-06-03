@@ -36,7 +36,7 @@ public class SystemLogConsumer(
          systemLogEvent.Level,
          systemLogEvent.Status,
          systemLogEvent.RetentionPolicy,
-         systemLogEvent.Source,
+         systemLogEvent.Module,
          systemLogEvent.Message,
          systemLogEvent.Exception,
          systemLogEvent.StackTrace,

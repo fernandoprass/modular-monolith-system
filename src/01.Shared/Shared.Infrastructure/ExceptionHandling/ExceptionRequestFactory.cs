@@ -14,11 +14,6 @@ public static class ExceptionRequestFactory
          ["path"] = httpRequest.Path.ToString()
       };
 
-      if (httpRequest.QueryString.HasValue)
-      {
-         properties.Add("queryString", httpRequest.QueryString.ToString());
-      }
-
       if (httpRequest.Query.Count > 0)
       {
          properties.Add("queryKeys", httpRequest.Query.Keys.ToArray());

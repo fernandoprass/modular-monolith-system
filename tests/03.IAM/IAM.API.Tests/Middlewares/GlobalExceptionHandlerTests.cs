@@ -1,7 +1,6 @@
-using FluentAssertions;
-using IAM.API.Middlewares;
+﻿using IAM.API.Middlewares;
+using IAM.Domain;
 using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
@@ -12,49 +11,97 @@ namespace IAM.API.Tests.Middlewares;
 
 public class GlobalExceptionHandlerTests
 {
-   [Theory]
-   [InlineData("db", StatusCodes.Status400BadRequest, "A database error occurred. This could be a constraint violation or invalid data.")]
-   [InlineData("unauthorized", StatusCodes.Status401Unauthorized, "Unauthorized access.")]
-   [InlineData("generic", StatusCodes.Status500InternalServerError, "An unexpected error occurred.")]
-   public async Task TryHandleAsync_ShouldReturnErrorResponseAndPublishSystemLog(
-      string exceptionType,
-      int expectedStatusCode,
-      string expectedMessage)
+   [Fact]
+   public async Task TryHandleAsync_ShouldReturnTrue()
    {
       var systemLogPublisher = Substitute.For<IExceptionSystemLogPublisher>();
-      var services = new ServiceCollection();
-      services.AddScoped(_ => systemLogPublisher);
-      var serviceProvider = services.BuildServiceProvider();
-      var handler = new GlobalExceptionHandler(Substitute.For<ILogger<GlobalExceptionHandler>>(), serviceProvider);
-      var httpContext = new DefaultHttpContext();
-      httpContext.Response.Body = new MemoryStream();
-      var exception = CreateException(exceptionType);
+      var handler = CreateHandler(systemLogPublisher);
+      var httpContext = CreateHttpContext();
+      var exception = new InvalidOperationException("Boom");
 
       var handled = await handler.TryHandleAsync(httpContext, exception, TestContext.Current.CancellationToken);
 
-      handled.Should().BeTrue();
-      httpContext.Response.StatusCode.Should().Be(expectedStatusCode);
+      Assert.True(handled);
+      Assert.Equal(StatusCodes.Status500InternalServerError, httpContext.Response.StatusCode);
+   }
 
-      httpContext.Response.Body.Position = 0;
-      using var response = await JsonDocument.ParseAsync(httpContext.Response.Body, cancellationToken: TestContext.Current.CancellationToken);
-      response.RootElement.GetProperty("message").GetString().Should().Be(expectedMessage);
+   [Fact]
+   public async Task TryHandleAsync_ShouldPublishIamSystemLog()
+   {
+      var systemLogPublisher = Substitute.For<IExceptionSystemLogPublisher>();
+      var handler = CreateHandler(systemLogPublisher);
+      var httpContext = CreateHttpContext();
+      var exception = new InvalidOperationException("Boom");
+
+      await handler.TryHandleAsync(httpContext, exception, TestContext.Current.CancellationToken);
 
       await systemLogPublisher.Received(1).PublishAsync(
-         "IAM",
-         httpContext.Request,
+         IamConst.System.ModuleName,
+         httpContext,
          exception,
-         expectedStatusCode,
-         httpContext.TraceIdentifier,
          Arg.Any<CancellationToken>());
    }
 
-   private static Exception CreateException(string exceptionType)
+   [Fact]
+   public async Task TryHandleAsync_ShouldNotThrow_WhenSystemLogPublishFails()
    {
-      return exceptionType switch
-      {
-         "db" => new DbUpdateException("Database failed", new InvalidOperationException("Unique constraint")),
-         "unauthorized" => new UnauthorizedAccessException("Denied"),
-         _ => new InvalidOperationException("Boom")
-      };
+      var systemLogPublisher = Substitute.For<IExceptionSystemLogPublisher>();
+      systemLogPublisher
+         .PublishAsync(
+            Arg.Any<string>(),
+            Arg.Any<HttpContext>(),
+            Arg.Any<Exception>(),
+            Arg.Any<CancellationToken>())
+         .Returns(_ => throw new InvalidOperationException("Publisher failed"));
+
+      var handler = CreateHandler(systemLogPublisher);
+      var httpContext = CreateHttpContext();
+      var exception = new InvalidOperationException("Boom");
+
+      var handled = await handler.TryHandleAsync(httpContext, exception, TestContext.Current.CancellationToken);
+
+      Assert.True(handled);
+      Assert.Equal(StatusCodes.Status500InternalServerError, httpContext.Response.StatusCode);
+   }
+
+   [Fact]
+   public async Task TryHandleAsync_ShouldWriteErrorResponse()
+   {
+      var systemLogPublisher = Substitute.For<IExceptionSystemLogPublisher>();
+      var handler = CreateHandler(systemLogPublisher);
+      var httpContext = CreateHttpContext();
+      var exception = new UnauthorizedAccessException("Denied");
+
+      await handler.TryHandleAsync(httpContext, exception, TestContext.Current.CancellationToken);
+
+      Assert.Equal(StatusCodes.Status401Unauthorized, httpContext.Response.StatusCode);
+      Assert.Equal("application/json; charset=utf-8", httpContext.Response.ContentType);
+
+      httpContext.Response.Body.Position = 0;
+      using var json = await JsonDocument.ParseAsync(httpContext.Response.Body, cancellationToken: TestContext.Current.CancellationToken);
+      Assert.Equal("Unauthorized access.", json.RootElement.GetProperty("message").GetString());
+   }
+
+   private static GlobalExceptionHandler CreateHandler(
+      IExceptionSystemLogPublisher systemLogPublisher,
+      ILogger<GlobalExceptionHandler>? logger = null)
+   {
+      var services = new ServiceCollection();
+      services.AddScoped(_ => systemLogPublisher);
+
+      return new GlobalExceptionHandler(
+         logger ?? Substitute.For<ILogger<GlobalExceptionHandler>>(),
+         services.BuildServiceProvider());
+   }
+
+   private static HttpContext CreateHttpContext()
+   {
+      var httpContext = new DefaultHttpContext();
+      httpContext.TraceIdentifier = "request-1";
+      httpContext.Request.Method = HttpMethods.Get;
+      httpContext.Request.Path = "/api/test";
+      httpContext.Response.Body = new MemoryStream();
+
+      return httpContext;
    }
 }

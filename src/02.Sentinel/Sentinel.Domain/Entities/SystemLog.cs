@@ -7,7 +7,7 @@ public class SystemLog : Entity
 {
    public SystemLogLevel Level { get; private set; }
    public SystemLogStatus Status { get; private set; } = SystemLogStatus.Unknown;
-   public string Source { get; private set; } = string.Empty;
+   public string Module { get; private set; } = string.Empty;
    public string Message { get; private set; } = string.Empty;
    public string? Exception { get; private set; }
    public string? StackTrace { get; private set; }
@@ -25,7 +25,7 @@ public class SystemLog : Entity
       SystemLogLevel level,
       SystemLogStatus status,
       RetentionPolicy retentionPolicy,
-      string source,
+      string module,
       string message,
       string? exception,
       string? stackTrace,
@@ -41,7 +41,7 @@ public class SystemLog : Entity
          Id = id,
          Level = level,
          Status = status,
-         Source = source,
+         Module = module,
          Message = message,
          Exception = exception,
          StackTrace = stackTrace,

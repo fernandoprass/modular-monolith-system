@@ -12,7 +12,7 @@ public static class SystemLogMappers
          systemLog.CreatedAt,
          systemLog.Level,
          systemLog.Status,
-         systemLog.Source,
+         systemLog.Module,
          systemLog.Message,
          systemLog.Exception,
          systemLog.StackTrace,

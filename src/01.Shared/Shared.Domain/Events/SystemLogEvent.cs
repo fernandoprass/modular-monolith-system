@@ -8,7 +8,7 @@ public record SystemLogEvent
    public SystemLogLevel Level { get; init; } = SystemLogLevel.Information;
    public SystemLogStatus Status { get; init; } = SystemLogStatus.Unknown;
    public RetentionPolicy RetentionPolicy { get; init; } = RetentionPolicy.Standard;
-   public string Source { get; init; } = string.Empty;
+   public string Module { get; init; } = string.Empty;
    public string Message { get; init; } = string.Empty;
    public string? Exception { get; init; }
    public string? StackTrace { get; init; }

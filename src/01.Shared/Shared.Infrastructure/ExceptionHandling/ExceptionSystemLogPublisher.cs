@@ -15,21 +15,19 @@ public class ExceptionSystemLogPublisher(
    private readonly ILogger<ExceptionSystemLogPublisher> _logger = logger;
 
    public async Task PublishAsync(
-      string source,
-      HttpRequest httpRequest,
+      string module,
+      HttpContext httpContext,
       Exception exception,
-      int statusCode,
-      string? requestId,
       CancellationToken cancellationToken = default)
    {
       try
       {
-         var systemLogEvent = SystemLogEventFactory.Create(source, httpRequest, exception, statusCode, requestId, _userContext);
+         var systemLogEvent = SystemLogEventFactory.Create(module, httpContext, exception, _userContext);
          await _eventPublisher.PublishSystemLogEventAsync(systemLogEvent, cancellationToken);
       }
       catch (Exception publishException)
       {
-         _logger.LogError(publishException, "Failed to publish exception system log for {Source}", source);
+         _logger.LogError(publishException, "Failed to publish exception system log for {Module}", module);
       }
    }
 }

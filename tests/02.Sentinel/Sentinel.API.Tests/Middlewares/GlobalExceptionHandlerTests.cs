@@ -13,8 +13,6 @@ namespace Sentinel.API.Tests.Middlewares;
 
 public class GlobalExceptionHandlerTests
 {
-   public GlobalExceptionHandlerTests() { }
-
    [Theory]
    [InlineData("unauthorized", StatusCodes.Status401Unauthorized, "Unauthorized access.", SystemLogStatus.Unauthorized, 180)]
    [InlineData("generic", StatusCodes.Status500InternalServerError, "An unexpected error occurred.", SystemLogStatus.Failure, 30)]
@@ -50,7 +48,7 @@ public class GlobalExceptionHandlerTests
       var systemLog = Assert.Single(repository.Logs);
       Assert.Equal(SystemLogLevel.Error, systemLog.Level);
       Assert.Equal(expectedLogStatus, systemLog.Status);
-      Assert.Equal(SentinelConst.System.ModuleName, systemLog.Source);
+      Assert.Equal(SentinelConst.System.ModuleName, systemLog.Module);
       Assert.Equal(exception.Message, systemLog.Message);
       Assert.Equal(exception.GetType().Name, systemLog.Exception);
       Assert.Equal("request-1", systemLog.RequestId);

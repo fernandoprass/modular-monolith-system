@@ -4,8 +4,8 @@ using Courier.Domain.DTOs.Requests;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Shared.Domain.Events;
 using Shared.Domain.Enums;
+using Shared.Domain.Events;
 using StackExchange.Redis;
 using System.Text.Json;
 
@@ -59,7 +59,7 @@ public class EmailRequestConsumer(
          catch (Exception ex)
          {
             _logger.LogError(ex, "Error consuming Courier email requests");
-            await LogSystemErrorAsync("Error consuming Courier email requests", ex, stoppingToken);
+            await TryLogSystemErrorAsync("Error consuming Courier email requests", ex, stoppingToken);
             await Task.Delay(TimeSpan.FromSeconds(CourierConst.Redis.ErrorDelaySeconds), stoppingToken);
          }
       }
@@ -83,7 +83,7 @@ public class EmailRequestConsumer(
       }
    }
 
-   private async Task ProcessEntryAsync(StreamEntry entry, CancellationToken cancellationToken)
+   internal async Task ProcessEntryAsync(StreamEntry entry, CancellationToken cancellationToken)
    {
       try
       {
@@ -104,14 +104,14 @@ public class EmailRequestConsumer(
          catch (JsonException ex)
          {
             _logger.LogError(ex, "Invalid Courier email request {EntryId}", entry.Id);
-            await LogSystemErrorAsync($"Invalid Courier email request {entry.Id}", ex, cancellationToken);
+            await TryLogSystemErrorAsync($"Invalid Courier email request {entry.Id}", ex, cancellationToken);
             await AcknowledgeAsync(entry);
             return;
          }
          catch (NotSupportedException ex)
          {
             _logger.LogError(ex, "Unsupported Courier email request {EntryId}", entry.Id);
-            await LogSystemErrorAsync($"Unsupported Courier email request {entry.Id}", ex, cancellationToken);
+            await TryLogSystemErrorAsync($"Unsupported Courier email request {entry.Id}", ex, cancellationToken);
             await AcknowledgeAsync(entry);
             return;
          }
@@ -134,28 +134,25 @@ public class EmailRequestConsumer(
 
          var request = envelope.Payload;
 
+         if (request == null)
+         {
+            await TryLogQueueFailureAsync(entry, "Courier email request payload is missing", null, cancellationToken);
+            await AcknowledgeAsync(entry);
+            return;
+         }
+
          using var scope = _serviceProvider.CreateScope();
          var service = scope.ServiceProvider.GetRequiredService<IEmailOutboxService>();
          var result = await service.QueueAsync(request, cancellationToken);
 
          if (result.HasError)
          {
-            var logger = scope.ServiceProvider.GetRequiredService<ICourierLogger>();
-            await logger.LogSystemAsync(
-               SystemLogLevel.Warning,
-               SystemLogStatus.Failure,
+            await TryLogQueueFailureAsync(
+               entry,
                $"Failed to queue email request {entry.Id}",
-               null,
-               request.OrganizationId,
-               request.UserId,
-               new Dictionary<string, object>
-               {
-                  ["streamId"] = entry.Id.ToString(),
-                  ["templateKey"] = request.TemplateKey,
-                  ["recipient"] = request.Recipient,
-                  ["errors"] = string.Join(" | ", result.Messages.Select(m => m.Show()))
-               },
-               cancellationToken);
+               request,
+               cancellationToken,
+               new KeyValuePair<string, object>("errors", string.Join(" | ", result.Messages.Select(m => m.Show()))));
          }
 
          await AcknowledgeAsync(entry);
@@ -163,24 +160,74 @@ public class EmailRequestConsumer(
       catch (Exception ex)
       {
          _logger.LogError(ex, "Failed to process Courier email request {EntryId}", entry.Id);
-         await LogSystemErrorAsync($"Failed to process Courier email request {entry.Id}", ex, cancellationToken);
+         await TryLogSystemErrorAsync($"Failed to process Courier email request {entry.Id}", ex, cancellationToken);
       }
    }
 
-   private Task AcknowledgeAsync(StreamEntry entry)
+   private Task<long> AcknowledgeAsync(StreamEntry entry)
    {
       return _database.StreamAcknowledgeAsync(CourierConst.Redis.EmailRequestsStream, CourierConst.Redis.EmailRequestConsumerGroup, entry.Id);
    }
 
-   private string GetConsumerName()
+   private static string GetConsumerName()
    {
       return $"{CourierConst.Redis.EmailRequestConsumerNamePrefix}-{Environment.MachineName}";
    }
 
-   private async Task LogSystemErrorAsync(string message, Exception exception, CancellationToken cancellationToken)
+   private async Task TryLogQueueFailureAsync(
+      StreamEntry entry,
+      string message,
+      EmailQueueRequest? request,
+      CancellationToken cancellationToken,
+      params KeyValuePair<string, object>[] extraProperties)
    {
-      using var scope = _serviceProvider.CreateScope();
-      var logger = scope.ServiceProvider.GetRequiredService<ICourierLogger>();
-      await logger.LogSystemAsync(SystemLogLevel.Error, SystemLogStatus.Failure, message, exception, cancellationToken: cancellationToken);
+      try
+      {
+         var properties = new Dictionary<string, object>
+         {
+            ["streamId"] = entry.Id.ToString()
+         };
+
+         if (request != null)
+         {
+            properties["templateKey"] = request.TemplateKey;
+            properties["recipient"] = request.Recipient;
+         }
+
+         foreach (var property in extraProperties)
+         {
+            properties[property.Key] = property.Value;
+         }
+
+         using var scope = _serviceProvider.CreateScope();
+         var logger = scope.ServiceProvider.GetRequiredService<ICourierLogger>();
+         await logger.LogSystemAsync(
+            SystemLogLevel.Warning,
+            SystemLogStatus.Failure,
+            message,
+            null,
+            request?.OrganizationId,
+            request?.UserId,
+            properties,
+            cancellationToken);
+      }
+      catch (Exception logException)
+      {
+         _logger.LogError(logException, "Failed to log Courier queue failure");
+      }
+   }
+
+   private async Task TryLogSystemErrorAsync(string message, Exception exception, CancellationToken cancellationToken)
+   {
+      try
+      {
+         using var scope = _serviceProvider.CreateScope();
+         var logger = scope.ServiceProvider.GetRequiredService<ICourierLogger>();
+         await logger.LogSystemAsync(SystemLogLevel.Error, SystemLogStatus.Failure, message, exception, cancellationToken: cancellationToken);
+      }
+      catch (Exception logException)
+      {
+         _logger.LogError(logException, "Failed to log Courier system error");
+      }
    }
 }

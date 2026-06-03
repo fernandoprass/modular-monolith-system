@@ -74,7 +74,7 @@ public class SentinelLogQueryRepository(SentinelDbContext dbContext) : ISentinel
          s.CreatedAt,
          s.Level,
          s.Status,
-         s.Source,
+         s.Module,
          s.Message,
          s.RequestId,
          s.UserId,
@@ -144,8 +144,8 @@ public class SentinelLogQueryRepository(SentinelDbContext dbContext) : ISentinel
       if (request.Status.HasValue)
          filters.Add(builder.Eq(s => s.Status, request.Status.Value));
 
-      if (!string.IsNullOrWhiteSpace(request.Source))
-         filters.Add(builder.Regex(s => s.Source, Contains(request.Source)));
+      if (!string.IsNullOrWhiteSpace(request.Module))
+         filters.Add(builder.Regex(s => s.Module, Contains(request.Module)));
 
       if (!string.IsNullOrWhiteSpace(request.RequestId))
          filters.Add(builder.Eq(s => s.RequestId, request.RequestId));
@@ -230,7 +230,7 @@ public class SentinelLogQueryRepository(SentinelDbContext dbContext) : ISentinel
             systemLog.CreatedAt,
             systemLog.Level,
             systemLog.Status,
-            systemLog.Source,
+            systemLog.Module,
             systemLog.Message,
             systemLog.Exception,
             systemLog.StackTrace,

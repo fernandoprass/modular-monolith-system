@@ -7,7 +7,7 @@ public record SystemLogDto(
    DateTime CreatedAt,
    SystemLogLevel Level,
    SystemLogStatus Status,
-   string Source,
+   string Module,
    string Message,
    string? Exception,
    string? StackTrace,

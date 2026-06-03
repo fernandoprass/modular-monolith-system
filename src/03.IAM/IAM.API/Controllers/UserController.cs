@@ -124,7 +124,6 @@ public class UserController(
       var response = await _authService.LoginAsync(request, cancellationToken);
 
       return response.IsSuccess ? OkOrNotFound(response) : Unauthorized(response);
-
    }
 }
 

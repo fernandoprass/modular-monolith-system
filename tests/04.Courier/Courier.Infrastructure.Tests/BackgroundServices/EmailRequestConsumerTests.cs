@@ -9,7 +9,6 @@ using Myce.Response;
 using NSubstitute;
 using Shared.Domain.Events;
 using StackExchange.Redis;
-using System.Reflection;
 using System.Text.Json;
 
 namespace Courier.Infrastructure.Tests.BackgroundServices;
@@ -31,7 +30,7 @@ public class EmailRequestConsumerTests
       outboxService.QueueAsync(Arg.Any<EmailQueueRequest>(), Arg.Any<CancellationToken>())
          .Returns(Task.FromResult(Result<Guid>.Success(Guid.NewGuid())));
 
-      await InvokeProcessEntryAsync(consumer, entry);
+      await consumer.ProcessEntryAsync(entry, TestContext.Current.CancellationToken);
 
       await outboxService.Received(1).QueueAsync(
          Arg.Is<EmailQueueRequest>(r =>
@@ -63,7 +62,7 @@ public class EmailRequestConsumerTests
          CreateRequest());
       var entry = CreateEntry(envelope);
 
-      await InvokeProcessEntryAsync(consumer, entry);
+      await consumer.ProcessEntryAsync(entry, TestContext.Current.CancellationToken);
 
       await outboxService.DidNotReceive().QueueAsync(Arg.Any<EmailQueueRequest>(), Arg.Any<CancellationToken>());
       await database.Received(1).StreamAcknowledgeAsync(
@@ -85,7 +84,25 @@ public class EmailRequestConsumerTests
          CreateRequest());
       var entry = CreateEntry(envelope);
 
-      await InvokeProcessEntryAsync(consumer, entry);
+      await consumer.ProcessEntryAsync(entry, TestContext.Current.CancellationToken);
+
+      await outboxService.DidNotReceive().QueueAsync(Arg.Any<EmailQueueRequest>(), Arg.Any<CancellationToken>());
+      await database.Received(1).StreamAcknowledgeAsync(
+         CourierConst.Redis.EmailRequestsStream,
+         CourierConst.Redis.EmailRequestConsumerGroup,
+         entry.Id,
+         Arg.Any<CommandFlags>());
+   }
+
+   [Fact]
+   public async Task ProcessEntryAsync_ShouldAcknowledge_WhenEventFieldIsMissing()
+   {
+      var database = Substitute.For<IDatabase>();
+      var outboxService = Substitute.For<IEmailOutboxService>();
+      var consumer = CreateConsumer(database, outboxService);
+      var entry = new StreamEntry("1-0", [new NameValueEntry("wrong-field", "{}")]);
+
+      await consumer.ProcessEntryAsync(entry, TestContext.Current.CancellationToken);
 
       await outboxService.DidNotReceive().QueueAsync(Arg.Any<EmailQueueRequest>(), Arg.Any<CancellationToken>());
       await database.Received(1).StreamAcknowledgeAsync(
@@ -103,9 +120,47 @@ public class EmailRequestConsumerTests
       var consumer = CreateConsumer(database, outboxService);
       var entry = new StreamEntry("1-0", [new NameValueEntry(CourierConst.Redis.EventFieldName, "null")]);
 
-      await InvokeProcessEntryAsync(consumer, entry);
+      await consumer.ProcessEntryAsync(entry, TestContext.Current.CancellationToken);
 
       await outboxService.DidNotReceive().QueueAsync(Arg.Any<EmailQueueRequest>(), Arg.Any<CancellationToken>());
+      await database.Received(1).StreamAcknowledgeAsync(
+         CourierConst.Redis.EmailRequestsStream,
+         CourierConst.Redis.EmailRequestConsumerGroup,
+         entry.Id,
+         Arg.Any<CommandFlags>());
+   }
+
+   [Fact]
+   public async Task ProcessEntryAsync_ShouldAcknowledgeAndLogWarning_WhenPayloadIsMissing()
+   {
+      var database = Substitute.For<IDatabase>();
+      var outboxService = Substitute.For<IEmailOutboxService>();
+      var courierLogger = Substitute.For<ICourierLogger>();
+      var consumer = CreateConsumer(database, outboxService, courierLogger);
+      var json = $$"""
+         {
+           "eventId": "{{Guid.NewGuid()}}",
+           "eventName": "{{CourierConst.Event.Name.EmailRequested}}",
+           "version": {{CourierConst.Event.Version}},
+           "correlationId": null,
+           "createdAt": "{{DateTime.UtcNow:O}}",
+           "payload": null
+         }
+         """;
+      var entry = new StreamEntry("1-0", [new NameValueEntry(CourierConst.Redis.EventFieldName, json)]);
+
+      await consumer.ProcessEntryAsync(entry, TestContext.Current.CancellationToken);
+
+      await outboxService.DidNotReceive().QueueAsync(Arg.Any<EmailQueueRequest>(), Arg.Any<CancellationToken>());
+      await courierLogger.Received(1).LogSystemAsync(
+         Shared.Domain.Enums.SystemLogLevel.Warning,
+         Shared.Domain.Enums.SystemLogStatus.Failure,
+         Arg.Any<string>(),
+         null,
+         null,
+         null,
+         Arg.Is<Dictionary<string, object>>(p => p["streamId"].ToString() == entry.Id.ToString()),
+         Arg.Any<CancellationToken>());
       await database.Received(1).StreamAcknowledgeAsync(
          CourierConst.Redis.EmailRequestsStream,
          CourierConst.Redis.EmailRequestConsumerGroup,
@@ -122,7 +177,7 @@ public class EmailRequestConsumerTests
       var consumer = CreateConsumer(database, outboxService, courierLogger);
       var entry = new StreamEntry("1-0", [new NameValueEntry(CourierConst.Redis.EventFieldName, "{ invalid json")]);
 
-      await InvokeProcessEntryAsync(consumer, entry);
+      await consumer.ProcessEntryAsync(entry, TestContext.Current.CancellationToken);
 
       await outboxService.DidNotReceive().QueueAsync(Arg.Any<EmailQueueRequest>(), Arg.Any<CancellationToken>());
       await courierLogger.Received(1).LogSystemAsync(
@@ -135,6 +190,38 @@ public class EmailRequestConsumerTests
          null,
          Arg.Any<CancellationToken>());
       await database.Received(1).StreamAcknowledgeAsync(
+         CourierConst.Redis.EmailRequestsStream,
+         CourierConst.Redis.EmailRequestConsumerGroup,
+         entry.Id,
+         Arg.Any<CommandFlags>());
+   }
+
+   [Fact]
+   public async Task ProcessEntryAsync_ShouldLogSystemErrorAndNotAcknowledge_WhenQueueThrows()
+   {
+      var database = Substitute.For<IDatabase>();
+      var outboxService = Substitute.For<IEmailOutboxService>();
+      var courierLogger = Substitute.For<ICourierLogger>();
+      var consumer = CreateConsumer(database, outboxService, courierLogger);
+      var entry = CreateEntry(IntegrationEvent<EmailQueueRequest>.Create(
+         CourierConst.Event.Name.EmailRequested,
+         CourierConst.Event.Version,
+         CreateRequest()));
+      outboxService.QueueAsync(Arg.Any<EmailQueueRequest>(), Arg.Any<CancellationToken>())
+         .Returns<Task<Result<Guid>>>(_ => throw new InvalidOperationException("queue error"));
+
+      await consumer.ProcessEntryAsync(entry, TestContext.Current.CancellationToken);
+
+      await courierLogger.Received(1).LogSystemAsync(
+         Shared.Domain.Enums.SystemLogLevel.Error,
+         Shared.Domain.Enums.SystemLogStatus.Failure,
+         Arg.Any<string>(),
+         Arg.Any<InvalidOperationException>(),
+         null,
+         null,
+         null,
+         Arg.Any<CancellationToken>());
+      await database.DidNotReceive().StreamAcknowledgeAsync(
          CourierConst.Redis.EmailRequestsStream,
          CourierConst.Redis.EmailRequestConsumerGroup,
          entry.Id,
@@ -157,7 +244,7 @@ public class EmailRequestConsumerTests
       outboxService.QueueAsync(Arg.Any<EmailQueueRequest>(), Arg.Any<CancellationToken>())
          .Returns(Result<Guid>.Failure(new EmailDeliveryFailedError("queue failed")));
 
-      await InvokeProcessEntryAsync(consumer, entry);
+      await consumer.ProcessEntryAsync(entry, TestContext.Current.CancellationToken);
 
       await courierLogger.Received(1).LogSystemAsync(
          Shared.Domain.Enums.SystemLogLevel.Warning,
@@ -198,15 +285,6 @@ public class EmailRequestConsumerTests
    {
       var json = JsonSerializer.Serialize(envelope);
       return new StreamEntry("1-0", [new NameValueEntry(CourierConst.Redis.EventFieldName, json)]);
-   }
-
-   private static async Task InvokeProcessEntryAsync(EmailRequestConsumer consumer, StreamEntry entry)
-   {
-      var method = typeof(EmailRequestConsumer).GetMethod("ProcessEntryAsync", BindingFlags.Instance | BindingFlags.NonPublic);
-      Assert.NotNull(method);
-
-      var task = (Task)method.Invoke(consumer, [entry, TestContext.Current.CancellationToken])!;
-      await task;
    }
 
    private static EmailQueueRequest CreateRequest()

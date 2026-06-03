@@ -20,7 +20,6 @@ public class GlobalExceptionHandler(
       _logger.LogError(exception, "An unhandled exception occurred: {Message}", exception.Message);
 
       await ExceptionResponseWriter.WriteAsync(httpContext, exception, cancellationToken);
-
       await PublishSystemLogAsync(httpContext, exception, cancellationToken);
       return true;
    }
@@ -34,14 +33,11 @@ public class GlobalExceptionHandler(
       {
          using var scope = _serviceProvider.CreateScope();
          var publisher = scope.ServiceProvider.GetRequiredService<IExceptionSystemLogPublisher>();
-         var properties = ExceptionRequestFactory.Create(httpContext.Request, httpContext.Response.StatusCode);
 
          await publisher.PublishAsync(
             CourierConst.System.ModuleName,
-            httpContext.Request,
+            httpContext,
             exception,
-            httpContext.Response.StatusCode,
-            httpContext.TraceIdentifier,
             cancellationToken);
       }
       catch (Exception publishException)

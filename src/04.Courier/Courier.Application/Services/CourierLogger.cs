@@ -56,7 +56,7 @@ public class CourierLogger(IEventPublisher eventPublisher) : ICourierLogger
    {
       var systemLog = new SystemLogEvent
       {
-         Source = CourierConst.System.ModuleName,
+         Module = CourierConst.System.ModuleName,
          Level = level,
          Status = status,
          Message = message,

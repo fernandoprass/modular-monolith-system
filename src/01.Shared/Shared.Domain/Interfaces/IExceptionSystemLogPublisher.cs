@@ -5,10 +5,8 @@ namespace Shared.Domain.Interfaces;
 public interface IExceptionSystemLogPublisher
 {
    Task PublishAsync(
-      string source,
-      HttpRequest httpRequest,
+      string module,
+      HttpContext httpContext,
       Exception exception,
-      int statusCode,
-      string? requestId,
       CancellationToken cancellationToken = default);
 }
