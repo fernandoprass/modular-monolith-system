@@ -1,6 +1,7 @@
 using Courier.Domain.Entities;
 using Courier.Domain.Enums;
 using Courier.Domain.Interfaces.Repositories;
+using Shared.Domain.Enums;
 
 namespace DatabaseSeeder.Templates;
 

@@ -7,7 +7,7 @@ public record SystemLogLiteDto(
    DateTime CreatedAt,
    SystemLogLevel Level,
    SystemLogStatus Status,
-   string Source,
+   string Module,
    string Message,
    string? RequestId,
    Guid? UserId,

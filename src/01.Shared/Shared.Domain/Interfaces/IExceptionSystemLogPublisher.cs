@@ -1,12 +1,12 @@
+using Microsoft.AspNetCore.Http;
+
 namespace Shared.Domain.Interfaces;
 
 public interface IExceptionSystemLogPublisher
 {
    Task PublishAsync(
-      string source,
+      string module,
+      HttpContext httpContext,
       Exception exception,
-      int statusCode,
-      string? requestId,
-      string? path,
       CancellationToken cancellationToken = default);
 }

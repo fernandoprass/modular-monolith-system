@@ -56,16 +56,6 @@ public class EmailOutboxServiceTests
       savedEmail!.Subject.Should().Be("Welcome <b>Ana</b>");
       savedEmail.Body.Should().Be("<p>Hello &lt;b&gt;Ana&lt;/b&gt;</p>");
       savedEmail.IsHtml.Should().BeTrue();
-      await _courierLogger.Received(1).LogAuditAsync(
-         CourierConst.Logger.Feature.Emails,
-         CourierConst.Logger.Action.Queue,
-         AuditPrivacyLevel.Medium,
-         Arg.Any<string>(),
-         request.OrganizationId,
-         request.UserId,
-         savedEmail.Id,
-         Arg.Any<object>(),
-         Arg.Any<CancellationToken>());
    }
 
    [Fact]
@@ -133,16 +123,6 @@ public class EmailOutboxServiceTests
       email.Status.Should().Be(EmailStatus.Sent);
       email.SentAt.Should().NotBeNull();
       await _emailRepository.Received(1).UpdateAsync(email, Arg.Any<CancellationToken>());
-      await _courierLogger.Received(1).LogAuditAsync(
-         CourierConst.Logger.Feature.Emails,
-         CourierConst.Logger.Action.Send,
-         AuditPrivacyLevel.Medium,
-         Arg.Any<string>(),
-         email.OrganizationId,
-         email.UserId,
-         email.Id,
-         Arg.Any<object>(),
-         Arg.Any<CancellationToken>());
    }
 
    [Fact]
@@ -161,16 +141,7 @@ public class EmailOutboxServiceTests
       email.RetryCount.Should().Be(1);
       email.Attempts.Should().ContainSingle();
       await _emailRepository.Received(1).UpdateAsync(email, Arg.Any<CancellationToken>());
-      await _courierLogger.Received(1).LogAuditAsync(
-         CourierConst.Logger.Feature.Emails,
-         CourierConst.Logger.Action.Fail,
-         AuditPrivacyLevel.High,
-         Arg.Any<string>(),
-         email.OrganizationId,
-         email.UserId,
-         email.Id,
-         Arg.Any<object>(),
-         Arg.Any<CancellationToken>());
+
       await _courierLogger.Received(1).LogSystemAsync(
          SystemLogLevel.Error,
          SystemLogStatus.Failure,

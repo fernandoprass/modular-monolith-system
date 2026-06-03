@@ -129,10 +129,11 @@ public class UserService(
                IamConst.Logger.Feature.Users,
                IamConst.Logger.Action.Update,
                AuditPrivacyLevel.Medium,
-               $"Updated user {user.Id}",
-               user.Id,
-               request,
-               ct);
+               RetentionPolicy.Extended,
+               description: $"Updated user {user.Name}",
+               targetId: user.Id,
+               metadata: request,
+               cancellationToken: ct);
          }
 
          return result;
@@ -156,7 +157,7 @@ public class UserService(
 
       var passwordExpiresAt = await GetPasswordExpiresAt(cancellationToken);
 
-      user.UpdatePassword(Argon2.Hash(request.PasswordNew), passwordExpiresAt);
+      user!.UpdatePassword(Argon2.Hash(request.PasswordNew), passwordExpiresAt);
 
       var result = await CommitUpdateAsync(user, cancellationToken);
 
@@ -166,9 +167,10 @@ public class UserService(
             IamConst.Logger.Feature.Users,
             IamConst.Logger.Action.UpdatePassword,
             AuditPrivacyLevel.High,
-            $"Updated user password {user.Id}",
-            user.Id,
-            new { user.Id, user.Email },
+            RetentionPolicy.Extended,
+            description: $"Updated user password {user.Name}",
+            targetId: user.Id,
+            metadata: new { user.Id, user.Email },
             cancellationToken);
 
          await _eventPublisher.NotifyEmailAsync(
@@ -204,9 +206,10 @@ public class UserService(
             IamConst.Logger.Feature.Users,
             IamConst.Logger.Action.UpdateOrganizationAdmin,
             AuditPrivacyLevel.High,
-            $"Updated user organization admin flag {user.Id}",
-            user.Id,
-            new { user.Id, user.Email, request.IsOrganizationAdmin },
+            RetentionPolicy.Compliance,
+            description: $"Updated user {user.Name} organization admin flag",
+            targetId: user.Id,
+            metadata: new { user.Id, user.Email, request.IsOrganizationAdmin },
             cancellationToken);
       }
 
@@ -239,10 +242,11 @@ public class UserService(
             IamConst.Logger.Feature.Users,
             IamConst.Logger.Action.Delete,
             AuditPrivacyLevel.High,
-            $"Deleted user {id}",
-            id,
-            new { user.Id, user.Email },
-            ct);
+            RetentionPolicy.Compliance,
+            description: $"Deleted user {user.Name}",
+            targetId: user.Id,
+            metadata: new { user.Id, user.Email },
+            cancellationToken: ct);
 
          await _eventPublisher.NotifyEmailAsync(
             IamConst.EmailTemplate.UserDelete,
@@ -327,7 +331,7 @@ public class UserService(
       return Result.Success(new SuccessInfo());
    }
 
-   private static IReadOnlyDictionary<string, string> BuildUserTemplateValues(User user)
+   private static Dictionary<string, string> BuildUserTemplateValues(User user)
    {
       return new Dictionary<string, string>
       {

@@ -7,7 +7,7 @@ public record SystemLogSearchRequest(
    Guid? UserId,
    SystemLogLevel? Level,
    SystemLogStatus? Status,
-   string? Source,
+   string? Module,
    string? RequestId,
    DateTime? From,
    DateTime? To,

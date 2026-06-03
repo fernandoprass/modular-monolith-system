@@ -46,7 +46,10 @@ public class SentinelDbContext
          new CreateIndexModel<AuditLog>(
             Builders<AuditLog>.IndexKeys.Ascending(a => a.OrganizationId).Ascending(a => a.TargetId).Descending(a => a.CreatedAt)),
          new CreateIndexModel<AuditLog>(
-            Builders<AuditLog>.IndexKeys.Ascending(a => a.OrganizationId).Ascending(a => a.UserId).Descending(a => a.CreatedAt))
+            Builders<AuditLog>.IndexKeys.Ascending(a => a.OrganizationId).Ascending(a => a.UserId).Descending(a => a.CreatedAt)),
+         new CreateIndexModel<AuditLog>(
+            Builders<AuditLog>.IndexKeys.Ascending(a => a.ExpiresAt),
+            new CreateIndexOptions { ExpireAfter = TimeSpan.Zero, Name = "ttl_audit_logs_expires_at" })
       };
 
       var systemIndexes = new[]
@@ -56,7 +59,11 @@ public class SentinelDbContext
          new CreateIndexModel<SystemLog>(
             Builders<SystemLog>.IndexKeys.Ascending(s => s.OrganizationId).Ascending(s => s.Level).Descending(s => s.CreatedAt)),
          new CreateIndexModel<SystemLog>(
-            Builders<SystemLog>.IndexKeys.Ascending(s => s.RequestId))
+            Builders<SystemLog>.IndexKeys.Ascending(s => s.RequestId)),
+         new CreateIndexModel<SystemLog>(
+            Builders<SystemLog>.IndexKeys.Ascending(s => s.ExpiresAt),
+            new CreateIndexOptions { ExpireAfter = TimeSpan.Zero, Name = "ttl_system_logs_expires_at" })
+
       };
 
       await AuditLogs.Indexes.CreateManyAsync(auditIndexes, cancellationToken);

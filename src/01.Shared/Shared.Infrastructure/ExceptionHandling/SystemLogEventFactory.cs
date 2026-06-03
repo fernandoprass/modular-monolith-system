@@ -9,57 +9,36 @@ namespace Shared.Infrastructure.ExceptionHandling;
 public static class SystemLogEventFactory
 {
    public static SystemLogEvent Create(
-      string source,
+      string module,
       HttpContext httpContext,
       Exception exception,
-      int statusCode,
       IUserContext userContext)
    {
-      return Create(
-         source,
-         exception,
-         statusCode,
-         httpContext.TraceIdentifier,
-         httpContext.Request.Path.ToString(),
-         userContext);
-   }
+      var retentionPolicy = ExceptionRetentionPolicyResolver.Resolve(exception, httpContext.Response.StatusCode);
+      var properties = ExceptionRequestFactory.Create(httpContext.Request, httpContext.Response.StatusCode);
 
-   public static SystemLogEvent Create(
-      string source,
-      Exception exception,
-      int statusCode,
-      string? requestId,
-      string? path,
-      IUserContext userContext)
-   {
       return new SystemLogEvent
       {
          Id = Guid.CreateVersion7(),
-         CreatedAt = DateTime.UtcNow,
          Level = SystemLogLevel.Error,
-         Status = GetStatus(statusCode),
-         Source = source,
+         Status = GetStatus(httpContext.Response.StatusCode),
+         RetentionPolicy = retentionPolicy,
+         Module = module,
          Message = exception.Message,
          Exception = exception.GetType().Name,
          StackTrace = exception.StackTrace,
-         RequestId = requestId,
+         RequestId = httpContext.TraceIdentifier,
          UserId = GetOptionalGuid(userContext.UserId),
          OrganizationId = GetOptionalGuid(userContext.UserOwnerId),
-         Properties = new Dictionary<string, object>
-         {
-            ["path"] = path ?? string.Empty,
-            ["statusCode"] = statusCode
-         }
+         Properties = properties
       };
    }
 
    private static SystemLogStatus GetStatus(int statusCode)
    {
-      return statusCode switch
-      {
-         (int)HttpStatusCode.Unauthorized => SystemLogStatus.Unauthorized,
-         _ => SystemLogStatus.Failure
-      };
+      return statusCode == (int)HttpStatusCode.Unauthorized 
+         ? SystemLogStatus.Unauthorized 
+         : SystemLogStatus.Failure;
    }
 
    private static Guid? GetOptionalGuid(Guid value)

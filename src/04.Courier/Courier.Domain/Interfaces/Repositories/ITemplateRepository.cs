@@ -1,5 +1,5 @@
-using Courier.Domain.Enums;
 using Courier.Domain.Entities;
+using Shared.Domain.Enums;
 
 namespace Courier.Domain.Interfaces.Repositories;
 

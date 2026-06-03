@@ -14,13 +14,14 @@ namespace Sentinel.API.Tests.Middlewares;
 public class GlobalExceptionHandlerTests
 {
    [Theory]
-   [InlineData("unauthorized", StatusCodes.Status401Unauthorized, "Unauthorized access.", SystemLogStatus.Unauthorized)]
-   [InlineData("generic", StatusCodes.Status500InternalServerError, "An unexpected error occurred.", SystemLogStatus.Failure)]
+   [InlineData("unauthorized", StatusCodes.Status401Unauthorized, "Unauthorized access.", SystemLogStatus.Unauthorized, 180)]
+   [InlineData("generic", StatusCodes.Status500InternalServerError, "An unexpected error occurred.", SystemLogStatus.Failure, 30)]
    public async Task TryHandleAsync_ShouldReturnErrorResponseAndPersistSystemLog(
       string exceptionType,
       int expectedStatusCode,
       string expectedMessage,
-      SystemLogStatus expectedLogStatus)
+      SystemLogStatus expectedLogStatus,
+      int expectedRetentionDays)
    {
       var repository = new FakeSystemLogRepository();
       var unitOfWork = new FakeSentinelUnitOfWork(repository);
@@ -47,13 +48,17 @@ public class GlobalExceptionHandlerTests
       var systemLog = Assert.Single(repository.Logs);
       Assert.Equal(SystemLogLevel.Error, systemLog.Level);
       Assert.Equal(expectedLogStatus, systemLog.Status);
-      Assert.Equal(SentinelConst.System.ModuleName, systemLog.Source);
+      Assert.Equal(SentinelConst.System.ModuleName, systemLog.Module);
       Assert.Equal(exception.Message, systemLog.Message);
       Assert.Equal(exception.GetType().Name, systemLog.Exception);
       Assert.Equal("request-1", systemLog.RequestId);
       Assert.Equal(userId, systemLog.UserId);
       Assert.Equal(organizationId, systemLog.OrganizationId);
+      Assert.True(systemLog.ExpiresAt >= systemLog.CreatedAt.AddDays(expectedRetentionDays).AddSeconds(-1));
+      Assert.True(systemLog.ExpiresAt <= systemLog.CreatedAt.AddDays(expectedRetentionDays).AddSeconds(1));
       Assert.Contains("statusCode", systemLog.PropertiesJson);
+      Assert.Contains("method", systemLog.PropertiesJson);
+      Assert.Contains("path", systemLog.PropertiesJson);
       Assert.Equal(1, unitOfWork.SaveChangesCount);
    }
 

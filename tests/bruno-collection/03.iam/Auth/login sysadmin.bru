@@ -1,7 +1,7 @@
 meta {
-  name: login org user
+  name: login sysadmin
   type: http
-  seq: 11
+  seq: 1
 }
 
 post {
@@ -12,7 +12,7 @@ post {
 
 body:json {
   {
-    "email": "ada.lovelace@analytical.org",
+    "email": "admin@saas.com",
     "password": "Password123!"
   }
 }
@@ -20,7 +20,7 @@ body:json {
 script:post-response {
   if (res.getStatus() === 200) {
     const body = res.getBody();
-    if (body && body.data && body.data) {
+    if (body && body.data) {
       bru.setVar("token", body.data.token);
       bru.setVar("organizationId", body.data.user.organizationId);
       bru.setVar("userId", body.data.user.id);

@@ -5,10 +5,10 @@ namespace Shared.Domain.Events;
 public record SystemLogEvent
 {
    public Guid Id { get; init; } = Guid.CreateVersion7();
-   public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
    public SystemLogLevel Level { get; init; } = SystemLogLevel.Information;
    public SystemLogStatus Status { get; init; } = SystemLogStatus.Unknown;
-   public string Source { get; init; } = string.Empty;
+   public RetentionPolicy RetentionPolicy { get; init; } = RetentionPolicy.Standard;
+   public string Module { get; init; } = string.Empty;
    public string Message { get; init; } = string.Empty;
    public string? Exception { get; init; }
    public string? StackTrace { get; init; }

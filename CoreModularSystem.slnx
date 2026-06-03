@@ -1,6 +1,5 @@
 <Solution>
   <Folder Name="/docs/">
-    <File Path="docs/00.database.seeder.md" />
     <File Path="docs/00.docker.md" />
     <File Path="docs/00.folder-structure.md" />
     <File Path="docs/00.migrations.md" />
@@ -8,13 +7,12 @@
     <File Path="docs/00.redis.messaging-system.md" />
     <File Path="docs/01.Shared.entities.md" />
     <File Path="docs/01.shared.enums.md" />
+    <File Path="docs/01.shared.exception-handling.md" />
     <File Path="docs/01.shared.repositories.md" />
     <File Path="docs/01.shared.uow.md" />
     <File Path="docs/02.sentinel.entities.md" />
-     <File Path="docs/03.iam.docker.md" />
      <File Path="docs/03.iam.entities.md" />
-     <File Path="docs/03.iam.folder-structure.md" />
-     <File Path="docs/03.iam.libraries.md" />
+    <File Path="docs/99.database.seeder.md" />
     <File Path="docs/readme.md" />
   </Folder>
   <Folder Name="/infra/">

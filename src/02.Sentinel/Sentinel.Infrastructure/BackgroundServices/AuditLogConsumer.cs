@@ -31,17 +31,17 @@ public class AuditLogConsumer(
 
       var auditLog = AuditLog.Create(
          auditEvent.Id,
-         auditEvent.CreatedAt,
          auditEvent.Module,
          auditEvent.Feature,
          auditEvent.Action,
-         auditEvent.PrivacyLevel,
          auditEvent.Description,
+         auditEvent.PrivacyLevel,
+         auditEvent.RetentionPolicy,
+         auditEvent.IpAddress,
+         auditEvent.UserAgent,
          auditEvent.UserId,
          auditEvent.OrganizationId,
          auditEvent.TargetId,
-         auditEvent.IpAddress,
-         auditEvent.UserAgent,
          auditEvent.Metadata);
 
       await unitOfWork.AuditLogs.AddAsync(auditLog, cancellationToken);

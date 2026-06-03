@@ -20,27 +20,25 @@ public class AuditLogConsumerTests
       unitOfWork.AuditLogs.Returns(auditLogRepository);
 
       var consumer = CreateConsumer(unitOfWork);
-      var auditEvent = new AuditLogEvent
-      {
-         CreatedAt = DateTime.UtcNow,
-         Module = "iam",
-         Feature = "users",
-         Action = "create",
-         PrivacyLevel = AuditPrivacyLevel.Confidential,
-         Description = "Created user",
-         UserId = Guid.CreateVersion7(),
-         OrganizationId = Guid.CreateVersion7(),
-         TargetId = Guid.CreateVersion7(),
-         IpAddress = "127.0.0.1",
-         UserAgent = "test-agent",
-         Metadata = "{\"name\":\"Test\"}"
-      };
+      var auditEvent = AuditLogEvent.Create(
+         module : "iam",
+         feature : "users",
+         action : "create",
+         description: "Created user",
+         privacyLevel : AuditPrivacyLevel.Confidential,
+         retentionPolicy: RetentionPolicy.Standard,
+         ipAddress: "127.0.0.1",
+         userAgent: "test-agent",
+         userId : Guid.CreateVersion7(),
+         targetId : Guid.CreateVersion7(),
+         organizationId: Guid.CreateVersion7(),
+         metadata : "{\"name\":\"Test\"}"
+      );
 
       await consumer.ProcessAsync(auditEvent, CancellationToken.None);
 
       await auditLogRepository.Received(1).AddAsync(
          Arg.Is<AuditLog>(log =>
-            log.CreatedAt == auditEvent.CreatedAt &&
             log.Module == auditEvent.Module &&
             log.Feature == auditEvent.Feature &&
             log.Action == auditEvent.Action &&

@@ -78,7 +78,7 @@ internal class ParameterService(
       var validation = _parameterValidator.ValidateOwnerUpdate(parameter, request);
       if (validation.HasError) return Result.Failure(validation.Messages);
 
-      var ownerId = GetOwnerId(parameter.OverrideType);
+      var ownerId = GetOwnerId(parameter!.OverrideType);
 
       var parameterOverride = await _parameterOverrideRepository.GetByParameterIdAndOwnerIdAsync(parameterId, ownerId, cancellationToken);
 
@@ -102,6 +102,7 @@ internal class ParameterService(
          $"Saved parameter override {parameter.Key}",
          parameterOverride.Id,
          request,
+         RetentionPolicy.Compliance,
          _userContext,
          cancellationToken);
 
@@ -129,6 +130,7 @@ internal class ParameterService(
             $"Deleted parameter override {parameter.Key}",
             parameterOverride.Id,
             parameterOverride,
+            RetentionPolicy.Compliance,
             _userContext,
             ct);
 
@@ -174,7 +176,7 @@ internal class ParameterService(
       var validation = _parameterValidator.ValidateUpdate(parameter != null, keyExists, request);
       if (validation.HasError) return Result.Failure(validation.Messages);
 
-      var oldKey = parameter.Key;
+      var oldKey = parameter!.Key;
 
       parameter.Update(
           request.Module,
@@ -201,6 +203,7 @@ internal class ParameterService(
          $"Updated parameter {parameter.Key}",
          parameter.Id,
          request,
+         RetentionPolicy.Compliance,
          _userContext,
          cancellationToken);
 
@@ -313,23 +316,26 @@ internal class ParameterService(
       string description,
       Guid targetId,
       object metadata,
+      RetentionPolicy retentionPolicy,
       IUserContext userContext,
       CancellationToken cancellationToken)
    {
-      await _eventPublisher.PublishAuditLogEventAsync(new AuditLogEvent
-      {
-         Module = SharedConst.System.ModuleName.ToLowerInvariant(),
-         Feature = SharedConst.Logger.Feature.Parameters,
-         Action = action,
-         PrivacyLevel = AuditPrivacyLevel.Medium,
-         Description = description,
-         UserId = userContext.UserId,
-         OrganizationId = userContext.UserOwnerId,
-         IpAddress = userContext.IpAddress,
-         UserAgent = userContext.UserAgent,
-         TargetId = targetId,
-         Metadata = JsonSerializer.Serialize(metadata)
-      }, cancellationToken);
+      var auditLogEvent = AuditLogEvent.Create(
+         module: SharedConst.System.ModuleName.ToLowerInvariant(),
+         feature: SharedConst.Logger.Feature.Security,
+         action: action,
+         description: description,
+         privacyLevel: AuditPrivacyLevel.Medium,
+         retentionPolicy: retentionPolicy,
+         ipAddress: userContext.IpAddress,
+         userAgent: userContext.UserAgent,
+         userId: userContext.UserId,
+         targetId: targetId,
+         organizationId: userContext.UserOwnerId,
+         metadata: JsonSerializer.Serialize(metadata)
+      );
+
+      await _eventPublisher.PublishAuditLogEventAsync(auditLogEvent, cancellationToken);
    }
    #endregion
 }

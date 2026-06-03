@@ -1,5 +1,5 @@
-using Microsoft.AspNetCore.Diagnostics;
 using IAM.Domain;
+using Microsoft.AspNetCore.Diagnostics;
 using Shared.Domain.Interfaces;
 using Shared.Infrastructure.ExceptionHandling;
 
@@ -19,27 +19,14 @@ public class GlobalExceptionHandler(
    {
       _logger.LogError(exception, "An unhandled exception occurred: {Message}", exception.Message);
 
-      httpContext.Response.ContentType = "application/json";
-
-      var exceptionResponse = ExceptionResponseFactory.Create(exception);
-
-      await PublishSystemLogAsync(httpContext, exception, exceptionResponse.StatusCode, cancellationToken);
-
-      httpContext.Response.StatusCode = exceptionResponse.StatusCode;
-      var response = new
-      {
-         exceptionResponse.Message,
-         exceptionResponse.Details
-      };
-
-      await httpContext.Response.WriteAsJsonAsync(response, cancellationToken);
+      await ExceptionResponseWriter.WriteAsync(httpContext, exception, cancellationToken);
+      await PublishSystemLogAsync(httpContext, exception, cancellationToken);
       return true;
    }
 
    private async Task PublishSystemLogAsync(
       HttpContext httpContext,
       Exception exception,
-      int statusCode,
       CancellationToken cancellationToken)
    {
       try
@@ -49,10 +36,8 @@ public class GlobalExceptionHandler(
 
          await publisher.PublishAsync(
             IamConst.System.ModuleName,
+            httpContext,
             exception,
-            statusCode,
-            httpContext.TraceIdentifier,
-            httpContext.Request.Path.ToString(),
             cancellationToken);
       }
       catch (Exception publishException)

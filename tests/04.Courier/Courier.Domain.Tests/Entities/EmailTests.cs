@@ -1,7 +1,7 @@
-using Courier.Domain;
 using Courier.Domain.Entities;
 using Courier.Domain.Enums;
 using FluentAssertions;
+using Shared.Domain.Enums;
 
 namespace Courier.Domain.Tests.Entities;
 

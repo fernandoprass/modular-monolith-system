@@ -22,10 +22,9 @@ public class SystemLogConsumerTests
       var consumer = CreateConsumer(unitOfWork);
       var systemLogEvent = new SystemLogEvent
       {
-         CreatedAt = DateTime.UtcNow,
          Level = SystemLogLevel.Error,
          Status = SystemLogStatus.Unauthorized,
-         Source = "Sentinel.Tests",
+         Module = "Sentinel.Tests",
          Message = "Unauthorized request",
          Exception = "exception",
          StackTrace = "stack",
@@ -42,10 +41,9 @@ public class SystemLogConsumerTests
 
       await systemLogRepository.Received(1).AddAsync(
          Arg.Is<SystemLog>(log =>
-            log.CreatedAt == systemLogEvent.CreatedAt &&
             log.Level == systemLogEvent.Level &&
             log.Status == systemLogEvent.Status &&
-            log.Source == systemLogEvent.Source &&
+            log.Module == systemLogEvent.Module &&
             log.Message == systemLogEvent.Message &&
             log.Exception == systemLogEvent.Exception &&
             log.StackTrace == systemLogEvent.StackTrace &&

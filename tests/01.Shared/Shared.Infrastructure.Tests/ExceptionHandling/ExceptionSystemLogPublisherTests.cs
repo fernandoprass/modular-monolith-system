@@ -1,6 +1,8 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Shared.Application.Contracts;
+using Shared.Domain.Enums;
 using Shared.Domain.Events;
 using Shared.Domain.Interfaces;
 using Shared.Infrastructure.ExceptionHandling;
@@ -20,14 +22,20 @@ public class ExceptionSystemLogPublisherTests
 
       await publisher.PublishAsync(
          "IAM",
+         CreateHttpContext(),
          new InvalidOperationException("Boom"),
-         500,
-         "request-id",
-         "/api/test",
          TestContext.Current.CancellationToken);
 
       await eventPublisher.Received(1).PublishSystemLogEventAsync(
-         Arg.Is<SystemLogEvent>(log => log.Source == "IAM" && log.Message == "Boom"),
+         Arg.Is<SystemLogEvent>(log =>
+            log.Module == "IAM" &&
+            log.Message == "Boom" &&
+            log.Exception == nameof(InvalidOperationException) &&
+            log.RequestId == "request-id" &&
+            log.Status == SystemLogStatus.Failure &&
+            log.RetentionPolicy == RetentionPolicy.Operational &&
+            log.Properties["path"].Equals("/api/test") &&
+            log.Properties["statusCode"].Equals(500)),
          Arg.Any<CancellationToken>());
    }
 
@@ -41,12 +49,15 @@ public class ExceptionSystemLogPublisherTests
 
       var act = async () => await publisher.PublishAsync(
          "IAM",
+         CreateHttpContext(),
          new InvalidOperationException("Boom"),
-         500,
-         "request-id",
-         "/api/test",
          TestContext.Current.CancellationToken);
 
       await act();
+   }
+
+   private static HttpContext CreateHttpContext()
+   {
+      return TestHttpContextFactory.Create(statusCode: 500, requestId: "request-id");
    }
 }

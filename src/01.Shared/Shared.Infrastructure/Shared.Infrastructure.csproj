@@ -18,7 +18,7 @@
 		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.8" />
 		<PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.8" />
 		<PackageReference Include="Microsoft.Net.Http.Headers" Version="10.0.8" />
-		<PackageReference Include="MongoDB.Bson" Version="3.8.1" />
+		<PackageReference Include="MongoDB.Bson" Version="3.9.0" />
 		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.2" />
 		<PackageReference Include="StackExchange.Redis" Version="2.13.17" />
     </ItemGroup>
