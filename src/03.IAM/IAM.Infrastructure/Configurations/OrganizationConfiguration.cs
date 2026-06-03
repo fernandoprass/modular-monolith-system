@@ -1,6 +1,7 @@
 using IAM.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Shared.Domain;
 using Shared.Infrastructure.Configurations;
 
 namespace IAM.Infrastructure.Configurations;
@@ -15,6 +16,7 @@ public class OrganizationConfiguration : BaseAuditedConfiguration<Organization>
       builder.Property(c => c.Code).IsRequired().HasMaxLength(25);
       builder.Property(c => c.Name).IsRequired().HasMaxLength(100);
       builder.Property(c => c.Description).HasMaxLength(1000);
+      builder.Property(c => c.DefaultLanguage).IsRequired().HasDefaultValue(LanguageOptions.English).HasMaxLength(10);
       builder.Property(c => c.IsActive).IsRequired().HasDefaultValue(true);
    }
 }

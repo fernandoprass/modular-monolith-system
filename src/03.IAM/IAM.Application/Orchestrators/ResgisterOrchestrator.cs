@@ -88,6 +88,7 @@ public class ResgisterOrchestrator(
        Argon2.Hash(organizationCreate.User.Password),
        DateTime.UtcNow.AddDays(30),
        isOrganizationAdmin: true,
+       organization.DefaultLanguage,
        organization.Id
       );
 

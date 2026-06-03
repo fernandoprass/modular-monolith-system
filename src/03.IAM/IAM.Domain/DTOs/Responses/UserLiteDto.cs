@@ -1,3 +1,5 @@
+using Shared.Domain;
+
 namespace IAM.Domain.DTOs.Responses;
 
 public sealed record UserLiteDto
@@ -6,4 +8,5 @@ public sealed record UserLiteDto
    public string Name { get; init; } = string.Empty;
    public string Email { get; init; } = string.Empty;
    public bool IsActive { get; init; }
+   public string Language { get; init; } = LanguageOptions.English;
 }

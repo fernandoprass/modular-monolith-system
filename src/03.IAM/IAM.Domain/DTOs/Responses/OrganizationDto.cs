@@ -9,5 +9,6 @@ public sealed record OrganizationDto
    string Code,
    string Name,
    string? Description,
+   string DefaultLanguage,
    bool IsActive
 );

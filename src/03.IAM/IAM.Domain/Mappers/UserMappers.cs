@@ -19,6 +19,7 @@ public static class UserMappers
          CreatedAt = user.CreatedAt,
          EmailVerifiedAt = user.EmailVerifiedAt,
          LastLoginAt = user.LastLoginAt,
+         Language = user.Language,
          OrganizationId = user.OrganizationId,
          OrganizationName = user.Organization?.Name ?? string.Empty
       };
@@ -37,6 +38,7 @@ public static class UserMappers
          CreatedAt = user.CreatedAt,
          EmailVerifiedAt = user.EmailVerifiedAt,
          LastLoginAt = user.LastLoginAt,
+         Language = user.Language,
          OrganizationId = user.OrganizationId,
          OrganizationName = user.OrganizationName
       };
@@ -56,6 +58,7 @@ public static class UserMappers
          CreatedAt = user.CreatedAt,
          EmailVerifiedAt = user.EmailVerifiedAt,
          LastLoginAt = user.LastLoginAt,
+         Language = user.Language,
          LockedOutUntil = user.LockedOutUntil,
          FailedLoginAttempts = user.NumFailedLoginAttempts,
          OrganizationId = user.OrganizationId,

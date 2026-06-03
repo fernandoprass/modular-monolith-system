@@ -7,6 +7,7 @@ using Isopoh.Cryptography.Argon2;
 using Myce.FluentValidator;
 using Myce.Response;
 using Shared.Application.Contracts;
+using Shared.Domain;
 using Shared.Domain.Messages;
 
 namespace IAM.Application.Validators;
@@ -22,6 +23,8 @@ public class UserValidator : IUserValidator
             .RuleFor(x => x.Email).ApplyTemplate(ValidatorTemplates.EmailRules)
             .RuleFor(x => x.Password).ApplyTemplate(ValidatorTemplates.PasswordRules)
             .RuleFor(x => x.OrganizationId).IsRequired()
+            .RuleFor(x => x.Language).IsRequired()
+            .RuleForValue(LanguageOptions.IsSupported(request.Language)).IsTrue(new InvalidLanguageError(request.Language!))
             .RuleForValue(emailAlreadyExists).IsFalse(new EmailAlreadyExistError(request.Email))
             .RuleForValue(organizationExists).IsTrue(new NotFoundError(IamConst.Entity.Organization));
 
@@ -47,6 +50,8 @@ public class UserValidator : IUserValidator
    {
       var validator = new FluentValidator<UserUpdateRequest>()
          .RuleFor(x => x.Name).ApplyTemplate(ValidatorTemplates.NameRules)
+         .RuleFor(x => x.Language).IsRequired()
+         .RuleForValue(LanguageOptions.IsSupported(request.Language)).IsTrue(new InvalidLanguageError(request.Language!))
          .RuleForValue(id).IsNotNull(new NotFoundError(IamConst.Entity.User));
 
       var isValid = validator.Validate(request);

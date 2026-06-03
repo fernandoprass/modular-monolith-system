@@ -14,6 +14,7 @@ public static class OrganizationMappers
          Code: organization.Code,
          Name: organization.Name,
          Description: organization.Description,
+         DefaultLanguage: organization.DefaultLanguage,
          IsActive: organization.IsActive
       );
    }
