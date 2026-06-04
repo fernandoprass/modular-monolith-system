@@ -75,6 +75,7 @@
   </Folder>
   <Folder Name="/tests/" />
   <Folder Name="/tests/00.Core/">
+    <Project Path="tests/00.Core/Core.API.EndToEnd.Tests/Core.API.EndToEnd.Tests.csproj" />
     <Project Path="tests/00.Core/Core.API.Tests/Core.API.Tests.csproj" />
   </Folder>
   <Folder Name="/tests/01.Shared/">
