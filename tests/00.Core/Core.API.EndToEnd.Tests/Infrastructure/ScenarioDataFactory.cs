@@ -6,6 +6,7 @@ namespace Core.API.EndToEnd.Tests.Infrastructure;
 internal static class ScenarioDataFactory
 {
    public const string Password = "Password123!";
+   public const string UpdatedPassword = "Password456!";
 
    public static OrganizationCreateRequest CreateOrganization()
    {
@@ -39,5 +40,32 @@ internal static class ScenarioDataFactory
       var suffix = Guid.NewGuid().ToString("N")[..8];
 
       return new OrganizationUpdateCodeRequest($"updated{suffix}");
+   }
+
+   public static UserCreateRequest CreateUser(Guid organizationId)
+   {
+      var suffix = Guid.NewGuid().ToString("N")[..8];
+
+      return new UserCreateRequest(
+         $"User {suffix}",
+         $"user-{suffix}@example.com",
+         Password,
+         "en",
+         organizationId);
+   }
+
+   public static UserUpdateRequest UpdateUser()
+   {
+      var suffix = Guid.NewGuid().ToString("N")[..8];
+
+      return new UserUpdateRequest(
+         $"Updated User {suffix}",
+         true,
+         "pt-BR");
+   }
+
+   public static UserUpdatePasswordRequest UpdatePassword()
+   {
+      return new UserUpdatePasswordRequest(Password, UpdatedPassword);
    }
 }
