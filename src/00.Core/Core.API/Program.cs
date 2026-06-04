@@ -1,0 +1,49 @@
+using Core.API;
+using Core.API.Configure;
+using Core.API.Middlewares;
+using Courier.API.Configure;
+using Courier.API.Controllers;
+using IAM.API.Configure;
+using IAM.API.Controllers;
+using Sentinel.API.Configure;
+using Sentinel.API.Controllers;
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services
+   .AddControllers()
+   .AddApplicationPart(typeof(UserController).Assembly)
+   .AddApplicationPart(typeof(LogController).Assembly)
+   .AddApplicationPart(typeof(EmailController).Assembly);
+
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
+
+builder.Services.AddIamModule(builder.Configuration);
+builder.Services.AddSentinelModule(builder.Configuration);
+builder.Services.AddCourierModule(builder.Configuration);
+
+Core.API.Configure.ApiVersioning.Configure(builder);
+JwtAuthentication.Configure(builder);
+
+var app = builder.Build();
+
+app.UseExceptionHandler();
+
+if (app.Environment.IsDevelopment())
+{
+   app.UseSwagger();
+   app.UseSwaggerUI();
+}
+
+app.UseHttpsRedirection();
+app.UseRouting();
+app.UseAuthentication();
+app.UseAuthorization();
+app.MapControllers();
+
+app.MapGet("api/v{version:apiVersion}/core/health", () => Results.Ok(new { Status = "Ok", Module = CoreConst.ModuleName }));
+
+app.Run();
