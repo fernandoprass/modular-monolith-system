@@ -9,12 +9,13 @@ public static class AuditLogMappers
    {
       return new AuditLogDto(
          auditLog.Id,
-         auditLog.CreatedAt,
          auditLog.Module,
          auditLog.Feature,
          auditLog.Action,
          auditLog.PrivacyLevel,
          auditLog.Description,
+         auditLog.CreatedAt,
+         auditLog.ExpiresAt,
          auditLog.UserId,
          auditLog.OrganizationId,
          auditLog.TargetId,

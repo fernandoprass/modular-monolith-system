@@ -1,9 +1,6 @@
 <Solution>
   <Folder Name="/docs/">
-    <File Path="docs/00.docker.md" />
-    <File Path="docs/00.folder-structure.md" />
-    <File Path="docs/00.migrations.md" />
-    <File Path="docs/00.redis.cache.md" />
+    <File Path="docs/00.core.md" />
     <File Path="docs/00.redis.messaging-system.md" />
     <File Path="docs/01.Shared.entities.md" />
     <File Path="docs/01.shared.enums.md" />
@@ -13,12 +10,19 @@
     <File Path="docs/02.sentinel.entities.md" />
      <File Path="docs/03.iam.entities.md" />
     <File Path="docs/99.database.seeder.md" />
+    <File Path="docs/deployment-modes.md" />
+    <File Path="docs/docker.md" />
+    <File Path="docs/folder-structure.md" />
+    <File Path="docs/migrations.md" />
     <File Path="docs/readme.md" />
+    <File Path="docs/redis.cache.md" />
+    <File Path="docs/redis.messaging-system.md" />
   </Folder>
   <Folder Name="/infra/">
     <File Path="infra/.env" />
     <File Path="infra/clean-database.sql" />
     <File Path="infra/docker-compose.apps.yaml" />
+    <File Path="infra/docker-compose.core.yaml" />
     <File Path="infra/docker-compose.mongodb.yaml" />
     <File Path="infra/docker-compose.postgresql.yaml" />
     <File Path="infra/docker-compose.redis.yaml" />
@@ -36,6 +40,9 @@
     <File Path="readme.md" />
   </Folder>
   <Folder Name="/src/" />
+  <Folder Name="/src/00.Core/">
+    <Project Path="src/00.Core/Core.API/Core.API.csproj" />
+  </Folder>
    <Folder Name="/src/01.Shared/">
      <File Path="src/01.Shared/readme.md" />
      <Project Path="src/01.Shared/Shared.Application/Shared.Application.csproj" />
@@ -67,6 +74,9 @@
     <Project Path="src/99.Seeder/DatabaseSeeder/DatabaseSeeder.csproj" />
   </Folder>
   <Folder Name="/tests/" />
+  <Folder Name="/tests/00.Core/">
+    <Project Path="tests/00.Core/Core.API.Tests/Core.API.Tests.csproj" />
+  </Folder>
   <Folder Name="/tests/01.Shared/">
     <Project Path="tests/01.Shared/Shared.Application.Tests/Shared.Application.Tests.csproj" />
     <Project Path="tests/01.Shared/Shared.Domain.Tests/Shared.Domain.Tests.csproj" />

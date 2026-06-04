@@ -611,7 +611,7 @@ Role permission cache:
 - Uses absolute expiration.
 
 See also:
-- `docs/00.redis.cache.md`
+- `docs/redis.cache.md`
 
 ---
 
@@ -644,7 +644,7 @@ Notification event:
 - Fire-and-forget.
 
 See also:
-- `docs/00.redis.messaging-system.md`
+- `docs/redis.messaging-system.md`
 
 ---
 
@@ -731,9 +731,9 @@ Useful documentation:
 - `docs/01.shared.enums.md`
 - `docs/01.shared.repositories.md`
 - `docs/01.shared.uow.md`
-- `docs/00.redis.cache.md`
-- `docs/00.redis.messaging-system.md`
-- `docs/00.folder-structure.md`
+- `docs/redis.cache.md`
+- `docs/redis.messaging-system.md`
+- `docs/folder-structure.md`
 
 Use this readme as the module overview.
 

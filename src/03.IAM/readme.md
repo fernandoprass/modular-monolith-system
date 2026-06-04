@@ -232,7 +232,7 @@ Example changes:
 - Permission unassigned from role.
 
 See also:
-- `docs/00.redis.cache.md`
+- `docs/redis.cache.md`
 
 ---
 
@@ -350,7 +350,7 @@ This lets IAM change some behavior without code deployment.
 
 See also:
 - `src/01.Shared/readme.md`
-- `docs/00.redis.cache.md`
+- `docs/redis.cache.md`
 
 ---
 
@@ -444,7 +444,7 @@ https://localhost:4055
 Docker and Visual Studio ports are intentionally different.
 
 See also:
-- `docs/00.docker.md`
+- `docs/docker.md`
 
 ---
 
@@ -468,7 +468,7 @@ The seeder creates:
 IAM should not execute its own seeding logic.
 
 See also:
-- `docs/00.database.seeder.md`
+- `docs/99.database.seeder.md`
 
 ---
 
@@ -493,9 +493,9 @@ See also:
 ## 15. Related Docs
 
 - `docs/03.iam.entities.md`
-- `docs/00.folder-structure.md`
-- `docs/00.redis.cache.md`
-- `docs/00.redis.messaging-system.md`
-- `docs/00.database.seeder.md`
+- `docs/folder-structure.md`
+- `docs/redis.cache.md`
+- `docs/redis.messaging-system.md`
+- `docs/99.database.seeder.md`
 - `src/01.Shared/readme.md`
 - `src/02.Sentinel/readme.md`

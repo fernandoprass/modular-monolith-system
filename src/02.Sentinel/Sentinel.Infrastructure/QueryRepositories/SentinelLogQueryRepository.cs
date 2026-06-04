@@ -36,12 +36,13 @@ public class SentinelLogQueryRepository(SentinelDbContext dbContext) : ISentinel
 
       var items = logs.Select(a => new AuditLogLiteDto(
          a.Id,
-         a.CreatedAt,
          a.Module,
          a.Feature,
          a.Action,
          a.PrivacyLevel,
          a.Description,
+         a.CreatedAt,
+         a.ExpiresAt,
          a.UserId,
          a.TargetId)).ToList();
 
@@ -71,11 +72,12 @@ public class SentinelLogQueryRepository(SentinelDbContext dbContext) : ISentinel
 
       var items = logs.Select(s => new SystemLogLiteDto(
          s.Id,
-         s.CreatedAt,
          s.Level,
          s.Status,
          s.Module,
          s.Message,
+         s.CreatedAt,
+         s.ExpiresAt,
          s.RequestId,
          s.UserId,
          s.OrganizationId)).ToList();
@@ -195,12 +197,13 @@ public class SentinelLogQueryRepository(SentinelDbContext dbContext) : ISentinel
          ? null
          : new AuditLogDto(
             auditLog.Id,
-            auditLog.CreatedAt,
             auditLog.Module,
             auditLog.Feature,
             auditLog.Action,
             auditLog.PrivacyLevel,
             auditLog.Description,
+            auditLog.CreatedAt,
+            auditLog.ExpiresAt,
             auditLog.UserId,
             auditLog.OrganizationId,
             auditLog.TargetId,
@@ -227,13 +230,14 @@ public class SentinelLogQueryRepository(SentinelDbContext dbContext) : ISentinel
          ? null
          : new SystemLogDto(
             systemLog.Id,
-            systemLog.CreatedAt,
             systemLog.Level,
             systemLog.Status,
             systemLog.Module,
             systemLog.Message,
             systemLog.Exception,
             systemLog.StackTrace,
+            systemLog.CreatedAt,
+            systemLog.ExpiresAt,
             systemLog.RequestId,
             systemLog.UserId,
             systemLog.OrganizationId,

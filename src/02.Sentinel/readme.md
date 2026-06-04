@@ -128,7 +128,7 @@ The stream producer is usually another module.
 The stream consumer is Sentinel.
 
 Redis messaging details are documented in:
-- `docs/00.redis.messaging-system.md`
+- `docs/redis.messaging-system.md`
 
 Important rule:
 

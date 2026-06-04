@@ -4,13 +4,14 @@ namespace Sentinel.Domain.DTOs.Responses;
 
 public record SystemLogDto(
    Guid Id,
-   DateTime CreatedAt,
    SystemLogLevel Level,
    SystemLogStatus Status,
    string Module,
    string Message,
    string? Exception,
    string? StackTrace,
+   DateTime CreatedAt,
+   DateTime ExpiresAt,
    string? RequestId,
    Guid? UserId,
    Guid? OrganizationId,

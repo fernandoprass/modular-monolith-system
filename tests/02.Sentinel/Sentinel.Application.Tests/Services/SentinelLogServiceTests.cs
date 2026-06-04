@@ -27,12 +27,13 @@ public class SentinelLogServiceTests
       var id = Guid.NewGuid();
       var auditLog = new AuditLogDto(
          id,
-         DateTime.UtcNow,
          "iam",
          "users",
          "create",
          AuditPrivacyLevel.Medium,
          "Created user",
+         DateTime.UtcNow,
+         DateTime.UtcNow.AddDays(90),
          Guid.NewGuid(),
          Guid.NewGuid(),
          Guid.NewGuid(),
@@ -66,13 +67,14 @@ public class SentinelLogServiceTests
       var id = Guid.NewGuid();
       var systemLog = new SystemLogDto(
          id,
-         DateTime.UtcNow,
          SystemLogLevel.Error,
          SystemLogStatus.Failure,
          "Sentinel",
          "Failure",
          "Exception",
          "Stack",
+         DateTime.UtcNow,
+         DateTime.UtcNow.AddDays(90),
          "request-1",
          Guid.NewGuid(),
          Guid.NewGuid(),

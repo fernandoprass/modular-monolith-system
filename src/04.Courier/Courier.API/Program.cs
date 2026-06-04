@@ -4,10 +4,7 @@ using Courier.Domain;
 using Courier.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using Shared.Application.Contracts;
 using Shared.Domain;
-using Shared.Infrastructure;
-using Shared.Infrastructure.Security;
 using StackExchange.Redis;
 using System.Text;
 
@@ -18,13 +15,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApi();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
-builder.Services.AddCourierInfrastructure(builder.Configuration);
-var sharedConnectionString = builder.Configuration.GetConnectionString(SharedConst.Database.ConnectionString)
-   ?? throw new InvalidOperationException("Shared database connection string is required.");
-builder.Services.AddSharedInfrastructure(builder.Configuration, sharedConnectionString);
+builder.Services.AddCourierModule(builder.Configuration);
 builder.Services.AddAuthorization();
-builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<IUserContext, AspNetUserContext>();
 
 ApiVersioning.Configure(builder);
 

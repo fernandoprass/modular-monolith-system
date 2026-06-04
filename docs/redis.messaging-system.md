@@ -4,7 +4,7 @@ This document explains the Redis messaging used for module communication.
 
 It is focused only on messaging.
 
-Redis cache is documented in `00.redis.cache.md`.
+Redis cache is documented in `redis.cache.md`.
 
 ---
 

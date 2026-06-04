@@ -42,10 +42,12 @@ Infrastructure talks to external systems
 
 ```text
 src/
-  00.Seeder/
+  00.Core/
   01.Shared/
   02.Sentinel/
   03.IAM/
+  04.Courier/
+  99.Seeder/
 tests/
 docs/
 infra/
@@ -66,16 +68,51 @@ The numeric prefix keeps modules ordered in the file tree, it does not replace d
 
 | Module | Purpose |
 | :--- | :--- |
-| `00.Seeder` | Console app that creates default database data. |
+| `00.Core` | Main API host for modular monolith deployment. |
 | `01.Shared` | Common contracts, base classes, infrastructure helpers, parameters, cache, and messaging. |
 | `02.Sentinel` | Logging and monitoring module. Stores audit logs and system logs. |
 | `03.IAM` | Identity and access management module. Users, organizations, roles, permissions, and authentication. |
+| `04.Courier` | Communication and notification module. Stores and sends email messages. |
+| `99.Seeder` | Console app that creates default database data. |
 
 New business modules should follow the same pattern as IAM and Sentinel.
 
 ---
 
-## 4. Standard Module Shape
+## 4. Core API Host
+
+Core API is the main modular monolith host.
+
+It lives in:
+
+```text
+src/00.Core/
+  Core.API/
+```
+
+Core API loads module API controllers through Application Parts.
+
+It does not copy controllers.
+
+It should not contain business rules.
+
+It can reference module API projects:
+
+```text
+Core.API -> IAM.API
+Core.API -> Sentinel.API
+Core.API -> Courier.API
+```
+
+Business modules should not reference Core API.
+
+See:
+- `docs/00.core.md`
+- `docs/deployment-modes.md`
+
+---
+
+## 5. Standard Module Shape
 
 A normal module has four projects:
 
@@ -112,7 +149,7 @@ The responsibilities stay the same.
 
 ---
 
-## 5. Dependency Direction
+## 6. Dependency Direction
 
 Clean Architecture is mostly about dependency direction.
 
@@ -141,7 +178,7 @@ Why:
 
 ---
 
-## 6. API Project
+## 7. API Project
 
 The API project is the HTTP entry point.
 
@@ -166,6 +203,16 @@ Responsibilities:
 - Register global exception handling.
 - Start the ASP.NET Core app.
 
+Each standalone module API should also expose a reusable module registration method.
+
+Core API uses that same method.
+
+Example:
+
+```csharp
+builder.Services.AddIamModule(builder.Configuration);
+```
+
 Controllers should be thin.
 
 They should:
@@ -188,7 +235,7 @@ HTTP in -> Application call -> HTTP out
 
 ---
 
-## 7. Application Project
+## 8. Application Project
 
 The Application project contains use cases.
 
@@ -240,7 +287,7 @@ That is more than one simple service action.
 
 ---
 
-## 8. Domain Project
+## 9. Domain Project
 
 The Domain project contains the business model.
 
@@ -292,7 +339,7 @@ Business state changes should live in entities when possible.
 
 ---
 
-## 9. Infrastructure Project
+## 10. Infrastructure Project
 
 The Infrastructure project contains external details.
 
@@ -332,7 +379,7 @@ Infrastructure provides the implementation.
 
 ---
 
-## 10. Shared Module
+## 11. Shared Module
 
 Shared contains reusable code used by more than one module.
 
@@ -384,14 +431,14 @@ Organization business rules
 
 ---
 
-## 11. Seeder Project
+## 12. Seeder Project
 
 The seeder is separate from IAM.
 
 Location:
 
 ```text
-src/00.Seeder/DatabaseSeeder
+src/99.Seeder/DatabaseSeeder
 ```
 
 Purpose:
@@ -407,11 +454,11 @@ Why separate:
 - The seeder can consume IAM repositories without putting seeding logic inside IAM.
 
 See:
-- `00.database.seeder.md`
+- `99.database.seeder.md`
 
 ---
 
-## 12. Tests
+## 13. Tests
 
 Tests mirror the source structure.
 
@@ -421,6 +468,12 @@ Example:
 tests/03.IAM/
   IAM.API.Tests/
   IAM.Application.Tests/
+```
+
+Core API tests live in:
+
+```text
+tests/00.Core/Core.API.Tests
 ```
 
 Common ownership:
@@ -439,7 +492,7 @@ Rules:
 
 ---
 
-## 13. Request Flow Example
+## 14. Request Flow Example
 
 Example: create a user.
 
@@ -470,7 +523,7 @@ Each class has one job.
 
 ---
 
-## 14. Sequence Example
+## 15. Sequence Example
 
 ```mermaid
 sequenceDiagram
@@ -507,13 +560,14 @@ It is not meant to show every line of code.
 
 ---
 
-## 15. Where To Put New Code
+## 16. Where To Put New Code
 
 Use this quick guide.
 
 | New code | Put it in |
 | :--- | :--- |
 | New HTTP endpoint | API controller. |
+| New host-level endpoint | Core API only when it is truly host-level, like Core health. |
 | New request validation | Application validator. |
 | New business action | Application service or orchestrator. |
 | Entity state change | Domain entity method. |
@@ -528,10 +582,12 @@ When unsure, ask before adding files.
 
 ---
 
-## 16. Rules
+## 17. Rules
 
 - Keep controllers thin.
 - Keep domain independent.
+- Keep Core API as a host only.
+- Do not copy module controllers into Core API.
 - Use repositories through interfaces.
 - Use query repositories for DTO reads.
 - Use unit of work for saving.

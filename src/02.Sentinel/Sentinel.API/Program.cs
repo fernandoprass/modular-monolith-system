@@ -3,11 +3,7 @@ using Microsoft.IdentityModel.Tokens;
 using Sentinel.API.Configure;
 using Sentinel.API.Middlewares;
 using Sentinel.Domain;
-using Sentinel.Infrastructure;
-using Shared.Application.Contracts;
 using Shared.Domain;
-using Shared.Infrastructure;
-using Shared.Infrastructure.Security;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,11 +13,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApi();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
-builder.Services.AddSentinelInfrastructure(builder.Configuration);
-builder.Services.AddSharedAuthorization(builder.Configuration);
+builder.Services.AddSentinelModule(builder.Configuration);
 builder.Services.AddAuthorization();
-builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<IUserContext, AspNetUserContext>();
 
 ApiVersioning.Configure(builder);
 
