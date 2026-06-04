@@ -1,6 +1,7 @@
 using IAM.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Shared.Domain;
 using Shared.Infrastructure.Configurations;
 
 namespace IAM.Infrastructure.Configurations;
@@ -22,6 +23,7 @@ public class UserConfiguration : BaseAuditedConfiguration<User>
       builder.Property(u => u.LastLoginAt);
       builder.Property(u => u.LockedOutUntil);
       builder.Property(u => u.NumFailedLoginAttempts).IsRequired().HasDefaultValue(0);
+      builder.Property(u => u.Language).IsRequired().HasDefaultValue(LanguageOptions.English).HasMaxLength(10);
       builder.Property(u => u.OrganizationId).IsRequired();
 
       builder.HasIndex(u => new { u.OrganizationId, u.Email }).IsUnique();

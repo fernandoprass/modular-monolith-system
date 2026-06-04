@@ -74,7 +74,9 @@ public class UserService(
              request.Email,
              Argon2.Hash(request.Password),
              passwordExpiresAt,
-             request.OrganizationId);
+             request.Language,
+             request.OrganizationId
+             );
 
          await AddDefaultRolesAsync(user, ct);
 
@@ -119,7 +121,7 @@ public class UserService(
             return Result.Failure(validator.Messages);
          }
 
-         user!.Update(request.Name, request.IsActive);
+         user!.Update(request.Name, request.IsActive, request.Language);
 
          var result = await CommitUpdateAsync(user, ct);
 

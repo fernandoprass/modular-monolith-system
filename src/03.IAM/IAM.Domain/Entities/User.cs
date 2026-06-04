@@ -1,3 +1,4 @@
+using Shared.Domain;
 using Shared.Domain.Entities;
 
 namespace IAM.Domain.Entities;
@@ -14,6 +15,7 @@ public class User : EntityAudited
    public DateTime? LastLoginAt { get; set; }
    public DateTime? PasswordExpiresAt { get; set; }
    public DateTime? LockedOutUntil { get; set; }
+   public string Language { get; set; } = LanguageOptions.English;
    public Guid OrganizationId { get; set; }
    public Organization Organization { get; set; } = null!;
 
@@ -22,7 +24,7 @@ public class User : EntityAudited
 
    private User() { }
 
-   public static User Create(string name, string email, string passwordHash, DateTime passwordExpiresAt, Guid organizationId)
+   public static User Create(string name, string email, string passwordHash, DateTime passwordExpiresAt, string language, Guid organizationId)
    {
       return new User
       {
@@ -35,21 +37,25 @@ public class User : EntityAudited
          IsSystemAdmin = false,
          IsOrganizationAdmin = false,
          NumFailedLoginAttempts = 0,
+         Language = LanguageOptions.Normalize(language),
          OrganizationId = organizationId
       };
    }
-   public static User CreateOrganizationAdmin(string name, string email, string passwordHash, DateTime passwordExpiresAt, bool isOrganizationAdmin, Guid organizationId)
+
+   public static User CreateOrganizationAdmin(string name, string email, string passwordHash, DateTime passwordExpiresAt, bool isOrganizationAdmin, string language, Guid organizationId)
    {
-      var user = User.Create(name, email, passwordHash, passwordExpiresAt, organizationId);
+      var user = User.Create(name, email, passwordHash, passwordExpiresAt, language, organizationId);
 
       user.IsOrganizationAdmin = isOrganizationAdmin;
 
       return user;
    }
-   public void Update(string name, bool isActive)
+
+   public void Update(string name, bool isActive, string language)
    {
       Name = name;
       IsActive = isActive;
+      Language = LanguageOptions.Normalize(language);
    }
 
    public void UpdatePassword(string newPasswordHash, DateTime expiresAt)

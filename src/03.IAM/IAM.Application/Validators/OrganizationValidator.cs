@@ -5,6 +5,7 @@ using IAM.Domain.Enums;
 using IAM.Domain.Messages;
 using Myce.FluentValidator;
 using Myce.Response;
+using Shared.Domain;
 using Shared.Domain.Messages;
 
 namespace IAM.Application.Validators;
@@ -21,6 +22,8 @@ public class OrganizationValidator : IOrganizationValidator
           .RuleFor(x => x.Name).ApplyTemplate(ValidatorTemplates.NameRules)
           .RuleFor(x => x.Code).If(x => x.Type.Equals(OrganizationType.Company), x => x.ApplyTemplate(CodeRules))
           .RuleFor(x => x.User).IsNotNull() //just to ensure the user object is provided, validation is done in UserValidator
+          .RuleFor(x => x.DefaultLanguage).IsRequired()
+          .RuleForValue(LanguageOptions.IsSupported(request.DefaultLanguage)).IsTrue(new InvalidLanguageError(request.DefaultLanguage!))
           .RuleForValue(newCodeExists).IsFalse(new OrganizationDuplicateCodeError(request.Code));
 
       var isValid = validator.Validate(request);
@@ -32,6 +35,8 @@ public class OrganizationValidator : IOrganizationValidator
    {
       var validator = new FluentValidator<OrganizationUpdateRequest>()
           .RuleFor(x => x.Name).ApplyTemplate(ValidatorTemplates.NameRules)
+          .RuleFor(x => x.DefaultLanguage).IsRequired()
+          .RuleForValue(LanguageOptions.IsSupported(request.DefaultLanguage)).IsTrue(new InvalidLanguageError(request.DefaultLanguage!))
           .RuleForValue(organizationExists).IsTrue(new NotFoundError(IamConst.Entity.Organization));
 
       var isValid = validator.Validate(request);

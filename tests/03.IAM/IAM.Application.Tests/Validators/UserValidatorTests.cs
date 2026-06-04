@@ -7,6 +7,7 @@ using IAM.Domain.Messages;
 using Isopoh.Cryptography.Argon2;
 using NSubstitute;
 using Shared.Application.Contracts;
+using Shared.Domain;
 using Shared.Domain.Messages;
 
 
@@ -24,7 +25,7 @@ public class UserValidatorTests
    [Fact]
    public void ValidateCreate_ShouldBeSuccess_WhenAllDataIsValid()
    {
-      var request = new UserCreateRequest("Dev Senior", "test@example.com", "Strong#Pass123", Guid.NewGuid());
+      var request = new UserCreateRequest("Dev Senior", "test@example.com", "Strong#Pass123", LanguageOptions.English, Guid.NewGuid());
 
       var result = _validator.ValidateCreate(request, emailAlreadyExists: false, organizationExists: true);
 
@@ -34,7 +35,7 @@ public class UserValidatorTests
    [Fact]
    public void ValidateCreate_ShouldHaveError_WhenEmailAlreadyExists()
    {
-      var request = new UserCreateRequest("Dev Senior", "exists@example.com", "Strong#Pass123", Guid.NewGuid());
+      var request = new UserCreateRequest("Dev Senior", "exists@example.com", "Strong#Pass123", LanguageOptions.English, Guid.NewGuid());
 
       var result = _validator.ValidateCreate(request, emailAlreadyExists: true, organizationExists: true);
 
@@ -45,7 +46,7 @@ public class UserValidatorTests
    [Fact]
    public void ValidateCreate_ShouldHaveError_WhenOrganizationDoesNotExist()
    {
-      var request = new UserCreateRequest("Dev Senior", "test@example.com", "Strong#Pass123", Guid.NewGuid());
+      var request = new UserCreateRequest("Dev Senior", "test@example.com", "Strong#Pass123", LanguageOptions.English, Guid.NewGuid());
 
       var result = _validator.ValidateCreate(request, emailAlreadyExists: false, organizationExists: false);
 
@@ -56,7 +57,7 @@ public class UserValidatorTests
    [Fact]
    public void ValidateUpdate_ShouldHaveError_WhenIdIsNull()
    {
-      var request = new UserUpdateRequest("New Name", true);
+      var request = new UserUpdateRequest("New Name", true, LanguageOptions.English);
 
       var result = _validator.ValidateUpdate(null, request);
 
@@ -68,7 +69,7 @@ public class UserValidatorTests
    public void ValidateUpdatePassword_ShouldBeSuccess_WhenCredentialsAreValid()
    {
       var oldPassword = "Old#Password123";
-      var user = User.Create("User Test", "test@email.com", Argon2.Hash(oldPassword), DateTime.UtcNow.AddDays(30), Guid.NewGuid());
+      var user = User.Create("User Test", "test@email.com", Argon2.Hash(oldPassword), DateTime.UtcNow.AddDays(30), LanguageOptions.English, Guid.NewGuid());
       var request = new UserUpdatePasswordRequest(oldPassword, "New#StrongPass88");
 
       var result = _validator.ValidateUpdatePassword(user, request);
@@ -80,7 +81,7 @@ public class UserValidatorTests
    [Fact]
    public void ValidateUpdatePassword_ShouldHaveError_WhenOldPasswordIsIncorrect()
    {
-      var user = User.Create("User Test", "test@email.com", Argon2.Hash("Correct#123"), DateTime.UtcNow.AddDays(30), Guid.NewGuid());
+      var user = User.Create("User Test", "test@email.com", Argon2.Hash("Correct#123"), DateTime.UtcNow.AddDays(30), LanguageOptions.English, Guid.NewGuid());
       var request = new UserUpdatePasswordRequest("Wrong#123", "New#StrongPass88");
 
       var result = _validator.ValidateUpdatePassword(user, request);
@@ -92,7 +93,7 @@ public class UserValidatorTests
    [Fact]
    public void ValidateUpdateOrganizationAdmin_ShouldBeSuccess_WhenUserIsSystemAdmin()
    {
-      var user = User.Create("User Test", "test@email.com", "hash", DateTime.UtcNow.AddDays(30), Guid.NewGuid());
+      var user = User.Create("User Test", "test@email.com", "hash", DateTime.UtcNow.AddDays(30), LanguageOptions.English, Guid.NewGuid());
       var request = new UserUpdateOrganizationAdminRequest(true);
       var userContext = CreateUserContext(isSystemAdmin: true, isOrganizationAdmin: false, userOwnerId: Guid.NewGuid());
 
@@ -105,7 +106,7 @@ public class UserValidatorTests
    public void ValidateUpdateOrganizationAdmin_ShouldBeSuccess_WhenUserIsOrganizationAdminForSameOrganization()
    {
       var organizationId = Guid.NewGuid();
-      var user = User.Create("User Test", "test@email.com", "hash", DateTime.UtcNow.AddDays(30), organizationId);
+      var user = User.Create("User Test", "test@email.com", "hash", DateTime.UtcNow.AddDays(30), LanguageOptions.English, organizationId);
       var request = new UserUpdateOrganizationAdminRequest(true);
       var userContext = CreateUserContext(isSystemAdmin: false, isOrganizationAdmin: true, userOwnerId: organizationId);
 
@@ -129,7 +130,7 @@ public class UserValidatorTests
    [Fact]
    public void ValidateUpdateOrganizationAdmin_ShouldHaveError_WhenCurrentUserIsNotAdmin()
    {
-      var user = User.Create("User Test", "test@email.com", "hash", DateTime.UtcNow.AddDays(30), Guid.NewGuid());
+      var user = User.Create("User Test", "test@email.com", "hash", DateTime.UtcNow.AddDays(30), LanguageOptions.English, Guid.NewGuid());
       var request = new UserUpdateOrganizationAdminRequest(true);
       var userContext = CreateUserContext(isSystemAdmin: false, isOrganizationAdmin: false, userOwnerId: user.OrganizationId);
 
@@ -142,7 +143,7 @@ public class UserValidatorTests
    [Fact]
    public void ValidateUpdateOrganizationAdmin_ShouldHaveError_WhenOrganizationAdminUpdatesAnotherOrganization()
    {
-      var user = User.Create("User Test", "test@email.com", "hash", DateTime.UtcNow.AddDays(30), Guid.NewGuid());
+      var user = User.Create("User Test", "test@email.com", "hash", DateTime.UtcNow.AddDays(30), LanguageOptions.English, Guid.NewGuid());
       var request = new UserUpdateOrganizationAdminRequest(true);
       var userContext = CreateUserContext(isSystemAdmin: false, isOrganizationAdmin: true, userOwnerId: Guid.NewGuid());
 

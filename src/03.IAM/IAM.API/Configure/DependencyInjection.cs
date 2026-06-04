@@ -44,7 +44,7 @@ public static class DependencyInjection
 
    private static void RegisterOrchestrators(WebApplicationBuilder builder)
    {
-      builder.Services.AddScoped<IRegisterOrchestrator, ResgisterOrchestrator>();
+      builder.Services.AddScoped<IRegisterOrchestrator, RegisterOrchestrator>();
    }
 
    private static void RegisterServices(WebApplicationBuilder builder)

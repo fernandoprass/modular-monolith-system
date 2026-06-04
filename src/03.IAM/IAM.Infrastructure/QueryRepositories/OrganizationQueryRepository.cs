@@ -19,7 +19,7 @@ public class OrganizationQueryRepository(IamDbContext dbContext) : IOrganization
       return await _dbContext.Organizations
           .AsNoTracking()
           .Where(c => c.Id == id)
-          .Select(c => new OrganizationDto(c.Id, c.Type, c.Code, c.Name, c.Description, c.IsActive))
+          .Select(c => new OrganizationDto(c.Id, c.Type, c.Code, c.Name, c.Description, c.DefaultLanguage, c.IsActive))
           .SingleOrDefaultAsync(cancellationToken);
    }
 
@@ -55,7 +55,7 @@ public class OrganizationQueryRepository(IamDbContext dbContext) : IOrganization
          .OrderBy(c => c.Name)
          .Skip((pageNumber - 1) * pageSize)
          .Take(pageSize)
-         .Select(c => new OrganizationDto(c.Id, c.Type, c.Code, c.Name, c.Description, c.IsActive))
+         .Select(c => new OrganizationDto(c.Id, c.Type, c.Code, c.Name, c.Description, c.DefaultLanguage, c.IsActive))
          .ToListAsync(cancellationToken);
 
       var totalPages = totalCount == 0 ? 0 : (int)Math.Ceiling(totalCount / (double)pageSize);
@@ -67,7 +67,7 @@ public class OrganizationQueryRepository(IamDbContext dbContext) : IOrganization
    {
       return await _dbContext.Organizations
           .AsNoTracking()
-          .Select(c => new OrganizationDto(c.Id, c.Type, c.Code, c.Name, c.Description, c.IsActive))
+          .Select(c => new OrganizationDto(c.Id, c.Type, c.Code, c.Name, c.Description, c.DefaultLanguage, c.IsActive))
           .ToListAsync(cancellationToken);
    }
 

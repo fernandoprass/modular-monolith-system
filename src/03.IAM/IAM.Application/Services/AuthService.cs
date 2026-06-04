@@ -150,6 +150,7 @@ public class AuthService(
             new (JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new (JwtRegisteredClaimNames.Email, user.Email),
             new (JwtRegisteredClaimNames.Name, user.Name),
+            new (SharedConst.Security.Claim.Language, user.Language),
             new (SharedConst.Security.Claim.IsSystemAdmin, user.IsSystemAdmin.ToString()),
             new (SharedConst.Security.Claim.IsOrganizationAdmin, user.IsOrganizationAdmin.ToString()),
             new (SharedConst.Security.Claim.UserOwnerId, user.OrganizationId.ToString()),

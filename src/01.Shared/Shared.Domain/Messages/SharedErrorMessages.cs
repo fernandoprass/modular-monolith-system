@@ -21,3 +21,12 @@ public class UnauthorizedAccessError : ErrorMessage
 {
    public UnauthorizedAccessError() : base("UnauthorizedAccessError", "You do not have permission to access this resource.") { }
 }
+
+public class InvalidLanguageError : ErrorMessage
+{
+   public InvalidLanguageError(string language)
+     : base("InvalidLanguageError", "The language '{language}' is not supported.")
+   {
+      AddVariable("language", language);
+   }
+}

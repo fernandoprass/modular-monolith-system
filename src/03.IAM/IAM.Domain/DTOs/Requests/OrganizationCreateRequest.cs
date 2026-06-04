@@ -8,5 +8,6 @@ public sealed record OrganizationCreateRequest
     string Name,
     string Code,
     string Description,
+    string DefaultLanguage,
     OrganizationUserCreateRequest User
 );

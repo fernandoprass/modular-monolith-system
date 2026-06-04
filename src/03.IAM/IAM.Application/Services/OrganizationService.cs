@@ -85,7 +85,7 @@ public class OrganizationService(
             return Result.Failure(validation.Messages);
          }
 
-         organization!.Update(request.Name, request.Description, request.IsActive);
+         organization!.Update(request.Name, request.Description, request.IsActive, request.DefaultLanguage);
 
          var result = await CommitUpdateAsync(organization, ct);
 

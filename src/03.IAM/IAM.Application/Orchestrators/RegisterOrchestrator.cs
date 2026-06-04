@@ -18,7 +18,7 @@ using Shared.Domain.Messages;
 
 namespace IAM.Application.Orchestrators;
 
-public class ResgisterOrchestrator(
+public class RegisterOrchestrator(
    IOrganizationService organizationService,
    IOrganizationQueryRepository organizationQueryRepository,
    IParameterService parameterService,
@@ -63,18 +63,19 @@ public class ResgisterOrchestrator(
       return result;
    }
 
-   public async Task<Result<OrganizationDto>> RegisterOrganizationAsync(OrganizationCreateRequest organizationCreate, CancellationToken cancellationToken = default)
+   public async Task<Result<OrganizationDto>> RegisterOrganizationAsync(OrganizationCreateRequest request, CancellationToken cancellationToken = default)
    {
-      var organizationValidateResult = await _organizationService.ValidateCreateOrganizationAsync(organizationCreate, cancellationToken);
-      var userValidateResult = await _userService.ValidateUserForNewOrganizationAsync(organizationCreate.User, cancellationToken);
+      var organizationValidateResult = await _organizationService.ValidateCreateOrganizationAsync(request, cancellationToken);
+      var userValidateResult = await _userService.ValidateUserForNewOrganizationAsync(request.User, cancellationToken);
 
       var result = Result.Merge(organizationValidateResult, userValidateResult);
 
       var organization = Organization.Create(
-         organizationCreate.Type,
-         organizationCreate.Type.Equals(OrganizationType.Company) ? organizationCreate.Code : _organizationService.GetRandomCode(),
-         organizationCreate.Type.Equals(OrganizationType.Company) ? organizationCreate.Name : organizationCreate.User.Name,
-         organizationCreate.Description
+         request.Type,
+         request.Type.Equals(OrganizationType.Company) ? request.Code : _organizationService.GetRandomCode(),
+         request.Type.Equals(OrganizationType.Company) ? request.Name : request.User.Name,
+         request.Description,
+         request.DefaultLanguage
       );
 
       if (result.HasError)
@@ -83,11 +84,12 @@ public class ResgisterOrchestrator(
       }
 
       var user = User.CreateOrganizationAdmin(
-       organizationCreate.User.Name,
-       organizationCreate.User.Email,
-       Argon2.Hash(organizationCreate.User.Password),
+       request.User.Name,
+       request.User.Email,
+       Argon2.Hash(request.User.Password),
        DateTime.UtcNow.AddDays(30),
        isOrganizationAdmin: true,
+       organization.DefaultLanguage,
        organization.Id
       );
 
@@ -106,7 +108,7 @@ public class ResgisterOrchestrator(
          RetentionPolicy.LongTerm,
          description: $"Created organization {organization.Name}",
          targetId: organization.Id,
-         metadata: organizationCreate,
+         metadata: request,
          cancellationToken: cancellationToken);
 
       await _eventPublisher.NotifyEmailAsync(

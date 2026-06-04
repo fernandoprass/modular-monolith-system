@@ -11,6 +11,7 @@ using IAM.Domain.Repositories;
 using Myce.Response;
 using NSubstitute;
 using Shared.Application.Contracts;
+using Shared.Domain;
 using Shared.Domain.Enums;
 
 namespace IAM.Application.Tests.Services;
@@ -54,7 +55,7 @@ public class UserServiceTests
    [Fact]
    public async Task CreateUserAsync_ShouldReturnForbiddenOrganizationError_WhenOperatorIdDoesNotMatch()
    {
-      var request = new UserCreateRequest(string.Empty, "test@test.com", string.Empty, Guid.NewGuid());
+      var request = new UserCreateRequest(string.Empty, "test@test.com", string.Empty, LanguageOptions.English, Guid.NewGuid());
 
       _parameterServiceMock.GetShortIntAsync(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns((short)30);
       _parameterServiceMock.GetGuidAsync(IamParam.Role.DefaultRoleIdForNewUser, Arg.Any<CancellationToken>()).Returns(Guid.CreateVersion7());
@@ -71,7 +72,7 @@ public class UserServiceTests
    [Fact]
    public async Task CreateUserAsync_ShouldReturnValidationErrors_WhenValidatorFails()
    {
-      var request = new UserCreateRequest("John Smith", "test@test.com", string.Empty, _userContextMock.UserOwnerId);
+      var request = new UserCreateRequest("John Smith", "test@test.com", string.Empty, LanguageOptions.English, _userContextMock.UserOwnerId);
 
       _userQueryRepositoryMock.GetIdByEmailAsync(request.Email, Arg.Any<CancellationToken>()).Returns(Guid.NewGuid());
 
@@ -92,7 +93,7 @@ public class UserServiceTests
    [Fact]
    public async Task CreateUserAsync_ShouldSaveUser_WhenRequestIsValid()
    {
-      var request = new UserCreateRequest("John Doe", "new@test.com", "SecurePassword123", _userContextMock.UserOwnerId);
+      var request = new UserCreateRequest("John Doe", "new@test.com", "SecurePassword123", LanguageOptions.English, _userContextMock.UserOwnerId);
 
       _userQueryRepositoryMock.GetIdByEmailAsync(request.Email, Arg.Any<CancellationToken>()).Returns(Guid.Empty);
 
@@ -153,7 +154,7 @@ public class UserServiceTests
    public async Task UpdatePasswordAsync_ShouldUpdateHashAndExpiration_WhenRequestIsValid()
    {
       var request = new UserUpdatePasswordRequest("OldPass123", "NewSecurePass123");
-      var user = User.Create("Name", "test@test.com", "OldHash", DateTime.UtcNow, _userContextMock.UserOwnerId);
+      var user = User.Create("Name", "test@test.com", "OldHash", DateTime.UtcNow, LanguageOptions.English, _userContextMock.UserOwnerId);
 
       _userContextMock.UserId.Returns(user.Id);
       _userRepositoryMock.GetByIdAsync(user.Id, Arg.Any<CancellationToken>()).Returns(user);
@@ -181,7 +182,7 @@ public class UserServiceTests
    public async Task UpdatePasswordAsync_ShouldReturnError_WhenValidatorFails()
    {
       var request = new UserUpdatePasswordRequest("OldPass123", "NewSecurePass123");
-      var user = User.Create("Name", "test@test.com", "OldHash", DateTime.UtcNow, _userContextMock.UserOwnerId);
+      var user = User.Create("Name", "test@test.com", "OldHash", DateTime.UtcNow, LanguageOptions.English, _userContextMock.UserOwnerId);
 
       _userContextMock.UserId.Returns(Guid.NewGuid());
       user.Id = _userContextMock.UserId;
@@ -200,8 +201,8 @@ public class UserServiceTests
    [Fact]
    public async Task UpdateAsync_ShouldUpdateUserFields_WhenRequestIsValid()
    {
-      var request = new UserUpdateRequest("Updated Name", false);
-      var user = User.Create("Original Name", "test@test.com", "hash", DateTime.UtcNow, _userContextMock.UserOwnerId);
+      var request = new UserUpdateRequest("Updated Name", false, LanguageOptions.English);
+      var user = User.Create("Original Name", "test@test.com", "hash", DateTime.UtcNow, LanguageOptions.English, _userContextMock.UserOwnerId);
 
       _userRepositoryMock.GetByIdAsync(user.Id, Arg.Any<CancellationToken>()).Returns(user);
       _userValidatorMock.ValidateUpdate(user.Id, request).Returns(Result.Success());
@@ -227,8 +228,8 @@ public class UserServiceTests
    public async Task UpdateAsync_ShouldReturnForbidden_WhenUserBelongsToAnotherOrganization()
    {
       var differentOrganizationId = Guid.NewGuid();
-      var request = new UserUpdateRequest("Name", true);
-      var user = User.Create("Name", "test@test.com", "hash", DateTime.UtcNow, differentOrganizationId);
+      var request = new UserUpdateRequest("Name", true, LanguageOptions.English);
+      var user = User.Create("Name", "test@test.com", "hash", DateTime.UtcNow, LanguageOptions.English, differentOrganizationId);
 
       _userRepositoryMock.GetByIdAsync(user.Id, Arg.Any<CancellationToken>()).Returns(user);
 
@@ -243,7 +244,7 @@ public class UserServiceTests
    public async Task UpdateOrganizationAdminAsync_ShouldUpdateAndAudit_WhenUserIsSystemAdmin()
    {
       var request = new UserUpdateOrganizationAdminRequest(true);
-      var user = User.Create("Name", "test@test.com", "hash", DateTime.UtcNow, Guid.NewGuid());
+      var user = User.Create("Name", "test@test.com", "hash", DateTime.UtcNow, LanguageOptions.English, Guid.NewGuid());
 
       _userContextMock.IsSystemAdmin.Returns(true);
       _userRepositoryMock.GetByIdAsync(user.Id, Arg.Any<CancellationToken>()).Returns(user);
@@ -274,7 +275,7 @@ public class UserServiceTests
    {
       var organizationId = _userContextMock.UserOwnerId;
       var request = new UserUpdateOrganizationAdminRequest(true);
-      var user = User.Create("Name", "test@test.com", "hash", DateTime.UtcNow, organizationId);
+      var user = User.Create("Name", "test@test.com", "hash", DateTime.UtcNow, LanguageOptions.English, organizationId);
 
       _userContextMock.IsSystemAdmin.Returns(false);
       _userContextMock.IsOrganizationAdmin.Returns(true);
@@ -316,7 +317,7 @@ public class UserServiceTests
    public async Task UpdateOrganizationAdminAsync_ShouldReturnForbidden_WhenOrganizationAdminUpdatesAnotherOrganization()
    {
       var request = new UserUpdateOrganizationAdminRequest(true);
-      var user = User.Create("Name", "test@test.com", "hash", DateTime.UtcNow, Guid.NewGuid());
+      var user = User.Create("Name", "test@test.com", "hash", DateTime.UtcNow, LanguageOptions.English, Guid.NewGuid());
 
       _userContextMock.IsSystemAdmin.Returns(false);
       _userContextMock.IsOrganizationAdmin.Returns(true);
@@ -359,7 +360,7 @@ public class UserServiceTests
    public async Task UpdateLastLoginAsync_ShouldUpdateTimestampAndSave()
    {
       var userId = Guid.NewGuid();
-      var user = User.Create("Name", "test@test.com", "hash", DateTime.UtcNow, _userContextMock.UserOwnerId);
+      var user = User.Create("Name", "test@test.com", "hash", DateTime.UtcNow, LanguageOptions.English, _userContextMock.UserOwnerId);
       var initialLastLogin = user.LastLoginAt;
 
       _userRepositoryMock.GetByIdAsync(userId, Arg.Any<CancellationToken>()).Returns(user);

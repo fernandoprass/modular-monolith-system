@@ -3,6 +3,7 @@ using IAM.Application.Validators;
 using IAM.Domain.DTOs.Requests;
 using IAM.Domain.Enums;
 using IAM.Domain.Messages;
+using Shared.Domain;
 
 namespace IAM.Application.Tests.Validators;
 
@@ -34,7 +35,7 @@ public class OrganizationValidatorTests
       //just to provid a user, validation is done in UserValidator
       var user = new OrganizationUserCreateRequest(string.Empty, string.Empty, string.Empty);
 
-      var request = new OrganizationCreateRequest(type, name, code, "description", user);
+      var request = new OrganizationCreateRequest(type, name, code, "description", LanguageOptions.English, user);
 
       var result = _validator.ValidateCreate(request, codeExists);
 
@@ -57,7 +58,7 @@ public class OrganizationValidatorTests
    [InlineData("Ab", true, false)] // Assuming min length 3 in NameRules
    public void ValidateUpdate_ShouldValidateName(string name, bool organizationExists, bool expectedSuccess)
    {
-      var request = new OrganizationUpdateRequest(name, string.Empty, IsActive: true);
+      var request = new OrganizationUpdateRequest(name, string.Empty, IsActive: true, LanguageOptions.English);
 
       var result = _validator.ValidateUpdate(request, organizationExists);
 

@@ -4,5 +4,6 @@ public sealed record OrganizationUpdateRequest
 (
     string Name,
     string? Description,
-    bool IsActive
+    bool IsActive,
+    string DefaultLanguage
 );

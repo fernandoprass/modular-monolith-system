@@ -1,4 +1,5 @@
 using IAM.Domain.Enums;
+using Shared.Domain;
 using Shared.Domain.Entities;
 
 namespace IAM.Domain.Entities;
@@ -9,6 +10,7 @@ public class Organization : EntityAudited
    public string Code { get; set; }
    public string Name { get; set; }
    public string? Description { get; set; }
+   public string DefaultLanguage { get; set; } = LanguageOptions.English;
    public bool IsActive { get; set; } = true;
 
    // Navigation property
@@ -16,7 +18,7 @@ public class Organization : EntityAudited
 
    public ICollection<Role> Roles { get; set; } = new List<Role>();
 
-   public static Organization Create(OrganizationType type, string code, string name, string? description)
+   public static Organization Create(OrganizationType type, string code, string name, string? description, string defaultLanguage)
    {
       return new Organization
       {
@@ -25,6 +27,7 @@ public class Organization : EntityAudited
          Code = code,
          Name = name,
          Description = description,
+         DefaultLanguage = LanguageOptions.Normalize(defaultLanguage),
          IsActive = true,
       };
    }
@@ -34,10 +37,11 @@ public class Organization : EntityAudited
       Code = code;
    }
 
-   public void Update(string name, string? description, bool isActive)
+   public void Update(string name, string? description, bool isActive, string defaultLanguage)
    {
       Name = name;
       Description = description;
       IsActive = isActive;
+      DefaultLanguage = LanguageOptions.Normalize(defaultLanguage);
    }
 }
