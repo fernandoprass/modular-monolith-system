@@ -9,13 +9,14 @@ public static class SystemLogMappers
    {
       return new SystemLogDto(
          systemLog.Id,
-         systemLog.CreatedAt,
          systemLog.Level,
          systemLog.Status,
          systemLog.Module,
          systemLog.Message,
          systemLog.Exception,
          systemLog.StackTrace,
+         systemLog.CreatedAt,
+         systemLog.ExpiresAt,
          systemLog.RequestId,
          systemLog.UserId,
          systemLog.OrganizationId,

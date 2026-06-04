@@ -4,12 +4,13 @@ namespace Sentinel.Domain.DTOs.Responses;
 
 public record AuditLogDto(
    Guid Id,
-   DateTime CreatedAt,
    string Module,
    string Feature,
    string Action,
    AuditPrivacyLevel PrivacyLevel,
    string Description,
+   DateTime CreatedAt,
+   DateTime ExpiresAt,
    Guid UserId,
    Guid OrganizationId,
    Guid TargetId,

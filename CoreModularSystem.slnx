@@ -36,6 +36,9 @@
     <File Path="readme.md" />
   </Folder>
   <Folder Name="/src/" />
+  <Folder Name="/src/00.Core/">
+    <Project Path="src/00.Core/Core.API/Core.API.csproj" />
+  </Folder>
    <Folder Name="/src/01.Shared/">
      <File Path="src/01.Shared/readme.md" />
      <Project Path="src/01.Shared/Shared.Application/Shared.Application.csproj" />
@@ -67,6 +70,9 @@
     <Project Path="src/99.Seeder/DatabaseSeeder/DatabaseSeeder.csproj" />
   </Folder>
   <Folder Name="/tests/" />
+  <Folder Name="/tests/00.Core/">
+    <Project Path="tests/00.Core/Core.API.Tests/Core.API.Tests.csproj" />
+  </Folder>
   <Folder Name="/tests/01.Shared/">
     <Project Path="tests/01.Shared/Shared.Application.Tests/Shared.Application.Tests.csproj" />
     <Project Path="tests/01.Shared/Shared.Domain.Tests/Shared.Domain.Tests.csproj" />
