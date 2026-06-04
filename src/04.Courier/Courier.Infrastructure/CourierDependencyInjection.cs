@@ -36,11 +36,22 @@ public static class CourierDependencyInjection
       services.AddScoped<ICourierLogger, CourierLogger>();
       services.AddScoped<IEventPublisher, RedisEventPublisher>();
       services.AddScoped<IExceptionSystemLogPublisher, ExceptionSystemLogPublisher>();
-      services.AddHostedService<CourierIndexInitializer>();
-      services.AddHostedService<EmailRequestConsumer>();
-      services.AddHostedService<EmailDeliveryWorker>();
+
+      if (IsHostedServicesEnabled(configuration))
+      {
+         services.AddHostedService<CourierIndexInitializer>();
+         services.AddHostedService<EmailRequestConsumer>();
+         services.AddHostedService<EmailDeliveryWorker>();
+      }
 
       return services;
+   }
+
+   private static bool IsHostedServicesEnabled(IConfiguration configuration)
+   {
+      var configuredValue = configuration["Courier:HostedServicesEnabled"];
+
+      return !bool.TryParse(configuredValue, out var enabled) || enabled;
    }
 
    private static void ConfigureDbContext(IConfiguration configuration)

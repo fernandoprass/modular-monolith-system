@@ -26,10 +26,20 @@ public static class SentinelDependencyInjection
       services.AddScoped<ISentinelLogQueryRepository, SentinelLogQueryRepository>();
       services.AddScoped<ISentinelLogService, SentinelLogService>();
 
-      services.AddHostedService<AuditLogConsumer>();
-      services.AddHostedService<SystemLogConsumer>();
+      if (IsHostedServicesEnabled(configuration))
+      {
+         services.AddHostedService<AuditLogConsumer>();
+         services.AddHostedService<SystemLogConsumer>();
+      }
 
       return services;
+   }
+
+   private static bool IsHostedServicesEnabled(IConfiguration configuration)
+   {
+      var configuredValue = configuration["Sentinel:HostedServicesEnabled"];
+
+      return !bool.TryParse(configuredValue, out var enabled) || enabled;
    }
 
    private static void ConfigureDbContext(IServiceCollection services, IConfiguration configuration)
