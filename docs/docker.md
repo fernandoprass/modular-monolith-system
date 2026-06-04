@@ -47,8 +47,10 @@ Applications:
 
 | Service | Purpose |
 | :--- | :--- |
+| Core API | Modular monolith API host for IAM, Sentinel, and Courier. |
 | IAM API | Identity and access management API. |
 | Sentinel API | Logging and monitoring API plus background consumers. |
+| Courier API | Communication and notification API plus background workers. |
 
 You can run only the infrastructure and start APIs from Visual Studio.
 
@@ -65,7 +67,8 @@ Docker files live mainly in `infra`.
 | `infra/docker-compose.postgresql.yaml` | PostgreSQL and pgAdmin. |
 | `infra/docker-compose.mongodb.yaml` | MongoDB and Mongo Express. |
 | `infra/docker-compose.redis.yaml` | Redis. |
-| `infra/docker-compose.apps.yaml` | IAM API and Sentinel API. |
+| `infra/docker-compose.core.yaml` | Core API modular monolith host. |
+| `infra/docker-compose.apps.yaml` | Standalone IAM API, Sentinel API, and Courier API. |
 | `infra/.env` | Local environment values used by Compose. |
 | `infra/start-infra.ps1` | Starts infrastructure containers. |
 | `infra/start-apps.ps1` | Builds and starts API containers. |
@@ -74,8 +77,10 @@ Application Dockerfiles:
 
 | File | Purpose |
 | :--- | :--- |
+| `src/00.Core/Core.API/Dockerfile` | Builds Core API image. |
 | `src/03.IAM/IAM.API/Dockerfile` | Builds IAM API image. |
 | `src/02.Sentinel/Sentinel.API/Dockerfile` | Builds Sentinel API image. |
+| `src/04.Courier/Courier.API/Dockerfile` | Builds Courier API image. |
 
 ---
 
@@ -133,13 +138,19 @@ Typical flow:
 
 `start-infra.ps1` starts databases and Redis.
 
-`start-apps.ps1` builds and starts IAM and Sentinel.
+`start-apps.ps1` builds and starts the standalone module APIs.
+
+`docker-compose.core.yaml` starts Core API.
+
+Use Core API for modular monolith mode.
+
+Use `docker-compose.apps.yaml` for standalone module API mode.
 
 ---
 
 ## 6. Multi-Stage Dockerfiles
 
-IAM and Sentinel APIs use multi-stage Dockerfiles.
+Core, IAM, Sentinel, and Courier APIs use multi-stage Dockerfiles.
 
 The normal flow:
 
@@ -228,8 +239,10 @@ Current API ports:
 
 | App | Docker URL | Visual Studio URL |
 | :--- | :--- | :--- |
+| Core API | `http://localhost:5050` | `https://localhost:4050` |
 | IAM API | `http://localhost:5055` | `https://localhost:4055` |
 | Sentinel API | `http://localhost:5056` | `https://localhost:4056` |
+| Courier API | `http://localhost:5057` | `https://localhost:4057` |
 
 Docker and Visual Studio ports are intentionally different.
 
@@ -301,7 +314,7 @@ This starts:
 - pgAdmin.
 - Mongo Express.
 
-Then start IAM or Sentinel from Visual Studio.
+Then start Core, IAM, Sentinel, or Courier from Visual Studio.
 
 ---
 
@@ -319,9 +332,10 @@ Then start applications:
 .\infra\start-apps.ps1
 ```
 
-This builds and starts:
+This builds and starts standalone module APIs:
 - `iam_api`
 - `sentinel_api`
+- `courier_api`
 
 First build can take a few minutes.
 
@@ -330,9 +344,25 @@ After build, open:
 ```text
 http://localhost:5055
 http://localhost:5056
+http://localhost:5057
 ```
 
 Use the real controller routes for API calls.
+
+To run Core API in Docker, use:
+
+```powershell
+docker compose --env-file infra/.env -f infra/docker-compose.core.yaml up -d --build
+```
+
+This builds and starts:
+- `core_api`
+
+Open:
+
+```text
+http://localhost:5050
+```
 
 ---
 

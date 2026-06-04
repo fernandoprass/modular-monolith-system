@@ -2,7 +2,7 @@
 
 This document explains Redis cache usage.
 
-Redis messaging is documented in `00.redis.messaging-system.md`.
+Redis messaging is documented in `redis.messaging-system.md`.
 
 Current cache areas:
 - Role permissions.

@@ -4,6 +4,7 @@ This repository documents the architecture for a distributed system designed for
 ## System Architecture Status
 |**System**  | **Role** |**Technology Stack**|**Status**|
 |--|--|--|--|
+| **Core** | Modular monolith API host | .NET, ASP.NET Core | Ongoing |
 | **Shared** | Common utilities, models, and interfaces | .NET Standard | Ongoing |
 | **Sentinel** | Centralized Logging & Auditing | .NET, MongoDB, Redis | Ongoing |
 | **IAM** | Identity & Access Management | .NET, PostgreSQL, Redis | Ongoing |
@@ -13,11 +14,17 @@ This repository documents the architecture for a distributed system designed for
 
 ----------
 
-## 1. Shared (common classes and interfaces)
+## 1. Core API (modular monolith host)
+_Main API host that loads IAM, Sentinel, and Courier endpoints into one process._
+- **Objective**: Run the system as one modular monolith API while keeping each module independently runnable.
+- **Local URL**: `https://localhost:4050`
+- **Docker URL**: `http://localhost:5050`
+
+## 2. Shared (common classes and interfaces)
 _Common codebase for shared models, utilities, and interfaces across all systems._
 - **Objective**: Promote code reuse and maintain consistency across modules.
 
-## 2. Sentinel (Centralized Logging & Auditing)
+## 3. Sentinel (Centralized Logging & Auditing)
 _The system for distributed tracing, log aggregation, and long-term security auditing._
 - **Objective**: Provide a single source of truth for system observability and compliance.
 - **Technology**: .NET + MongoDB (leveraging TTL indexes for automatic log pruning).
@@ -28,12 +35,12 @@ _The system for distributed tracing, log aggregation, and long-term security aud
     - **Anomaly Alerting**: Logic to detect patterns indicative of security threats (e.g., rapid failed logins, abnormal API access).
     - **Audit Trail**: Immutable storage of administrative actions for compliance (GDPR/SOC2).
 
-## 3. IAM (Identity & Access Management)
+## 4. IAM (Identity & Access Management)
 _Core system for multi-tenant authentication, authorization, and user lifecycle management._
 -   **Objective**: Centralize user identity and tenant management.
 -   **Key Status**: Development is underway using Clean Architecture.
 
-## 4. Courier  (Communication & Notification Hub)
+## 5. Courier  (Communication & Notification Hub)
 _A centralized engine to manage all outbound and inbound communication flows._
 - **Objective**: Decouple communication logic (email, push, SMS) from business services.
 - **Technology**: .NET + MongoDB (Schema-less storage is ideal for varying message payloads).

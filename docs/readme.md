@@ -16,11 +16,13 @@ The files are grouped by prefix:
 
 | File | Description |
 | :--- | :--- |
-| `00.folder-structure.md` | Explains the repository layout, Clean Architecture layers, module shape, dependency direction, and where new code should go. |
-| `00.docker.md` | Explains Docker concepts, compose files, networks, volumes, ports, health checks, and how to run infrastructure and app containers. |
-| `00.migrations.md` | Explains database migrations and how schema changes should be managed. |
-| `00.redis.messaging-system.md` | Explains Redis messaging, streams, Pub/Sub, event publishing, Sentinel consumers, and troubleshooting. |
-| `00.redis.cache.md` | Explains Redis cache usage for role permissions and parameters, including cache structures and invalidation rules. |
+| `00.core.md` | Explains Core API, the modular monolith host that loads module APIs through Application Parts. |
+| `deployment-modes.md` | Explains Core API modular monolith mode and standalone module API mode. |
+| `folder-structure.md` | Explains the repository layout, Clean Architecture layers, module shape, dependency direction, and where new code should go. |
+| `docker.md` | Explains Docker concepts, compose files, networks, volumes, ports, health checks, and how to run infrastructure and app containers. |
+| `migrations.md` | Explains database migrations and how schema changes should be managed. |
+| `redis.messaging-system.md` | Explains Redis messaging, streams, Pub/Sub, event publishing, Sentinel consumers, and troubleshooting. |
+| `redis.cache.md` | Explains Redis cache usage for role permissions and parameters, including cache structures and invalidation rules. |
 | `99.database.seeder.md` | Explains the dedicated seeder project, what default data it creates, seed order, and how to run it. |
 
 ---
