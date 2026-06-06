@@ -36,6 +36,29 @@ Current URLs:
 
 Use this mode when you want one application process.
 
+### Core Docker Publish Notes
+
+Core API references the module API projects.
+
+Those module API projects have their own `appsettings*.json` files.
+
+When Core API is published, only Core API configuration files should be copied to the publish folder.
+
+Module `appsettings*.json` files are excluded during Core publish.
+
+This avoids duplicate publish output files.
+
+Standalone module publish still keeps each module's own configuration files.
+
+Core Docker publish also runs MSBuild with one process:
+
+```text
+/p:BuildInParallel=false
+/m:1
+```
+
+This avoids Linux container file copy races during publish.
+
 ---
 
 ## 2. Standalone Module API Mode

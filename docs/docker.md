@@ -68,10 +68,10 @@ Docker files live mainly in `infra`.
 | `infra/docker-compose.mongodb.yaml` | MongoDB and Mongo Express. |
 | `infra/docker-compose.redis.yaml` | Redis. |
 | `infra/docker-compose.core.yaml` | Core API modular monolith host. |
-| `infra/docker-compose.apps.yaml` | Standalone IAM API, Sentinel API, and Courier API. |
+| `infra/docker-compose.modules.yaml` | Standalone IAM API, Sentinel API, and Courier API. |
 | `infra/.env` | Local environment values used by Compose. |
 | `infra/start-infra.ps1` | Starts infrastructure containers. |
-| `infra/start-apps.ps1` | Builds and starts API containers. |
+| `infra/start-modules.ps1` | Builds and starts API containers. |
 
 Application Dockerfiles:
 
@@ -133,18 +133,18 @@ Typical flow:
 
 ```powershell
 .\infra\start-infra.ps1
-.\infra\start-apps.ps1
+.\infra\start-modules.ps1
 ```
 
 `start-infra.ps1` starts databases and Redis.
 
-`start-apps.ps1` builds and starts the standalone module APIs.
+`start-modules.ps1` builds and starts the standalone module APIs.
 
 `docker-compose.core.yaml` starts Core API.
 
 Use Core API for modular monolith mode.
 
-Use `docker-compose.apps.yaml` for standalone module API mode.
+Use `docker-compose.modules.yaml` for standalone module API mode.
 
 ---
 
@@ -329,7 +329,7 @@ First start infrastructure:
 Then start applications:
 
 ```powershell
-.\infra\start-apps.ps1
+.\infra\start-modules.ps1
 ```
 
 This builds and starts standalone module APIs:

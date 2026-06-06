@@ -7,7 +7,9 @@ RUN dotnet publish "src/00.Core/Core.API/Core.API.csproj" \
     --configuration Release \
     --output /app/publish \
     --no-restore \
-    /p:UseAppHost=false
+    /p:UseAppHost=false \
+    /p:BuildInParallel=false \
+    /m:1
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app

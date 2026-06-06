@@ -77,7 +77,18 @@ public class SentinelDbContext
          return;
       }
 
-      BsonSerializer.RegisterSerializer(new GuidSerializer(GuidRepresentation.Standard));
+      TryRegisterGuidSerializer();
+   }
+
+   private static void TryRegisterGuidSerializer()
+   {
+      try
+      {
+         BsonSerializer.RegisterSerializer(new GuidSerializer(GuidRepresentation.Standard));
+      }
+      catch (BsonSerializationException ex) when (ex.Message.Contains("already a serializer registered", StringComparison.OrdinalIgnoreCase))
+      {
+      }
    }
 
 }

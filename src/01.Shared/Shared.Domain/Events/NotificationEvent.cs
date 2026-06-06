@@ -14,4 +14,6 @@ public record NotificationEvent
    public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
    public Guid UserId { get; init; }
    public Dictionary<string, object> Data { get; init; } = [];
+
+   public NotificationEvent() { }
 }

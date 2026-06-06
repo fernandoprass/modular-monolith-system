@@ -44,8 +44,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
-app.MapGet("api/v{version:apiVersion}/core/health", () => Results.Ok(new { Status = "Ok", Module = CoreConst.ModuleName }));
-
 app.Run();
 
 public partial class Program { }

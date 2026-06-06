@@ -79,7 +79,7 @@ public class CourierDbContext
          return;
       }
 
-      BsonSerializer.RegisterSerializer(new GuidSerializer(GuidRepresentation.Standard));
+      TryRegisterGuidSerializer();
 
       if (!BsonClassMap.IsClassMapRegistered(typeof(Template)))
       {
@@ -97,6 +97,17 @@ public class CourierDbContext
          {
             cm.AutoMap();
          });
+      }
+   }
+
+   private static void TryRegisterGuidSerializer()
+   {
+      try
+      {
+         BsonSerializer.RegisterSerializer(new GuidSerializer(GuidRepresentation.Standard));
+      }
+      catch (BsonSerializationException ex) when (ex.Message.Contains("already a serializer registered", StringComparison.OrdinalIgnoreCase))
+      {
       }
    }
 }

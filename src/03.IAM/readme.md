@@ -426,7 +426,7 @@ src/03.IAM/IAM.API/Dockerfile
 Application compose file:
 
 ```text
-infra/docker-compose.apps.yaml
+infra/docker-compose.modules.yaml
 ```
 
 Docker URL:
