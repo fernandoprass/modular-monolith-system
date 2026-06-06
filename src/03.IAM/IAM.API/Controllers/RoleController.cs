@@ -42,6 +42,15 @@ public class RoleController(IRoleService roleService) : BaseController
       return OkOrNotFound(result);
    }
 
+   [HttpDelete("{id:guid}")]
+   [Authorize]
+   [RequirePermission(IamPermission.Roles.Delete)]
+   public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
+   {
+      var result = await _roleService.DeleteAsync(id, cancellationToken);
+      return OkOrNotFound(result);
+   }
+
    [HttpPost("assign")]
    [Authorize]
    [RequirePermission(IamPermission.Roles.Assign)]

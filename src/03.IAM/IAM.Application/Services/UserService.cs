@@ -112,7 +112,7 @@ public class UserService(
 
    public async Task<Result> UpdateAsync(Guid id, UserUpdateRequest request, CancellationToken cancellationToken = default)
    {
-      var user = await _iamUnitOfWork.Users.GetByIdAsync(id, cancellationToken);
+      var user = await _iamUnitOfWork.Users.GetByIdWithRolesAsync(id, cancellationToken);
       return await ExecuteIfUserOwnsAsync(user?.OrganizationId, async (ct) =>
       {
          var validator = _userValidator.ValidateUpdate(user?.Id, request);

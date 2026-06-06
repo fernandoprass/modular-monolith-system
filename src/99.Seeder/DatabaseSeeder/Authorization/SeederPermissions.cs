@@ -64,6 +64,7 @@ public class SeederPermissions(
       await AddPermissionAsync(IamPermission.Roles.Update, "Update Roles", "Allows updating roles.", cancellationToken);
       await AddPermissionAsync(IamPermission.Roles.Assign, "Assign Roles", "Allows assigning roles to users.", cancellationToken);
       await AddPermissionAsync(IamPermission.Roles.ViewPermissions, "View Role Permissions", "Allows viewing user permissions.", cancellationToken);
+      await AddPermissionAsync(IamPermission.Roles.Delete, "Delete Roles", "Allows deleting roles.", cancellationToken);
 
       await AddPermissionAsync(IamPermission.Parameters.List, "List Parameters", "Allows listing parameters.", cancellationToken);
       await AddPermissionAsync(IamPermission.Parameters.View, "View Parameters", "Allows viewing parameters.", cancellationToken);

@@ -84,6 +84,34 @@ public class RoleService(
       }, cancellationToken);
    }
 
+   public async Task<Result> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
+   {
+      var role = await _iamUnitOfWork.Roles.GetByIdAsync(id, cancellationToken);
+
+      return await ExecuteIfUserOwnsAsync(role?.OrganizationId, async (ct) =>
+      {
+         if (role == null)
+         {
+            return Result.Failure(new NotFoundError(IamConst.Entity.Role));
+         }
+
+         await _iamUnitOfWork.Roles.DeleteAsync(id, ct);
+         await _iamUnitOfWork.SaveChangesAsync(ct);
+
+         await _eventPublisher.NotifyAuditLogAsync(
+            IamConst.Logger.Feature.Roles,
+            IamConst.Logger.Action.Delete,
+            AuditPrivacyLevel.High,
+            RetentionPolicy.Extended,
+            $"Deleted role {role.Name}",
+            role.Id,
+            new { role.Id, role.Name },
+            ct);
+
+         return Result.Success(new SuccessInfo());
+      }, cancellationToken);
+   }
+
    public async Task<Result> AssignToUserAsync(RoleAssignRequest request, CancellationToken cancellationToken = default)
    {
       var user = await _iamUnitOfWork.Users.GetByIdWithRolesAsync(request.UserId, cancellationToken);

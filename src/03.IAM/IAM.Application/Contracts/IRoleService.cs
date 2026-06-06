@@ -8,6 +8,7 @@ public interface IRoleService
 {
    Task<Result<RoleDto>> CreateAsync(RoleCreateRequest request, CancellationToken cancellationToken = default);
    Task<Result> UpdateAsync(Guid id, RoleUpdateRequest request, CancellationToken cancellationToken = default);
+   Task<Result> DeleteAsync(Guid id, CancellationToken cancellationToken = default);
    Task<Result> AssignToUserAsync(RoleAssignRequest request, CancellationToken cancellationToken = default);
    Task<Result> UnassignFromUserAsync(RoleUnassignRequest request, CancellationToken cancellationToken = default);
    Task<IEnumerable<Guid>> GetDefaultRolesByOrganizationIdAsync(Guid organizationId, CancellationToken cancellationToken = default);

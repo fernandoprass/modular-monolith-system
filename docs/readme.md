@@ -17,6 +17,7 @@ The files are grouped by prefix:
 | File | Description |
 | :--- | :--- |
 | `00.core.md` | Explains Core API, the modular monolith host that loads module APIs through Application Parts. |
+| `00.core.e2e-tests.md` | Explains Core API end-to-end tests, reusable test infrastructure, and current scenarios in Gherkin format. |
 | `deployment-modes.md` | Explains Core API modular monolith mode and standalone module API mode. |
 | `folder-structure.md` | Explains the repository layout, Clean Architecture layers, module shape, dependency direction, and where new code should go. |
 | `docker.md` | Explains Docker concepts, compose files, networks, volumes, ports, health checks, and how to run infrastructure and app containers. |

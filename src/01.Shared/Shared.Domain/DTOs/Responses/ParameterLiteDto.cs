@@ -5,6 +5,7 @@ namespace Shared.Domain.DTOs.Responses
    public class ParameterLiteDto
    {
       public Guid Id { get; set; }
+      public Guid? ParameterOverrideId { get; set; }
       public string Module { get; set; }
       public string Group { get; set; }
       public string Name { get; set; }

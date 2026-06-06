@@ -1,6 +1,5 @@
 using Asp.Versioning;
 using IAM.Domain;
-using IAM.Domain.DTOs.Requests;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Application.Contracts;
@@ -54,7 +53,7 @@ public class ParameterController(IParameterService parameterService) : BaseContr
    }
 
 
-      [HttpPut("{id:guid}/override")]
+   [HttpPut("{id:guid}/override")]
    [Authorize]
    [RequirePermission(IamPermission.Parameters.SaveOverride)]
    public async Task<IActionResult> SaveOverride(Guid id, ParameterOwnerUpdateRequest request, CancellationToken cancellationToken)

@@ -40,6 +40,7 @@ public static class IamPermission
       public const string Update = $"{Module}.{Resource}.update";
       public const string Assign = $"{Module}.{Resource}.assign";
       public const string ViewPermissions = $"{Module}.{Resource}.viewpermissions";
+      public const string Delete = $"{Module}.{Resource}.delete";
    }
 
    public static class Parameters

@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/docs/">
+    <File Path="docs/00.core.e2e-tests.md" />
     <File Path="docs/00.core.md" />
     <File Path="docs/00.redis.messaging-system.md" />
     <File Path="docs/01.Shared.entities.md" />
@@ -41,6 +42,7 @@
   </Folder>
   <Folder Name="/src/" />
   <Folder Name="/src/00.Core/">
+    <File Path="src/00.Core/00.core.md" />
     <Project Path="src/00.Core/Core.API/Core.API.csproj" />
   </Folder>
    <Folder Name="/src/01.Shared/">
@@ -75,6 +77,7 @@
   </Folder>
   <Folder Name="/tests/" />
   <Folder Name="/tests/00.Core/">
+    <Project Path="tests/00.Core/Core.API.EndToEnd.Tests/Core.API.EndToEnd.Tests.csproj" />
     <Project Path="tests/00.Core/Core.API.Tests/Core.API.Tests.csproj" />
   </Folder>
   <Folder Name="/tests/01.Shared/">
