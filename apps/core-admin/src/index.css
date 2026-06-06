@@ -1,0 +1,31 @@
+:root {
+  color: #1f2937;
+  background: #f7f8fa;
+  font-family: Inter, Roboto, Arial, sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+}
+
+.dashboard {
+  padding: 24px;
+}
+
+.dashboard h1 {
+  margin: 0 0 8px;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.dashboard p {
+  max-width: 640px;
+  margin: 0;
+  color: #4b5563;
+}

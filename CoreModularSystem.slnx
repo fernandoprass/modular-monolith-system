@@ -32,6 +32,7 @@
     <File Path="infra/iam.db-backup.ps1" />
     <File Path="infra/servers.json" />
     <File Path="infra/start-modules.ps1" />
+    <File Path="infra/start-core.ps1" />
     <File Path="infra/start-infra.ps1" />
   </Folder>
   <Folder Name="/Solution Items/">

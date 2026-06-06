@@ -1,0 +1,479 @@
+# Frontend Development Conventions
+
+This file defines rules for frontend work under `apps/`.
+
+The current frontend app is:
+
+```text
+apps/core-admin
+```
+
+It is the admin UI for the Core API backend.
+
+Communicate with the user using short sentences.
+
+Ask before changing design ownership, folder structure, API contracts, route names, or state management patterns.
+
+Show a plan before editing files.
+
+Wait for `go` before making changes.
+
+---
+
+## Stack Direction
+
+Use:
+- React
+- TypeScript
+- React-admin
+- Material UI through React-admin
+- Vite
+
+Do not build a raw MUI admin unless the user asks.
+
+React-admin owns:
+- admin app structure
+- resources
+- routes
+- list/create/edit/show pages
+- forms
+- filters
+- notifications
+- auth integration
+- data loading patterns
+
+Material UI owns:
+- visual components
+- theme
+- layout primitives used by React-admin
+
+---
+
+## Backend Context
+
+Before working on API integration, read:
+
+```text
+apps/backend.md
+docs/readme.md
+docs/00.core.e2e-tests.md
+src/00.Core/00.core.md
+src/03.IAM/readme.md
+```
+
+Use backend docs for endpoint ownership and domain rules.
+
+Do not guess backend behavior when an endpoint, DTO, permission, or flow is unclear.
+
+Ask or inspect backend code.
+
+---
+
+## Project Structure
+
+Keep frontend code organized by responsibility.
+
+Recommended structure:
+
+```text
+apps/core-admin/src
++-- app
++-- auth
++-- data
++-- resources
++-- shared
+```
+
+Use these folders:
+
+| Folder | Purpose |
+| :--- | :--- |
+| `app` | Admin shell, providers, routes, layout, theme setup. |
+| `auth` | Auth provider, login helpers, token storage. |
+| `data` | Data provider, HTTP client, API result unwrapping. |
+| `resources` | React-admin resource pages grouped by backend entity. |
+| `shared` | Reusable constants, types, helpers, UI utilities. |
+
+Keep resource-specific code inside its resource folder.
+
+Example:
+
+```text
+resources/iam/users
++-- UserList.tsx
++-- UserCreate.tsx
++-- UserEdit.tsx
++-- userTypes.ts
++-- userResource.ts
+```
+
+Group resources by backend module.
+
+Example:
+
+```text
+resources/iam/organizations
+resources/iam/users
+resources/iam/roles
+resources/iam/permissions
+resources/iam/parameters
+```
+
+Even though parameters are a Shared concept, the current admin API exposes them through IAM.
+
+So keep parameters under `resources/iam/parameters` for now.
+
+---
+
+## No Magic Strings
+
+Avoid magic strings.
+
+Names that repeat must be constants.
+
+Create constants for:
+- API base URL keys
+- API paths
+- resource names
+- route names
+- local storage keys
+- permission codes
+- query parameter names
+- field names used in filters more than once
+- enum display labels
+- notification messages reused across files
+
+Good:
+
+```ts
+export const RESOURCE_NAMES = {
+  users: "users",
+  organizations: "organizations",
+} as const;
+```
+
+Good:
+
+```ts
+export const STORAGE_KEYS = {
+  authToken: "core-admin.auth.token",
+} as const;
+```
+
+Avoid:
+
+```ts
+localStorage.getItem("token");
+```
+
+Prefer:
+
+```ts
+localStorage.getItem(STORAGE_KEYS.authToken);
+```
+
+---
+
+## API Integration Rules
+
+Use a custom React-admin `dataProvider`.
+
+The backend uses a Result wrapper:
+
+```json
+{
+  "data": {},
+  "messages": [],
+  "isSuccess": true,
+  "title": null
+}
+```
+
+The data provider must unwrap this shape.
+
+React-admin expects:
+
+```ts
+{ data: record }
+```
+
+For lists, React-admin expects:
+
+```ts
+{ data: records, total: number }
+```
+
+If the backend endpoint does not return pagination metadata yet, use the array length as `total`.
+
+Keep this conversion in one place.
+
+Do not unwrap API results inside pages.
+
+Do not call backend endpoints directly from resource pages unless React-admin cannot model the action.
+
+For custom actions, create reusable API functions under `data` or the resource folder.
+
+---
+
+## Authentication Rules
+
+IAM login endpoint returns a JWT.
+
+Store the token behind a small token storage helper.
+
+Do not access `localStorage` directly across many files.
+
+Use a React-admin `authProvider`.
+
+The auth provider should own:
+- login
+- logout
+- auth check
+- error check
+- identity loading when available
+- permission loading when available
+
+Use the bearer token on authenticated requests:
+
+```text
+Authorization: Bearer {token}
+```
+
+Do not store passwords.
+
+Do not log tokens.
+
+---
+
+## Permission Rules
+
+Permission codes come from the backend.
+
+Do not hardcode permission strings in pages.
+
+Create frontend constants that mirror backend permission codes when needed.
+
+Keep permission constants in one file.
+
+Example:
+
+```ts
+export const IAM_PERMISSIONS = {
+  users: {
+    view: "iam.users.view",
+    create: "iam.users.create",
+  },
+} as const;
+```
+
+Use permissions to:
+- hide actions
+- disable buttons
+- protect routes when needed
+
+Authorization is still enforced by the backend.
+
+Frontend permission checks are only for user experience.
+
+---
+
+## TypeScript Rules
+
+Use TypeScript types for backend DTOs.
+
+Keep DTO names aligned with backend names when practical.
+
+Examples:
+- `UserDto`
+- `UserCreateRequest`
+- `OrganizationDto`
+- `RoleDto`
+
+Use `type` for simple object shapes.
+
+Use `interface` only when extension or declaration merging is useful.
+
+Avoid `any`.
+
+If unknown data comes from HTTP, parse or narrow it at the data boundary.
+
+Keep nullable fields explicit.
+
+---
+
+## UI Rules
+
+This is an admin application.
+
+Prefer clear and dense screens.
+
+Avoid marketing-style pages.
+
+Avoid oversized hero sections.
+
+Avoid decorative UI that does not help the workflow.
+
+Use standard admin patterns:
+- lists
+- filters
+- detail pages
+- edit forms
+- create forms
+- confirmation dialogs
+- inline status chips
+- tabs for related data
+
+Use icons only when they clarify common actions.
+
+Use short labels.
+
+Keep forms predictable.
+
+Do not hide important backend state.
+
+---
+
+## Internationalization Rules
+
+The frontend must support internationalization.
+
+Default language is:
+
+```text
+en
+```
+
+The app should be ready to add:
+
+```text
+pt-BR
+```
+
+Use React-admin i18n support.
+
+Do not hardcode user-facing text in components.
+
+Use translation keys for:
+- menu labels
+- page titles
+- field labels
+- buttons
+- filters
+- empty states
+- validation messages
+- notification messages
+- confirmation dialogs
+- enum labels
+- status labels
+
+Keep translation keys stable.
+
+Group keys by module and resource.
+
+Example:
+
+```text
+resources.iam.users.fields.email
+resources.iam.users.actions.create
+resources.iam.roles.notifications.created
+resources.iam.parameters.fields.overrideType
+```
+
+Shared text should live under shared keys.
+
+Example:
+
+```text
+shared.actions.save
+shared.actions.cancel
+shared.status.active
+shared.status.inactive
+```
+
+Do not use backend enum numeric values directly as labels.
+
+Map enum values to translation keys.
+
+Keep translation files close to app-level i18n setup.
+
+Recommended folder:
+
+```text
+apps/core-admin/src/app/i18n
+```
+
+If a component needs text, it should use the translation function or React-admin translated props.
+
+Do not concatenate translated strings unless there is no better option.
+
+Prefer full sentence translation keys for messages.
+
+---
+
+## React Rules
+
+Prefer React-admin components and hooks before custom code.
+
+Keep components small.
+
+Do not put data fetching logic inside visual components if a data provider or resource hook can own it.
+
+Avoid global state unless needed.
+
+Use React-admin and TanStack Query behavior before adding another state library.
+
+Do not add Redux unless explicitly approved.
+
+---
+
+## Error Handling
+
+Backend business errors usually arrive in `messages`.
+
+Convert backend messages into clear user notifications.
+
+Keep error translation in shared data/auth helpers.
+
+Do not duplicate error parsing in pages.
+
+Show simple messages.
+
+Do not expose stack traces or raw JSON to users.
+
+---
+
+## Testing Rules
+
+Ask before adding a test framework if none exists.
+
+Prefer focused tests for:
+- data provider unwrapping
+- auth provider behavior
+- permission helpers
+- important custom components
+
+Do not over-test React-admin built-in behavior.
+
+---
+
+## Documentation Rules
+
+When adding frontend architecture, update docs only if requested.
+
+Keep docs simple enough for a backend developer learning the frontend.
+
+Use current paths and names.
+
+Do not write docs only for agents.
+
+---
+
+## Before Finishing
+
+For frontend code changes:
+- run TypeScript build if available
+- run tests if available
+- run lint if available
+- start dev server if the user asked to try the app
+
+If a command cannot run, say why.
