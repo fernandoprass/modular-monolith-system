@@ -45,10 +45,13 @@ internal class ParameterQueryRepository(SharedDbContext dbContext) : IParameterQ
          query = query.Where(x => x.param.Name == request.Name);
 
       if (!string.IsNullOrWhiteSpace(request.Key))
-         query = query.Where(x => x.param.Key == request.Key);
+         query = query.Where(x => EF.Functions.ILike(x.param.Key, $"%{request.Key}%"));
+
+      if (!string.IsNullOrWhiteSpace(request.Title))
+         query = query.Where(x => EF.Functions.ILike(x.param.Title, $"%{request.Title}%"));
 
       if (!string.IsNullOrWhiteSpace(request.Description))
-         query = query.Where(x => x.param.Description.Contains(request.Description));
+         query = query.Where(x => EF.Functions.ILike(x.param.Description, $"%{request.Description}%"));
 
       if (!request.IsSystemAdmin)
          query = query.Where(x => x.param.IsVisible);
@@ -64,6 +67,7 @@ internal class ParameterQueryRepository(SharedDbContext dbContext) : IParameterQ
          Description = x.param.Description,
          Type = x.param.Type,
          Value = x.paramOverride != null ? x.paramOverride.Value : x.param.Value,
+         ParameterOverrideId = x.paramOverride != null ? x.paramOverride.Id : null,
          OverrideType = x.param.OverrideType,
          IsOverridden = x.paramOverride != null
       }).ToListAsync(cancellationToken);
@@ -84,22 +88,23 @@ internal class ParameterQueryRepository(SharedDbContext dbContext) : IParameterQ
               .Where(p => p.Key == key)
               .Select(p => new
               {
-                 Parameter = p,
-                 OverrideValue = _dbContext.ParameterOverrides
+                 param = p,
+                 paramOverride = _dbContext.ParameterOverrides
                       .Where(o => o.ParameterId == p.Id &&
                                  o.OwnerId == (p.OverrideType == ParameterOverrideType.UserOwnerId ? userOwnerId : userId))
-                      .Select(o => o.Value)
                       .FirstOrDefault()
               })
               .Select(x => new ParameterValueDto
               {
-                 Key = x.Parameter.Key,
-                 Type = x.Parameter.Type,
-                 Value = x.OverrideValue ?? x.Parameter.Value,
-                 DefaultValue = x.Parameter.Value,
-                 CanBeOverride = x.Parameter.OverrideType != ParameterOverrideType.None,
-                 IsOverride = x.OverrideValue != null,
-                 OverrideType = x.Parameter.OverrideType
+                 Id = x.param.Id,
+                 Key = x.param.Key,
+                 Type = x.param.Type,
+                 ParameterOverrideId = x.paramOverride != null ? x.paramOverride.Id : null,
+                 Value = x.paramOverride != null ? x.paramOverride.Value : x.param.Value,
+                 DefaultValue = x.param.Value,
+                 CanBeOverride = x.param.OverrideType != ParameterOverrideType.None,
+                 IsOverride = x.paramOverride != null,
+                 OverrideType = x.param.OverrideType
               })
               .SingleOrDefaultAsync(cancellationToken);
    }

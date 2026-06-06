@@ -147,6 +147,7 @@ public class SeederRolePermissions(
          IamPermission.Roles.Update,
          IamPermission.Roles.Assign,
          IamPermission.Roles.ViewPermissions,
+         IamPermission.Roles.Delete,
          IamPermission.Parameters.View,
          IamPermission.Parameters.List,
          IamPermission.Parameters.SaveOverride,

@@ -201,10 +201,10 @@ public class UserServiceTests
    [Fact]
    public async Task UpdateAsync_ShouldUpdateUserFields_WhenRequestIsValid()
    {
-      var request = new UserUpdateRequest("Updated Name", false, LanguageOptions.English);
-      var user = User.Create("Original Name", "test@test.com", "hash", DateTime.UtcNow, LanguageOptions.English, _userContextMock.UserOwnerId);
+      var request = new UserUpdateRequest("Updated Name", false, LanguageOptions.PortugueseBrazil);
+      var user = User.Create("Original Name", "test@test.com", "hash", DateTime.UtcNow, LanguageOptions.Spanish, _userContextMock.UserOwnerId);
 
-      _userRepositoryMock.GetByIdAsync(user.Id, Arg.Any<CancellationToken>()).Returns(user);
+      _userRepositoryMock.GetByIdWithRolesAsync(user.Id, Arg.Any<CancellationToken>()).Returns(user);
       _userValidatorMock.ValidateUpdate(user.Id, request).Returns(Result.Success());
 
       var result = await _userService.UpdateAsync(user.Id, request, TestContext.Current.CancellationToken);
@@ -212,6 +212,7 @@ public class UserServiceTests
       result.IsSuccess.Should().BeTrue();
       user.Name.Should().Be("Updated Name");
       user.IsActive.Should().BeFalse();
+      user.Language.Should().Be(LanguageOptions.PortugueseBrazil);
       await _unitOfWorkMock.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
       await _eventPublisherMock.Received(1).NotifyAuditLogAsync(
          IamConst.Logger.Feature.Users,

@@ -5,13 +5,13 @@ meta {
 }
 
 get {
-  url: {{host.iam}}/api/{{version}}/iam/parameters/value?key=IAM.Security.MaxFailedLoginAttempts
+  url: {{host.iam}}/api/{{version}}/iam/parameters/value?key=IAM.Security.MaxPasswordAgeInDays
   body: none
   auth: bearer
 }
 
 params:query {
-  key: IAM.Security.MaxFailedLoginAttempts
+  key: IAM.Security.MaxPasswordAgeInDays
 }
 
 auth:bearer {

@@ -100,6 +100,8 @@ public sealed class CoreApiTestFixture : WebApplicationFactory<CoreApi::Program>
 
       if (await iamDbContext.Permissions.AnyAsync())
       {
+         await EnsureRoleDeletePermissionAsync(iamDbContext, sharedDbContext);
+         await EnsureDefaultUserPermissionsAsync(iamDbContext, sharedDbContext);
          return;
       }
 
@@ -130,6 +132,136 @@ public sealed class CoreApiTestFixture : WebApplicationFactory<CoreApi::Program>
          CreateParameter(IamParam.Role.DefaultRoleIdForNewUser, ParameterType.UUID, userRole.Id.ToString(), ParameterOverrideType.None));
 
       await sharedDbContext.SaveChangesAsync();
+      await EnsureRoleDeletePermissionAsync(iamDbContext, sharedDbContext);
+      await EnsureDefaultUserPermissionsAsync(iamDbContext, sharedDbContext);
+   }
+
+   private static async Task EnsureDefaultUserPermissionsAsync(IamDbContext iamDbContext, SharedDbContext sharedDbContext)
+   {
+      var requiredPermissionCodes = new[]
+      {
+         IamPermission.Users.UpdateMe,
+         IamPermission.Users.DeleteMe,
+         IamPermission.Users.UpdatePassword
+      };
+
+      foreach (var permissionCode in requiredPermissionCodes)
+      {
+         var permissionExists = await iamDbContext.Permissions.AnyAsync(permission => permission.Code == permissionCode);
+         if (!permissionExists)
+         {
+            iamDbContext.Permissions.Add(CreatePermission(permissionCode));
+         }
+      }
+
+      await iamDbContext.SaveChangesAsync();
+
+      var userRoleIdValue = await sharedDbContext.Parameters
+         .Where(parameter => parameter.Key == IamParam.Role.DefaultRoleIdForNewUser)
+         .Select(parameter => parameter.Value)
+         .FirstOrDefaultAsync();
+
+      if (!Guid.TryParse(userRoleIdValue, out var userRoleId))
+      {
+         var userRole = await iamDbContext.Roles.FirstOrDefaultAsync(role => role.Name == "User" && role.OrganizationId == null);
+         if (userRole == null)
+         {
+            return;
+         }
+
+         userRoleId = userRole.Id;
+      }
+
+      var permissionIds = await iamDbContext.Permissions
+         .Where(permission => requiredPermissionCodes.Contains(permission.Code))
+         .Select(permission => permission.Id)
+         .ToListAsync();
+
+      foreach (var permissionId in permissionIds)
+      {
+         var rolePermissionExists = await iamDbContext.RolePermissions.AnyAsync(rolePermission =>
+            rolePermission.RoleId == userRoleId &&
+            rolePermission.PermissionId == permissionId);
+
+         if (!rolePermissionExists)
+         {
+            iamDbContext.RolePermissions.Add(new RolePermission(userRoleId, permissionId));
+         }
+      }
+
+      await iamDbContext.SaveChangesAsync();
+   }
+
+   private static async Task EnsureRoleDeletePermissionAsync(IamDbContext iamDbContext, SharedDbContext sharedDbContext)
+   {
+      var roleDeletePermission = await iamDbContext.Permissions
+         .FirstOrDefaultAsync(permission => permission.Code == IamPermission.Roles.Delete);
+
+      if (roleDeletePermission == null)
+      {
+         roleDeletePermission = CreatePermission(IamPermission.Roles.Delete);
+         iamDbContext.Permissions.Add(roleDeletePermission);
+         await iamDbContext.SaveChangesAsync();
+      }
+      else if (!roleDeletePermission.IsActive)
+      {
+         roleDeletePermission.Update(
+            roleDeletePermission.Module,
+            roleDeletePermission.Resource,
+            roleDeletePermission.Action,
+            roleDeletePermission.Title,
+            roleDeletePermission.Description,
+            isActive: true);
+         iamDbContext.Permissions.Update(roleDeletePermission);
+         await iamDbContext.SaveChangesAsync();
+      }
+
+      var organizationAdminRoleId = await sharedDbContext.Parameters
+         .Where(parameter => parameter.Key == IamParam.Role.DefaultRoleIdForNewOrganization)
+         .Select(parameter => parameter.Value)
+         .FirstOrDefaultAsync();
+
+      var roleQuery = iamDbContext.Roles
+         .Include(role => role.RolePermissions)
+         .AsQueryable();
+
+      Role? organizationAdminRole = null;
+
+      if (Guid.TryParse(organizationAdminRoleId, out var roleId))
+      {
+         organizationAdminRole = await roleQuery.FirstOrDefaultAsync(role => role.Id == roleId);
+      }
+
+      organizationAdminRole ??= await roleQuery.FirstOrDefaultAsync(role => role.Name == "Organization Admin" && role.OrganizationId == null);
+
+      var organizationDeletePermissionId = await iamDbContext.Permissions
+         .Where(permission => permission.Code == IamPermission.Organizations.Delete)
+         .Select(permission => permission.Id)
+         .FirstOrDefaultAsync();
+
+      var adminRoleIds = await iamDbContext.RolePermissions
+         .Where(rolePermission => rolePermission.PermissionId == organizationDeletePermissionId)
+         .Select(rolePermission => rolePermission.RoleId)
+         .ToListAsync();
+
+      if (organizationAdminRole != null)
+      {
+         adminRoleIds.Add(organizationAdminRole.Id);
+      }
+
+      foreach (var adminRoleId in adminRoleIds.Distinct())
+      {
+         var rolePermissionExists = await iamDbContext.RolePermissions.AnyAsync(rolePermission =>
+            rolePermission.RoleId == adminRoleId &&
+            rolePermission.PermissionId == roleDeletePermission.Id);
+
+         if (!rolePermissionExists)
+         {
+            iamDbContext.RolePermissions.Add(new RolePermission(adminRoleId, roleDeletePermission.Id));
+         }
+      }
+
+      await iamDbContext.SaveChangesAsync();
    }
 
    private static List<Permission> CreateIamPermissions()
@@ -139,6 +271,8 @@ public sealed class CoreApiTestFixture : WebApplicationFactory<CoreApi::Program>
          .SelectMany(type => type.GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static))
          .Where(field => field.IsLiteral && field.FieldType == typeof(string))
          .Select(field => (string)field.GetRawConstantValue()!)
+         .Append(IamPermission.Roles.Delete)
+         .Distinct(StringComparer.OrdinalIgnoreCase)
          .Select(CreatePermission)
          .ToList();
    }

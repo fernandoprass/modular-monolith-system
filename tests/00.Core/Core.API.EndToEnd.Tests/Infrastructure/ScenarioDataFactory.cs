@@ -14,12 +14,12 @@ internal static class ScenarioDataFactory
 
       return new OrganizationCreateRequest(
          OrganizationType.Company,
-         $"Acme {suffix}",
+         $"E2E Test - Acme {suffix}",
          $"acme{suffix}",
-         $"Organization {suffix}",
+         $"E2E Test - Organization {suffix}",
          "en",
          new OrganizationUserCreateRequest(
-            $"Admin {suffix}",
+            $"E2E Test - Admin {suffix}",
             $"admin-{suffix}@example.com",
             Password));
    }
@@ -29,8 +29,8 @@ internal static class ScenarioDataFactory
       var suffix = Guid.NewGuid().ToString("N")[..8];
 
       return new OrganizationUpdateRequest(
-         $"Updated Acme {suffix}",
-         $"Updated organization {suffix}",
+         $"E2E Test - Updated Acme {suffix}",
+         $"E2E Test - Updated organization {suffix}",
          true,
          "en");
    }
@@ -47,7 +47,7 @@ internal static class ScenarioDataFactory
       var suffix = Guid.NewGuid().ToString("N")[..8];
 
       return new UserCreateRequest(
-         $"User {suffix}",
+         $"E2E Test - User {suffix}",
          $"user-{suffix}@example.com",
          Password,
          "en",
@@ -59,7 +59,7 @@ internal static class ScenarioDataFactory
       var suffix = Guid.NewGuid().ToString("N")[..8];
 
       return new UserUpdateRequest(
-         $"Updated User {suffix}",
+         $"E2E Test - Updated User {suffix}",
          true,
          "pt-BR");
    }
@@ -67,5 +67,28 @@ internal static class ScenarioDataFactory
    public static UserUpdatePasswordRequest UpdatePassword()
    {
       return new UserUpdatePasswordRequest(Password, UpdatedPassword);
+   }
+
+   public static RoleCreateRequest CreateRole(Guid organizationId)
+   {
+      var suffix = Guid.NewGuid().ToString("N")[..8];
+
+      return new RoleCreateRequest(
+         $"E2E Test - Role {suffix}",
+         $"E2E Test - Role description {suffix}",
+         false,
+         true,
+         organizationId);
+   }
+
+   public static RoleUpdateRequest UpdateRoleAsDefault()
+   {
+      var suffix = Guid.NewGuid().ToString("N")[..8];
+
+      return new RoleUpdateRequest(
+         $"E2E Test - Updated Role {suffix}",
+         $"E2E Test - Updated role description {suffix}",
+         true,
+         true);
    }
 }
