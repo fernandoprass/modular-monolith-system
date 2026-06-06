@@ -428,9 +428,33 @@ Do not add Redux unless explicitly approved.
 
 ## Error Handling
 
-Backend business errors usually arrive in `messages`.
+Backend business errors arrive in the Result wrapper.
 
-Convert backend messages into clear user notifications.
+Error shape:
+
+```json
+{
+  "data": null,
+  "messages": [
+    {
+      "type": 2,
+      "code": "InvalidEmailPasswordError",
+      "text": "Invalid email or password.",
+      "variables": []
+    }
+  ],
+  "isSuccess": false,
+  "title": "Invalid email or password."
+}
+```
+
+Use backend `title` first for user notifications, `title` is the text of the first message.
+
+If `title` is empty, use `messages[].text`.
+
+Do not hardcode backend business error text in translation files.
+
+Do not translate backend message codes in the frontend unless the backend explicitly changes to code-only messages.
 
 Keep error translation in shared data/auth helpers.
 
