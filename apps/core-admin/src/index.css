@@ -30,6 +30,18 @@ body {
   color: #4b5563;
 }
 
+.menu-section-label {
+  padding: 12px 16px 4px;
+  color: #6b7280;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.menu-nested-items {
+  padding-left: 16px;
+}
+
 .login-page {
   display: grid;
   min-height: 100vh;

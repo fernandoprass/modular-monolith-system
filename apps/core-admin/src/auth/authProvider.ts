@@ -1,7 +1,8 @@
 import type { AuthProvider } from 'react-admin'
 
 import { API_PATHS } from '../data/apiPaths'
-import { postJson, unwrapResult } from '../data/httpClient'
+import { getJson, postJson, unwrapResult } from '../data/httpClient'
+import type { PermissionDto } from '../shared/permissions'
 import { tokenStorage } from './tokenStorage'
 
 type LoginParams = {
@@ -36,9 +37,15 @@ export const authProvider: AuthProvider = {
       id: loginResponse.user.id,
       fullName: loginResponse.user.name,
     })
+
+    const permissionsResponse = await getJson(API_PATHS.iam.roles.userPermissions(loginResponse.user.id))
+    const permissions = unwrapResult<PermissionDto[]>(permissionsResponse)
+
+    tokenStorage.setPermissions(permissions)
   },
 
   async logout() {
+    tokenStorage.clearPermissions()
     tokenStorage.clearToken()
     tokenStorage.clearUser()
   },
@@ -57,6 +64,7 @@ export const authProvider: AuthProvider = {
     if (status === 401 || status === 403) {
       tokenStorage.clearToken()
       tokenStorage.clearUser()
+      tokenStorage.clearPermissions()
       throw new Error('auth.invalid')
     }
   },
@@ -72,6 +80,6 @@ export const authProvider: AuthProvider = {
   },
 
   async getPermissions() {
-    return []
+    return tokenStorage.getPermissions()
   },
 }

@@ -64,6 +64,27 @@ export async function postJson(path: string, body: unknown): Promise<unknown> {
   return result
 }
 
+export async function getJson(path: string): Promise<unknown> {
+  const response = await fetch(`${CONFIG.coreApiUrl}${path}`, {
+    method: 'GET',
+    headers: getHeaders(),
+  })
+
+  const result = await response.json() as unknown
+
+  if (!response.ok) {
+    const apiResult = result as ApiResult<unknown>
+
+    if (Array.isArray(apiResult.messages)) {
+      throw new ApiResultError(apiResult.title, apiResult.messages)
+    }
+
+    throw new Error(response.statusText)
+  }
+
+  return result
+}
+
 export function unwrapResult<TData>(response: unknown): TData {
   const result = response as ApiResult<TData>
 

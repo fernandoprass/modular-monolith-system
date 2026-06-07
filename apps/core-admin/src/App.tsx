@@ -1,7 +1,8 @@
-import { Admin, CustomRoutes, Layout, Title, useTranslate } from 'react-admin'
+import { Admin, CustomRoutes, Title, useTranslate } from 'react-admin'
 import { Route } from 'react-router-dom'
 
 import { APP_CONSTANTS } from './app/appConstants'
+import { AppLayout } from './app/AppLayout'
 import { i18nProvider } from './app/i18n/i18nProvider'
 import { appTheme } from './app/theme'
 import { authProvider } from './auth/authProvider'
@@ -29,7 +30,7 @@ function App() {
       dashboard={Dashboard}
       dataProvider={dataProvider}
       i18nProvider={i18nProvider}
-      layout={Layout}
+      layout={AppLayout}
       loginPage={LoginPage}
       theme={appTheme}
       title={APP_CONSTANTS.appName}

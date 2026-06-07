@@ -10,8 +10,8 @@ export function LoginPage() {
   const login = useLogin()
   const notify = useNotify()
   const translate = useTranslate()
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  const [email, setEmail] = useState('alan.turing@enigma.org')
+  const [password, setPassword] = useState('Password123!')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
