@@ -1,4 +1,4 @@
-import { Admin, CustomRoutes, Title, useTranslate } from 'react-admin'
+import { Admin, CustomRoutes, Resource, Title, useTranslate } from 'react-admin'
 import { Route } from 'react-router-dom'
 
 import { APP_CONSTANTS } from './app/appConstants'
@@ -8,6 +8,8 @@ import { appTheme } from './app/theme'
 import { authProvider } from './auth/authProvider'
 import { LoginPage } from './auth/LoginPage'
 import { dataProvider } from './data/dataProvider'
+import { organizationResource } from './resources/iam/organizations/organizationResource'
+import { PublicOrganizationCreatePage } from './resources/iam/organizations/PublicOrganizationCreatePage'
 
 function Dashboard() {
   const translate = useTranslate()
@@ -24,6 +26,10 @@ function Dashboard() {
 }
 
 function App() {
+  if (window.location.pathname === '/register-organization') {
+    return <PublicOrganizationCreatePage />
+  }
+
   return (
     <Admin
       authProvider={authProvider}
@@ -35,6 +41,7 @@ function App() {
       theme={appTheme}
       title={APP_CONSTANTS.appName}
     >
+      <Resource {...organizationResource} />
       <CustomRoutes>
         <Route path="/" element={<Dashboard />} />
       </CustomRoutes>

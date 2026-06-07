@@ -63,3 +63,36 @@ body {
 .login-card button {
   margin-top: 16px;
 }
+
+.login-signup-link {
+  display: block;
+  margin-top: 16px;
+  text-align: center;
+}
+
+.public-register-card {
+  width: min(100%, 520px);
+}
+
+.public-register-card h1,
+.public-register-card h2 {
+  margin: 0 0 12px;
+}
+
+.public-register-card h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.public-register-card h2 {
+  font-size: 1.125rem;
+  font-weight: 500;
+}
+
+.public-register-error {
+  color: #b91c1c;
+}
+
+.public-register-success {
+  color: #166534;
+}

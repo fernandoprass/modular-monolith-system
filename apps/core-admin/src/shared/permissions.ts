@@ -50,6 +50,13 @@ export function hasResourceAccess(permissions: PermissionDto[], resource: string
   )
 }
 
+export function hasPermissionCode(permissions: PermissionDto[], code: string): boolean {
+  return permissions.some((permission) =>
+    permission.isActive
+    && permission.code === code
+  )
+}
+
 function byResourceOrder(left: NavigationResource, right: NavigationResource): number {
   return IAM_RESOURCE_ORDER.indexOf(left.resource) - IAM_RESOURCE_ORDER.indexOf(right.resource)
 }

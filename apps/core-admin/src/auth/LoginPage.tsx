@@ -1,7 +1,8 @@
-import { Button, Card, CardContent, TextField } from '@mui/material'
+import { Button, Card, CardContent, Link, TextField } from '@mui/material'
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { useLogin, useNotify, useTranslate } from 'react-admin'
+import { Link as RouterLink } from 'react-router-dom'
 
 import { APP_CONSTANTS } from '../app/appConstants'
 import { getApiErrorText } from '../data/httpClient'
@@ -63,6 +64,10 @@ export function LoginPage() {
             >
               {translate('auth.login.submit')}
             </Button>
+            <p> </p>
+            <Link className="login-signup-link" component={RouterLink} to="/register-organization">
+              {translate('auth.login.signUp')}
+            </Link>
           </form>
         </CardContent>
       </Card>
