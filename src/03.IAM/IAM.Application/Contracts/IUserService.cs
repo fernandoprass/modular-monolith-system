@@ -2,6 +2,7 @@ using IAM.Domain.DTOs;
 using IAM.Domain.DTOs.Requests;
 using IAM.Domain.DTOs.Responses;
 using Myce.Response;
+using Shared.Domain.DTOs.Responses;
 
 namespace IAM.Application.Contracts;
 
@@ -9,7 +10,7 @@ public interface IUserService
 {
    Task<UserDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
    Task<UserPasswordDto?> GetByEmailWithPasswordAsync(string email, CancellationToken cancellationToken = default);
-   Task<IEnumerable<UserLiteDto>> GetByOrganizationIdAsync(Guid organizationId, CancellationToken cancellationToken = default);
+   Task<PagedResultDto<UserLiteDto>> GetAsync(UserSearchRequest request, CancellationToken cancellationToken = default);
    Task<Result<UserDto>> CreateUserAsync(UserCreateRequest request, bool organizationExists, CancellationToken cancellationToken = default);
    Task<Result> DeleteAsync(Guid id, CancellationToken cancellationToken = default);
    Task<Result> DeleteMeAsync(CancellationToken cancellationToken = default);

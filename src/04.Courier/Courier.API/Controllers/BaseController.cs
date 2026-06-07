@@ -14,6 +14,11 @@ public abstract class BaseController : ControllerBase
          return NotFound(Result<T>.Failure(new NotFoundError()));
       }
 
+      if (value is Result result && !result.IsSuccess)
+      {
+         return BadRequest(result);
+      }
+
       return value is Result ? Ok(value) : Ok(Result<T>.Success(value));
    }
 }

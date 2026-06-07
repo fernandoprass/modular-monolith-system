@@ -1,15 +1,23 @@
 using IAM.Domain.DTOs;
+using IAM.Domain.DTOs.Requests;
 using IAM.Domain.DTOs.Responses;
 using IAM.Domain.Entities;
 using IAM.Domain.Mappers;
 using IAM.Domain.QueryRepositories;
 using Microsoft.EntityFrameworkCore;
+using Shared.Application.Contracts;
+using Shared.Domain.DTOs.Responses;
 
 namespace IAM.Infrastructure.QueryRepositories;
 
-public class UserQueryRepository(IamDbContext dbContext) : IUserQueryRepository
+public class UserQueryRepository(IamDbContext dbContext, IUserContext userContext) : IUserQueryRepository
 {
+   private const int DefaultPageNumber = 1;
+   private const int DefaultPageSize = 25;
+   private const int MaxPageSize = 200;
+
    private readonly IamDbContext _dbContext = dbContext;
+   private readonly IUserContext _userContext;
 
    public async Task<UserDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
    {
@@ -51,11 +59,33 @@ public class UserQueryRepository(IamDbContext dbContext) : IUserQueryRepository
           .SingleOrDefaultAsync(cancellationToken);
    }
 
-   public async Task<IEnumerable<UserLiteDto>> GetByOrganizationIdAsync(Guid organizationId, CancellationToken cancellationToken = default)
+   public async Task<PagedResultDto<UserLiteDto>> GetAsync(UserSearchRequest request, CancellationToken cancellationToken = default)
    {
-      return await _dbContext.Users
-          .AsNoTracking()
-          .Where(u => u.OrganizationId == organizationId)
+      var query = _dbContext.Users.AsNoTracking();
+
+      if (!string.IsNullOrWhiteSpace(request.Name))
+      {
+         query = query.Where(u => EF.Functions.ILike(u.Name, $"%{request.Name}%"));
+      }
+
+      if (!string.IsNullOrWhiteSpace(request.Email))
+      {
+         query = query.Where(u => EF.Functions.ILike(u.Email, $"%{request.Email}%"));
+      }
+
+      if (request.OrganizationId.HasValue)
+      {
+         query = query.Where(u => u.OrganizationId == request.OrganizationId.Value);
+      }
+
+      var pageNumber = request.PageNumber < 1 ? DefaultPageNumber : request.PageNumber;
+      var pageSize = request.PageSize < 1 ? DefaultPageSize : Math.Min(request.PageSize, MaxPageSize);
+      var totalCount = await query.LongCountAsync(cancellationToken);
+
+      var items = await query
+         .OrderBy(u => u.Name)
+         .Skip((pageNumber - 1) * pageSize)
+         .Take(pageSize)
           .Select(u => new UserLiteDto
           {
              Id = u.Id,
@@ -64,5 +94,9 @@ public class UserQueryRepository(IamDbContext dbContext) : IUserQueryRepository
              IsActive = u.IsActive
           })
           .ToListAsync(cancellationToken);
+
+      var totalPages = totalCount == 0 ? 0 : (int)Math.Ceiling(totalCount / (double)pageSize);
+
+      return new PagedResultDto<UserLiteDto>(items, pageNumber, pageSize, totalCount, totalPages);
    }
 }

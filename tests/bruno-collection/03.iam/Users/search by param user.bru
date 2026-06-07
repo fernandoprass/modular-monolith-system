@@ -1,0 +1,23 @@
+meta {
+  name: search by param user
+  type: http
+  seq: 9
+}
+
+get {
+  url: {{host.iam}}/api/{{version}}/iam/users/?name=tes&email=1f&pageNumber=1&pageSize=25
+  body: none
+  auth: bearer
+}
+
+params:query {
+  name: tes
+  email: 1f
+  pageNumber: 1
+  pageSize: 25
+  ~organizationId: {{organizationId}}
+}
+
+auth:bearer {
+  token: {{token}}
+}
