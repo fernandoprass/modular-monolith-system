@@ -10,6 +10,7 @@ import { Box, Collapse, List, ListItemIcon, MenuItem, Typography } from '@mui/ma
 import { useState } from 'react'
 import { Menu, usePermissions, useTranslate } from 'react-admin'
 
+import { APP_ROUTES } from './routes'
 import { IAM_RESOURCES } from '../shared/iamConstants'
 import { hasResourceAccess, type PermissionDto } from '../shared/permissions'
 
@@ -35,21 +36,21 @@ export function AppMenu() {
         <Menu.Item
           leftIcon={<BusinessIcon />}
           primaryText="resources.iam.organizations.name"
-          to="/organizations"
+          to={APP_ROUTES.organizations}
         />
       )}
       {canOpenUsers && (
         <Menu.Item
           leftIcon={<PeopleIcon />}
           primaryText="resources.iam.users.name"
-          to="/users"
+          to={APP_ROUTES.users}
         />
       )}
       {canOpenParameters && (
         <Menu.Item
           leftIcon={<SettingsIcon />}
           primaryText="resources.iam.parameters.name"
-          to="/parameters"
+          to={APP_ROUTES.parameters}
         />
       )}
       {canOpenAuthorization && (
@@ -70,14 +71,14 @@ export function AppMenu() {
                   <Menu.Item
                     leftIcon={<ManageAccountsIcon />}
                     primaryText="resources.iam.roles.name"
-                    to="/roles"
+                    to={APP_ROUTES.roles}
                   />
                 )}
                 {canOpenPermissions && (
                   <Menu.Item
                     leftIcon={<KeyIcon />}
                     primaryText="resources.iam.permissions.name"
-                    to="/permissions"
+                    to={APP_ROUTES.permissions}
                   />
                 )}
               </Box>

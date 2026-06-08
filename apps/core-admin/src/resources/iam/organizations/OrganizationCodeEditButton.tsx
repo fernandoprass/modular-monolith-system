@@ -6,7 +6,7 @@ import { useNotify, useRecordContext, useRefresh, useTranslate } from 'react-adm
 
 import { API_PATHS } from '../../../data/apiPaths'
 import { ensureResultSuccess, getApiErrorText, patchJson } from '../../../data/httpClient'
-import type { OrganizationDto } from './organizationTypes'
+import { ORGANIZATION_REQUEST_FIELDS, type OrganizationDto } from './organizationTypes'
 
 export function OrganizationCodeEditButton() {
   const record = useRecordContext<OrganizationDto>()
@@ -29,7 +29,7 @@ export function OrganizationCodeEditButton() {
 
     try {
       const response = await patchJson(API_PATHS.iam.organizations.code(organization.id), {
-        Code: code,
+        [ORGANIZATION_REQUEST_FIELDS.code]: code,
       })
 
       ensureResultSuccess(response)

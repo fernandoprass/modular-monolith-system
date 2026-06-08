@@ -1,5 +1,6 @@
 import {
   BooleanField,
+  CreateButton,
   Datagrid,
   DeleteButton,
   EditButton,
@@ -8,6 +9,7 @@ import {
   SelectField,
   TextField,
   TextInput,
+  TopToolbar,
   usePermissions,
 } from 'react-admin'
 
@@ -20,6 +22,17 @@ const organizationFilters = [
   <TextInput key="Code" source="Code" />,
   <TextInput key="Name" source="Name" />,
 ]
+
+function OrganizationListActions() {
+  const { permissions } = usePermissions<PermissionDto[]>()
+  const canCreate = hasPermissionCode(permissions ?? [], IAM_PERMISSIONS.organizations.create)
+
+  return (
+    <TopToolbar>
+      {canCreate && <CreateButton />}
+    </TopToolbar>
+  )
+}
 
 function OrganizationRowActions() {
   const { permissions } = usePermissions<PermissionDto[]>()
@@ -40,6 +53,7 @@ function OrganizationRowActions() {
 export function OrganizationList() {
   return (
     <List
+      actions={<OrganizationListActions />}
       filters={organizationFilters}
       perPage={25}
       sort={{ field: 'name', order: 'ASC' }}

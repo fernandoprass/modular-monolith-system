@@ -20,16 +20,19 @@ import {
   ensureResultSuccess,
   getJson,
   getJsonWithQuery,
-  postJson,
   putJson,
   unwrapResult,
 } from './httpClient'
 import type {
   OrganizationCreateForm,
-  OrganizationCreateRequest,
   OrganizationDto,
   PagedResultDto,
 } from '../resources/iam/organizations/organizationTypes'
+import {
+  ORGANIZATION_QUERY_PARAMS,
+  ORGANIZATION_REQUEST_FIELDS,
+} from '../resources/iam/organizations/organizationTypes'
+import { createOrganization as createOrganizationApi } from '../resources/iam/organizations/organizationApi'
 
 type OrganizationRecord = OrganizationDto & RaRecord
 
@@ -47,25 +50,25 @@ function toNumberFilter(value: unknown): string | null {
 
 function buildOrganizationQuery(params: GetListParams): URLSearchParams {
   const query = new URLSearchParams()
-  const code = toStringFilter(params.filter.Code)
-  const name = toStringFilter(params.filter.Name)
-  const type = toNumberFilter(params.filter.Type)
+  const code = toStringFilter(params.filter[ORGANIZATION_QUERY_PARAMS.code])
+  const name = toStringFilter(params.filter[ORGANIZATION_QUERY_PARAMS.name])
+  const type = toNumberFilter(params.filter[ORGANIZATION_QUERY_PARAMS.type])
   const page = params.pagination?.page ?? 1
   const perPage = params.pagination?.perPage ?? 25
 
-  query.set('PageNumber', page.toString())
-  query.set('PageSize', perPage.toString())
+  query.set(ORGANIZATION_QUERY_PARAMS.pageNumber, page.toString())
+  query.set(ORGANIZATION_QUERY_PARAMS.pageSize, perPage.toString())
 
   if (code !== null) {
-    query.set('Code', code)
+    query.set(ORGANIZATION_QUERY_PARAMS.code, code)
   }
 
   if (name !== null) {
-    query.set('Name', name)
+    query.set(ORGANIZATION_QUERY_PARAMS.name, name)
   }
 
   if (type !== null) {
-    query.set('Type', type)
+    query.set(ORGANIZATION_QUERY_PARAMS.type, type)
   }
 
   return query
@@ -95,10 +98,10 @@ async function getOrganizationOne(params: GetOneParams): Promise<GetOneResult<Or
 
 async function updateOrganization(params: UpdateParams): Promise<UpdateResult<OrganizationRecord>> {
   const request = {
-    Name: params.data.name,
-    Description: params.data.description,
-    IsActive: params.data.isActive,
-    DefaultLanguage: params.data.defaultLanguage,
+    [ORGANIZATION_REQUEST_FIELDS.name]: params.data.name,
+    [ORGANIZATION_REQUEST_FIELDS.description]: params.data.description,
+    [ORGANIZATION_REQUEST_FIELDS.isActive]: params.data.isActive,
+    [ORGANIZATION_REQUEST_FIELDS.defaultLanguage]: params.data.defaultLanguage,
   }
   const response = await putJson(API_PATHS.iam.organizations.byId(params.id), request)
 
@@ -119,27 +122,8 @@ async function deleteOrganization(params: DeleteParams): Promise<DeleteResult<Or
   }
 }
 
-function toOrganizationCreateRequest(data: OrganizationCreateForm): OrganizationCreateRequest {
-  return {
-    Type: data.type,
-    Name: data.name,
-    Code: data.code,
-    Description: data.description,
-    DefaultLanguage: data.defaultLanguage,
-    User: {
-      Name: data.userName,
-      Email: data.userEmail,
-      Password: data.userPassword,
-    },
-  }
-}
-
-async function createOrganization(params: CreateParams): Promise<CreateResult<OrganizationRecord>> {
-  const response = await postJson(
-    API_PATHS.iam.organizations.list,
-    toOrganizationCreateRequest(params.data as OrganizationCreateForm),
-  )
-  const organization = unwrapResult<OrganizationDto>(response)
+async function createOrganizationRecord(params: CreateParams): Promise<CreateResult<OrganizationRecord>> {
+  const organization = await createOrganizationApi(params.data as OrganizationCreateForm)
 
   return {
     data: organization as OrganizationRecord,
@@ -169,7 +153,7 @@ export const dataProvider: DataProvider = {
   getManyReference: unsupportedAction,
   create: async (resource, params) => {
     if (resource === RESOURCE_NAMES.organizations) {
-      return createOrganization(params) as Promise<CreateResult>
+      return createOrganizationRecord(params) as Promise<CreateResult>
     }
 
     return unsupportedAction()

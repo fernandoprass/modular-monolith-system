@@ -17,6 +17,28 @@ export const enMessages = {
       submit: 'Sign in',
     },
   },
+  public: {
+    organizationRegistration: {
+      actions: {
+        signIn: 'Back to sign in',
+        submit: 'Create organization',
+      },
+      fields: {
+        adminEmail: 'Admin email',
+        adminName: 'Admin name',
+        adminPassword: 'Admin password',
+        code: 'Code',
+        defaultLanguage: 'Default language',
+        description: 'Description',
+        name: 'Name',
+        type: 'Type',
+      },
+      messages: {
+        success: 'Organization created. You can sign in now.',
+      },
+      title: 'Create organization',
+    },
+  },
   shared: {
     actions: {
       cancel: 'Cancel',

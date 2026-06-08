@@ -3,69 +3,34 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 
 import { APP_CONSTANTS } from '../../../app/appConstants'
-import { API_PATHS } from '../../../data/apiPaths'
-import { getApiErrorText, postJson, unwrapResult } from '../../../data/httpClient'
+import { enMessages } from '../../../app/i18n/en'
+import { APP_ROUTES } from '../../../app/routes'
+import { getApiErrorText } from '../../../data/httpClient'
 import { LANGUAGE_CODES, languageChoices } from '../../../shared/languages'
 import {
   ORGANIZATION_TYPES,
   organizationTypeChoices,
 } from './organizationTypes'
-import type { OrganizationCreateRequest, OrganizationDto } from './organizationTypes'
+import type { OrganizationCreateForm } from './organizationTypes'
+import { createOrganization } from './organizationApi'
 
-const PUBLIC_FORM_LABELS = {
-  adminEmail: 'Admin email',
-  adminName: 'Admin name',
-  adminPassword: 'Admin password',
-  code: 'Code',
-  defaultLanguage: 'Default language',
-  description: 'Description',
-  name: 'Name',
-  signIn: 'Back to sign in',
-  submit: 'Create organization',
-  success: 'Organization created. You can sign in now.',
-  title: 'Create organization',
-  type: 'Type',
+const PUBLIC_TEXT = enMessages.public.organizationRegistration
+const SHARED_TEXT = enMessages.shared
+const ORGANIZATION_TEXT = enMessages.resources.iam.organizations
+
+const ORGANIZATION_TYPE_LABELS = {
+  [ORGANIZATION_TYPES.company]: ORGANIZATION_TEXT.types.company,
+  [ORGANIZATION_TYPES.individual]: ORGANIZATION_TEXT.types.individual,
 } as const
 
-const PUBLIC_ORGANIZATION_TYPE_LABELS = {
-  [ORGANIZATION_TYPES.company]: 'Company',
-  [ORGANIZATION_TYPES.individual]: 'Individual',
+const LANGUAGE_LABELS = {
+  [LANGUAGE_CODES.english]: SHARED_TEXT.languages.en,
+  [LANGUAGE_CODES.portugueseBrazil]: SHARED_TEXT.languages.ptBr,
+  [LANGUAGE_CODES.spanish]: SHARED_TEXT.languages.es,
 } as const
-
-const PUBLIC_LANGUAGE_LABELS = {
-  [LANGUAGE_CODES.english]: 'English',
-  [LANGUAGE_CODES.portugueseBrazil]: 'Portuguese - Brazil',
-  [LANGUAGE_CODES.spanish]: 'Spanish',
-} as const
-
-function toCreateRequest(form: PublicOrganizationCreateForm): OrganizationCreateRequest {
-  return {
-    Type: form.type,
-    Name: form.name,
-    Code: form.code,
-    Description: form.description,
-    DefaultLanguage: form.defaultLanguage,
-    User: {
-      Name: form.userName,
-      Email: form.userEmail,
-      Password: form.userPassword,
-    },
-  }
-}
-
-type PublicOrganizationCreateForm = {
-  type: number
-  code: string
-  name: string
-  description: string
-  defaultLanguage: string
-  userName: string
-  userEmail: string
-  userPassword: string
-}
 
 export function PublicOrganizationCreatePage() {
-  const [form, setForm] = useState<PublicOrganizationCreateForm>({
+  const [form, setForm] = useState<OrganizationCreateForm>({
     type: ORGANIZATION_TYPES.company,
     code: '',
     name: '',
@@ -80,9 +45,9 @@ export function PublicOrganizationCreatePage() {
   const [isSuccess, setIsSuccess] = useState(false)
   const isCompany = form.type === ORGANIZATION_TYPES.company
 
-  function setField<TField extends keyof PublicOrganizationCreateForm>(
+  function setField<TField extends keyof OrganizationCreateForm>(
     field: TField,
-    value: PublicOrganizationCreateForm[TField],
+    value: OrganizationCreateForm[TField],
   ) {
     setForm((currentForm) => ({
       ...currentForm,
@@ -96,8 +61,7 @@ export function PublicOrganizationCreatePage() {
     setIsSubmitting(true)
 
     try {
-      const response = await postJson(API_PATHS.iam.organizations.list, toCreateRequest(form))
-      unwrapResult<OrganizationDto>(response)
+      await createOrganization(form)
       setIsSuccess(true)
     } catch (submitError) {
       setError(getApiErrorText(submitError))
@@ -111,19 +75,19 @@ export function PublicOrganizationCreatePage() {
       <Card className="public-register-card">
         <CardContent>
           <h1>{APP_CONSTANTS.appName}</h1>
-          <h2>{PUBLIC_FORM_LABELS.title}</h2>
+          <h2>{PUBLIC_TEXT.title}</h2>
           {isSuccess ? (
             <div>
-              <p className="public-register-success">{PUBLIC_FORM_LABELS.success}</p>
-              <Link href="/login">
-                {PUBLIC_FORM_LABELS.signIn}
+              <p className="public-register-success">{PUBLIC_TEXT.messages.success}</p>
+              <Link href={APP_ROUTES.login}>
+                {PUBLIC_TEXT.actions.signIn}
               </Link>
             </div>
           ) : (
             <form onSubmit={handleSubmit}>
               <TextField
                 fullWidth
-                label={PUBLIC_FORM_LABELS.type}
+                label={PUBLIC_TEXT.fields.type}
                 margin="normal"
                 onChange={(event) => setField('type', Number(event.target.value))}
                 required
@@ -132,7 +96,7 @@ export function PublicOrganizationCreatePage() {
               >
                 {organizationTypeChoices.map((choice) => (
                   <MenuItem key={choice.id} value={choice.id}>
-                    {PUBLIC_ORGANIZATION_TYPE_LABELS[choice.id]}
+                    {ORGANIZATION_TYPE_LABELS[choice.id]}
                   </MenuItem>
                 ))}
               </TextField>
@@ -140,7 +104,7 @@ export function PublicOrganizationCreatePage() {
                 <>
                   <TextField
                     fullWidth
-                    label={PUBLIC_FORM_LABELS.code}
+                    label={PUBLIC_TEXT.fields.code}
                     margin="normal"
                     onChange={(event) => setField('code', event.target.value)}
                     required
@@ -148,7 +112,7 @@ export function PublicOrganizationCreatePage() {
                   />
                   <TextField
                     fullWidth
-                    label={PUBLIC_FORM_LABELS.name}
+                    label={PUBLIC_TEXT.fields.name}
                     margin="normal"
                     onChange={(event) => setField('name', event.target.value)}
                     required
@@ -158,7 +122,7 @@ export function PublicOrganizationCreatePage() {
               )}
               <TextField
                 fullWidth
-                label={PUBLIC_FORM_LABELS.description}
+                label={PUBLIC_TEXT.fields.description}
                 margin="normal"
                 onChange={(event) => setField('description', event.target.value)}
                 required
@@ -166,7 +130,7 @@ export function PublicOrganizationCreatePage() {
               />
               <TextField
                 fullWidth
-                label={PUBLIC_FORM_LABELS.defaultLanguage}
+                label={PUBLIC_TEXT.fields.defaultLanguage}
                 margin="normal"
                 onChange={(event) => setField('defaultLanguage', event.target.value)}
                 required
@@ -175,13 +139,13 @@ export function PublicOrganizationCreatePage() {
               >
                 {languageChoices.map((choice) => (
                   <MenuItem key={choice.id} value={choice.id}>
-                    {PUBLIC_LANGUAGE_LABELS[choice.id]}
+                    {LANGUAGE_LABELS[choice.id]}
                   </MenuItem>
                 ))}
               </TextField>
               <TextField
                 fullWidth
-                label={PUBLIC_FORM_LABELS.adminName}
+                label={PUBLIC_TEXT.fields.adminName}
                 margin="normal"
                 onChange={(event) => setField('userName', event.target.value)}
                 required
@@ -189,7 +153,7 @@ export function PublicOrganizationCreatePage() {
               />
               <TextField
                 fullWidth
-                label={PUBLIC_FORM_LABELS.adminEmail}
+                label={PUBLIC_TEXT.fields.adminEmail}
                 margin="normal"
                 onChange={(event) => setField('userEmail', event.target.value)}
                 required
@@ -198,7 +162,7 @@ export function PublicOrganizationCreatePage() {
               />
               <TextField
                 fullWidth
-                label={PUBLIC_FORM_LABELS.adminPassword}
+                label={PUBLIC_TEXT.fields.adminPassword}
                 margin="normal"
                 onChange={(event) => setField('userPassword', event.target.value)}
                 required
@@ -207,10 +171,10 @@ export function PublicOrganizationCreatePage() {
               />
               {error.length > 0 && <p className="public-register-error">{error}</p>}
               <Button disabled={isSubmitting} fullWidth type="submit" variant="contained">
-                {PUBLIC_FORM_LABELS.submit}
+                {PUBLIC_TEXT.actions.submit}
               </Button>
-              <Link className="login-signup-link" href="/login">
-                {PUBLIC_FORM_LABELS.signIn}
+              <Link className="login-signup-link" href={APP_ROUTES.login}>
+                {PUBLIC_TEXT.actions.signIn}
               </Link>
             </form>
           )}

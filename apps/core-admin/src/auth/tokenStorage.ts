@@ -6,6 +6,19 @@ export type StoredUser = {
   fullName: string
 }
 
+function parseStoredValue<TValue>(value: string | null, clearValue: () => void): TValue | null {
+  if (value === null) {
+    return null
+  }
+
+  try {
+    return JSON.parse(value) as TValue
+  } catch {
+    clearValue()
+    return null
+  }
+}
+
 export const tokenStorage = {
   getToken(): string | null {
     return localStorage.getItem(STORAGE_KEYS.authToken)
@@ -20,13 +33,10 @@ export const tokenStorage = {
   },
 
   getUser(): StoredUser | null {
-    const value = localStorage.getItem(STORAGE_KEYS.authUser)
-
-    if (value === null) {
-      return null
-    }
-
-    return JSON.parse(value) as StoredUser
+    return parseStoredValue<StoredUser>(
+      localStorage.getItem(STORAGE_KEYS.authUser),
+      () => localStorage.removeItem(STORAGE_KEYS.authUser),
+    )
   },
 
   setUser(user: StoredUser): void {
@@ -38,13 +48,10 @@ export const tokenStorage = {
   },
 
   getPermissions(): PermissionDto[] {
-    const value = localStorage.getItem(STORAGE_KEYS.authPermissions)
-
-    if (value === null) {
-      return []
-    }
-
-    return JSON.parse(value) as PermissionDto[]
+    return parseStoredValue<PermissionDto[]>(
+      localStorage.getItem(STORAGE_KEYS.authPermissions),
+      () => localStorage.removeItem(STORAGE_KEYS.authPermissions),
+    ) ?? []
   },
 
   setPermissions(permissions: PermissionDto[]): void {

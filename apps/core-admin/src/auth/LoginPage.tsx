@@ -5,6 +5,7 @@ import { useLogin, useNotify, useTranslate } from 'react-admin'
 import { Link as RouterLink } from 'react-router-dom'
 
 import { APP_CONSTANTS } from '../app/appConstants'
+import { APP_ROUTES } from '../app/routes'
 import { getApiErrorText } from '../data/httpClient'
 
 export function LoginPage() {
@@ -64,8 +65,7 @@ export function LoginPage() {
             >
               {translate('auth.login.submit')}
             </Button>
-            <p> </p>
-            <Link className="login-signup-link" component={RouterLink} to="/register-organization">
+            <Link className="login-signup-link" component={RouterLink} to={APP_ROUTES.registerOrganization}>
               {translate('auth.login.signUp')}
             </Link>
           </form>

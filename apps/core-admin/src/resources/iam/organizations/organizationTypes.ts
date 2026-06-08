@@ -3,6 +3,28 @@ export const ORGANIZATION_TYPES = {
   individual: 2,
 } as const
 
+export const ORGANIZATION_QUERY_PARAMS = {
+  code: 'Code',
+  name: 'Name',
+  organizationId: 'OrganizationId',
+  pageNumber: 'PageNumber',
+  pageSize: 'PageSize',
+  type: 'Type',
+} as const
+
+export const ORGANIZATION_REQUEST_FIELDS = {
+  code: 'Code',
+  defaultLanguage: 'DefaultLanguage',
+  description: 'Description',
+  isActive: 'IsActive',
+  name: 'Name',
+  type: 'Type',
+  user: 'User',
+  userEmail: 'Email',
+  userName: 'Name',
+  userPassword: 'Password',
+} as const
+
 export type OrganizationDto = {
   id: string
   type: number

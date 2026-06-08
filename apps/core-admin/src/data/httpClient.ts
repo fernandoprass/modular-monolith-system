@@ -91,9 +91,27 @@ export async function getJson(path: string): Promise<unknown> {
 }
 
 async function readJsonResponse(response: Response): Promise<unknown> {
-  const result = await response.json() as unknown
+  const result = await readResponseBody(response)
   ensureHttpSuccess(response, result)
   return result
+}
+
+async function readResponseBody(response: Response): Promise<unknown> {
+  const text = await response.text()
+
+  if (text.length === 0) {
+    return null
+  }
+
+  try {
+    return JSON.parse(text) as unknown
+  } catch {
+    if (response.ok) {
+      return text
+    }
+
+    throw new Error(response.statusText)
+  }
 }
 
 export async function getJsonWithQuery(path: string, query: URLSearchParams): Promise<unknown> {
@@ -115,16 +133,25 @@ function ensureHttpSuccess(response: Response, result: unknown): void {
     return
   }
 
-    const apiResult = result as ApiResult<unknown>
+  if (isApiResult(result)) {
+    throw new ApiResultError(result.title, result.messages)
+  }
 
-    if (Array.isArray(apiResult.messages)) {
-      throw new ApiResultError(apiResult.title, apiResult.messages)
-    }
+  throw new Error(response.statusText)
+}
 
-    throw new Error(response.statusText)
+function isApiResult(value: unknown): value is ApiResult<unknown> {
+  return typeof value === 'object'
+    && value !== null
+    && 'messages' in value
+    && Array.isArray(value.messages)
 }
 
 export function unwrapResult<TData>(response: unknown): TData {
+  if (!isApiResult(response)) {
+    throw new Error('Invalid API result.')
+  }
+
   const result = response as ApiResult<TData>
 
   if (!result.isSuccess) {
@@ -139,6 +166,10 @@ export function unwrapResult<TData>(response: unknown): TData {
 }
 
 export function ensureResultSuccess(response: unknown): void {
+  if (!isApiResult(response)) {
+    throw new Error('Invalid API result.')
+  }
+
   const result = response as ApiResult<unknown>
 
   if (!result.isSuccess) {

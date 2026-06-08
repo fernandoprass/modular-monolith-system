@@ -4,6 +4,7 @@ import { Route } from 'react-router-dom'
 import { APP_CONSTANTS } from './app/appConstants'
 import { AppLayout } from './app/AppLayout'
 import { i18nProvider } from './app/i18n/i18nProvider'
+import { APP_ROUTES } from './app/routes'
 import { appTheme } from './app/theme'
 import { authProvider } from './auth/authProvider'
 import { LoginPage } from './auth/LoginPage'
@@ -26,7 +27,7 @@ function Dashboard() {
 }
 
 function App() {
-  if (window.location.pathname === '/register-organization') {
+  if (window.location.pathname === APP_ROUTES.registerOrganization) {
     return <PublicOrganizationCreatePage />
   }
 
