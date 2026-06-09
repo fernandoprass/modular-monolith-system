@@ -3,12 +3,13 @@ import { X } from 'lucide-react'
 import type { PropsWithChildren, ReactNode } from 'react'
 
 type DialogProps = PropsWithChildren<{
+  backLabel: string
   onOpenChange: (open: boolean) => void
   open: boolean
   title: string
 }>
 
-export function Dialog({ children, onOpenChange, open, title }: DialogProps) {
+export function Dialog({ children, backLabel, onOpenChange, open, title }: DialogProps) {
   return (
     <DialogPrimitive.Root onOpenChange={onOpenChange} open={open}>
       <DialogPrimitive.Portal>
@@ -16,7 +17,7 @@ export function Dialog({ children, onOpenChange, open, title }: DialogProps) {
         <DialogPrimitive.Content className="dialog-content">
           <div className="dialog-header">
             <DialogPrimitive.Title className="dialog-title">{title}</DialogPrimitive.Title>
-            <DialogPrimitive.Close className="dialog-close">
+            <DialogPrimitive.Close aria-label={backLabel} className="dialog-close">
               <X size={16} />
             </DialogPrimitive.Close>
           </div>
@@ -29,6 +30,7 @@ export function Dialog({ children, onOpenChange, open, title }: DialogProps) {
 
 type ConfirmDialogProps = {
   cancelText: string
+  backLabel: string
   confirmText: string
   children: ReactNode
   onConfirm: () => void
@@ -40,6 +42,7 @@ type ConfirmDialogProps = {
 export function ConfirmDialog({
   cancelText,
   children,
+  backLabel,
   confirmText,
   onConfirm,
   onOpenChange,
@@ -47,7 +50,7 @@ export function ConfirmDialog({
   title,
 }: ConfirmDialogProps) {
   return (
-    <Dialog onOpenChange={onOpenChange} open={open} title={title}>
+    <Dialog backLabel={backLabel} onOpenChange={onOpenChange} open={open} title={title}>
       <div className="dialog-body">{children}</div>
       <div className="dialog-actions">
         <button className="btn btn-sm btn-outline" onClick={() => onOpenChange(false)} type="button">

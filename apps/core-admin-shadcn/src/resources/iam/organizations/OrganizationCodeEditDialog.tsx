@@ -55,7 +55,12 @@ export function OrganizationCodeEditDialog({
   }
 
   return (
-    <Dialog onOpenChange={(open) => !open && onClose()} open={isOpen} title={t('resources.iam.organizations.actions.editCode')}>
+    <Dialog
+      backLabel={t('shared.actions.back')}
+      onOpenChange={(open) => !open && onClose()}
+      open={isOpen}
+      title={t('resources.iam.organizations.actions.editCode')}
+    >
       <form onSubmit={handleSubmit}>
         <div className="dialog-body form-stack">
           <div className="field">

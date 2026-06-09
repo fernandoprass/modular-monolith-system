@@ -9,8 +9,8 @@ import { APP_ROUTES } from '../../../app/routes'
 import { useNotifyError } from '../../../auth/AuthProvider'
 import { Button } from '../../../components/ui/button'
 import { Card, CardContent } from '../../../components/ui/card'
+import { Field } from '../../../components/ui/field'
 import { Input } from '../../../components/ui/input'
-import { Label } from '../../../components/ui/label'
 import { Select } from '../../../components/ui/select'
 import { LANGUAGE_CODES, LANGUAGE_OPTIONS } from '../../../shared/languages'
 import { ORGANIZATION_TYPES, ORGANIZATION_TYPE_OPTIONS, type OrganizationCreateForm } from './organizationTypes'
@@ -128,19 +128,5 @@ export function PublicOrganizationCreatePage() {
         </CardContent>
       </Card>
     </main>
-  )
-}
-
-type FieldProps = {
-  children: React.ReactNode
-  label: string
-}
-
-function Field({ children, label }: FieldProps) {
-  return (
-    <div className="field">
-      <Label>{label}</Label>
-      {children}
-    </div>
   )
 }

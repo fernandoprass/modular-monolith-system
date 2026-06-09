@@ -57,7 +57,7 @@ export function AppLayout() {
       <header className="shell-header">
         <div className="header-left">
           <Button
-            aria-label="Menu"
+            aria-label={t('navigation.menu')}
             className="mobile-menu"
             onClick={() => setIsMobileOpen((current) => !current)}
             size="icon"

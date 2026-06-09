@@ -1,27 +1,25 @@
-import { Edit, Eye, Trash2 } from 'lucide-react'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
+import type { SortingState } from '@tanstack/react-table'
 
 import { useToast } from '../../../app/ToastProvider'
 import { useTranslate } from '../../../app/i18n/i18n'
-import { APP_ROUTES } from '../../../app/routes'
 import { useAuth, useNotifyError } from '../../../auth/AuthProvider'
-import { Badge } from '../../../components/ui/badge'
-import { Button } from '../../../components/ui/button'
+import { DataTable } from '../../../components/ui/data-table'
 import { ConfirmDialog } from '../../../components/ui/dialog'
+import { Field } from '../../../components/ui/field'
+import { FilterToolbar } from '../../../components/ui/filter-toolbar'
 import { Input } from '../../../components/ui/input'
-import { Label } from '../../../components/ui/label'
 import { Select } from '../../../components/ui/select'
+import { DataTablePagination } from '../../../components/ui/data-table-pagination'
 import { IAM_PERMISSIONS } from '../../../shared/iamConstants'
+import { DEFAULT_PAGINATION } from '../../../shared/pagination'
 import { hasPermissionCode } from '../../../shared/permissions'
 import { deleteOrganization, getOrganizations } from './organizationApi'
+import { createOrganizationTableColumns } from './OrganizationListPageColumns'
 import { ORGANIZATION_TYPE_OPTIONS, type OrganizationDto, type PagedResultDto } from './organizationTypes'
-import { getLanguageLabel, getOrganizationTypeLabel, toTranslatedOptions } from './organizationUi'
-
-const DEFAULT_PAGE_NUMBER = 1
-const DEFAULT_PAGE_SIZE = 25
-const ICON_SIZE = 15
+import { toTranslatedOptions } from './organizationUi'
 
 export function OrganizationListPage() {
   const t = useTranslate()
@@ -35,14 +33,23 @@ export function OrganizationListPage() {
   const [appliedCodeFilter, setAppliedCodeFilter] = useState('')
   const [appliedNameFilter, setAppliedNameFilter] = useState('')
   const [appliedTypeFilter, setAppliedTypeFilter] = useState<string | null>(null)
-  const [pageNumber, setPageNumber] = useState(DEFAULT_PAGE_NUMBER)
+  const [pageNumber, setPageNumber] = useState<number>(DEFAULT_PAGINATION.pageNumber)
+  const [pageSize, setPageSize] = useState<number>(DEFAULT_PAGINATION.pageSize)
   const [result, setResult] = useState<PagedResultDto<OrganizationDto> | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<OrganizationDto | null>(null)
+  const [sorting, setSorting] = useState<SortingState>([])
   const canView = hasPermissionCode(permissions, IAM_PERMISSIONS.organizations.view)
   const canUpdate = hasPermissionCode(permissions, IAM_PERMISSIONS.organizations.update)
   const canDelete = hasPermissionCode(permissions, IAM_PERMISSIONS.organizations.delete)
-
+  const columns = useMemo(() => createOrganizationTableColumns({
+    canDelete,
+    canUpdate,
+    canView,
+    navigate,
+    setDeleteTarget,
+    t,
+  }), [canDelete, canUpdate, canView, navigate, t])
   const loadOrganizations = useCallback(async (targetPage = pageNumber) => {
     setIsLoading(true)
 
@@ -51,7 +58,7 @@ export function OrganizationListPage() {
         code: appliedCodeFilter,
         name: appliedNameFilter,
         pageNumber: targetPage,
-        pageSize: DEFAULT_PAGE_SIZE,
+        pageSize,
         type: appliedTypeFilter,
       }))
     } catch (error) {
@@ -59,7 +66,7 @@ export function OrganizationListPage() {
     } finally {
       setIsLoading(false)
     }
-  }, [appliedCodeFilter, appliedNameFilter, appliedTypeFilter, notifyError, pageNumber, t])
+  }, [appliedCodeFilter, appliedNameFilter, appliedTypeFilter, notifyError, pageNumber, pageSize, t])
 
   useEffect(() => {
     void loadOrganizations(pageNumber)
@@ -67,7 +74,7 @@ export function OrganizationListPage() {
 
   function handleFilter(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    setPageNumber(DEFAULT_PAGE_NUMBER)
+    setPageNumber(DEFAULT_PAGINATION.pageNumber)
     setAppliedCodeFilter(codeFilter)
     setAppliedNameFilter(nameFilter)
     setAppliedTypeFilter(typeFilter)
@@ -80,7 +87,12 @@ export function OrganizationListPage() {
     setAppliedCodeFilter('')
     setAppliedNameFilter('')
     setAppliedTypeFilter(null)
-    setPageNumber(DEFAULT_PAGE_NUMBER)
+    setPageNumber(DEFAULT_PAGINATION.pageNumber)
+  }
+
+  function handlePageSizeChange(nextPageSize: number) {
+    setPageSize(nextPageSize)
+    setPageNumber(DEFAULT_PAGINATION.pageNumber)
   }
 
   async function handleConfirmDelete() {
@@ -103,95 +115,44 @@ export function OrganizationListPage() {
   return (
     <main className="page">
       <h1 className="page-title">{t('resources.iam.organizations.pages.list')}</h1>
-      <form className="toolbar" onSubmit={handleFilter}>
+      <FilterToolbar onReset={handleReset} onSubmit={handleFilter}>
+        <Field label={t('resources.iam.organizations.fields.type')}>
+          <Select
+            onValueChange={(value) => setTypeFilter(value === 'all' ? null : value)}
+            options={[{ label: t('shared.filters.all'), value: 'all' }, ...toTranslatedOptions(ORGANIZATION_TYPE_OPTIONS, t)]}
+            value={typeFilter ?? 'all'}
+          />
+        </Field>
         <Field label={t('resources.iam.organizations.fields.code')}>
           <Input onChange={(event) => setCodeFilter(event.currentTarget.value)} value={codeFilter} />
         </Field>
         <Field label={t('resources.iam.organizations.fields.name')}>
           <Input onChange={(event) => setNameFilter(event.currentTarget.value)} value={nameFilter} />
         </Field>
-        <Field label={t('resources.iam.organizations.fields.type')}>
-          <Select
-            onValueChange={(value) => setTypeFilter(value === 'all' ? null : value)}
-            options={[{ label: '', value: 'all' }, ...toTranslatedOptions(ORGANIZATION_TYPE_OPTIONS, t)]}
-            value={typeFilter ?? 'all'}
-          />
-        </Field>
-        <Button type="submit">{t('resources.iam.organizations.actions.filter')}</Button>
-        <Button onClick={handleReset} type="button" variant="outline">{t('resources.iam.organizations.actions.reset')}</Button>
-      </form>
+      </FilterToolbar>
 
-      <div className="table-panel">
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th>{t('resources.iam.organizations.fields.type')}</th>
-              <th>{t('resources.iam.organizations.fields.code')}</th>
-              <th>{t('resources.iam.organizations.fields.name')}</th>
-              <th>{t('resources.iam.organizations.fields.defaultLanguage')}</th>
-              <th>{t('resources.iam.organizations.fields.isActive')}</th>
-              <th className="actions-column">{t('resources.iam.organizations.fields.actions')}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {result?.items.map((organization) => (
-              <tr key={organization.id}>
-                <td>{getOrganizationTypeLabel(organization.type, t)}</td>
-                <td>{organization.code}</td>
-                <td>{organization.name}</td>
-                <td>{getLanguageLabel(organization.defaultLanguage, t)}</td>
-                <td>
-                  <Badge variant={organization.isActive ? 'active' : 'inactive'}>
-                    {organization.isActive ? t('shared.status.active') : t('shared.status.inactive')}
-                  </Badge>
-                </td>
-                <td>
-                  <div className="row-actions">
-                    {canView && (
-                      <Button onClick={() => navigate(APP_ROUTES.organizationShow(organization.id))} size="icon" title={t('resources.iam.organizations.actions.view')} variant="ghost">
-                        <Eye size={ICON_SIZE} />
-                      </Button>
-                    )}
-                    {canUpdate && (
-                      <Button onClick={() => navigate(APP_ROUTES.organizationEdit(organization.id))} size="icon" title={t('resources.iam.organizations.actions.edit')} variant="ghost">
-                        <Edit size={ICON_SIZE} />
-                      </Button>
-                    )}
-                    {canDelete && (
-                      <Button onClick={() => setDeleteTarget(organization)} size="icon" title={t('resources.iam.organizations.actions.delete')} variant="ghost">
-                        <Trash2 size={ICON_SIZE} />
-                      </Button>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {result !== null && result.items.length === 0 && <p className="empty-text">{t('resources.iam.organizations.messages.empty')}</p>}
-        {isLoading && <p className="empty-text">{t('shared.common.loading')}</p>}
-      </div>
+      <DataTable
+        columns={columns}
+        data={result?.items ?? []}
+        emptyText={t('resources.iam.organizations.messages.empty')}
+        isLoading={isLoading}
+        loadingText={t('shared.common.loading')}
+        onSortingChange={setSorting}
+        sorting={sorting}
+      />
 
-      <div className="pagination-row">
-        <span>
-          {t('shared.pagination.summary', {
-            page: result?.pageNumber ?? pageNumber,
-            pages: totalPages,
-            total: result?.totalCount ?? 0,
-          })}
-        </span>
-        <div className="pagination-actions">
-          <Button disabled={pageNumber <= 1} onClick={() => setPageNumber((page) => page - 1)} type="button" variant="outline">
-            Prev
-          </Button>
-          <Button disabled={pageNumber >= totalPages} onClick={() => setPageNumber((page) => page + 1)} type="button" variant="outline">
-            Next
-          </Button>
-        </div>
-      </div>
+      <DataTablePagination
+        onPageChange={setPageNumber}
+        onPageSizeChange={handlePageSizeChange}
+        pageNumber={result?.pageNumber ?? pageNumber}
+        pageSize={pageSize}
+        totalCount={result?.totalCount ?? 0}
+        totalPages={totalPages}
+      />
 
       <ConfirmDialog
         cancelText={t('shared.actions.cancel')}
+        backLabel={t('shared.actions.back')}
         confirmText={t('resources.iam.organizations.actions.delete')}
         onConfirm={() => void handleConfirmDelete()}
         onOpenChange={(open) => !open && setDeleteTarget(null)}
@@ -201,19 +162,5 @@ export function OrganizationListPage() {
         <p>{t('resources.iam.organizations.messages.deleteConfirm')}</p>
       </ConfirmDialog>
     </main>
-  )
-}
-
-type FieldProps = {
-  children: React.ReactNode
-  label: string
-}
-
-function Field({ children, label }: FieldProps) {
-  return (
-    <div className="field">
-      <Label>{label}</Label>
-      {children}
-    </div>
   )
 }

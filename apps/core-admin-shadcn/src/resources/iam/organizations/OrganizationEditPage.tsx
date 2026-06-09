@@ -10,6 +10,7 @@ import { useNotifyError } from '../../../auth/AuthProvider'
 import { Button } from '../../../components/ui/button'
 import { Card, CardContent } from '../../../components/ui/card'
 import { Checkbox } from '../../../components/ui/checkbox'
+import { Field } from '../../../components/ui/field'
 import { Input } from '../../../components/ui/input'
 import { Label } from '../../../components/ui/label'
 import { Select } from '../../../components/ui/select'
@@ -106,7 +107,7 @@ export function OrganizationEditPage() {
         <h1 className="page-title">{t('resources.iam.organizations.pages.edit')}</h1>
         <Button onClick={() => navigate(APP_ROUTES.organizations)} type="button" variant="outline">
           <ArrowLeft size={16} />
-          {t('shared.actions.close')}
+          {t('shared.actions.back')}
         </Button>
       </div>
       <Card>
@@ -159,19 +160,5 @@ export function OrganizationEditPage() {
         />
       )}
     </main>
-  )
-}
-
-type FieldProps = {
-  children: React.ReactNode
-  label: string
-}
-
-function Field({ children, label }: FieldProps) {
-  return (
-    <div className="field">
-      <Label>{label}</Label>
-      {children}
-    </div>
   )
 }

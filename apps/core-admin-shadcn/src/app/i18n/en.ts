@@ -19,6 +19,7 @@ export const enMessages = {
   },
   navigation: {
     dashboard: 'Dashboard',
+    menu: 'Menu',
     groups: {
       authorization: 'Authorization',
       iam: 'IAM',
@@ -106,7 +107,12 @@ export const enMessages = {
   shared: {
     actions: {
       cancel: 'Cancel',
-      close: 'Close',
+      back: 'Back',
+      columns: 'Columns',
+      filter: 'Filter',
+      next: 'Next',
+      previous: 'Previous',
+      reset: 'Reset',
       save: 'Save',
     },
     common: {
@@ -122,8 +128,13 @@ export const enMessages = {
       es: 'Spanish',
       ptBr: 'Portuguese - Brazil',
     },
+    filters: {
+      all: 'All',
+    },
     pagination: {
-      summary: 'Page {{page}} of {{pages}}. {{total}} total.',
+      pageSize: 'Rows per page',
+      summary: '{{page}} / {{pages}}',
+      visibleRows: 'Showing {{start}}-{{end}} of {{total}}',
     },
     status: {
       active: 'Active',

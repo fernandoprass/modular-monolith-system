@@ -1,5 +1,12 @@
 import { API_PATHS } from '../../../data/apiPaths'
-import { deleteJson, getJson, getJsonWithQuery, patchJson, postJson, putJson } from '../../../data/httpClient'
+import {
+  deleteIamJson,
+  getIamJson,
+  getIamJsonWithQuery,
+  patchIamJson,
+  postIamJson,
+  putIamJson,
+} from '../../../data/httpClient'
 import { ensureResultSuccess, unwrapResult } from '../../../data/result'
 import {
   ORGANIZATION_QUERY_PARAMS,
@@ -54,7 +61,7 @@ export function toOrganizationCreateRequest(data: OrganizationCreateForm): Organ
 }
 
 export async function createOrganization(data: OrganizationCreateForm): Promise<OrganizationDto> {
-  const response = await postJson(
+  const response = await postIamJson(
     API_PATHS.iam.organizations.list,
     toOrganizationCreateRequest(data),
   )
@@ -65,7 +72,7 @@ export async function createOrganization(data: OrganizationCreateForm): Promise<
 export async function getOrganizations(
   request: OrganizationListQuery,
 ): Promise<PagedResultDto<OrganizationDto>> {
-  const response = await getJsonWithQuery(
+  const response = await getIamJsonWithQuery(
     API_PATHS.iam.organizations.list,
     buildOrganizationQuery(request),
   )
@@ -74,13 +81,13 @@ export async function getOrganizations(
 }
 
 export async function getOrganization(id: string): Promise<OrganizationDto> {
-  const response = await getJson(API_PATHS.iam.organizations.byId(id))
+  const response = await getIamJson(API_PATHS.iam.organizations.byId(id))
 
   return unwrapResult<OrganizationDto>(response)
 }
 
 export async function updateOrganization(id: string, request: OrganizationUpdateRequest): Promise<void> {
-  const response = await putJson(API_PATHS.iam.organizations.byId(id), request)
+  const response = await putIamJson(API_PATHS.iam.organizations.byId(id), request)
 
   ensureResultSuccess(response)
 }
@@ -89,13 +96,13 @@ export async function updateOrganizationCode(
   id: string,
   request: OrganizationCodeUpdateRequest,
 ): Promise<void> {
-  const response = await patchJson(API_PATHS.iam.organizations.code(id), request)
+  const response = await patchIamJson(API_PATHS.iam.organizations.code(id), request)
 
   ensureResultSuccess(response)
 }
 
 export async function deleteOrganization(id: string): Promise<void> {
-  const response = await deleteJson(API_PATHS.iam.organizations.byId(id))
+  const response = await deleteIamJson(API_PATHS.iam.organizations.byId(id))
 
   ensureResultSuccess(response)
 }

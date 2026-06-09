@@ -3,7 +3,7 @@ import type { PropsWithChildren } from 'react'
 
 import { useToast } from '../app/ToastProvider'
 import { API_PATHS } from '../data/apiPaths'
-import { getJson, postJson } from '../data/httpClient'
+import { getIamJson, postIamJson } from '../data/httpClient'
 import { getApiErrorText, unwrapResult } from '../data/result'
 import type { PermissionDto } from '../shared/permissions'
 import { tokenStorage, type StoredUser } from './tokenStorage'
@@ -56,24 +56,31 @@ export function AuthProvider({ children }: PropsWithChildren) {
   }, [])
 
   const login = useCallback(async (request: LoginRequest) => {
-    const loginResponse = unwrapResult<LoginResponse>(
-      await postJson(API_PATHS.iam.users.login, {
-        email: request.email,
-        password: request.password,
-      }),
-    )
-    const storedUser = toStoredUser(loginResponse)
+    try {
+      const loginResponse = unwrapResult<LoginResponse>(
+        await postIamJson(API_PATHS.iam.users.login, {
+          email: request.email,
+          password: request.password,
+        }),
+      )
+      const storedUser = toStoredUser(loginResponse)
 
-    tokenStorage.setToken(loginResponse.token)
-    tokenStorage.setUser(storedUser)
+      tokenStorage.setToken(loginResponse.token)
 
-    const loadedPermissions = unwrapResult<PermissionDto[]>(
-      await getJson(API_PATHS.iam.roles.userPermissions(storedUser.id)),
-    )
+      const loadedPermissions = unwrapResult<PermissionDto[]>(
+        await getIamJson(API_PATHS.iam.roles.userPermissions(storedUser.id)),
+      )
 
-    tokenStorage.setPermissions(loadedPermissions)
-    setUser(storedUser)
-    setPermissions(loadedPermissions)
+      tokenStorage.setUser(storedUser)
+      tokenStorage.setPermissions(loadedPermissions)
+      setUser(storedUser)
+      setPermissions(loadedPermissions)
+    } catch (error) {
+      tokenStorage.clearAll()
+      setUser(null)
+      setPermissions([])
+      throw error
+    }
   }, [])
 
   const value = useMemo<AuthContextValue>(() => ({

@@ -364,6 +364,29 @@ input {
   font-weight: 700;
 }
 
+.table-header-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: default;
+  font: inherit;
+  font-weight: inherit;
+  padding: 0;
+  text-align: left;
+}
+
+.table-header-sortable {
+  cursor: pointer;
+}
+
+.table-header-sortable:hover {
+  color: #1d4ed8;
+}
+
 .data-table tr:hover td {
   background: #f8fafc;
 }
@@ -409,6 +432,13 @@ input {
 }
 
 .pagination-actions {
+  gap: 6px;
+}
+
+.pagination-page-size {
+  display: grid;
+  grid-template-columns: auto 76px;
+  align-items: center;
   gap: 6px;
 }
 

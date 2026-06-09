@@ -123,6 +123,19 @@ Even though parameters are a Shared concept, the current admin API exposes them 
 
 So keep parameters under `resources/iam/parameters` for now.
 
+Reusable component helper files that belong to one component family must share the same file prefix.
+
+Good:
+
+```text
+components/ui/data-table.tsx
+components/ui/data-table-pagination.tsx
+components/ui/data-table-row-actions.tsx
+components/ui/data-table-sortable-button.tsx
+```
+
+Avoid mixed prefixes for the same component family.
+
 ---
 
 ## No Magic Strings

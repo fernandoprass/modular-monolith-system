@@ -3,16 +3,17 @@ import { tokenStorage } from '../auth/tokenStorage'
 import { ApiResultError, isApiResult } from './result'
 
 type RequestOptions = {
+  baseUrl: string
   body?: unknown
   method: string
   query?: URLSearchParams
 }
 
-function buildUrl(path: string, query?: URLSearchParams): string {
+function buildUrl(baseUrl: string, path: string, query?: URLSearchParams): string {
   const queryString = query?.toString()
   return queryString === undefined || queryString.length === 0
-    ? `${CONFIG.coreApiUrl}${path}`
-    : `${CONFIG.coreApiUrl}${path}?${queryString}`
+    ? `${baseUrl}${path}`
+    : `${baseUrl}${path}?${queryString}`
 }
 
 function getHeaders(): Headers {
@@ -41,7 +42,7 @@ async function readBody(response: Response): Promise<unknown> {
 }
 
 async function request(path: string, options: RequestOptions): Promise<unknown> {
-  const response = await fetch(buildUrl(path, options.query), {
+  const response = await fetch(buildUrl(options.baseUrl, path, options.query), {
     body: options.body === undefined ? undefined : JSON.stringify(options.body),
     headers: getHeaders(),
     method: options.method,
@@ -64,25 +65,49 @@ async function request(path: string, options: RequestOptions): Promise<unknown> 
 }
 
 export function getJson(path: string): Promise<unknown> {
-  return request(path, { method: 'GET' })
+  return request(path, { baseUrl: CONFIG.apiBaseUrls.core, method: 'GET' })
 }
 
 export function getJsonWithQuery(path: string, query: URLSearchParams): Promise<unknown> {
-  return request(path, { method: 'GET', query })
+  return request(path, { baseUrl: CONFIG.apiBaseUrls.core, method: 'GET', query })
 }
 
 export function postJson(path: string, body: unknown): Promise<unknown> {
-  return request(path, { body, method: 'POST' })
+  return request(path, { baseUrl: CONFIG.apiBaseUrls.core, body, method: 'POST' })
 }
 
 export function putJson(path: string, body: unknown): Promise<unknown> {
-  return request(path, { body, method: 'PUT' })
+  return request(path, { baseUrl: CONFIG.apiBaseUrls.core, body, method: 'PUT' })
 }
 
 export function patchJson(path: string, body: unknown): Promise<unknown> {
-  return request(path, { body, method: 'PATCH' })
+  return request(path, { baseUrl: CONFIG.apiBaseUrls.core, body, method: 'PATCH' })
 }
 
 export function deleteJson(path: string): Promise<unknown> {
-  return request(path, { method: 'DELETE' })
+  return request(path, { baseUrl: CONFIG.apiBaseUrls.core, method: 'DELETE' })
+}
+
+export function getIamJson(path: string): Promise<unknown> {
+  return request(path, { baseUrl: CONFIG.apiBaseUrls.iam, method: 'GET' })
+}
+
+export function getIamJsonWithQuery(path: string, query: URLSearchParams): Promise<unknown> {
+  return request(path, { baseUrl: CONFIG.apiBaseUrls.iam, method: 'GET', query })
+}
+
+export function postIamJson(path: string, body: unknown): Promise<unknown> {
+  return request(path, { baseUrl: CONFIG.apiBaseUrls.iam, body, method: 'POST' })
+}
+
+export function putIamJson(path: string, body: unknown): Promise<unknown> {
+  return request(path, { baseUrl: CONFIG.apiBaseUrls.iam, body, method: 'PUT' })
+}
+
+export function patchIamJson(path: string, body: unknown): Promise<unknown> {
+  return request(path, { baseUrl: CONFIG.apiBaseUrls.iam, body, method: 'PATCH' })
+}
+
+export function deleteIamJson(path: string): Promise<unknown> {
+  return request(path, { baseUrl: CONFIG.apiBaseUrls.iam, method: 'DELETE' })
 }

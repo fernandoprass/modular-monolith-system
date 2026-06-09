@@ -7,8 +7,8 @@ import { useTranslate } from '../app/i18n/i18n'
 import { APP_ROUTES } from '../app/routes'
 import { Button } from '../components/ui/button'
 import { Card, CardContent } from '../components/ui/card'
+import { Field } from '../components/ui/field'
 import { Input } from '../components/ui/input'
-import { Label } from '../components/ui/label'
 import { useAuth, useNotifyError } from './AuthProvider'
 
 export function LoginPage() {
@@ -77,19 +77,5 @@ export function LoginPage() {
         </CardContent>
       </Card>
     </main>
-  )
-}
-
-type FieldProps = {
-  children: React.ReactNode
-  label: string
-}
-
-function Field({ children, label }: FieldProps) {
-  return (
-    <div className="field">
-      <Label>{label}</Label>
-      {children}
-    </div>
   )
 }

@@ -2,6 +2,8 @@ import { createContext, useCallback, useContext, useMemo, useState } from 'react
 import type { PropsWithChildren } from 'react'
 import { X } from 'lucide-react'
 
+import { useTranslate } from './i18n/i18n'
+
 type Toast = {
   id: number
   message: string
@@ -16,6 +18,7 @@ type ToastContextValue = {
 const ToastContext = createContext<ToastContextValue | null>(null)
 
 export function ToastProvider({ children }: PropsWithChildren) {
+  const t = useTranslate()
   const [toasts, setToasts] = useState<Toast[]>([])
 
   const removeToast = useCallback((id: number) => {
@@ -41,7 +44,7 @@ export function ToastProvider({ children }: PropsWithChildren) {
           <div className={`toast toast-${toast.type}`} key={toast.id}>
             <span>{toast.message}</span>
             <button
-              aria-label="Close"
+              aria-label={t('shared.actions.back')}
               className="toast-close"
               onClick={() => removeToast(toast.id)}
               type="button"

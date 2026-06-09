@@ -44,7 +44,7 @@ export function OrganizationShowPage() {
         <h1 className="page-title">{t('resources.iam.organizations.pages.show')}</h1>
         <Button onClick={() => navigate(APP_ROUTES.organizations)} type="button" variant="outline">
           <ArrowLeft size={16} />
-          {t('shared.actions.close')}
+          {t('shared.actions.back')}
         </Button>
       </div>
       <Card>
