@@ -16,8 +16,8 @@ export function LoginPage() {
   const navigate = useNavigate()
   const notifyError = useNotifyError()
   const { isAuthenticated, login } = useAuth()
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  const [email, setEmail] = useState('admin@saas.com')
+  const [password, setPassword] = useState('Password123!')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   if (isAuthenticated) {

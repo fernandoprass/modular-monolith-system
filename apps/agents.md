@@ -10,6 +10,8 @@ apps/core-admin
 
 It is the admin UI for the Core API backend.
 
+It uses React, TypeScript, Vite, and shadcn/ui style components.
+
 Communicate with the user using short sentences.
 
 Ask before changing design ownership, folder structure, API contracts, route names, or state management patterns.
@@ -25,27 +27,38 @@ Wait for `go` before making changes.
 Use:
 - React
 - TypeScript
-- React-admin
-- Material UI through React-admin
 - Vite
+- shadcn/ui style components
+- Radix UI primitives when useful
+- TanStack Table for reusable data tables
 
-Do not build a raw MUI admin unless the user asks.
+Do not use React-admin unless the user asks.
 
-React-admin owns:
-- admin app structure
-- resources
+The app owns:
+- admin shell
 - routes
-- list/create/edit/show pages
+- resource pages
 - forms
 - filters
 - notifications
 - auth integration
 - data loading patterns
 
-Material UI owns:
-- visual components
-- theme
-- layout primitives used by React-admin
+shadcn/ui style components own:
+- buttons
+- inputs
+- selects
+- dialogs
+- dropdowns
+- checkboxes
+- reusable UI primitives
+
+Plain CSS owns:
+- app shell layout
+- spacing
+- density
+- admin visual polish
+- responsive behavior
 
 ---
 
@@ -90,8 +103,8 @@ Use these folders:
 | :--- | :--- |
 | `app` | Admin shell, providers, routes, layout, theme setup. |
 | `auth` | Auth provider, login helpers, token storage. |
-| `data` | Data provider, HTTP client, API result unwrapping. |
-| `resources` | React-admin resource pages grouped by backend entity. |
+| `data` | HTTP client, API paths, API result unwrapping. |
+| `resources` | Resource pages grouped by backend entity. |
 | `shared` | Reusable constants, types, helpers, UI utilities. |
 
 Keep resource-specific code inside its resource folder.
@@ -189,8 +202,6 @@ localStorage.getItem(STORAGE_KEYS.authToken);
 
 ## API Integration Rules
 
-Use a custom React-admin `dataProvider`.
-
 The backend uses a Result wrapper:
 
 ```json
@@ -202,27 +213,9 @@ The backend uses a Result wrapper:
 }
 ```
 
-The data provider must unwrap this shape.
-
-React-admin expects:
-
-```ts
-{ data: record }
-```
-
-For lists, React-admin expects:
-
-```ts
-{ data: records, total: number }
-```
-
-If the backend endpoint does not return pagination metadata yet, use the array length as `total`.
-
 Keep this conversion in one place.
 
 Do not unwrap API results inside pages.
-
-Do not call backend endpoints directly from resource pages unless React-admin cannot model the action.
 
 For custom actions, create reusable API functions under `data` or the resource folder.
 
@@ -236,7 +229,7 @@ Store the token behind a small token storage helper.
 
 Do not access `localStorage` directly across many files.
 
-Use a React-admin `authProvider`.
+Use an app auth provider.
 
 The auth provider should own:
 - login
@@ -362,8 +355,6 @@ The app should be ready to add:
 pt-BR
 ```
 
-Use React-admin i18n support.
-
 Do not hardcode user-facing text in components.
 
 Use translation keys for:
@@ -415,7 +406,7 @@ Recommended folder:
 apps/core-admin/src/app/i18n
 ```
 
-If a component needs text, it should use the translation function or React-admin translated props.
+If a component needs text, it should use the app translation function.
 
 Do not concatenate translated strings unless there is no better option.
 
@@ -425,15 +416,13 @@ Prefer full sentence translation keys for messages.
 
 ## React Rules
 
-Prefer React-admin components and hooks before custom code.
-
 Keep components small.
 
-Do not put data fetching logic inside visual components if a data provider or resource hook can own it.
+Do not put data fetching logic inside visual components if an API helper or resource hook can own it.
 
 Avoid global state unless needed.
 
-Use React-admin and TanStack Query behavior before adding another state library.
+Use React and TanStack Table behavior before adding another state library.
 
 Do not add Redux unless explicitly approved.
 
@@ -489,7 +478,7 @@ Prefer focused tests for:
 - permission helpers
 - important custom components
 
-Do not over-test React-admin built-in behavior.
+Do not over-test shadcn/ui, Radix UI, or browser built-in behavior.
 
 ---
 

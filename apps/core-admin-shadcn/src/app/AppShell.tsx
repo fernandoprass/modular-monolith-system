@@ -5,6 +5,8 @@ import {
   Key,
   LogOut,
   Menu,
+  PanelLeftClose,
+  PanelLeftOpen,
   Settings,
   Shield,
   UserCog,
@@ -35,6 +37,7 @@ export function AppLayout() {
   const navigate = useNavigate()
   const location = useLocation()
   const [isMobileOpen, setIsMobileOpen] = useState(false)
+  const [isCollapsed, setIsCollapsed] = useState(false)
   const { isAuthenticated, logout, permissions, user } = useAuth()
   const canOpenOrganizations = hasResourceAccess(permissions, IAM_RESOURCES.organizations)
   const canOpenUsers = hasResourceAccess(permissions, IAM_RESOURCES.users)
@@ -53,97 +56,131 @@ export function AppLayout() {
   }
 
   return (
-    <div className="shell">
-      <header className="shell-header">
-        <div className="header-left">
-          <Button
-            aria-label={t('navigation.menu')}
-            className="mobile-menu"
-            onClick={() => setIsMobileOpen((current) => !current)}
-            size="icon"
-            variant="ghost"
-          >
-            <Menu size={18} />
-          </Button>
-          <span className="brand">{APP_CONSTANTS.appName}</span>
-        </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost">
-              {user?.fullName}
-              <ChevronDown size={14} />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={handleLogout}>
-              <LogOut size={16} />
-              {t('auth.userMenu.logout')}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </header>
+    <div className={`shell ${isCollapsed ? 'shell-collapsed' : ''}`}>
       <aside className={`sidebar ${isMobileOpen ? 'sidebar-open' : ''}`}>
-        <NavItem
-          active={location.pathname === APP_ROUTES.dashboard}
-          icon={<Gauge size={ICON_SIZE} />}
-          label={t('navigation.dashboard')}
-          to={APP_ROUTES.dashboard}
-        />
-        <div className="menu-section-label">{t('navigation.groups.iam')}</div>
-        {canOpenOrganizations && (
+        <div className="sidebar-header">
+          <div className="sidebar-brand-mark">CA</div>
+          <div className="sidebar-brand-text">
+            <span className="brand">{APP_CONSTANTS.appName}</span>
+            <span>{t('app.shell.workspace')}</span>
+          </div>
+        </div>
+        <nav className="sidebar-content">
           <NavItem
-            active={location.pathname.startsWith(APP_ROUTES.organizations)}
-            icon={<Building2 size={ICON_SIZE} />}
-            label={t('resources.iam.organizations.name')}
-            to={APP_ROUTES.organizations}
+            active={location.pathname === APP_ROUTES.dashboard}
+            icon={<Gauge size={ICON_SIZE} />}
+            label={t('navigation.dashboard')}
+            to={APP_ROUTES.dashboard}
           />
-        )}
-        {canOpenUsers && (
-          <NavItem
-            active={location.pathname.startsWith(APP_ROUTES.users)}
-            icon={<Users size={ICON_SIZE} />}
-            label={t('resources.iam.users.name')}
-            to={APP_ROUTES.users}
-          />
-        )}
-        {canOpenParameters && (
-          <NavItem
-            active={location.pathname.startsWith(APP_ROUTES.parameters)}
-            icon={<Settings size={ICON_SIZE} />}
-            label={t('resources.iam.parameters.name')}
-            to={APP_ROUTES.parameters}
-          />
-        )}
-        {canOpenAuthorization && (
-          <>
-            <div className="nav-group-title">
-              <Shield size={ICON_SIZE} />
-              {t('navigation.groups.authorization')}
-            </div>
-            <div className="nav-nested">
-              {canOpenRoles && (
-                <NavItem
-                  active={location.pathname.startsWith(APP_ROUTES.roles)}
-                  icon={<UserCog size={ICON_SIZE} />}
-                  label={t('resources.iam.roles.name')}
-                  to={APP_ROUTES.roles}
-                />
-              )}
-              {canOpenPermissions && (
-                <NavItem
-                  active={location.pathname.startsWith(APP_ROUTES.permissions)}
-                  icon={<Key size={ICON_SIZE} />}
-                  label={t('resources.iam.permissions.name')}
-                  to={APP_ROUTES.permissions}
-                />
-              )}
-            </div>
-          </>
-        )}
+          <div className="menu-section-label">{t('navigation.groups.iam')}</div>
+          {canOpenOrganizations && (
+            <NavItem
+              active={location.pathname.startsWith(APP_ROUTES.organizations)}
+              icon={<Building2 size={ICON_SIZE} />}
+              label={t('resources.iam.organizations.name')}
+              to={APP_ROUTES.organizations}
+            />
+          )}
+          {canOpenUsers && (
+            <NavItem
+              active={location.pathname.startsWith(APP_ROUTES.users)}
+              icon={<Users size={ICON_SIZE} />}
+              label={t('resources.iam.users.name')}
+              to={APP_ROUTES.users}
+            />
+          )}
+          {canOpenParameters && (
+            <NavItem
+              active={location.pathname.startsWith(APP_ROUTES.parameters)}
+              icon={<Settings size={ICON_SIZE} />}
+              label={t('resources.iam.parameters.name')}
+              to={APP_ROUTES.parameters}
+            />
+          )}
+          {canOpenAuthorization && (
+            <>
+              <div className="nav-group-title">
+                <Shield size={ICON_SIZE} />
+                <span>{t('navigation.groups.authorization')}</span>
+              </div>
+              <div className="nav-nested">
+                {canOpenRoles && (
+                  <NavItem
+                    active={location.pathname.startsWith(APP_ROUTES.roles)}
+                    icon={<UserCog size={ICON_SIZE} />}
+                    label={t('resources.iam.roles.name')}
+                    to={APP_ROUTES.roles}
+                  />
+                )}
+                {canOpenPermissions && (
+                  <NavItem
+                    active={location.pathname.startsWith(APP_ROUTES.permissions)}
+                    icon={<Key size={ICON_SIZE} />}
+                    label={t('resources.iam.permissions.name')}
+                    to={APP_ROUTES.permissions}
+                  />
+                )}
+              </div>
+            </>
+          )}
+        </nav>
+        <div className="sidebar-footer">
+          <span className="shell-current-section">{APP_CONSTANTS.appName}</span>
+        </div>
       </aside>
-      <main className="shell-main">
-        <Outlet />
-      </main>
+      <div className="shell-inset">
+        <header className="shell-topbar">
+          <div className="header-left">
+            <Button
+              aria-label={t('navigation.menu')}
+              className="mobile-menu"
+              onClick={() => setIsMobileOpen((current) => !current)}
+              size="icon"
+              variant="ghost"
+            >
+              <Menu size={18} />
+            </Button>
+            <Button
+              aria-label={t('navigation.toggleSidebar')}
+              className="desktop-menu"
+              onClick={() => setIsCollapsed((current) => !current)}
+              size="icon"
+              variant="ghost"
+            >
+              {isCollapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
+            </Button>
+            <span className="shell-current-section">{APP_CONSTANTS.appName}</span>
+          </div>
+          <div className="header-right">
+            <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button className="sidebar-user-button" variant="ghost">
+                <span className="sidebar-user-avatar">{user?.fullName.slice(0, 1)}</span>
+                <span className="sidebar-user-name">{user?.fullName}</span>
+                <ChevronDown className="sidebar-user-chevron" size={14} />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={handleLogout}>
+                <LogOut size={16} />
+                {t('auth.userMenu.logout')}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          </div>
+        </header>
+        <main className="shell-main">
+          <Outlet />
+        </main>
+      </div>
+      {isMobileOpen && (
+        <button
+          aria-label={t('navigation.toggleSidebar')}
+          className="sidebar-scrim"
+          onClick={() => setIsMobileOpen(false)}
+          type="button"
+        />
+      )}
     </div>
   )
 }

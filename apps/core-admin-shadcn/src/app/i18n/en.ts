@@ -4,6 +4,9 @@ export const enMessages = {
       subtitle: 'Admin workspace for Core API modules.',
       title: 'Core Admin',
     },
+    shell: {
+      workspace: 'Admin workspace',
+    },
   },
   auth: {
     login: {
@@ -20,6 +23,7 @@ export const enMessages = {
   navigation: {
     dashboard: 'Dashboard',
     menu: 'Menu',
+    toggleSidebar: 'Toggle sidebar',
     groups: {
       authorization: 'Authorization',
       iam: 'IAM',
@@ -110,8 +114,10 @@ export const enMessages = {
       back: 'Back',
       columns: 'Columns',
       filter: 'Filter',
-      next: 'Next',
-      previous: 'Previous',
+      firstPage: '<<', 
+      nextPage: '>',
+      previousPage: '<',
+      lastPage: '>>', 
       reset: 'Reset',
       save: 'Save',
     },
@@ -133,7 +139,7 @@ export const enMessages = {
     },
     pagination: {
       pageSize: 'Rows per page',
-      summary: '{{page}} / {{pages}}',
+      summary: 'Page {{page}} of {{pages}}',
       visibleRows: 'Showing {{start}}-{{end}} of {{total}}',
     },
     status: {

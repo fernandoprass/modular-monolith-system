@@ -52,12 +52,18 @@ export function DataTablePagination({
         })}
       </span>
       <div className="pagination-actions">
-        <Button disabled={pageNumber <= 1} onClick={() => onPageChange(pageNumber - 1)} type="button" variant="outline">
-          {t('shared.actions.previous')}
-        </Button>
         <span>{t('shared.pagination.summary', { page: pageNumber, pages: totalPages })}</span>
+        <Button disabled={pageNumber <= 1} onClick={() => onPageChange(1)} type="button" variant="outline">
+          {t('shared.actions.firstPage')}
+        </Button>
+        <Button disabled={pageNumber <= 1} onClick={() => onPageChange(pageNumber - 1)} type="button" variant="outline">
+          {t('shared.actions.previousPage')}
+        </Button>
         <Button disabled={pageNumber >= totalPages} onClick={() => onPageChange(pageNumber + 1)} type="button" variant="outline">
-          {t('shared.actions.next')}
+          {t('shared.actions.nextPage')}
+        </Button>
+        <Button disabled={pageNumber >= totalPages} onClick={() => onPageChange(totalPages)} type="button" variant="outline">
+          {t('shared.actions.lastPage')}
         </Button>
       </div>
     </div>
