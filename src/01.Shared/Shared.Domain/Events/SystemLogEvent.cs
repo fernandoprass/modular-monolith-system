@@ -16,4 +16,6 @@ public record SystemLogEvent
    public Guid? OrganizationId { get; init; }
    public Guid? UserId { get; init; }
    public Dictionary<string, object> Properties { get; init; } = [];
+
+   public SystemLogEvent() { }
 }

@@ -9,6 +9,7 @@ using Sentinel.API.Configure;
 using Sentinel.API.Controllers;
 
 var builder = WebApplication.CreateBuilder(args);
+const string FrontendCorsPolicy = "FrontendCorsPolicy";
 
 builder.Services
    .AddControllers()
@@ -20,6 +21,20 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
+builder.Services.AddCors(options =>
+{
+   options.AddPolicy(FrontendCorsPolicy, policy =>
+   {
+      var allowedOrigins = builder.Configuration
+         .GetSection("Cors:AllowedOrigins")
+         .Get<string[]>() ?? [];
+
+      policy
+         .WithOrigins(allowedOrigins)
+         .AllowAnyHeader()
+         .AllowAnyMethod();
+   });
+});
 
 builder.Services.AddIamModule(builder.Configuration);
 builder.Services.AddSentinelModule(builder.Configuration);
@@ -40,11 +55,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseRouting();
+app.UseCors(FrontendCorsPolicy);
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-
-app.MapGet("api/v{version:apiVersion}/core/health", () => Results.Ok(new { Status = "Ok", Module = CoreConst.ModuleName }));
 
 app.Run();
 

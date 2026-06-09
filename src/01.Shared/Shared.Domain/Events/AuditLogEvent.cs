@@ -18,7 +18,7 @@ public record AuditLogEvent
    public Guid OrganizationId { get; init; }
    public string Metadata { get; init; } = "{}";
 
-   private AuditLogEvent() { }
+   public AuditLogEvent() { }
 
    public static AuditLogEvent Create(
       string module, 

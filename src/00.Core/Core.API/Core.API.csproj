@@ -15,9 +15,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\02.Sentinel\Sentinel.API\Sentinel.API.csproj" />
-    <ProjectReference Include="..\..\03.IAM\IAM.API\IAM.API.csproj" />
-    <ProjectReference Include="..\..\04.Courier\Courier.API\Courier.API.csproj" />
+    <ProjectReference Include="..\..\02.Sentinel\Sentinel.API\Sentinel.API.csproj" AdditionalProperties="IsCoreHostPublish=true" />
+    <ProjectReference Include="..\..\03.IAM\IAM.API\IAM.API.csproj" AdditionalProperties="IsCoreHostPublish=true" />
+    <ProjectReference Include="..\..\04.Courier\Courier.API\Courier.API.csproj" AdditionalProperties="IsCoreHostPublish=true" />
   </ItemGroup>
 
 </Project>

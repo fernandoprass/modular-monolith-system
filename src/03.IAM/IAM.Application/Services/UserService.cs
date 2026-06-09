@@ -11,6 +11,7 @@ using Isopoh.Cryptography.Argon2;
 using Myce.Response;
 using Shared.Application.Contracts;
 using Shared.Application.Services;
+using Shared.Domain.DTOs.Responses;
 using Shared.Domain.Enums;
 using Shared.Domain.Interfaces;
 using Shared.Domain.Messages;
@@ -46,12 +47,14 @@ public class UserService(
       return await _userQueryRepository.GetByEmailWithPasswordAsync(email, cancellationToken);
    }
 
-   public async Task<IEnumerable<UserLiteDto>> GetByOrganizationIdAsync(Guid organizationId, CancellationToken cancellationToken = default)
+   public async Task<PagedResultDto<UserLiteDto>> GetAsync(UserSearchRequest request, CancellationToken cancellationToken = default)
    {
-      return await ExecuteIfUserOwnsCollectionAsync(
-         organizationId,
-         ct => _userQueryRepository.GetByOrganizationIdAsync(organizationId, ct),
-         cancellationToken);
+      var searchRequest = request with
+      {
+         OrganizationId = _userContext.IsSystemAdmin ? request.OrganizationId : _userContext.UserOwnerId
+      };
+
+      return await _userQueryRepository.GetAsync(request,cancellationToken);
    }
 
    public async Task<Result<UserDto>> CreateUserAsync(UserCreateRequest request,

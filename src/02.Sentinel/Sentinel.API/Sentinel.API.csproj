@@ -20,4 +20,8 @@
     <ProjectReference Include="..\..\01.Shared\Shared.Infrastructure\Shared.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(IsCoreHostPublish)' == 'true'">
+    <Content Update="appsettings*.json" CopyToPublishDirectory="Never" />
+  </ItemGroup>
+
 </Project>

@@ -39,12 +39,12 @@ public class UserController(
       return OkOrNotFound(user);
    }
 
-   [HttpGet("by-organization/{organizationId:guid}")]
+   [HttpGet("")]
    [Authorize]
    [RequirePermission(IamPermission.Users.List)]
-   public async Task<IActionResult> GetByOrganizationId(Guid organizationId, CancellationToken cancellationToken)
+   public async Task<IActionResult> GetByOrganizationId([FromQuery] UserSearchRequest request, CancellationToken cancellationToken)
    {
-      var users = await _userService.GetByOrganizationIdAsync(organizationId, cancellationToken);
+      var users = await _userService.GetAsync(request, cancellationToken);
 
       return OkOrNotFound(users);
    }
