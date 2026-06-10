@@ -10,9 +10,12 @@ public static class IamPermission
 
       public const string List = $"{Module}.{Resource}.list";
       public const string View = $"{Module}.{Resource}.view";
+      public const string ViewOwn = $"{Module}.{Resource}.viewown";
       public const string Create = $"{Module}.{Resource}.create";
       public const string Update = $"{Module}.{Resource}.update";
+      public const string UpdateOwn = $"{Module}.{Resource}.updateown";
       public const string Delete = $"{Module}.{Resource}.delete";
+      public const string DeleteOwn = $"{Module}.{Resource}.deleteown";
    }
 
    public static class Users

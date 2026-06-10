@@ -6,6 +6,7 @@ public class UserRole : EntityAudited
 {
    public Guid UserId { get; private set; }
    public Guid RoleId { get; private set; }
+   public DateTime StartsAt { get; private set; }
    public DateTime? ExpiresAt { get; private set; }
    public User User { get; private set; } = null!;
    public Role Role { get; private set; } = null!;

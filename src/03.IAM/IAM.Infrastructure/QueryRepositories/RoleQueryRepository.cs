@@ -72,10 +72,14 @@ public class RoleQueryRepository(IamDbContext dbContext, IUserContext userContex
 
    public async Task<IEnumerable<Permission>> GetRolePermissionsByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
    {
+      var now = DateTime.UtcNow;
+
       return await _dbContext.UserRoles
           .AsNoTracking()
           .Where(ur => ur.UserId == userId)
-          .Where(ur => ur.Role.IsActive)
+          .Where(ur => ur.Role.IsActive && 
+                       ur.StartsAt <= now &&
+                       (ur.ExpiresAt == null || ur.ExpiresAt >= now))
           .SelectMany(ur => ur.Role.RolePermissions.Select(rf => rf.Permission))
           .Where(permission => permission.IsActive)
           .Distinct()

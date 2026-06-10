@@ -1,10 +1,11 @@
 using Asp.Versioning;
-using Shared.Infrastructure.Authorization;
 using IAM.Application.Contracts;
 using IAM.Domain;
 using IAM.Domain.DTOs.Requests;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Shared.Application.Contracts;
+using Shared.Infrastructure.Authorization;
 
 namespace IAM.API.Controllers;
 
@@ -12,10 +13,12 @@ namespace IAM.API.Controllers;
 [Route("api/v{version:apiVersion}/iam/organizations")]
 public class OrganizationController(
    IOrganizationService organizationService,
-   IRegisterOrchestrator registerOrchestrator) : BaseController
+   IRegisterOrchestrator registerOrchestrator,
+   IUserContext userContext) : BaseController
 {
    private readonly IOrganizationService _organizationService = organizationService;
    private readonly IRegisterOrchestrator _registerOrchestrator = registerOrchestrator;
+   private readonly IUserContext _userContext = userContext;
 
    [HttpGet("{id:guid}")]
    [Authorize]
@@ -26,12 +29,30 @@ public class OrganizationController(
       return OkOrNotFound(organization);
    }
 
+   [HttpGet("own")]
+   [Authorize]
+   [RequirePermission(IamPermission.Organizations.ViewOwn)]
+   public async Task<IActionResult> GetById(CancellationToken cancellationToken)
+   {
+      var organization = await _organizationService.GetByIdAsync(_userContext.UserOwnerId, cancellationToken);
+      return OkOrNotFound(organization);
+   }
+
    [HttpGet()]
    [Authorize]
    [RequirePermission(IamPermission.Organizations.List)]
    public async Task<IActionResult> Get([FromQuery] OrganizationSearchRequest request, CancellationToken cancellationToken)
    {
       var organization = await _organizationService.GetAsync(request, cancellationToken);
+      return OkOrNotFound(organization);
+   }
+
+   [HttpGet("lookup")]
+   [Authorize]
+   [RequirePermission(IamPermission.Organizations.List)]
+   public async Task<IActionResult> GetLookup([FromQuery] OrganizationLookupRequest request, CancellationToken cancellationToken)
+   {
+      var organization = await _organizationService.GetLookupAsync(request, cancellationToken);
       return OkOrNotFound(organization);
    }
 
@@ -51,6 +72,15 @@ public class OrganizationController(
       return OkOrNotFound(result);
    }
 
+   [HttpPut("own")]
+   [Authorize]
+   [RequirePermission(IamPermission.Organizations.UpdateOwn)]
+   public async Task<IActionResult> Update([FromBody] OrganizationUpdateRequest organization, CancellationToken cancellationToken)
+   {
+      var result = await _organizationService.UpdateAsync(_userContext.UserOwnerId, organization, cancellationToken);
+      return OkOrNotFound(result);
+   }
+
    [HttpPatch("{id:guid}/code")]
    [Authorize]
    [RequirePermission(IamPermission.Organizations.Update)]
@@ -66,6 +96,15 @@ public class OrganizationController(
    public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
    {
       var result = await _registerOrchestrator.DeleteOrganizationAsync(id, cancellationToken);
+      return OkOrNotFound(result);
+   }
+
+   [HttpDelete("own")]
+   [Authorize]
+   [RequirePermission(IamPermission.Organizations.DeleteOwn)]
+   public async Task<IActionResult> Delete(CancellationToken cancellationToken)
+   {
+      var result = await _registerOrchestrator.DeleteOrganizationAsync(_userContext.UserOwnerId, cancellationToken);
       return OkOrNotFound(result);
    }
 }

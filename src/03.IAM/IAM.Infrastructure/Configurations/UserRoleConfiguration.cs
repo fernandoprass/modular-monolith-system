@@ -8,6 +8,7 @@ namespace IAM.Infrastructure.Configurations
    {
       public void Configure(EntityTypeBuilder<UserRole> builder)
       {
+         builder.Property(u => u.StartsAt).IsRequired().HasDefaultValueSql("CURRENT_TIMESTAMP");
          builder.HasKey(ur => new { ur.UserId, ur.RoleId });
 
          builder.HasOne(ur => ur.User)

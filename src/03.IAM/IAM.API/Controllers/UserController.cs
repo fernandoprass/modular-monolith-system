@@ -33,6 +33,7 @@ public class UserController(
 
    [HttpGet("me")]
    [Authorize]
+   [RequirePermission(IamPermission.Users.ViewMe)]
    public async Task<IActionResult> GetByCurrentUser(CancellationToken cancellationToken)
    {
       var user = await _userService.GetByIdAsync(_userContext.UserId, cancellationToken);
