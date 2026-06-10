@@ -4,8 +4,14 @@ import { AuthProvider } from '../auth/AuthProvider'
 import { LoginPage } from '../auth/LoginPage'
 import { OrganizationEditPage } from '../resources/iam/organizations/OrganizationEditPage'
 import { OrganizationListPage } from '../resources/iam/organizations/OrganizationListPage'
+import { OrganizationProfilePage } from '../resources/iam/organizations/OrganizationProfilePage'
 import { OrganizationShowPage } from '../resources/iam/organizations/OrganizationShowPage'
 import { PublicOrganizationCreatePage } from '../resources/iam/organizations/PublicOrganizationCreatePage'
+import { UserCreatePage } from '../resources/iam/users/UserCreatePage'
+import { UserEditPage } from '../resources/iam/users/UserEditPage'
+import { UserListPage } from '../resources/iam/users/UserListPage'
+import { UserProfilePage } from '../resources/iam/users/UserProfilePage'
+import { UserShowPage } from '../resources/iam/users/UserShowPage'
 import { ToastProvider } from './ToastProvider'
 import { AppLayout } from './AppShell'
 import { I18nContext, translate } from './i18n/i18n'
@@ -22,9 +28,15 @@ function App() {
               <Route path={APP_ROUTES.registerOrganization} element={<PublicOrganizationCreatePage />} />
               <Route element={<AppLayout />}>
                 <Route index element={<DashboardPage />} />
+                <Route path={APP_ROUTES.organizationProfile.slice(1)} element={<OrganizationProfilePage />} />
                 <Route path={APP_ROUTES.organizations.slice(1)} element={<OrganizationListPage />} />
                 <Route path="organizations/:id" element={<OrganizationEditPage />} />
                 <Route path="organizations/:id/show" element={<OrganizationShowPage />} />
+                <Route path={APP_ROUTES.users.slice(1)} element={<UserListPage />} />
+                <Route path="users/create" element={<UserCreatePage />} />
+                <Route path="users/:id" element={<UserEditPage />} />
+                <Route path="users/:id/show" element={<UserShowPage />} />
+                <Route path={APP_ROUTES.userProfile.slice(1)} element={<UserProfilePage />} />
                 <Route path="*" element={<Navigate to={APP_ROUTES.dashboard} replace />} />
               </Route>
             </Routes>

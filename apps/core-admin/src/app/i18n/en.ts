@@ -23,6 +23,7 @@ export const enMessages = {
   navigation: {
     dashboard: 'Dashboard',
     menu: 'Menu',
+    profile: 'Profile',
     toggleSidebar: 'Toggle sidebar',
     groups: {
       authorization: 'Authorization',
@@ -87,7 +88,11 @@ export const enMessages = {
         pages: {
           edit: 'Edit organization',
           list: 'Organizations',
+          profile: 'Organization profile',
           show: 'Organization details',
+        },
+        placeholders: {
+          search: 'Search organization',
         },
         types: {
           company: 'Company',
@@ -104,7 +109,42 @@ export const enMessages = {
         name: 'Roles',
       },
       users: {
+        actions: {
+          create: 'Create user',
+          delete: 'Delete',
+          edit: 'Edit',
+          view: 'View',
+        },
+        fields: {
+          actions: 'Actions',
+          email: 'Email',
+          isActive: 'Active',
+          isOrganizationAdmin: 'Organization admin',
+          isSystemAdmin: 'System admin',
+          language: 'Language',
+          name: 'Name',
+          organizationId: 'Organization ID',
+          organizationName: 'Organization',
+          password: 'Password',
+        },
+        messages: {
+          deleteConfirm: 'Delete this user?',
+          empty: 'No users found.',
+        },
         name: 'Users',
+        notifications: {
+          created: 'User created.',
+          deleted: 'User deleted.',
+          profileUpdated: 'Profile updated.',
+          updated: 'User updated.',
+        },
+        pages: {
+          create: 'Create user',
+          edit: 'Edit user',
+          list: 'Users',
+          profile: 'User profile',
+          show: 'User details',
+        },
       },
     },
   },
@@ -112,6 +152,7 @@ export const enMessages = {
     actions: {
       cancel: 'Cancel',
       back: 'Back',
+      clear: 'Clear',
       columns: 'Columns',
       filter: 'Filter',
       firstPage: '<<', 

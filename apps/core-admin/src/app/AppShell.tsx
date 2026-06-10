@@ -10,6 +10,7 @@ import {
   Settings,
   Shield,
   UserCog,
+  UserRound,
   Users,
 } from 'lucide-react'
 import type { ReactNode } from 'react'
@@ -45,6 +46,8 @@ export function AppLayout() {
   const canOpenRoles = hasResourceAccess(permissions, IAM_RESOURCES.roles)
   const canOpenPermissions = hasResourceAccess(permissions, IAM_RESOURCES.permissions)
   const canOpenAuthorization = canOpenRoles || canOpenPermissions
+  const organizationName = user?.organizationName || APP_CONSTANTS.appName
+  const canOpenOrganizationProfile = user?.isOrganizationAdmin === true
 
   if (!isAuthenticated) {
     return <Navigate to={APP_ROUTES.login} replace />
@@ -55,15 +58,46 @@ export function AppLayout() {
     navigate(APP_ROUTES.login)
   }
 
+  function handleOrganizationProfile() {
+    navigate(APP_ROUTES.organizationProfile)
+  }
+
+  function handleUserProfile() {
+    navigate(APP_ROUTES.userProfile)
+  }
+
   return (
     <div className={`shell ${isCollapsed ? 'shell-collapsed' : ''}`}>
       <aside className={`sidebar ${isMobileOpen ? 'sidebar-open' : ''}`}>
         <div className="sidebar-header">
-          <div className="sidebar-brand-mark">CA</div>
-          <div className="sidebar-brand-text">
-            <span className="brand">{APP_CONSTANTS.appName}</span>
-            <span>{t('app.shell.workspace')}</span>
-          </div>
+          {canOpenOrganizationProfile ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button className="sidebar-organization-button" variant="ghost">
+                  <span className="sidebar-brand-mark">{organizationName.slice(0, 2)}</span>
+                  <span className="sidebar-brand-text">
+                    <span className="brand">{organizationName}</span>
+                    <span>{APP_CONSTANTS.appName}</span>
+                  </span>
+                  <ChevronDown className="sidebar-user-chevron" size={14} />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start">
+                <DropdownMenuItem onClick={handleOrganizationProfile}>
+                  <UserRound size={16} />
+                  {t('navigation.profile')}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <>
+              <div className="sidebar-brand-mark">{organizationName.slice(0, 2)}</div>
+              <div className="sidebar-brand-text">
+                <span className="brand">{organizationName}</span>
+                <span>{APP_CONSTANTS.appName}</span>
+              </div>
+            </>
+          )}
         </div>
         <nav className="sidebar-content">
           <NavItem
@@ -153,20 +187,24 @@ export function AppLayout() {
           </div>
           <div className="header-right">
             <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button className="sidebar-user-button" variant="ghost">
-                <span className="sidebar-user-avatar">{user?.fullName.slice(0, 1)}</span>
-                <span className="sidebar-user-name">{user?.fullName}</span>
-                <ChevronDown className="sidebar-user-chevron" size={14} />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={handleLogout}>
-                <LogOut size={16} />
-                {t('auth.userMenu.logout')}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button className="sidebar-user-button" variant="ghost">
+                  <span className="sidebar-user-avatar">{user?.fullName.slice(0, 1)}</span>
+                  <span className="sidebar-user-name">{user?.fullName}</span>
+                  <ChevronDown className="sidebar-user-chevron" size={14} />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={handleUserProfile}>
+                  <UserRound size={16} />
+                  {t('resources.iam.users.pages.profile')}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleLogout}>
+                  <LogOut size={16} />
+                  {t('auth.userMenu.logout')}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </header>
         <main className="shell-main">

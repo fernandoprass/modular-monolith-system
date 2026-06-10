@@ -1,7 +1,7 @@
 meta {
   name: search by param
   type: http
-  seq: 6
+  seq: 9
 }
 
 get {
@@ -11,12 +11,12 @@ get {
 }
 
 params:query {
+  pageNumber: 1
+  pageSize: 25
   ~type: 1
   ~code: sa
   ~name: sa
   ~organizationId: {{organizationId}}
-  pageNumber: 1
-  pageSize: 25
 }
 
 auth:bearer {

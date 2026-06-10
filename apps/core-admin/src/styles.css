@@ -171,6 +171,25 @@ input {
   line-height: 1.2;
 }
 
+.sidebar-organization-button {
+  width: 100%;
+  height: auto;
+  justify-content: flex-start;
+  gap: 10px;
+  padding: 0;
+}
+
+.sidebar-organization-button .sidebar-brand-text {
+  flex: 1;
+  text-align: left;
+}
+
+.sidebar-organization-button .brand {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .sidebar-content {
   display: grid;
   flex: 1;
@@ -231,6 +250,7 @@ input {
 .shell-collapsed .sidebar-header,
 .shell-collapsed .nav-item,
 .shell-collapsed .nav-group-title,
+.shell-collapsed .sidebar-organization-button,
 .shell-collapsed .sidebar-user-button {
   justify-content: center;
 }
@@ -618,6 +638,72 @@ input {
   font-size: 0.84rem;
 }
 
+.lookup-select {
+  position: relative;
+}
+
+.lookup-input-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 6px;
+}
+
+.lookup-input-wrap {
+  position: relative;
+}
+
+.lookup-input-wrap .input {
+  padding-right: 28px;
+}
+
+.lookup-chevron {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  color: #64748b;
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+.lookup-options {
+  position: absolute;
+  z-index: 25;
+  top: calc(100% + 4px);
+  right: 0;
+  left: 0;
+  max-height: 220px;
+  overflow-y: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background: #fff;
+  box-shadow: 0 10px 30px rgb(15 23 42 / 12%);
+  padding: 4px;
+}
+
+.lookup-option {
+  display: grid;
+  width: 100%;
+  gap: 2px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: #0f172a;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.82rem;
+  padding: 6px 8px;
+  text-align: left;
+}
+
+.lookup-option:hover {
+  background: #f1f5f9;
+}
+
+.lookup-option span:last-child {
+  color: #64748b;
+  font-size: 0.74rem;
+}
+
 .checkbox {
   display: grid;
   width: 16px;
@@ -774,6 +860,7 @@ input {
   .shell-collapsed .sidebar-header,
   .shell-collapsed .nav-item,
   .shell-collapsed .nav-group-title,
+  .shell-collapsed .sidebar-organization-button,
   .shell-collapsed .sidebar-user-button {
     justify-content: flex-start;
   }

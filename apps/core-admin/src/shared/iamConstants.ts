@@ -42,7 +42,10 @@ export const IAM_PERMISSIONS = {
     view: permission(IAM_RESOURCES.roles, IAM_ACTIONS.view),
   },
   users: {
+    create: permission(IAM_RESOURCES.users, IAM_ACTIONS.create),
+    delete: permission(IAM_RESOURCES.users, IAM_ACTIONS.delete),
     list: permission(IAM_RESOURCES.users, IAM_ACTIONS.list),
+    update: permission(IAM_RESOURCES.users, IAM_ACTIONS.update),
     view: permission(IAM_RESOURCES.users, IAM_ACTIONS.view),
   },
 } as const
