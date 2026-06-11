@@ -1,0 +1,24 @@
+meta {
+  name: update own
+  type: http
+  seq: 3
+}
+
+put {
+  url: {{host.iam}}/api/{{version}}/iam/organizations/own
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "name": "Saas Admin own",
+    "description": "brand new description",
+    "isActive": true,
+    "defaultLanguage": "en"
+  }
+}

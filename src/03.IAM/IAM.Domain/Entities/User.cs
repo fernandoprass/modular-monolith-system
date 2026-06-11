@@ -87,11 +87,11 @@ public class User : EntityAudited
       }
    }
 
-   public void AddRole(Guid roleId, DateTime? expiresAt)
+   public void AddRole(Guid roleId, DateTime startsAt, DateTime? expiresAt)
    {
       if (!_userRoles.Any(ur => ur.RoleId == roleId))
       {
-         _userRoles.Add(UserRole.Create(Id, roleId, expiresAt));
+         _userRoles.Add(UserRole.Create(Id, roleId, startsAt, expiresAt));
       }
    }
 

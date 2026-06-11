@@ -60,7 +60,7 @@ public class UserEndToEndTests(CoreApiTestFixture fixture) : IClassFixture<CoreA
 
       var role = await adminApi.CreateRoleAsync(roleRequest, TestContext.Current.CancellationToken);
       var organizationPermissions = await adminApi.SearchPermissionsAsync(
-         new PermissionSearchRequest(null, "iam", "organizations", null),
+         new PermissionSearchRequest(null, "iam", "organizations", null, null, false),
          TestContext.Current.CancellationToken);
       var viewPermission = organizationPermissions.First(permission => permission.Code == IamPermission.Organizations.View);
       var updatePermission = organizationPermissions.First(permission => permission.Code == IamPermission.Organizations.Update);
@@ -69,7 +69,7 @@ public class UserEndToEndTests(CoreApiTestFixture fixture) : IClassFixture<CoreA
          TestContext.Current.CancellationToken);
       var user = await adminApi.CreateUserAsync(userRequest, TestContext.Current.CancellationToken);
       await adminApi.AssignRoleAsync(
-         new RoleAssignRequest(user.Id, [new RoleAssignRoleRequest(role.Id, null)]),
+         new RoleAssignRequest(user.Id, [new RoleAssignRoleRequest(role.Id, DateTime.UtcNow, null)]),
          TestContext.Current.CancellationToken);
       await adminApi.UpdateOrganizationAdminAsync(
          user.Id,

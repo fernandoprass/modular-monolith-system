@@ -23,6 +23,7 @@ export const enMessages = {
   navigation: {
     dashboard: 'Dashboard',
     menu: 'Menu',
+    profile: 'Organization Profile',
     toggleSidebar: 'Toggle sidebar',
     groups: {
       authorization: 'Authorization',
@@ -87,7 +88,11 @@ export const enMessages = {
         pages: {
           edit: 'Edit organization',
           list: 'Organizations',
+          profile: 'Organization profile',
           show: 'Organization details',
+        },
+        placeholders: {
+          search: 'Search organization',
         },
         types: {
           company: 'Company',
@@ -98,13 +103,135 @@ export const enMessages = {
         name: 'Parameters',
       },
       permissions: {
+        actions: {
+          create: 'Create',
+          delete: 'Delete',
+          edit: 'Edit permission',
+          list: 'List',
+          saveoverride: 'Save override',
+          update: 'Update',
+          updatepassword: 'Update password',
+          view: 'View',
+          viewpermissions: 'View permissions',
+        },
+        fields: {
+          action: 'Action',
+          actions: 'Actions',
+          description: 'Description',
+          isActive: 'Active',
+          module: 'Module',
+          resource: 'Resource',
+          title: 'Title',
+        },
+        messages: {
+          empty: 'No permissions found.',
+        },
+        modules: {
+          courier: 'Courier',
+          iam: 'IAM',
+          sentinel: 'Sentinel',
+          shared: 'Shared',
+        },
         name: 'Permissions',
+        notifications: {
+          updated: 'Permission updated.',
+        },
+        pages: {
+          list: 'Permissions',
+        },
+        resources: {
+          auditlogs: 'Audit logs',
+          emails: 'Emails',
+          emailtemplates: 'Email templates',
+          organizations: 'Organizations',
+          parameters: 'Parameters',
+          permissions: 'Permissions',
+          roles: 'Roles',
+          systemlogs: 'System logs',
+          templates: 'Templates',
+          users: 'Users',
+        },
       },
       roles: {
+        actions: {
+          create: 'Create role',
+          delete: 'Delete',
+          edit: 'Edit role',
+        },
+        fields: {
+          actions: 'Actions',
+          assignedBy: 'Assigned by',
+          assignedAt: 'Assigned at',
+          description: 'Description',
+          isActive: 'Active',
+          isDefault: 'Default',
+          name: 'Name',
+          organizationId: 'Organization',
+          startsAt: 'Starts at',
+          expiresAt: 'Expires at',
+          userId: 'User ID',
+        },
+        messages: {
+          deleteConfirm: 'Delete this role?',
+          empty: 'No roles found.',
+        },
         name: 'Roles',
+        notifications: {
+          created: 'Role created.',
+          deleted: 'Role deleted.',
+          updated: 'Role updated.',
+        },
+        pages: {
+          list: 'Roles',
+        },
       },
       users: {
+        actions: {
+          create: 'Create user',
+          delete: 'Delete',
+          edit: 'Edit',
+          view: 'View',
+        },
+        fields: {
+          actions: 'Actions',
+          email: 'Email',
+          isActive: 'Active',
+          isOrganizationAdmin: 'Organization admin',
+          isSystemAdmin: 'System admin',
+          language: 'Language',
+          name: 'Name',
+          organizationId: 'Organization ID',
+          organizationName: 'Organization',
+          password: 'Password',
+        },
+        messages: {
+          deleteConfirm: 'Delete this user?',
+          empty: 'No users found.',
+          noPermissions: 'No permissions found.',
+          noRoles: 'No roles found.',
+          organizationRequired: 'Select an organization.',
+        },
         name: 'Users',
+        notifications: {
+          created: 'User created.',
+          deleted: 'User deleted.',
+          profileUpdated: 'Profile updated.',
+          updated: 'User updated.',
+        },
+        pages: {
+          create: 'Create user',
+          edit: 'Edit user',
+          list: 'Users',
+          profile: 'User profile',
+          show: 'User details',
+        },
+        placeholders: {
+          search: 'Search user',
+        },
+        tabs: {
+          permissions: 'Permissions',
+          roles: 'Roles',
+        },
       },
     },
   },
@@ -112,6 +239,7 @@ export const enMessages = {
     actions: {
       cancel: 'Cancel',
       back: 'Back',
+      clear: 'Clear',
       columns: 'Columns',
       filter: 'Filter',
       firstPage: '<<', 

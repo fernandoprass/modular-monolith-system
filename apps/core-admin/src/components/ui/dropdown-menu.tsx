@@ -23,3 +23,10 @@ export function DropdownMenuItem({
 }: ComponentProps<typeof DropdownMenuPrimitive.Item>) {
   return <DropdownMenuPrimitive.Item className={cn('dropdown-item', className)} {...props} />
 }
+
+export function DropdownMenuGroup({
+  className,
+  ...props
+}: ComponentProps<typeof DropdownMenuPrimitive.Group>) {
+  return <DropdownMenuPrimitive.Group className={className} {...props} />
+}

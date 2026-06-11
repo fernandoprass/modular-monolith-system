@@ -27,7 +27,7 @@ public class RoleEndToEndTests(CoreApiTestFixture fixture) : IClassFixture<CoreA
       await adminApi.UpdateRoleAsync(role.Id, roleUpdateRequest, TestContext.Current.CancellationToken);
 
       var userPermissions = await adminApi.SearchPermissionsAsync(
-         new PermissionSearchRequest(null, "iam", "users", null),
+         new PermissionSearchRequest(null, "iam", "users", null, null, false),
          TestContext.Current.CancellationToken);
       var viewPermission = GetPermissionByCode(userPermissions, IamPermission.Users.View);
       var updateOrganizationAdminPermission = GetPermissionByCode(userPermissions, IamPermission.Users.UpdateOrganizationAdmin);
@@ -97,7 +97,7 @@ public class RoleEndToEndTests(CoreApiTestFixture fixture) : IClassFixture<CoreA
 
       var role = await adminApi.CreateRoleAsync(roleRequest, TestContext.Current.CancellationToken);
       var permissions = await adminApi.SearchPermissionsAsync(
-         new PermissionSearchRequest(null, "iam", "users", "view"),
+         new PermissionSearchRequest(null, "iam", "users", "view", null, false),
          TestContext.Current.CancellationToken);
       var viewPermission = GetPermissionByCode(permissions, IamPermission.Users.View);
       await adminApi.AssignPermissionsAsync(
@@ -106,7 +106,7 @@ public class RoleEndToEndTests(CoreApiTestFixture fixture) : IClassFixture<CoreA
 
       var user = await adminApi.CreateUserAsync(userRequest, TestContext.Current.CancellationToken);
       await adminApi.AssignRoleAsync(
-         new RoleAssignRequest(user.Id, [new RoleAssignRoleRequest(role.Id, null)]),
+         new RoleAssignRequest(user.Id, [new RoleAssignRoleRequest(role.Id, DateTime.UtcNow, null)]),
          TestContext.Current.CancellationToken);
       var userApi = await _fixture.Api.LoginAsync(
          userRequest.Email,

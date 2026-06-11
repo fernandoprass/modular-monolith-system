@@ -72,6 +72,19 @@ public class OrganizationService(
       return Result<PagedResultDto<OrganizationDto>>.Success(organizations);
    }
 
+
+   public async Task<Result<IEnumerable<OrganizationLookupDto>>> GetLookupAsync(OrganizationLookupRequest request, CancellationToken cancellationToken = default)
+   {
+      var searchRequest = request with
+      {
+         Id = _userContext.IsSystemAdmin ? request.Id : _userContext.UserOwnerId
+      };
+
+      var organizations = await _organizationQueryRepository.GetLookupAsync(searchRequest, cancellationToken);
+
+      return Result<IEnumerable<OrganizationLookupDto>>.Success(organizations);
+   }
+
    public async Task<Result> UpdateAsync(Guid id, OrganizationUpdateRequest request, CancellationToken cancellationToken = default)
    {
       return await ExecuteIfUserOwnsAsync(id, async (ct) =>

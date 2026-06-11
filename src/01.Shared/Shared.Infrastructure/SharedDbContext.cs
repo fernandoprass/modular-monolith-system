@@ -21,6 +21,6 @@ public class SharedDbContext(DbContextOptions<SharedDbContext> options) : DbCont
 
    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
    {
-      configurationBuilder.Properties<Guid>().HaveColumnType(SharedConst.Database.UuidType);
+      configurationBuilder.Properties<Guid>().HaveColumnType(SharedConst.Database.PostgreSQL.UuidType);
    }
 }

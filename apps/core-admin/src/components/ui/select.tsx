@@ -22,17 +22,19 @@ export function Select({ onValueChange, options, placeholder, value }: SelectPro
       <SelectPrimitive.Trigger className="select-trigger">
         <SelectPrimitive.Value placeholder={placeholder} />
         <SelectPrimitive.Icon>
-          <ChevronDown size={14} />
+          <ChevronDown />
         </SelectPrimitive.Icon>
       </SelectPrimitive.Trigger>
       <SelectPrimitive.Portal>
         <SelectPrimitive.Content className="select-content" position="popper">
           <SelectPrimitive.Viewport>
-            {options.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
+            <SelectPrimitive.Group>
+              {options.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectPrimitive.Group>
           </SelectPrimitive.Viewport>
         </SelectPrimitive.Content>
       </SelectPrimitive.Portal>
@@ -45,7 +47,7 @@ function SelectItem({ children, className, ...props }: ComponentProps<typeof Sel
     <SelectPrimitive.Item className={cn('select-item', className)} {...props}>
       <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
       <SelectPrimitive.ItemIndicator className="select-indicator">
-        <Check size={14} />
+        <Check />
       </SelectPrimitive.ItemIndicator>
     </SelectPrimitive.Item>
   )

@@ -1,5 +1,5 @@
-using IAM.Domain.DTOs.Responses;
 using IAM.Domain.DTOs.Requests;
+using IAM.Domain.DTOs.Responses;
 using IAM.Domain.Entities;
 using IAM.Domain.Mappers;
 using IAM.Domain.QueryRepositories;
@@ -34,16 +34,13 @@ public class RoleQueryRepository(IamDbContext dbContext, IUserContext userContex
 
    public async Task<IEnumerable<RoleDto>> GetAsync(RoleSearchRequest request, CancellationToken cancellationToken = default)
    {
-      var query = CreateQueryWithSecurityContextFilter();
+      var query = request.UserId.HasValue
+         ? CreateUserRoleSearchQuery(request.UserId.Value)
+         : CreateQueryWithSecurityContextFilter();
 
       if (!string.IsNullOrWhiteSpace(request.Name))
       {
          query = query.Where(r => EF.Functions.ILike(r.Name, $"%{request.Name}%"));
-      }
-
-      if (request.UserId.HasValue)
-      {
-         query = query.Where(r => r.UserRoles.Any(ur => ur.UserId == request.UserId.Value));
       }
 
       if (request.OrganizationId.HasValue)
@@ -57,6 +54,7 @@ public class RoleQueryRepository(IamDbContext dbContext, IUserContext userContex
       }
 
       return await query
+          .OrderBy(r => r.Name)
           .Select(r => r.ToRoleDto())
           .ToListAsync(cancellationToken);
    }
@@ -70,15 +68,46 @@ public class RoleQueryRepository(IamDbContext dbContext, IUserContext userContex
          .ToListAsync(cancellationToken);
    }
 
+   public async Task<IEnumerable<UserRoleDto>> GetRolesByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
+   {
+      string systemUserName = "System";
+
+      var query = _dbContext.UserRoles.AsNoTracking()
+          .OrderBy(ur => ur.Role.Name)
+          .Where(ur => ur.UserId == userId)
+          .Select(ur => new UserRoleDto(
+              ur.Id,
+              ur.RoleId,
+              ur.Role.Name,
+              ur.Role.IsActive,
+              ur.Role.IsDefault,
+              ur.StartsAt,
+              ur.ExpiresAt,
+              AssignedBy: ur.CreatedBy != Guid.Empty
+                   ? _dbContext.Users.Where(u => u.Id == ur.CreatedBy).Select(u => u.Name).FirstOrDefault() ?? systemUserName
+                   : systemUserName,
+              AssignedAt: ur.Role.CreatedAt
+          ));
+
+      return await query.ToListAsync(cancellationToken);
+   }
+
    public async Task<IEnumerable<Permission>> GetRolePermissionsByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
    {
+      var now = DateTime.UtcNow;
+
       return await _dbContext.UserRoles
           .AsNoTracking()
-          .Where(ur => ur.UserId == userId)
-          .Where(ur => ur.Role.IsActive)
+          .Where(ur => ur.UserId == userId &&
+                       ur.Role.IsActive &&
+                       ur.StartsAt <= now &&
+                       (ur.ExpiresAt == null || ur.ExpiresAt >= now))
           .SelectMany(ur => ur.Role.RolePermissions.Select(rf => rf.Permission))
           .Where(permission => permission.IsActive)
           .Distinct()
+          .OrderBy(permission => permission.Module)
+          .ThenBy(permission => permission.Resource)
+          .ThenBy(permission => permission.Action)
           .ToListAsync(cancellationToken);
    }
 
@@ -117,5 +146,20 @@ public class RoleQueryRepository(IamDbContext dbContext, IUserContext userContex
       return query.Where(role =>
           _dbContext.UserRoles.Any(ru => ru.RoleId == role.Id && ru.UserId == _userContext.UserId) ||
           (_userContext.IsOrganizationAdmin && role.OrganizationId == _userContext.UserOwnerId));
+   }
+
+   private IQueryable<Role> CreateUserRoleSearchQuery(Guid userId)
+   {
+      var query = _dbContext.Roles
+         .AsNoTracking()
+         .Where(role => role.UserRoles.Any(userRole => userRole.UserId == userId));
+
+      if (_userContext.IsSystemAdmin)
+      {
+         return query;
+      }
+
+      return query.Where(role =>
+         _dbContext.Users.Any(user => user.Id == userId && user.OrganizationId == _userContext.UserOwnerId));
    }
 }

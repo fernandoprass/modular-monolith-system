@@ -54,11 +54,11 @@ public class SeederOrganizations(
       superUser.IsSystemAdmin = true;
       superUser.IsOrganizationAdmin = true;
 
-      superUser.AddRole(seederData.SysAdminRoleId, null);
+      superUser.AddRole(seederData.SysAdminRoleId, DateTime.UtcNow, null);
       organization.CreatedBy = superUser.Id;
 
       var supportUser = User.Create("Internal Support", "support@saas.com", passwordHash, DateTime.UtcNow.AddDays(30), LanguageOptions.English, organization.Id);
-      supportUser.AddRole(seederData.SysAdminRoleId, null);
+      supportUser.AddRole(seederData.SysAdminRoleId, DateTime.UtcNow, null);
 
       Console.WriteLine($"Adding organization: {organization.Name}");
       await iamUnitOfWork.Organizations.AddAsync(organization, cancellationToken);
@@ -109,13 +109,13 @@ public class SeederOrganizations(
 
 
       Console.WriteLine($"Adding admin role to {alanTuring.Email}");
-      alanTuring.AddRole(seederData.OrganizationAdminRoleId, null);
+      alanTuring.AddRole(seederData.OrganizationAdminRoleId, DateTime.UtcNow, null);
       alanTuring.IsOrganizationAdmin = true;
 
       foreach (var user in users.Skip(1))
       {
          Console.WriteLine($"Adding user role to {user.Email}");
-         user.AddRole(seederData.UserRoleId, null);
+         user.AddRole(seederData.UserRoleId, DateTime.UtcNow, null);
       }
 
       Console.WriteLine($"Adding users for organization: {organization.Name}");

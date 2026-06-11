@@ -1,22 +1,23 @@
 meta {
   name: search by param
   type: http
-  seq: 6
+  seq: 9
 }
 
 get {
-  url: {{host.iam}}/api/{{version}}/iam/organizations/
+  url: {{host.iam}}/api/{{version}}/iam/organizations/?pageNumber=1&pageSize=25&isActive=false
   body: none
   auth: bearer
 }
 
 params:query {
+  pageNumber: 1
+  pageSize: 25
+  isActive: false
   ~type: 1
   ~code: sa
   ~name: sa
   ~organizationId: {{organizationId}}
-  pageNumber: 1
-  pageSize: 25
 }
 
 auth:bearer {

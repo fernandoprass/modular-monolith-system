@@ -77,5 +77,14 @@ public class RoleController(IRoleService roleService) : BaseController
       var result = await _roleService.GetRolePermissionsByUserIdAsync(userId, cancellationToken);
       return OkOrNotFound(result);
    }
+
+   [HttpGet("user/{userId:guid}/roles")]
+   [Authorize]
+   [RequirePermission(IamPermission.Roles.ViewPermissions)]
+   public async Task<IActionResult> GetRoleUserRoles(Guid userId, CancellationToken cancellationToken)
+   {
+      var result = await _roleService.GetRolesByUserIdAsync(userId, cancellationToken);
+      return OkOrNotFound(result);
+   }
 }
 

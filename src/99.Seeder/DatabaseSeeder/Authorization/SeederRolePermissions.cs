@@ -69,9 +69,9 @@ public class SeederRolePermissions(
    private static List<string> OrganizationAdminPermissions()
    {
       Console.WriteLine("Adding Organization Admin permissions...");
-      var orgAdminPermissions = GetIamOrganizationPermissions();
-      orgAdminPermissions.AddRange(GetSentinelOrganizationPermissions());
-      orgAdminPermissions.AddRange(GetCourierOrganizationPermissions());
+      var orgAdminPermissions = GetIamOrganizationAdminPermissions();
+      orgAdminPermissions.AddRange(GetSentinelOrganizationAdminPermissions());
+      orgAdminPermissions.AddRange(GetCourierOrganizationAdminPermissions());
 
       return orgAdminPermissions.Distinct().ToList();
    }
@@ -95,12 +95,12 @@ public class SeederRolePermissions(
          SentinelPermission.SystemLogs.View
       };
 
-      sentinelSytemAdminPermissions.AddRange(GetSentinelOrganizationPermissions());
+      sentinelSytemAdminPermissions.AddRange(GetSentinelOrganizationAdminPermissions());
 
       return sentinelSytemAdminPermissions;
    }
 
-   private static List<string> GetSentinelOrganizationPermissions()
+   private static List<string> GetSentinelOrganizationAdminPermissions()
    {
       List<string> sentinelOrgPermissions = 
       [
@@ -123,24 +123,27 @@ public class SeederRolePermissions(
    private static List<string> GetIamSystemAdminPermissions()
    {
       List<string> sysAdminPermissions = [
-         IamPermission.Organizations.Create,
          IamPermission.Organizations.List,
+         IamPermission.Organizations.View,
+         IamPermission.Organizations.Create,
+         IamPermission.Organizations.Update,
+         IamPermission.Organizations.Delete,
          IamPermission.Permissions.Update,
       ];
 
-      sysAdminPermissions.AddRange(GetIamOrganizationPermissions());
+      sysAdminPermissions.AddRange(GetIamOrganizationAdminPermissions());
       sysAdminPermissions.AddRange(GetIamUserPermissions());
 
       return sysAdminPermissions;
    }
 
-   private static List<string> GetIamOrganizationPermissions()
+   private static List<string> GetIamOrganizationAdminPermissions()
    {
       List<string> organizationPermissions =
       [
-         IamPermission.Organizations.View,
-         IamPermission.Organizations.Update,
-         IamPermission.Organizations.Delete,
+         IamPermission.Organizations.ViewOwn,
+         IamPermission.Organizations.UpdateOwn,
+         IamPermission.Organizations.DeleteOwn,
          IamPermission.Roles.View,
          IamPermission.Roles.List,
          IamPermission.Roles.Create,
@@ -171,6 +174,7 @@ public class SeederRolePermissions(
    {
       return
       [
+         IamPermission.Users.ViewMe,
          IamPermission.Users.UpdateMe,
          IamPermission.Users.DeleteMe,
          IamPermission.Users.UpdatePassword
@@ -193,12 +197,12 @@ public class SeederRolePermissions(
          CourierPermission.Templates.Delete
       };
 
-      courierSystemAdminPermissions.AddRange(GetCourierOrganizationPermissions());
+      courierSystemAdminPermissions.AddRange(GetCourierOrganizationAdminPermissions());
 
       return courierSystemAdminPermissions;
    }
 
-   private static List<string> GetCourierOrganizationPermissions()
+   private static List<string> GetCourierOrganizationAdminPermissions()
    {
       List<string> courierOrgPermissions =[];
 

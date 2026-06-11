@@ -45,16 +45,21 @@ public class SeederPermissions(
       Console.WriteLine("Adding IAM permissions...");
       await AddPermissionAsync(IamPermission.Organizations.List, "List Organizations", "Allows listing organizations.", cancellationToken);
       await AddPermissionAsync(IamPermission.Organizations.View, "View Organizations", "Allows viewing organizations.", cancellationToken);
+      await AddPermissionAsync(IamPermission.Organizations.ViewOwn, "View Own Organization", "Allows viewing own organization.", cancellationToken);
       await AddPermissionAsync(IamPermission.Organizations.Create, "Create Organizations", "Allows creating organizations.", cancellationToken);
       await AddPermissionAsync(IamPermission.Organizations.Update, "Update Organizations", "Allows updating organizations.", cancellationToken);
+      await AddPermissionAsync(IamPermission.Organizations.UpdateOwn, "Update Own Organization", "Allows updating own organization.", cancellationToken);
       await AddPermissionAsync(IamPermission.Organizations.Delete, "Delete Organizations", "Allows deleting organizations.", cancellationToken);
+      await AddPermissionAsync(IamPermission.Organizations.DeleteOwn, "Delete Own Organization", "Allows deleting own organization.", cancellationToken);
 
       await AddPermissionAsync(IamPermission.Users.List, "List Users", "Allows listing users.", cancellationToken);
       await AddPermissionAsync(IamPermission.Users.View, "View Users", "Allows viewing users.", cancellationToken);
+      await AddPermissionAsync(IamPermission.Users.ViewMe, "View Me", "Allows users to view their own profile.", cancellationToken);
       await AddPermissionAsync(IamPermission.Users.Create, "Create Users", "Allows creating users.", cancellationToken);
       await AddPermissionAsync(IamPermission.Users.UpdateMe, "Update Me", "Allows users to update their own profile.", cancellationToken);
       await AddPermissionAsync(IamPermission.Users.Update, "Update Users", "Allows updating users.", cancellationToken);
       await AddPermissionAsync(IamPermission.Users.UpdateOrganizationAdmin, "Update User Organization Admin", "Allows updating the user organization admin flag.", cancellationToken);
+      await AddPermissionAsync(IamPermission.Users.UpdatePassword, "Update User Password", "Allows updating user passwords.", cancellationToken);
       await AddPermissionAsync(IamPermission.Users.DeleteMe, "Delete Me", "Allows users to delete their own account.", cancellationToken);
       await AddPermissionAsync(IamPermission.Users.Delete, "Delete Users", "Allows deleting users.", cancellationToken);
 

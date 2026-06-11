@@ -6,18 +6,15 @@ using IAM.Domain.Mappers;
 using IAM.Domain.QueryRepositories;
 using Microsoft.EntityFrameworkCore;
 using Shared.Application.Contracts;
+using Shared.Domain;
 using Shared.Domain.DTOs.Responses;
 
 namespace IAM.Infrastructure.QueryRepositories;
 
 public class UserQueryRepository(IamDbContext dbContext, IUserContext userContext) : IUserQueryRepository
 {
-   private const int DefaultPageNumber = 1;
-   private const int DefaultPageSize = 25;
-   private const int MaxPageSize = 200;
-
    private readonly IamDbContext _dbContext = dbContext;
-   private readonly IUserContext _userContext;
+   private readonly IUserContext _userContext = userContext;
 
    public async Task<UserDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
    {
@@ -61,7 +58,7 @@ public class UserQueryRepository(IamDbContext dbContext, IUserContext userContex
 
    public async Task<PagedResultDto<UserLiteDto>> GetAsync(UserSearchRequest request, CancellationToken cancellationToken = default)
    {
-      var query = _dbContext.Users.AsNoTracking();
+      var query = CreateQueryWithSecurityContextFilter(request.OrganizationId);
 
       if (!string.IsNullOrWhiteSpace(request.Name))
       {
@@ -73,13 +70,13 @@ public class UserQueryRepository(IamDbContext dbContext, IUserContext userContex
          query = query.Where(u => EF.Functions.ILike(u.Email, $"%{request.Email}%"));
       }
 
-      if (request.OrganizationId.HasValue)
+      if (request.IsActive.HasValue)
       {
-         query = query.Where(u => u.OrganizationId == request.OrganizationId.Value);
+         query = query.Where(u => u.IsActive == request.IsActive.Value);
       }
 
-      var pageNumber = request.PageNumber < 1 ? DefaultPageNumber : request.PageNumber;
-      var pageSize = request.PageSize < 1 ? DefaultPageSize : Math.Min(request.PageSize, MaxPageSize);
+      var pageNumber = request.PageNumber < 1 ? SharedConst.Pagination.DefaultPageNumber : request.PageNumber;
+      var pageSize = request.PageSize < 1 ? SharedConst.Pagination.DefaultPageSize : Math.Min(request.PageSize, SharedConst.Pagination.MaxPageSize);
       var totalCount = await query.LongCountAsync(cancellationToken);
 
       var items = await query
@@ -99,4 +96,53 @@ public class UserQueryRepository(IamDbContext dbContext, IUserContext userContex
 
       return new PagedResultDto<UserLiteDto>(items, pageNumber, pageSize, totalCount, totalPages);
    }
+
+   public async Task<IEnumerable<UserLookupDto>> GetLookupAsync(UserLookupRequest request, CancellationToken cancellationToken = default)
+   {
+      var query = CreateQueryWithSecurityContextFilter(request.OrganizationId);
+
+      if (request.Id.HasValue)
+      {
+         query = query.Where(u => u.Id == request.Id.Value);
+      }
+
+      if (!string.IsNullOrWhiteSpace(request.Search))
+      {
+         query = query.Where(u => EF.Functions.ILike(u.Name, $"%{request.Search}%"));
+      }
+
+      if (!request.IncludeInactive)
+      {
+         query = query.Where(u => u.IsActive);
+      }
+
+      return await query
+          .OrderBy(u => u.Name)
+          .Select(u => new UserLookupDto(
+             u.Id,
+             u.Name,
+             u.IsActive,
+             u.OrganizationId
+             ))
+          .Take(request.Take)
+          .ToListAsync(cancellationToken);
+   }
+
+   private IQueryable<User> CreateQueryWithSecurityContextFilter(Guid? organizationId)
+   {
+      var query = _dbContext.Users.AsNoTracking();
+
+      if(!_userContext.IsSystemAdmin)
+      {
+         query = query.Where(u => u.OrganizationId == _userContext.UserOwnerId);
+      }
+
+      if (organizationId.HasValue)
+      {
+         query = query.Where(u => u.OrganizationId == organizationId.Value);
+      }
+
+      return query;
+   }
+
 }

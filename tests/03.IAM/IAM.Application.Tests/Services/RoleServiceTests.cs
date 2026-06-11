@@ -242,7 +242,7 @@ public class RoleServiceTests
 
       var request = new RoleAssignRequest(
          UserId: Guid.NewGuid(),
-         Roles: [new RoleAssignRoleRequest(RoleId: Guid.NewGuid(), ExpiresAt: DateTime.UtcNow.AddDays(-1))]);
+         Roles: [new RoleAssignRoleRequest(RoleId: Guid.NewGuid(), StartsAt: DateTime.UtcNow, ExpiresAt: DateTime.UtcNow.AddDays(-1))]);
 
       var user = User.Create("Test User", "test@example.com", "hash", DateTime.UtcNow.AddMonths(1), LanguageOptions.English, organizationId);
 
@@ -299,7 +299,7 @@ public class RoleServiceTests
    {
       return new RoleAssignRequest(
          UserId: Guid.NewGuid(),
-         Roles: [new RoleAssignRoleRequest(RoleId: Guid.NewGuid(), ExpiresAt: expiresAt)]);
+         Roles: [new RoleAssignRoleRequest(RoleId: Guid.NewGuid(), StartsAt: DateTime.UtcNow, ExpiresAt: expiresAt)]);
    }
 
    [Fact]
@@ -314,8 +314,8 @@ public class RoleServiceTests
          UserId: Guid.NewGuid(),
          Roles:
          [
-            new RoleAssignRoleRequest(roleId, null),
-            new RoleAssignRoleRequest(roleId, null)
+            new RoleAssignRoleRequest(roleId, StartsAt: DateTime.UtcNow, ExpiresAt: null),
+            new RoleAssignRoleRequest(roleId, StartsAt: DateTime.UtcNow, ExpiresAt: null),
          ]);
 
       var user = User.Create("Test User", "test@example.com", "hash", DateTime.UtcNow.AddMonths(1), LanguageOptions.English, organizationId);
@@ -350,7 +350,7 @@ public class RoleServiceTests
       var request = new RoleUnassignRequest(UserId: Guid.NewGuid(), RoleIds: [roleId]);
 
       var user = User.Create("Test User", "test@example.com", "hash", DateTime.UtcNow.AddMonths(1), LanguageOptions.English, organizationId);
-      user.AddRole(roleId, null);
+      user.AddRole(roleId, DateTime.UtcNow, null);
 
       _userContextMock.UserOwnerId.Returns(organizationId);
       _userContextMock.IsSystemAdmin.Returns(false);
@@ -418,7 +418,7 @@ public class RoleServiceTests
       var request = new RoleUnassignRequest(UserId: Guid.NewGuid(), RoleIds: [Guid.NewGuid()]);
 
       var user = User.Create("Test User", "test@example.com", "hash", DateTime.UtcNow.AddMonths(1), LanguageOptions.English, organizationId:Guid.NewGuid());
-      user.AddRole(roleId, null);
+      user.AddRole(roleId, DateTime.UtcNow, null);
 
       _userContextMock.UserOwnerId.Returns(Guid.NewGuid());
       _userContextMock.IsSystemAdmin.Returns(false);
@@ -736,7 +736,7 @@ public class RoleServiceTests
 
    private static RoleDto CreateRoleDto(string name, Guid? organizationId)
    {
-      return new RoleDto(Guid.NewGuid(), name, true, false, organizationId);
+      return new RoleDto(Guid.NewGuid(), name, "Role description", true, false, organizationId);
    }
 
    private static PermissionDto CreatePermissionDto(string name)

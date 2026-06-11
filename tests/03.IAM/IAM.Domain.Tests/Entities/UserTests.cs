@@ -80,7 +80,7 @@ public class UserTests
       var roleId = Guid.NewGuid();
       var expiresAt = DateTime.UtcNow.AddDays(10);
 
-      user.AddRole(roleId, expiresAt);
+      user.AddRole(roleId, DateTime.UtcNow, expiresAt);
 
       user.UserRoles.Should().ContainSingle(role =>
          role.RoleId == roleId &&
@@ -94,8 +94,8 @@ public class UserTests
       var user = CreateUser();
       var roleId = Guid.NewGuid();
 
-      user.AddRole(roleId, null);
-      user.AddRole(roleId, null);
+      user.AddRole(roleId, DateTime.UtcNow, null);
+      user.AddRole(roleId, DateTime.UtcNow, null);
 
       user.UserRoles.Should().ContainSingle(role => role.RoleId == roleId);
    }
@@ -105,7 +105,7 @@ public class UserTests
    {
       var user = CreateUser();
       var roleId = Guid.NewGuid();
-      user.AddRole(roleId, null);
+      user.AddRole(roleId, DateTime.UtcNow, null);
 
       user.RemoveRole(roleId);
 
@@ -117,7 +117,7 @@ public class UserTests
    {
       var user = CreateUser();
       var roleId = Guid.NewGuid();
-      user.AddRole(roleId, null);
+      user.AddRole(roleId, DateTime.UtcNow, null);
 
       user.RemoveRole(Guid.NewGuid());
 
@@ -128,8 +128,8 @@ public class UserTests
    public void ClearRoles_ShouldRemoveAllRoles()
    {
       var user = CreateUser();
-      user.AddRole(Guid.NewGuid(), null);
-      user.AddRole(Guid.NewGuid(), null);
+      user.AddRole(Guid.NewGuid(), DateTime.UtcNow, null);
+      user.AddRole(Guid.NewGuid(), DateTime.UtcNow, null);
 
       user.ClearRoles();
 

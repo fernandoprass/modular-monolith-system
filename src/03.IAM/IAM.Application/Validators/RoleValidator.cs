@@ -40,6 +40,8 @@ public class RoleValidator(IUserContext userContext) : IRoleValidator
          .RuleForValue(userExists).IsTrue(new NotFoundError(IamConst.Entity.User))
          .RuleForValue(allRolesAvailable).IsTrue(new RolesCannotBeAssignedError())
          .RuleFor(x => x.Roles.Select(r => r.RoleId)).HasItems().HasNoDuplicates()
+         .RuleFor(x => x.Roles.Select(r => r.StartsAt))
+            .All<RoleAssignRequest, IEnumerable<DateTime>, DateTime>(startDate => startDate >= DateTime.Today, new RolesInvalidStartDateError())
          .RuleFor(x => x.Roles.Select(r => r.ExpiresAt))
             .All<RoleAssignRequest, IEnumerable<DateTime?>, DateTime?>(expireDate => expireDate == null || expireDate >= DateTime.UtcNow, new RolesInvalidExpirationError());
 

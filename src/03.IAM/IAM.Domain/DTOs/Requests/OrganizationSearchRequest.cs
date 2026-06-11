@@ -1,4 +1,3 @@
-using IAM.Domain.Entities;
 using IAM.Domain.Enums;
 
 namespace IAM.Domain.DTOs.Requests;
@@ -8,5 +7,6 @@ public sealed record OrganizationSearchRequest(
    string? Code = null,
    string? Name = null,
    Guid? OrganizationId = null,
+   bool? IsActive = null,
    int PageNumber = 1,
    int PageSize = 25);

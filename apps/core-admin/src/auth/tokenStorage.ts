@@ -5,8 +5,10 @@ export type StoredUser = {
   email: string
   fullName: string
   id: string
+  isOrganizationAdmin: boolean
   isSystemAdmin: boolean
   organizationId: string
+  organizationName: string
 }
 
 function parseStoredValue<TValue>(value: string | null, clearValue: () => void): TValue | null {

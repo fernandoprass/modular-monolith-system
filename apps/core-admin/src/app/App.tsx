@@ -4,8 +4,16 @@ import { AuthProvider } from '../auth/AuthProvider'
 import { LoginPage } from '../auth/LoginPage'
 import { OrganizationEditPage } from '../resources/iam/organizations/OrganizationEditPage'
 import { OrganizationListPage } from '../resources/iam/organizations/OrganizationListPage'
-import { OrganizationShowPage } from '../resources/iam/organizations/OrganizationShowPage'
+import { OrganizationProfilePage } from '../resources/iam/organizations/OrganizationProfilePage'
+import { OrganizationViewPage } from '../resources/iam/organizations/OrganizationViewPage'
 import { PublicOrganizationCreatePage } from '../resources/iam/organizations/PublicOrganizationCreatePage'
+import { PermissionListPage } from '../resources/iam/permissions/PermissionListPage'
+import { RoleListPage } from '../resources/iam/roles/RoleListPage'
+import { UserCreatePage } from '../resources/iam/users/UserCreatePage'
+import { UserEditPage } from '../resources/iam/users/UserEditPage'
+import { UserListPage } from '../resources/iam/users/UserListPage'
+import { UserProfilePage } from '../resources/iam/users/UserProfilePage'
+import { UserViewPage } from '../resources/iam/users/UserViewPage'
 import { ToastProvider } from './ToastProvider'
 import { AppLayout } from './AppShell'
 import { I18nContext, translate } from './i18n/i18n'
@@ -22,9 +30,17 @@ function App() {
               <Route path={APP_ROUTES.registerOrganization} element={<PublicOrganizationCreatePage />} />
               <Route element={<AppLayout />}>
                 <Route index element={<DashboardPage />} />
+                <Route path={APP_ROUTES.organizationProfile.slice(1)} element={<OrganizationProfilePage />} />
                 <Route path={APP_ROUTES.organizations.slice(1)} element={<OrganizationListPage />} />
                 <Route path="organizations/:id" element={<OrganizationEditPage />} />
-                <Route path="organizations/:id/show" element={<OrganizationShowPage />} />
+                <Route path="organizations/:id/show" element={<OrganizationViewPage />} />
+                <Route path={APP_ROUTES.users.slice(1)} element={<UserListPage />} />
+                <Route path="users/create" element={<UserCreatePage />} />
+                <Route path="users/:id" element={<UserEditPage />} />
+                <Route path="users/:id/show" element={<UserViewPage />} />
+                <Route path={APP_ROUTES.userProfile.slice(1)} element={<UserProfilePage />} />
+                <Route path={APP_ROUTES.roles.slice(1)} element={<RoleListPage />} />
+                <Route path={APP_ROUTES.permissions.slice(1)} element={<PermissionListPage />} />
                 <Route path="*" element={<Navigate to={APP_ROUTES.dashboard} replace />} />
               </Route>
             </Routes>

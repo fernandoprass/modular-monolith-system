@@ -17,6 +17,20 @@ Communicate with me using only short sentences; caveman language is enough. Do n
 
 ---
 
+## MCP Tools
+
+Use the GitHub MCP when GitHub context is needed.
+
+Use it to:
+- read repositories
+- check issues
+- check pull requests
+- read authenticated GitHub user context
+
+Do not expose tokens or secrets.
+
+---
+
 ## Table of Contents
 1. [Collaboration Rules](#collaboration-rules)
 2. [Architectural Principles](#architectural-principles)

@@ -5,17 +5,18 @@ meta {
 }
 
 get {
-  url: {{host.iam}}/api/{{version}}/iam/permissions
+  url: {{host.iam}}/api/{{version}}/iam/permissions?includeInactive=true&title
   body: none
   auth: bearer
 }
 
 params:query {
+  includeInactive: true
+  title: 
   ~roleId: {{roleId}}
   ~module: iam
   ~resource: users
   ~action: view
-  includeInactive: true
 }
 
 auth:bearer {

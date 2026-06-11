@@ -33,6 +33,7 @@ public class UserController(
 
    [HttpGet("me")]
    [Authorize]
+   [RequirePermission(IamPermission.Users.ViewMe)]
    public async Task<IActionResult> GetByCurrentUser(CancellationToken cancellationToken)
    {
       var user = await _userService.GetByIdAsync(_userContext.UserId, cancellationToken);
@@ -45,6 +46,16 @@ public class UserController(
    public async Task<IActionResult> GetByOrganizationId([FromQuery] UserSearchRequest request, CancellationToken cancellationToken)
    {
       var users = await _userService.GetAsync(request, cancellationToken);
+
+      return OkOrNotFound(users);
+   }
+
+   [HttpGet("lookup")]
+   [Authorize]
+   [RequirePermission(IamPermission.Users.List)]
+   public async Task<IActionResult> GetLookup([FromQuery] UserLookupRequest request, CancellationToken cancellationToken)
+   {
+      var users = await _userService.GetLookupAsync(request, cancellationToken);
 
       return OkOrNotFound(users);
    }

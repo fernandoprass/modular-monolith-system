@@ -22,6 +22,25 @@ Wait for `go` before making changes.
 
 ---
 
+## MCP Tools
+
+Use the shadcn MCP when working with shadcn/ui.
+
+Use it to:
+- search registry items
+- view component examples
+- get add commands
+
+Prefer shadcn MCP examples before guessing component usage.
+
+---
+
+## SKILLS
+
+Read .agent/skill folder
+
+---
+
 ## Stack Direction
 
 Use:

@@ -15,16 +15,25 @@ import {
   type OrganizationCreateForm,
   type OrganizationCreateRequest,
   type OrganizationDto,
+  type OrganizationLookupDto,
   type OrganizationUpdateRequest,
   type PagedResultDto,
 } from './organizationTypes'
 
 export type OrganizationListQuery = {
   code: string
+  isActive: string | null
   name: string
   pageNumber: number
   pageSize: number
   type: string | null
+}
+
+export type OrganizationLookupQuery = {
+  id?: string
+  includeInactive?: boolean
+  search: string
+  take?: number
 }
 
 function appendOptional(query: URLSearchParams, key: string, value: string | null): void {
@@ -39,8 +48,23 @@ function buildOrganizationQuery(request: OrganizationListQuery): URLSearchParams
   query.set(ORGANIZATION_QUERY_PARAMS.pageNumber, request.pageNumber.toString())
   query.set(ORGANIZATION_QUERY_PARAMS.pageSize, request.pageSize.toString())
   appendOptional(query, ORGANIZATION_QUERY_PARAMS.code, request.code)
+  appendOptional(query, ORGANIZATION_QUERY_PARAMS.isActive, request.isActive)
   appendOptional(query, ORGANIZATION_QUERY_PARAMS.name, request.name)
   appendOptional(query, ORGANIZATION_QUERY_PARAMS.type, request.type)
+
+  return query
+}
+
+function buildOrganizationLookupQuery(request: OrganizationLookupQuery): URLSearchParams {
+  const query = new URLSearchParams()
+
+  query.set(ORGANIZATION_QUERY_PARAMS.includeInactive, String(request.includeInactive ?? false))
+  query.set(ORGANIZATION_QUERY_PARAMS.take, String(request.take ?? 25))
+  appendOptional(query, ORGANIZATION_QUERY_PARAMS.search, request.search)
+
+  if (request.id !== undefined && request.id.trim().length > 0) {
+    query.set(ORGANIZATION_QUERY_PARAMS.id, request.id.trim())
+  }
 
   return query
 }
@@ -80,14 +104,37 @@ export async function getOrganizations(
   return unwrapResult<PagedResultDto<OrganizationDto>>(response)
 }
 
+export async function getOrganizationLookup(
+  request: OrganizationLookupQuery,
+): Promise<OrganizationLookupDto[]> {
+  const response = await getIamJsonWithQuery(
+    API_PATHS.iam.organizations.lookup,
+    buildOrganizationLookupQuery(request),
+  )
+
+  return unwrapResult<OrganizationLookupDto[]>(response)
+}
+
 export async function getOrganization(id: string): Promise<OrganizationDto> {
   const response = await getIamJson(API_PATHS.iam.organizations.byId(id))
 
   return unwrapResult<OrganizationDto>(response)
 }
 
+export async function getOwnOrganization(): Promise<OrganizationDto> {
+  const response = await getIamJson(API_PATHS.iam.organizations.own)
+
+  return unwrapResult<OrganizationDto>(response)
+}
+
 export async function updateOrganization(id: string, request: OrganizationUpdateRequest): Promise<void> {
   const response = await putIamJson(API_PATHS.iam.organizations.byId(id), request)
+
+  ensureResultSuccess(response)
+}
+
+export async function updateOwnOrganization(request: OrganizationUpdateRequest): Promise<void> {
+  const response = await putIamJson(API_PATHS.iam.organizations.own, request)
 
   ensureResultSuccess(response)
 }

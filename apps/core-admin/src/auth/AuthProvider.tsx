@@ -14,9 +14,11 @@ type LoginResponse = {
   user: {
     email: string
     id: string
+    isOrganizationAdmin: boolean
     isSystemAdmin: boolean
     name: string
     organizationId: string
+    organizationName: string
   }
 }
 
@@ -40,8 +42,10 @@ function toStoredUser(response: LoginResponse): StoredUser {
     email: response.user.email,
     fullName: response.user.name,
     id: response.user.id,
+    isOrganizationAdmin: response.user.isOrganizationAdmin,
     isSystemAdmin: response.user.isSystemAdmin,
     organizationId: response.user.organizationId,
+    organizationName: response.user.organizationName,
   }
 }
 

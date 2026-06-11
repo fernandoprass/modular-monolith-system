@@ -1,6 +1,7 @@
 using IAM.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Shared.Domain;
 
 namespace IAM.Infrastructure.Configurations
 {
@@ -8,6 +9,7 @@ namespace IAM.Infrastructure.Configurations
    {
       public void Configure(EntityTypeBuilder<UserRole> builder)
       {
+         builder.Property(u => u.StartsAt).IsRequired().HasDefaultValueSql(SharedConst.Database.PostgreSQL.CurrentTimeStamp);
          builder.HasKey(ur => new { ur.UserId, ur.RoleId });
 
          builder.HasOne(ur => ur.User)

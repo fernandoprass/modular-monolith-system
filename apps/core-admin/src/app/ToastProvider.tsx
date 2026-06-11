@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useMemo, useState } from 'react
 import type { PropsWithChildren } from 'react'
 import { X } from 'lucide-react'
 
+import { cn } from '../lib/utils'
 import { useTranslate } from './i18n/i18n'
 
 type Toast = {
@@ -41,7 +42,7 @@ export function ToastProvider({ children }: PropsWithChildren) {
       {children}
       <div className="toast-region">
         {toasts.map((toast) => (
-          <div className={`toast toast-${toast.type}`} key={toast.id}>
+          <div className={cn('toast', `toast-${toast.type}`)} key={toast.id}>
             <span>{toast.message}</span>
             <button
               aria-label={t('shared.actions.back')}
@@ -49,7 +50,7 @@ export function ToastProvider({ children }: PropsWithChildren) {
               onClick={() => removeToast(toast.id)}
               type="button"
             >
-              <X size={14} />
+              <X />
             </button>
           </div>
         ))}

@@ -1,6 +1,8 @@
 import { ChevronDown, ChevronsUpDown, ChevronUp } from 'lucide-react'
 import type { ReactNode } from 'react'
 
+import { cn } from '../../lib/utils'
+
 type DataTableSortDirection = false | 'asc' | 'desc'
 
 type DataTableSortableButtonProps = {
@@ -18,7 +20,7 @@ export function DataTableSortableButton({
 }: DataTableSortableButtonProps) {
   return (
     <button
-      className={`table-header-button ${canSort ? 'table-header-sortable' : ''}`}
+      className={cn('table-header-button', canSort && 'table-header-sortable')}
       disabled={!canSort}
       onClick={onClick}
       type="button"
@@ -35,12 +37,12 @@ type SortIconProps = {
 
 function SortIcon({ direction }: SortIconProps) {
   if (direction === 'asc') {
-    return <ChevronUp size={14} />
+    return <ChevronUp />
   }
 
   if (direction === 'desc') {
-    return <ChevronDown size={14} />
+    return <ChevronDown />
   }
 
-  return <ChevronsUpDown size={14} />
+  return <ChevronsUpDown />
 }

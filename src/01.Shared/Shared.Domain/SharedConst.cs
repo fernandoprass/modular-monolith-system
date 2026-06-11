@@ -7,27 +7,18 @@ public static partial class SharedConst
       public const string ConnectionString = "SharedDb";
       public const string Schema = "shared";
 
-      public const string TextType = "text";
-      public const string UuidType = "uuid";
+      public static class PostgreSQL
+      {
+         public const string TextType = "text";
+         public const string UuidType = "uuid";
+         public const string CurrentTimeStamp = "CURRENT_TIMESTAMP";
+      }
    }
 
    public static class Entity
    {
       public const string Parameter = nameof(Entities.Parameter);
       public const string ParameterOverride = nameof(Entities.ParameterOverride);
-   }
-
-   public static class Redis
-   {
-      public const string ConnectionString = "Redis";
-      public const string EventFieldName = "event";
-
-      public const string AuditLogEventsStream = "audit-log-events";
-      public const string SystemLogEventsStream = "system-log-events";
-      public const string EmailRequestsStream = "courier-email-requests";
-      public const string NotificationEventsChannel = "notification-events";
-      public const string CacheKeyPrefixForParameter = "param:";
-      public const string CacheKeyPrefixForRole = "role:";
    }
 
    public static class Event
@@ -41,6 +32,43 @@ public static partial class SharedConst
          public const string EmailRequested = "courier.email.requested";
          public const string NotificationRequested = "courier.notification.requested";
       }
+   }
+
+   public static class Logger
+   {
+      public static class Feature
+      {
+         public const string Parameters = "parameters";
+         public const string Security = "security";
+      }
+
+      public static class Action
+      {
+         public const string DeleteOverride = "delete-override";
+         public const string SaveOverride = "save-override";
+         public const string Update = "update";
+         public const string UnauthorizedResourceAccess = "unauthorized-resource-access";
+      }
+   }
+
+   public static class Pagination
+   {
+      public const int DefaultPageNumber = 1;
+      public const int DefaultPageSize = 25;
+      public const int MaxPageSize = 200;
+   }
+
+   public static class Redis
+   {
+      public const string ConnectionString = "Redis";
+      public const string EventFieldName = "event";
+
+      public const string AuditLogEventsStream = "audit-log-events";
+      public const string SystemLogEventsStream = "system-log-events";
+      public const string EmailRequestsStream = "courier-email-requests";
+      public const string NotificationEventsChannel = "notification-events";
+      public const string CacheKeyPrefixForParameter = "param:";
+      public const string CacheKeyPrefixForRole = "role:";
    }
 
    public class Security
@@ -61,22 +89,5 @@ public static partial class SharedConst
    {
       public const string ModuleName = "Shared";
       public const string DefaultLanguage = "en";
-   }
-
-   public static class Logger
-   {
-      public static class Feature
-      {
-         public const string Parameters = "parameters";
-         public const string Security = "security";
-      }
-
-      public static class Action
-      {
-         public const string DeleteOverride = "delete-override";
-         public const string SaveOverride = "save-override";
-         public const string Update = "update";
-         public const string UnauthorizedResourceAccess = "unauthorized-resource-access";
-      }
    }
 }

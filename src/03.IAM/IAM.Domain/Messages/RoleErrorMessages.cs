@@ -21,6 +21,11 @@ namespace IAM.Domain.Messages
       public RolesCannotBeUnassignedError() : base("RolesCannotBeUnassignedError", "Roles cannot be unassigned. One or more roles are not assigned to the user.") { }
    }
 
+   public class RolesInvalidStartDateError: ErrorMessage
+   {
+      public RolesInvalidStartDateError() : base("RolesInvalidStartDateError", "Start date should be today or in the future.") { }
+   }
+
    public class RolesInvalidExpirationError : ErrorMessage
    {
       public RolesInvalidExpirationError() : base("RolesInvalidExpirationError", "Expire date should be in the future.") { }

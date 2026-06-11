@@ -2,19 +2,14 @@ using IAM.Domain.DTOs.Requests;
 using IAM.Domain.DTOs.Responses;
 using IAM.Domain.QueryRepositories;
 using Microsoft.EntityFrameworkCore;
-using Shared.Application.Contracts;
+using Shared.Domain;
 using Shared.Domain.DTOs.Responses;
 
 namespace IAM.Infrastructure.QueryRepositories;
 
-public class OrganizationQueryRepository(IamDbContext dbContext, IUserContext userContext) : IOrganizationQueryRepository
+public class OrganizationQueryRepository(IamDbContext dbContext) : IOrganizationQueryRepository
 {
-   private const int DefaultPageNumber = 1;
-   private const int DefaultPageSize = 25;
-   private const int MaxPageSize = 200;
-
    private readonly IamDbContext _dbContext = dbContext;
-   private readonly IUserContext _userContext;
 
    public async Task<OrganizationDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
    {
@@ -28,6 +23,11 @@ public class OrganizationQueryRepository(IamDbContext dbContext, IUserContext us
    public async Task<PagedResultDto<OrganizationDto>> GetAsync(OrganizationSearchRequest request, CancellationToken cancellationToken = default)
    {
       var query = _dbContext.Organizations.AsNoTracking();
+
+      if (request.OrganizationId.HasValue)
+      {
+         query = query.Where(org => org.Id == request.OrganizationId.Value);
+      }
 
       if (request.Type.HasValue)
       {
@@ -44,13 +44,14 @@ public class OrganizationQueryRepository(IamDbContext dbContext, IUserContext us
          query = query.Where(org => EF.Functions.ILike(org.Name, $"%{request.Name}%"));
       }
 
-      if (request.OrganizationId.HasValue)
+      if (request.IsActive.HasValue)
       {
-         query = query.Where(org => org.Id == request.OrganizationId.Value);
+         query = query.Where(org => org.IsActive == request.IsActive.Value);
       }
 
-      var pageNumber = request.PageNumber < 1 ? DefaultPageNumber : request.PageNumber;
-      var pageSize = request.PageSize < 1 ? DefaultPageSize : Math.Min(request.PageSize, MaxPageSize);
+
+      var pageNumber = request.PageNumber < 1 ? SharedConst.Pagination.DefaultPageNumber : request.PageNumber;
+      var pageSize = request.PageSize < 1 ? SharedConst.Pagination.DefaultPageSize : Math.Min(request.PageSize, SharedConst.Pagination.MaxPageSize);
       var totalCount = await query.LongCountAsync(cancellationToken);
 
       var items = await query
@@ -63,6 +64,33 @@ public class OrganizationQueryRepository(IamDbContext dbContext, IUserContext us
       var totalPages = totalCount == 0 ? 0 : (int)Math.Ceiling(totalCount / (double)pageSize);
 
       return new PagedResultDto<OrganizationDto>(items, pageNumber, pageSize, totalCount, totalPages);
+   }
+
+   public async Task<IEnumerable<OrganizationLookupDto>> GetLookupAsync(OrganizationLookupRequest request, CancellationToken cancellationToken = default)
+   {
+      var query = _dbContext.Organizations.AsNoTracking();
+
+      if (request.Id.HasValue)
+      {
+         query = query.Where(org => org.Id == request.Id.Value);
+      }
+
+      if (!string.IsNullOrWhiteSpace(request.Search))
+      {
+         query = query.Where(org => EF.Functions.ILike(org.Code, $"%{request.Search}%") ||
+                                    EF.Functions.ILike(org.Name, $"%{request.Search}%"));
+      }
+
+      if (!request.IncludeInactive)
+      {
+         query = query.Where(org => org.IsActive);
+      }
+
+      return await query
+         .OrderBy(org => org.Name)
+         .Take(request.Take)
+         .Select(org => new OrganizationLookupDto(org.Id, org.Code, org.Name, org.IsActive))
+         .ToListAsync(cancellationToken);
    }
 
    public async Task<bool> ExistsByCodeAsync(string code, CancellationToken cancellationToken = default)

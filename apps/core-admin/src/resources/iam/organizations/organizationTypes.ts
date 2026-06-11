@@ -5,10 +5,15 @@ export const ORGANIZATION_TYPES = {
 
 export const ORGANIZATION_QUERY_PARAMS = {
   code: 'Code',
+  id: 'Id',
+  includeInactive: 'IncludeInactive',
+  isActive: 'IsActive',
   name: 'Name',
   organizationId: 'OrganizationId',
   pageNumber: 'PageNumber',
   pageSize: 'PageSize',
+  search: 'Search',
+  take: 'Take',
   type: 'Type',
 } as const
 
@@ -32,6 +37,13 @@ export type OrganizationDto = {
   name: string
   description: string | null
   defaultLanguage: string
+  isActive: boolean
+}
+
+export type OrganizationLookupDto = {
+  id: string
+  code: string
+  name: string
   isActive: boolean
 }
 
