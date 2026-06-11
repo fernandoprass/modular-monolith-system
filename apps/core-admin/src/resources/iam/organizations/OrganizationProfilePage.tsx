@@ -1,16 +1,15 @@
+import { useForm } from '@tanstack/react-form'
 import { useCallback, useEffect, useState } from 'react'
-import type { FormEvent } from 'react'
 
 import { useToast } from '../../../app/ToastProvider'
 import { useTranslate } from '../../../app/i18n/i18n'
 import { useNotifyError } from '../../../auth/AuthProvider'
 import { Button } from '../../../components/ui/button'
 import { Card, CardContent } from '../../../components/ui/card'
-import { Checkbox } from '../../../components/ui/checkbox'
-import { Field } from '../../../components/ui/field'
+import { Field, FieldGroup, FieldLabel } from '../../../components/ui/form'
 import { Input } from '../../../components/ui/input'
-import { Label } from '../../../components/ui/label'
 import { Select } from '../../../components/ui/select'
+import { Textarea } from '../../../components/ui/textarea'
 import { LANGUAGE_CODES, LANGUAGE_OPTIONS } from '../../../shared/languages'
 import { getOwnOrganization, updateOwnOrganization } from './organizationApi'
 import { ORGANIZATION_REQUEST_FIELDS, type OrganizationDto } from './organizationTypes'
@@ -28,24 +27,38 @@ export function OrganizationProfilePage() {
   const notifyError = useNotifyError()
   const { showSuccess } = useToast()
   const [organization, setOrganization] = useState<OrganizationDto | null>(null)
-  const [form, setForm] = useState<OrganizationProfileForm>({
-    defaultLanguage: LANGUAGE_CODES.english,
-    description: '',
-    isActive: true,
-    name: '',
-  })
   const [isSaving, setIsSaving] = useState(false)
+  const form = useForm({
+    defaultValues: {
+      defaultLanguage: LANGUAGE_CODES.english,
+      description: '',
+      isActive: true,
+      name: '',
+    } as OrganizationProfileForm,
+    onSubmit: async ({ value }) => {
+      setIsSaving(true)
+
+      try {
+        await updateOwnOrganization({
+          [ORGANIZATION_REQUEST_FIELDS.name]: value.name,
+          [ORGANIZATION_REQUEST_FIELDS.description]: value.description,
+          [ORGANIZATION_REQUEST_FIELDS.isActive]: value.isActive,
+          [ORGANIZATION_REQUEST_FIELDS.defaultLanguage]: value.defaultLanguage,
+        })
+        showSuccess(t('resources.iam.organizations.notifications.updated'))
+        await loadOrganization()
+      } catch (error) {
+        notifyError(error, t('shared.errors.generic'))
+      } finally {
+        setIsSaving(false)
+      }
+    },
+  })
 
   const loadOrganization = useCallback(async () => {
     try {
       const loaded = await getOwnOrganization()
       setOrganization(loaded)
-      setForm({
-        defaultLanguage: loaded.defaultLanguage,
-        description: loaded.description ?? '',
-        isActive: loaded.isActive,
-        name: loaded.name,
-      })
     } catch (error) {
       notifyError(error, t('shared.errors.generic'))
     }
@@ -55,35 +68,18 @@ export function OrganizationProfilePage() {
     void loadOrganization()
   }, [loadOrganization])
 
-  function setField<TField extends keyof OrganizationProfileForm>(
-    field: TField,
-    value: OrganizationProfileForm[TField],
-  ) {
-    setForm((currentForm) => ({
-      ...currentForm,
-      [field]: value,
-    }))
-  }
-
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    setIsSaving(true)
-
-    try {
-      await updateOwnOrganization({
-        [ORGANIZATION_REQUEST_FIELDS.name]: form.name,
-        [ORGANIZATION_REQUEST_FIELDS.description]: form.description,
-        [ORGANIZATION_REQUEST_FIELDS.isActive]: form.isActive,
-        [ORGANIZATION_REQUEST_FIELDS.defaultLanguage]: form.defaultLanguage,
-      })
-      showSuccess(t('resources.iam.organizations.notifications.updated'))
-      await loadOrganization()
-    } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
-    } finally {
-      setIsSaving(false)
+  useEffect(() => {
+    if (organization === null) {
+      return
     }
-  }
+
+    form.reset({
+      defaultLanguage: organization.defaultLanguage,
+      description: organization.description ?? '',
+      isActive: organization.isActive,
+      name: organization.name,
+    })
+  }, [form, organization])
 
   return (
     <main className="page">
@@ -95,33 +91,50 @@ export function OrganizationProfilePage() {
           {organization === null ? (
             <p className="page-subtitle">{t('shared.common.loading')}</p>
           ) : (
-            <form className="edit-form" onSubmit={handleSubmit}>
-              <div className="field">
-                <Label>{t('resources.iam.organizations.fields.code')}</Label>
-                <Input disabled value={organization.code} />
-              </div>
-              <Field label={t('resources.iam.organizations.fields.name')}>
-                <Input onChange={(event) => setField('name', event.currentTarget.value)} required value={form.name} />
-              </Field>
-              <Field label={t('resources.iam.organizations.fields.description')}>
-                <Input
-                  onChange={(event) => setField('description', event.currentTarget.value)}
-                  required
-                  value={form.description}
-                />
-              </Field>
-              <Field label={t('resources.iam.organizations.fields.defaultLanguage')}>
-                <Select
-                  onValueChange={(value) => setField('defaultLanguage', value)}
-                  options={toTranslatedOptions(LANGUAGE_OPTIONS, t)}
-                  value={form.defaultLanguage}
-                />
-              </Field>
-              <Checkbox
-                checked={form.isActive}
-                label={t('resources.iam.organizations.fields.isActive')}
-                onCheckedChange={(checked) => setField('isActive', checked)}
-              />
+            <form className="edit-form" onSubmit={(event) => {
+              event.preventDefault()
+              void form.handleSubmit()
+            }}>
+              <FieldGroup>
+                <Field data-disabled>
+                  <FieldLabel>{t('resources.iam.organizations.fields.code')}</FieldLabel>
+                  <Input disabled value={organization.code} />
+                </Field>
+                <form.Field name="name">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel htmlFor={field.name}>{t('resources.iam.organizations.fields.name')}</FieldLabel>
+                      <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required value={field.state.value} />
+                    </Field>
+                  )}
+                </form.Field>
+                <form.Field name="description">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel htmlFor={field.name}>{t('resources.iam.organizations.fields.description')}</FieldLabel>
+                      <Textarea
+                        id={field.name}
+                        onBlur={field.handleBlur}
+                        onChange={(event) => field.handleChange(event.currentTarget.value)}
+                        required
+                        value={field.state.value}
+                      />
+                    </Field>
+                  )}
+                </form.Field>
+                <form.Field name="defaultLanguage">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>{t('resources.iam.organizations.fields.defaultLanguage')}</FieldLabel>
+                      <Select
+                        onValueChange={field.handleChange}
+                        options={toTranslatedOptions(LANGUAGE_OPTIONS, t)}
+                        value={field.state.value}
+                      />
+                    </Field>
+                  )}
+                </form.Field>
+              </FieldGroup>
               <div className="form-actions">
                 <Button disabled={isSaving} type="submit">{t('shared.actions.save')}</Button>
               </div>

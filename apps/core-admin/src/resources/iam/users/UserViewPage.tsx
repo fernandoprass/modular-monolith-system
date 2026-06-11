@@ -9,11 +9,12 @@ import { useNotifyError } from '../../../auth/AuthProvider'
 import { Badge } from '../../../components/ui/badge'
 import { Button } from '../../../components/ui/button'
 import { Card, CardContent } from '../../../components/ui/card'
+import { UserAccessTabs } from './UserAccessTabs'
 import { getUser } from './userApi'
 import type { UserDto } from './userTypes'
 import { getLanguageLabel } from './userUi'
 
-export function UserShowPage() {
+export function UserViewPage() {
   const t = useTranslate()
   const navigate = useNavigate()
   const notifyError = useNotifyError()
@@ -43,7 +44,7 @@ export function UserShowPage() {
       <div className="page-header">
         <h1 className="page-title">{t('resources.iam.users.pages.show')}</h1>
         <Button onClick={() => navigate(APP_ROUTES.users)} type="button" variant="outline">
-          <ArrowLeft size={16} />
+          <ArrowLeft data-icon="inline-start" />
           {t('shared.actions.back')}
         </Button>
       </div>
@@ -52,22 +53,25 @@ export function UserShowPage() {
           {user === null ? (
             <p className="page-subtitle">{t('shared.common.loading')}</p>
           ) : (
-            <div className="detail-grid">
-              <Field label={t('resources.iam.users.fields.organizationName')}>{user.organizationName}</Field>
-              <Field label={t('resources.iam.users.fields.isActive')}>
-                <Badge variant={user.isActive ? 'active' : 'inactive'}>
-                  {user.isActive ? t('shared.status.active') : t('shared.status.inactive')}
-                </Badge>
-              </Field>
-              <Field label={t('resources.iam.users.fields.name')}>{user.name}</Field>
-              <Field label={t('resources.iam.users.fields.email')}>{user.email}</Field>
-              <Field label={t('resources.iam.users.fields.language')}>{getLanguageLabel(user.language, t)}</Field>
-              <Field label={t('resources.iam.users.fields.isSystemAdmin')}>
-                {user.isSystemAdmin ? t('shared.common.yes') : t('shared.common.no')}
-              </Field>
-              <Field label={t('resources.iam.users.fields.isOrganizationAdmin')}>
-                {user.isOrganizationAdmin ? t('shared.common.yes') : t('shared.common.no')}
-              </Field>
+            <div className="detail-stack">
+                <div className="detail-grid">
+                  <Field label={t('resources.iam.users.fields.organizationName')}>{user.organizationName}</Field>
+                  <Field label={t('resources.iam.users.fields.language')}>{getLanguageLabel(user.language, t)}</Field>
+                  <Field label={t('resources.iam.users.fields.name')}>{user.name}</Field>
+                  <Field label={t('resources.iam.users.fields.email')}>{user.email}</Field>
+                  <Field label={t('resources.iam.users.fields.isSystemAdmin')}>
+                    {user.isSystemAdmin ? t('shared.common.yes') : t('shared.common.no')}
+                  </Field>
+                  <Field label={t('resources.iam.users.fields.isOrganizationAdmin')}>
+                    {user.isOrganizationAdmin ? t('shared.common.yes') : t('shared.common.no')}
+                  </Field>
+                  <Field label={t('resources.iam.users.fields.isActive')}>
+                    <Badge variant={user.isActive ? 'active' : 'inactive'}>
+                      {user.isActive ? t('shared.status.active') : t('shared.status.inactive')}
+                    </Badge>
+                  </Field>
+                </div>
+              <UserAccessTabs userId={user.id} />
             </div>
           )}
         </CardContent>

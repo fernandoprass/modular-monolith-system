@@ -65,7 +65,7 @@ export function createOrganizationTableColumns({
               isVisible: canView,
               kind: DATA_TABLE_ROW_ACTION_KINDS.view,
               label: t('resources.iam.organizations.actions.view'),
-              onClick: () => navigate(APP_ROUTES.organizationShow(row.original.id)),
+              onClick: () => navigate(APP_ROUTES.organizationView(row.original.id)),
             },
             {
               isVisible: canUpdate,

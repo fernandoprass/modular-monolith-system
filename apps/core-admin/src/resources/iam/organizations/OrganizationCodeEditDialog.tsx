@@ -1,13 +1,13 @@
+import { useForm } from '@tanstack/react-form'
 import { useEffect, useState } from 'react'
-import type { FormEvent } from 'react'
 
 import { useToast } from '../../../app/ToastProvider'
 import { useTranslate } from '../../../app/i18n/i18n'
 import { useNotifyError } from '../../../auth/AuthProvider'
 import { Button } from '../../../components/ui/button'
 import { Dialog } from '../../../components/ui/dialog'
+import { Field, FieldGroup, FieldLabel } from '../../../components/ui/form'
 import { Input } from '../../../components/ui/input'
-import { Label } from '../../../components/ui/label'
 import { ORGANIZATION_REQUEST_FIELDS, type OrganizationDto } from './organizationTypes'
 import { updateOrganizationCode } from './organizationApi'
 
@@ -27,32 +27,34 @@ export function OrganizationCodeEditDialog({
   const t = useTranslate()
   const notifyError = useNotifyError()
   const { showSuccess } = useToast()
-  const [code, setCode] = useState(organization.code)
   const [isSaving, setIsSaving] = useState(false)
+  const form = useForm({
+    defaultValues: {
+      code: organization.code,
+    },
+    onSubmit: async ({ value }) => {
+      setIsSaving(true)
+
+      try {
+        await updateOrganizationCode(organization.id, {
+          [ORGANIZATION_REQUEST_FIELDS.code]: value.code,
+        })
+        showSuccess(t('resources.iam.organizations.notifications.codeUpdated'))
+        await onSaved()
+        onClose()
+      } catch (error) {
+        notifyError(error, t('shared.errors.generic'))
+      } finally {
+        setIsSaving(false)
+      }
+    },
+  })
 
   useEffect(() => {
     if (isOpen) {
-      setCode(organization.code)
+      form.reset({ code: organization.code })
     }
-  }, [isOpen, organization.code])
-
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    setIsSaving(true)
-
-    try {
-      await updateOrganizationCode(organization.id, {
-        [ORGANIZATION_REQUEST_FIELDS.code]: code,
-      })
-      showSuccess(t('resources.iam.organizations.notifications.codeUpdated'))
-      await onSaved()
-      onClose()
-    } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
-    } finally {
-      setIsSaving(false)
-    }
-  }
+  }, [form, isOpen, organization.code])
 
   return (
     <Dialog
@@ -61,12 +63,21 @@ export function OrganizationCodeEditDialog({
       open={isOpen}
       title={t('resources.iam.organizations.actions.editCode')}
     >
-      <form onSubmit={handleSubmit}>
-        <div className="dialog-body form-stack">
-          <div className="field">
-            <Label>{t('resources.iam.organizations.fields.code')}</Label>
-            <Input autoFocus onChange={(event) => setCode(event.currentTarget.value)} required value={code} />
-          </div>
+      <form onSubmit={(event) => {
+        event.preventDefault()
+        void form.handleSubmit()
+      }}>
+        <div className="dialog-body">
+          <FieldGroup>
+            <form.Field name="code">
+              {(field) => (
+                <Field>
+                  <FieldLabel htmlFor={field.name}>{t('resources.iam.organizations.fields.code')}</FieldLabel>
+                  <Input autoFocus id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required value={field.state.value} />
+                </Field>
+              )}
+            </form.Field>
+          </FieldGroup>
         </div>
         <div className="dialog-actions">
           <Button onClick={onClose} type="button" variant="outline">

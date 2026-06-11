@@ -3,7 +3,7 @@ export const APP_ROUTES = {
   login: '/login',
   organizationEdit: (id: string) => `/organizations/${id}`,
   organizationProfile: '/organization-profile',
-  organizationShow: (id: string) => `/organizations/${id}/show`,
+  organizationView: (id: string) => `/organizations/${id}/show`,
   organizations: '/organizations',
   parameters: '/parameters',
   permissions: '/permissions',
@@ -12,6 +12,6 @@ export const APP_ROUTES = {
   userCreate: '/users/create',
   userEdit: (id: string) => `/users/${id}`,
   userProfile: '/user-profile',
-  userShow: (id: string) => `/users/${id}/show`,
+  userView: (id: string) => `/users/${id}/show`,
   users: '/users',
 } as const

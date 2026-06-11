@@ -13,7 +13,7 @@ import { getOrganization } from './organizationApi'
 import type { OrganizationDto } from './organizationTypes'
 import { getLanguageLabel, getOrganizationTypeLabel } from './organizationUi'
 
-export function OrganizationShowPage() {
+export function OrganizationViewPage() {
   const t = useTranslate()
   const navigate = useNavigate()
   const notifyError = useNotifyError()
@@ -43,7 +43,7 @@ export function OrganizationShowPage() {
       <div className="page-header">
         <h1 className="page-title">{t('resources.iam.organizations.pages.show')}</h1>
         <Button onClick={() => navigate(APP_ROUTES.organizations)} type="button" variant="outline">
-          <ArrowLeft size={16} />
+          <ArrowLeft data-icon="inline-start" />
           {t('shared.actions.back')}
         </Button>
       </div>

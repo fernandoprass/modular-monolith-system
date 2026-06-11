@@ -1,22 +1,23 @@
 import * as CheckboxPrimitive from '@radix-ui/react-checkbox'
 import { Check } from 'lucide-react'
+import type { ComponentProps } from 'react'
 
-type CheckboxProps = {
-  checked: boolean
+import { cn } from '../../lib/utils'
+
+type CheckboxProps = ComponentProps<typeof CheckboxPrimitive.Root> & {
   label: string
-  onCheckedChange: (checked: boolean) => void
 }
 
-export function Checkbox({ checked, label, onCheckedChange }: CheckboxProps) {
+export function Checkbox({ className, label, onCheckedChange, ...props }: CheckboxProps) {
   return (
     <label className="checkbox-row">
       <CheckboxPrimitive.Root
-        checked={checked}
-        className="checkbox"
-        onCheckedChange={(value) => onCheckedChange(value === true)}
+        className={cn('checkbox', className)}
+        onCheckedChange={(value) => onCheckedChange?.(value === true)}
+        {...props}
       >
-        <CheckboxPrimitive.Indicator>
-          <Check size={13} />
+        <CheckboxPrimitive.Indicator className="checkbox-indicator">
+          <Check data-icon="inline-start" />
         </CheckboxPrimitive.Indicator>
       </CheckboxPrimitive.Root>
       <span>{label}</span>

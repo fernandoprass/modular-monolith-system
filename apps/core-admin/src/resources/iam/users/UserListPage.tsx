@@ -1,6 +1,6 @@
+import { useForm } from '@tanstack/react-form'
 import { Plus } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import type { FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { SortingState } from '@tanstack/react-table'
 
@@ -11,9 +11,10 @@ import { useAuth, useNotifyError } from '../../../auth/AuthProvider'
 import { Button } from '../../../components/ui/button'
 import { DataTable } from '../../../components/ui/data-table'
 import { ConfirmDialog } from '../../../components/ui/dialog'
-import { Field } from '../../../components/ui/field'
+import { Field, FieldLabel } from '../../../components/ui/form'
 import { FilterToolbar } from '../../../components/ui/filter-toolbar'
 import { Input } from '../../../components/ui/input'
+import { Select } from '../../../components/ui/select'
 import { DataTablePagination } from '../../../components/ui/data-table-pagination'
 import { IAM_PERMISSIONS } from '../../../shared/iamConstants'
 import { DEFAULT_PAGINATION } from '../../../shared/pagination'
@@ -29,10 +30,8 @@ export function UserListPage() {
   const notifyError = useNotifyError()
   const { showSuccess } = useToast()
   const { permissions } = useAuth()
-  const [organizationIdFilter, setOrganizationIdFilter] = useState('')
-  const [nameFilter, setNameFilter] = useState('')
-  const [emailFilter, setEmailFilter] = useState('')
   const [appliedOrganizationIdFilter, setAppliedOrganizationIdFilter] = useState('')
+  const [appliedIsActiveFilter, setAppliedIsActiveFilter] = useState<string | null>(null)
   const [appliedNameFilter, setAppliedNameFilter] = useState('')
   const [appliedEmailFilter, setAppliedEmailFilter] = useState('')
   const [pageNumber, setPageNumber] = useState<number>(DEFAULT_PAGINATION.pageNumber)
@@ -53,12 +52,28 @@ export function UserListPage() {
     setDeleteTarget,
     t,
   }), [canDelete, canUpdate, canView, navigate, t])
+  const filterForm = useForm({
+    defaultValues: {
+      email: '',
+      isActive: 'all',
+      name: '',
+      organizationId: '',
+    },
+    onSubmit: ({ value }) => {
+      setPageNumber(DEFAULT_PAGINATION.pageNumber)
+      setAppliedOrganizationIdFilter(value.organizationId)
+      setAppliedIsActiveFilter(value.isActive === 'all' ? null : value.isActive)
+      setAppliedNameFilter(value.name)
+      setAppliedEmailFilter(value.email)
+    },
+  })
   const loadUsers = useCallback(async (targetPage = pageNumber) => {
     setIsLoading(true)
 
     try {
       setResult(await getUsers({
         email: appliedEmailFilter,
+        isActive: appliedIsActiveFilter,
         name: appliedNameFilter,
         organizationId: appliedOrganizationIdFilter,
         pageNumber: targetPage,
@@ -69,25 +84,16 @@ export function UserListPage() {
     } finally {
       setIsLoading(false)
     }
-  }, [appliedEmailFilter, appliedNameFilter, appliedOrganizationIdFilter, notifyError, pageNumber, pageSize, t])
+  }, [appliedEmailFilter, appliedIsActiveFilter, appliedNameFilter, appliedOrganizationIdFilter, notifyError, pageNumber, pageSize, t])
 
   useEffect(() => {
     void loadUsers(pageNumber)
   }, [loadUsers, pageNumber])
 
-  function handleFilter(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    setPageNumber(DEFAULT_PAGINATION.pageNumber)
-    setAppliedOrganizationIdFilter(organizationIdFilter)
-    setAppliedNameFilter(nameFilter)
-    setAppliedEmailFilter(emailFilter)
-  }
-
   function handleReset() {
-    setOrganizationIdFilter('')
-    setNameFilter('')
-    setEmailFilter('')
+    filterForm.reset()
     setAppliedOrganizationIdFilter('')
+    setAppliedIsActiveFilter(null)
     setAppliedNameFilter('')
     setAppliedEmailFilter('')
     setPageNumber(DEFAULT_PAGINATION.pageNumber)
@@ -121,25 +127,59 @@ export function UserListPage() {
         <h1 className="page-title">{t('resources.iam.users.pages.list')}</h1>
         {canCreate && (
           <Button onClick={() => navigate(APP_ROUTES.userCreate)} type="button">
-            <Plus size={16} />
+            <Plus data-icon="inline-start" />
             {t('resources.iam.users.actions.create')}
           </Button>
         )}
       </div>
-      <FilterToolbar onReset={handleReset} onSubmit={handleFilter}>
-        <Field label={t('resources.iam.users.fields.organizationId')}>
-          <OrganizationSelect
-            clearable
-            onValueChange={setOrganizationIdFilter}
-            value={organizationIdFilter}
-          />
-        </Field>
-        <Field label={t('resources.iam.users.fields.name')}>
-          <Input onChange={(event) => setNameFilter(event.currentTarget.value)} value={nameFilter} />
-        </Field>
-        <Field label={t('resources.iam.users.fields.email')}>
-          <Input onChange={(event) => setEmailFilter(event.currentTarget.value)} type="email" value={emailFilter} />
-        </Field>
+      <FilterToolbar onReset={handleReset} onSubmit={(event) => {
+        event.preventDefault()
+        void filterForm.handleSubmit()
+      }}>
+        <filterForm.Field name="organizationId">
+          {(field) => (
+            <Field>
+              <FieldLabel>{t('resources.iam.users.fields.organizationId')}</FieldLabel>
+              <OrganizationSelect
+                clearable
+                onValueChange={field.handleChange}
+                value={field.state.value}
+              />
+            </Field>
+          )}
+        </filterForm.Field>
+        <filterForm.Field name="name">
+          {(field) => (
+            <Field>
+              <FieldLabel htmlFor={field.name}>{t('resources.iam.users.fields.name')}</FieldLabel>
+              <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} value={field.state.value} />
+            </Field>
+          )}
+        </filterForm.Field>
+        <filterForm.Field name="email">
+          {(field) => (
+            <Field>
+              <FieldLabel htmlFor={field.name}>{t('resources.iam.users.fields.email')}</FieldLabel>
+              <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} value={field.state.value} />
+            </Field>
+          )}
+        </filterForm.Field>
+                <filterForm.Field name="isActive">
+          {(field) => (
+            <Field>
+              <FieldLabel>{t('resources.iam.users.fields.isActive')}</FieldLabel>
+              <Select
+                onValueChange={field.handleChange}
+                options={[
+                  { label: t('shared.filters.all'), value: 'all' },
+                  { label: t('shared.status.active'), value: 'true' },
+                  { label: t('shared.status.inactive'), value: 'false' },
+                ]}
+                value={field.state.value}
+              />
+            </Field>
+          )}
+        </filterForm.Field>
       </FilterToolbar>
 
       <DataTable

@@ -23,7 +23,7 @@ export const enMessages = {
   navigation: {
     dashboard: 'Dashboard',
     menu: 'Menu',
-    profile: 'Profile',
+    profile: 'Organization Profile',
     toggleSidebar: 'Toggle sidebar',
     groups: {
       authorization: 'Authorization',
@@ -103,10 +103,87 @@ export const enMessages = {
         name: 'Parameters',
       },
       permissions: {
+        actions: {
+          create: 'Create',
+          delete: 'Delete',
+          edit: 'Edit permission',
+          list: 'List',
+          saveoverride: 'Save override',
+          update: 'Update',
+          updatepassword: 'Update password',
+          view: 'View',
+          viewpermissions: 'View permissions',
+        },
+        fields: {
+          action: 'Action',
+          actions: 'Actions',
+          description: 'Description',
+          isActive: 'Active',
+          module: 'Module',
+          resource: 'Resource',
+          title: 'Title',
+        },
+        messages: {
+          empty: 'No permissions found.',
+        },
+        modules: {
+          courier: 'Courier',
+          iam: 'IAM',
+          sentinel: 'Sentinel',
+          shared: 'Shared',
+        },
         name: 'Permissions',
+        notifications: {
+          updated: 'Permission updated.',
+        },
+        pages: {
+          list: 'Permissions',
+        },
+        resources: {
+          auditlogs: 'Audit logs',
+          emails: 'Emails',
+          emailtemplates: 'Email templates',
+          organizations: 'Organizations',
+          parameters: 'Parameters',
+          permissions: 'Permissions',
+          roles: 'Roles',
+          systemlogs: 'System logs',
+          templates: 'Templates',
+          users: 'Users',
+        },
       },
       roles: {
+        actions: {
+          create: 'Create role',
+          delete: 'Delete',
+          edit: 'Edit role',
+        },
+        fields: {
+          actions: 'Actions',
+          assignedBy: 'Assigned by',
+          assignedAt: 'Assigned at',
+          description: 'Description',
+          isActive: 'Active',
+          isDefault: 'Default',
+          name: 'Name',
+          organizationId: 'Organization',
+          startsAt: 'Starts at',
+          expiresAt: 'Expires at',
+          userId: 'User ID',
+        },
+        messages: {
+          deleteConfirm: 'Delete this role?',
+          empty: 'No roles found.',
+        },
         name: 'Roles',
+        notifications: {
+          created: 'Role created.',
+          deleted: 'Role deleted.',
+          updated: 'Role updated.',
+        },
+        pages: {
+          list: 'Roles',
+        },
       },
       users: {
         actions: {
@@ -130,6 +207,9 @@ export const enMessages = {
         messages: {
           deleteConfirm: 'Delete this user?',
           empty: 'No users found.',
+          noPermissions: 'No permissions found.',
+          noRoles: 'No roles found.',
+          organizationRequired: 'Select an organization.',
         },
         name: 'Users',
         notifications: {
@@ -144,6 +224,13 @@ export const enMessages = {
           list: 'Users',
           profile: 'User profile',
           show: 'User details',
+        },
+        placeholders: {
+          search: 'Search user',
+        },
+        tabs: {
+          permissions: 'Permissions',
+          roles: 'Roles',
         },
       },
     },

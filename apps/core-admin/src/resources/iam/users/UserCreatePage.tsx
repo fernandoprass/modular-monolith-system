@@ -1,15 +1,15 @@
+import { useForm } from '@tanstack/react-form'
 import { ArrowLeft } from 'lucide-react'
 import { useState } from 'react'
-import type { FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { useToast } from '../../../app/ToastProvider'
 import { useTranslate } from '../../../app/i18n/i18n'
 import { APP_ROUTES } from '../../../app/routes'
-import { useNotifyError } from '../../../auth/AuthProvider'
+import { useAuth, useNotifyError } from '../../../auth/AuthProvider'
 import { Button } from '../../../components/ui/button'
 import { Card, CardContent } from '../../../components/ui/card'
-import { Field } from '../../../components/ui/field'
+import { Field, FieldGroup, FieldLabel } from '../../../components/ui/form'
 import { Input } from '../../../components/ui/input'
 import { Select } from '../../../components/ui/select'
 import { LANGUAGE_CODES, LANGUAGE_OPTIONS } from '../../../shared/languages'
@@ -22,75 +22,101 @@ export function UserCreatePage() {
   const t = useTranslate()
   const navigate = useNavigate()
   const notifyError = useNotifyError()
-  const { showSuccess } = useToast()
-  const [form, setForm] = useState<UserCreateForm>({
-    email: '',
-    language: LANGUAGE_CODES.english,
-    name: '',
-    organizationId: '',
-    password: '',
-  })
+  const { user } = useAuth()
+  const { showError, showSuccess } = useToast()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const form = useForm({
+    defaultValues: {
+      email: '',
+      language: LANGUAGE_CODES.english,
+      name: '',
+      organizationId: user?.isSystemAdmin === true ? '' : user?.organizationId ?? '',
+      password: '',
+    } as UserCreateForm,
+    onSubmit: async ({ value }) => {
+      if (value.organizationId.trim().length === 0) {
+        showError(t('resources.iam.users.messages.organizationRequired'))
+        return
+      }
 
-  function setField<TField extends keyof UserCreateForm>(
-    field: TField,
-    value: UserCreateForm[TField],
-  ) {
-    setForm((currentForm) => ({
-      ...currentForm,
-      [field]: value,
-    }))
-  }
+      setIsSubmitting(true)
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    setIsSubmitting(true)
-
-    try {
-      const created = await createUser(form)
-      showSuccess(t('resources.iam.users.notifications.created'))
-      navigate(APP_ROUTES.userShow(created.id))
-    } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
+      try {
+        const created = await createUser(value)
+        showSuccess(t('resources.iam.users.notifications.created'))
+        navigate(APP_ROUTES.userView(created.id))
+      } catch (error) {
+        notifyError(error, t('shared.errors.generic'))
+      } finally {
+        setIsSubmitting(false)
+      }
+    },
+  })
 
   return (
     <main className="page">
       <div className="page-header">
         <h1 className="page-title">{t('resources.iam.users.pages.create')}</h1>
         <Button onClick={() => navigate(APP_ROUTES.users)} type="button" variant="outline">
-          <ArrowLeft size={16} />
+          <ArrowLeft data-icon="inline-start" />
           {t('shared.actions.back')}
         </Button>
       </div>
       <Card>
         <CardContent>
-          <form className="edit-form" onSubmit={handleSubmit}>
-            <Field label={t('resources.iam.users.fields.organizationId')}>
-              <OrganizationSelect
-                onValueChange={(value) => setField('organizationId', value)}
-                value={form.organizationId}
-              />
-            </Field>
-            <Field label={t('resources.iam.users.fields.name')}>
-              <Input onChange={(event) => setField('name', event.currentTarget.value)} required value={form.name} />
-            </Field>
-            <Field label={t('resources.iam.users.fields.email')}>
-              <Input onChange={(event) => setField('email', event.currentTarget.value)} required type="email" value={form.email} />
-            </Field>
-            <Field label={t('resources.iam.users.fields.password')}>
-              <Input onChange={(event) => setField('password', event.currentTarget.value)} required type="password" value={form.password} />
-            </Field>
-            <Field label={t('resources.iam.users.fields.language')}>
-              <Select
-                onValueChange={(value) => setField('language', value)}
-                options={toTranslatedOptions(LANGUAGE_OPTIONS, t)}
-                value={form.language}
-              />
-            </Field>
+          <form className="edit-form" onSubmit={(event) => {
+            event.preventDefault()
+            void form.handleSubmit()
+          }}>
+            <FieldGroup>
+              <form.Field name="organizationId">
+                {(field) => (
+                  <Field>
+                    <FieldLabel>{t('resources.iam.users.fields.organizationId')}</FieldLabel>
+                    <OrganizationSelect
+                      onValueChange={field.handleChange}
+                      value={field.state.value}
+                    />
+                  </Field>
+                )}
+              </form.Field>
+              <form.Field name="name">
+                {(field) => (
+                  <Field>
+                    <FieldLabel htmlFor={field.name}>{t('resources.iam.users.fields.name')}</FieldLabel>
+                    <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required value={field.state.value} />
+                  </Field>
+                )}
+              </form.Field>
+              <form.Field name="email">
+                {(field) => (
+                  <Field>
+                    <FieldLabel htmlFor={field.name}>{t('resources.iam.users.fields.email')}</FieldLabel>
+                    <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required type="email" value={field.state.value} />
+                  </Field>
+                )}
+              </form.Field>
+              <form.Field name="password">
+                {(field) => (
+                  <Field>
+                    <FieldLabel htmlFor={field.name}>{t('resources.iam.users.fields.password')}</FieldLabel>
+                    <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required type="password" value={field.state.value} />
+                  </Field>
+                )}
+              </form.Field>
+              <form.Field name="language">
+                {(field) => (
+                  <Field>
+                    <FieldLabel>{t('resources.iam.users.fields.language')}</FieldLabel>
+                    <Select
+                      onValueChange={field.handleChange}
+                      options={toTranslatedOptions(LANGUAGE_OPTIONS, t)}
+                      value={field.state.value}
+                    />
+                  </Field>
+                )}
+              </form.Field>
+            </FieldGroup>
             <div className="form-actions">
               <Button disabled={isSubmitting} type="submit">{t('resources.iam.users.actions.create')}</Button>
             </div>

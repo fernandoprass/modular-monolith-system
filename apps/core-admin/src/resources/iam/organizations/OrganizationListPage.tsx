@@ -1,5 +1,5 @@
+import { useForm } from '@tanstack/react-form'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import type { FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { SortingState } from '@tanstack/react-table'
 
@@ -8,7 +8,7 @@ import { useTranslate } from '../../../app/i18n/i18n'
 import { useAuth, useNotifyError } from '../../../auth/AuthProvider'
 import { DataTable } from '../../../components/ui/data-table'
 import { ConfirmDialog } from '../../../components/ui/dialog'
-import { Field } from '../../../components/ui/field'
+import { Field, FieldLabel } from '../../../components/ui/form'
 import { FilterToolbar } from '../../../components/ui/filter-toolbar'
 import { Input } from '../../../components/ui/input'
 import { Select } from '../../../components/ui/select'
@@ -27,10 +27,8 @@ export function OrganizationListPage() {
   const notifyError = useNotifyError()
   const { showSuccess } = useToast()
   const { permissions } = useAuth()
-  const [codeFilter, setCodeFilter] = useState('')
-  const [nameFilter, setNameFilter] = useState('')
-  const [typeFilter, setTypeFilter] = useState<string | null>(null)
   const [appliedCodeFilter, setAppliedCodeFilter] = useState('')
+  const [appliedIsActiveFilter, setAppliedIsActiveFilter] = useState<string | null>(null)
   const [appliedNameFilter, setAppliedNameFilter] = useState('')
   const [appliedTypeFilter, setAppliedTypeFilter] = useState<string | null>(null)
   const [pageNumber, setPageNumber] = useState<number>(DEFAULT_PAGINATION.pageNumber)
@@ -50,12 +48,28 @@ export function OrganizationListPage() {
     setDeleteTarget,
     t,
   }), [canDelete, canUpdate, canView, navigate, t])
+  const filterForm = useForm({
+    defaultValues: {
+      code: '',
+      isActive: 'all',
+      name: '',
+      type: 'all',
+    },
+    onSubmit: ({ value }) => {
+      setPageNumber(DEFAULT_PAGINATION.pageNumber)
+      setAppliedCodeFilter(value.code)
+      setAppliedIsActiveFilter(value.isActive === 'all' ? null : value.isActive)
+      setAppliedNameFilter(value.name)
+      setAppliedTypeFilter(value.type === 'all' ? null : value.type)
+    },
+  })
   const loadOrganizations = useCallback(async (targetPage = pageNumber) => {
     setIsLoading(true)
 
     try {
       setResult(await getOrganizations({
         code: appliedCodeFilter,
+        isActive: appliedIsActiveFilter,
         name: appliedNameFilter,
         pageNumber: targetPage,
         pageSize,
@@ -66,25 +80,16 @@ export function OrganizationListPage() {
     } finally {
       setIsLoading(false)
     }
-  }, [appliedCodeFilter, appliedNameFilter, appliedTypeFilter, notifyError, pageNumber, pageSize, t])
+  }, [appliedCodeFilter, appliedIsActiveFilter, appliedNameFilter, appliedTypeFilter, notifyError, pageNumber, pageSize, t])
 
   useEffect(() => {
     void loadOrganizations(pageNumber)
   }, [loadOrganizations, pageNumber])
 
-  function handleFilter(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    setPageNumber(DEFAULT_PAGINATION.pageNumber)
-    setAppliedCodeFilter(codeFilter)
-    setAppliedNameFilter(nameFilter)
-    setAppliedTypeFilter(typeFilter)
-  }
-
   function handleReset() {
-    setCodeFilter('')
-    setNameFilter('')
-    setTypeFilter(null)
+    filterForm.reset()
     setAppliedCodeFilter('')
+    setAppliedIsActiveFilter(null)
     setAppliedNameFilter('')
     setAppliedTypeFilter(null)
     setPageNumber(DEFAULT_PAGINATION.pageNumber)
@@ -115,20 +120,54 @@ export function OrganizationListPage() {
   return (
     <main className="page">
       <h1 className="page-title">{t('resources.iam.organizations.pages.list')}</h1>
-      <FilterToolbar onReset={handleReset} onSubmit={handleFilter}>
-        <Field label={t('resources.iam.organizations.fields.type')}>
-          <Select
-            onValueChange={(value) => setTypeFilter(value === 'all' ? null : value)}
-            options={[{ label: t('shared.filters.all'), value: 'all' }, ...toTranslatedOptions(ORGANIZATION_TYPE_OPTIONS, t)]}
-            value={typeFilter ?? 'all'}
-          />
-        </Field>
-        <Field label={t('resources.iam.organizations.fields.code')}>
-          <Input onChange={(event) => setCodeFilter(event.currentTarget.value)} value={codeFilter} />
-        </Field>
-        <Field label={t('resources.iam.organizations.fields.name')}>
-          <Input onChange={(event) => setNameFilter(event.currentTarget.value)} value={nameFilter} />
-        </Field>
+      <FilterToolbar onReset={handleReset} onSubmit={(event) => {
+        event.preventDefault()
+        void filterForm.handleSubmit()
+      }}>
+        <filterForm.Field name="type">
+          {(field) => (
+            <Field>
+              <FieldLabel>{t('resources.iam.organizations.fields.type')}</FieldLabel>
+              <Select
+                onValueChange={field.handleChange}
+                options={[{ label: t('shared.filters.all'), value: 'all' }, ...toTranslatedOptions(ORGANIZATION_TYPE_OPTIONS, t)]}
+                value={field.state.value}
+              />
+            </Field>
+          )}
+        </filterForm.Field>
+        <filterForm.Field name="code">
+          {(field) => (
+            <Field>
+              <FieldLabel htmlFor={field.name}>{t('resources.iam.organizations.fields.code')}</FieldLabel>
+              <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} value={field.state.value} />
+            </Field>
+          )}
+        </filterForm.Field>
+        <filterForm.Field name="name">
+          {(field) => (
+            <Field>
+              <FieldLabel htmlFor={field.name}>{t('resources.iam.organizations.fields.name')}</FieldLabel>
+              <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} value={field.state.value} />
+            </Field>
+          )}
+        </filterForm.Field>
+                <filterForm.Field name="isActive">
+          {(field) => (
+            <Field>
+              <FieldLabel>{t('resources.iam.organizations.fields.isActive')}</FieldLabel>
+              <Select
+                onValueChange={field.handleChange}
+                options={[
+                  { label: t('shared.filters.all'), value: 'all' },
+                  { label: t('shared.status.active'), value: 'true' },
+                  { label: t('shared.status.inactive'), value: 'false' },
+                ]}
+                value={field.state.value}
+              />
+            </Field>
+          )}
+        </filterForm.Field>
       </FilterToolbar>
 
       <DataTable

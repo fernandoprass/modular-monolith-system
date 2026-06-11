@@ -41,12 +41,10 @@ type DataTableRowActionsProps = {
   actions: DataTableRowAction[]
 }
 
-const ICON_SIZE = 15
-
 const PRESET_ICONS: Record<PresetDataTableRowActionKind, ReactNode> = {
-  [DATA_TABLE_ROW_ACTION_KINDS.delete]: <Trash2 size={ICON_SIZE} />,
-  [DATA_TABLE_ROW_ACTION_KINDS.edit]: <Edit size={ICON_SIZE} />,
-  [DATA_TABLE_ROW_ACTION_KINDS.view]: <Eye size={ICON_SIZE} />,
+  [DATA_TABLE_ROW_ACTION_KINDS.delete]: <Trash2 data-icon="inline-start" />,
+  [DATA_TABLE_ROW_ACTION_KINDS.edit]: <Edit data-icon="inline-start" />,
+  [DATA_TABLE_ROW_ACTION_KINDS.view]: <Eye data-icon="inline-start" />,
 }
 
 function isCustomAction(action: DataTableRowAction): action is CustomDataTableRowAction {

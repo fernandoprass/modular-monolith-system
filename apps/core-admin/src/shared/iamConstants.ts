@@ -35,10 +35,14 @@ export const IAM_PERMISSIONS = {
   },
   permissions: {
     list: permission(IAM_RESOURCES.permissions, IAM_ACTIONS.list),
+    update: permission(IAM_RESOURCES.permissions, IAM_ACTIONS.update),
     view: permission(IAM_RESOURCES.permissions, IAM_ACTIONS.view),
   },
   roles: {
+    create: permission(IAM_RESOURCES.roles, IAM_ACTIONS.create),
+    delete: permission(IAM_RESOURCES.roles, IAM_ACTIONS.delete),
     list: permission(IAM_RESOURCES.roles, IAM_ACTIONS.list),
+    update: permission(IAM_RESOURCES.roles, IAM_ACTIONS.update),
     view: permission(IAM_RESOURCES.roles, IAM_ACTIONS.view),
   },
   users: {

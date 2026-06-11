@@ -9,6 +9,8 @@ import {
 } from '@tanstack/react-table'
 
 import { DataTableSortableButton } from './data-table-sortable-button'
+import { Empty, EmptyDescription } from './empty'
+import { Skeleton } from './skeleton'
 
 type DataTableProps<TData> = {
   columns: ColumnDef<TData>[]
@@ -77,8 +79,18 @@ export function DataTable<TData>({
           ))}
         </tbody>
       </table>
-      {!isLoading && data.length === 0 && <p className="empty-text">{emptyText}</p>}
-      {isLoading && <p className="empty-text">{loadingText}</p>}
+      {!isLoading && data.length === 0 && (
+        <Empty>
+          <EmptyDescription>{emptyText}</EmptyDescription>
+        </Empty>
+      )}
+      {isLoading && (
+        <div aria-label={loadingText} className="table-skeleton">
+          <Skeleton />
+          <Skeleton />
+          <Skeleton />
+        </div>
+      )}
     </div>
   )
 }

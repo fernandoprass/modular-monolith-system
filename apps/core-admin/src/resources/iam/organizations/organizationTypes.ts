@@ -7,6 +7,7 @@ export const ORGANIZATION_QUERY_PARAMS = {
   code: 'Code',
   id: 'Id',
   includeInactive: 'IncludeInactive',
+  isActive: 'IsActive',
   name: 'Name',
   organizationId: 'OrganizationId',
   pageNumber: 'PageNumber',

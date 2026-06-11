@@ -58,7 +58,7 @@ export function createUserTableColumns({
               isVisible: canView,
               kind: DATA_TABLE_ROW_ACTION_KINDS.view,
               label: t('resources.iam.users.actions.view'),
-              onClick: () => navigate(APP_ROUTES.userShow(row.original.id)),
+              onClick: () => navigate(APP_ROUTES.userView(row.original.id)),
             },
             {
               isVisible: canUpdate,

@@ -1,9 +1,14 @@
 export const USER_QUERY_PARAMS = {
   email: 'Email',
+  id: 'Id',
+  includeInactive: 'IncludeInactive',
+  isActive: 'IsActive',
   name: 'Name',
   organizationId: 'OrganizationId',
   pageNumber: 'PageNumber',
   pageSize: 'PageSize',
+  search: 'Search',
+  take: 'Take',
 } as const
 
 export const USER_REQUEST_FIELDS = {
@@ -23,6 +28,11 @@ export type UserLiteDto = {
   language: string
 }
 
+export type UserLookupDto = {
+  id: string
+  name: string
+}
+
 export type UserDto = UserLiteDto & {
   isSystemAdmin: boolean
   isOrganizationAdmin: boolean
@@ -31,6 +41,18 @@ export type UserDto = UserLiteDto & {
   lastLoginAt: string | null
   organizationId: string
   organizationName: string
+}
+
+export type UserRoleDto = {
+  id: string
+  roleId: string
+  name: string
+  isActive: boolean
+  isDefault: boolean
+  startsAt: string
+  expiresAt: string | null
+  assignedBy : string
+  assignedAt: string
 }
 
 export type UserCreateForm = {

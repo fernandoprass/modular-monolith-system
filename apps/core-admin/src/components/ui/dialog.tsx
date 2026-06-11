@@ -18,7 +18,7 @@ export function Dialog({ children, backLabel, onOpenChange, open, title }: Dialo
           <div className="dialog-header">
             <DialogPrimitive.Title className="dialog-title">{title}</DialogPrimitive.Title>
             <DialogPrimitive.Close aria-label={backLabel} className="dialog-close">
-              <X size={16} />
+              <X />
             </DialogPrimitive.Close>
           </div>
           {children}

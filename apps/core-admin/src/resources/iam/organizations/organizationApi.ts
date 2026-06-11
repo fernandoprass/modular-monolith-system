@@ -22,6 +22,7 @@ import {
 
 export type OrganizationListQuery = {
   code: string
+  isActive: string | null
   name: string
   pageNumber: number
   pageSize: number
@@ -47,6 +48,7 @@ function buildOrganizationQuery(request: OrganizationListQuery): URLSearchParams
   query.set(ORGANIZATION_QUERY_PARAMS.pageNumber, request.pageNumber.toString())
   query.set(ORGANIZATION_QUERY_PARAMS.pageSize, request.pageSize.toString())
   appendOptional(query, ORGANIZATION_QUERY_PARAMS.code, request.code)
+  appendOptional(query, ORGANIZATION_QUERY_PARAMS.isActive, request.isActive)
   appendOptional(query, ORGANIZATION_QUERY_PARAMS.name, request.name)
   appendOptional(query, ORGANIZATION_QUERY_PARAMS.type, request.type)
 
