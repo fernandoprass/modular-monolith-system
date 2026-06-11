@@ -35,6 +35,12 @@ Prefer shadcn MCP examples before guessing component usage.
 
 ---
 
+## SKILLS
+
+Read .agent/skill folder
+
+---
+
 ## Stack Direction
 
 Use:
