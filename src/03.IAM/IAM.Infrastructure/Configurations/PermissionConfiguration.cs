@@ -17,7 +17,7 @@ public class PermissionConfiguration : BaseAuditedConfiguration<Permission>
       builder.Property(p => p.Action).IsRequired().HasMaxLength(100);
       builder.Property(p => p.Code).IsRequired().HasMaxLength(200);
       builder.Property(p => p.Title).IsRequired().HasMaxLength(200);
-      builder.Property(p => p.Description).HasColumnType(SharedConst.Database.TextType);
+      builder.Property(p => p.Description).HasColumnType(SharedConst.Database.PostgreSQL.TextType);
       builder.Property(p => p.IsActive).IsRequired().HasDefaultValue(true);
 
       builder.HasIndex(p => p.Code).IsUnique();

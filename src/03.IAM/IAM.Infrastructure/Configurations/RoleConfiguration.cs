@@ -13,13 +13,12 @@ public class RoleConfiguration : BaseAuditedConfiguration<Role>
       base.Configure(builder);
 
       builder.Property(r => r.Name).IsRequired().HasMaxLength(100);
-      builder.Property(r => r.Description).IsRequired().HasColumnType(SharedConst.Database.TextType);
+      builder.Property(r => r.Description).IsRequired().HasColumnType(SharedConst.Database.PostgreSQL.TextType);
       builder.Property(r => r.IsDefault).IsRequired().HasDefaultValue(false);
       builder.Property(r => r.IsActive).IsRequired().HasDefaultValue(true);
       builder.Property(r => r.OrganizationId).IsRequired(false);
 
-
-      builder.HasIndex(r => new { r.Name, r.OrganizationId }).IsUnique();
+      builder.HasIndex(r => r.Name);
 
       builder.HasMany(r => r.RolePermissions)
          .WithOne(rf => rf.Role)

@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace IAM.Infrastructure.Configurations;
 
-public class RoleFeatureConfiguration : IEntityTypeConfiguration<RolePermission>
+public class RolePermissionConfiguration : IEntityTypeConfiguration<RolePermission>
 {
    public void Configure(EntityTypeBuilder<RolePermission> builder)
    {

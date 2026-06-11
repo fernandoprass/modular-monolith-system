@@ -11,7 +11,7 @@ public class ParameterOverrideConfiguration : BaseAuditedConfiguration<Parameter
    {
       base.Configure(builder);
 
-      builder.Property(p => p.Value).IsRequired().HasColumnType(SharedConst.Database.TextType);
+      builder.Property(p => p.Value).IsRequired().HasColumnType(SharedConst.Database.PostgreSQL.TextType);
       builder.Property(pc => pc.OwnerId).IsRequired();
       builder.Property(pc => pc.ParameterId).IsRequired();
 

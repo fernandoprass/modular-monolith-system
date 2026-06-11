@@ -62,7 +62,7 @@ public class PermissionQueryRepository(IamDbContext dbContext, IUserContext user
    public async Task<bool> CodeExistsAsync(string code, Guid excludedId, CancellationToken cancellationToken = default)
    {
       return await _dbContext.Permissions
-         .AnyAsync(p => p.Id != excludedId && p.Code == code.ToLowerInvariant(), cancellationToken);
+         .AnyAsync(p => p.Id != excludedId && p.Code.Equals(code, StringComparison.InvariantCultureIgnoreCase), cancellationToken);
    }
 
    public async Task<PermissionDto?> GetByCodeAsync(string code, CancellationToken cancellationToken = default)
