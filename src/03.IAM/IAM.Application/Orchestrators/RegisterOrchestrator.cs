@@ -93,7 +93,7 @@ public class RegisterOrchestrator(
        organization.Id
       );
 
-      user.AddRole(await _parameterService.GetGuidAsync(IamParam.Role.DefaultRoleIdForNewOrganization, cancellationToken), null);
+      user.AddRole(await _parameterService.GetGuidAsync(IamParam.Role.DefaultRoleIdForNewOrganization, cancellationToken), DateTime.UtcNow, null);
 
       organization.CreatedBy = user.Id;
 

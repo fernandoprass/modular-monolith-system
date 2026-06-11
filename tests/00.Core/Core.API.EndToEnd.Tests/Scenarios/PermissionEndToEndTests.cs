@@ -21,7 +21,7 @@ public class PermissionEndToEndTests(CoreApiTestFixture fixture) : IClassFixture
          TestContext.Current.CancellationToken);
 
       var permissions = await adminApi.SearchPermissionsAsync(
-         new PermissionSearchRequest(null, "iam", "users", "view"),
+         new PermissionSearchRequest(null, "iam", "users", "view", null, false),
          TestContext.Current.CancellationToken);
 
       Assert.Contains(permissions, permission => permission.Code == IamPermission.Users.View);

@@ -5,7 +5,7 @@ meta {
 }
 
 get {
-  url: {{host.iam}}/api/{{version}}/iam/organizations/
+  url: {{host.iam}}/api/{{version}}/iam/organizations/?pageNumber=1&pageSize=25&isActive=false
   body: none
   auth: bearer
 }
@@ -13,6 +13,7 @@ get {
 params:query {
   pageNumber: 1
   pageSize: 25
+  isActive: false
   ~type: 1
   ~code: sa
   ~name: sa

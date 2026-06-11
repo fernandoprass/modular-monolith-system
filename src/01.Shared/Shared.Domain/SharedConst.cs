@@ -51,6 +51,13 @@ public static partial class SharedConst
       }
    }
 
+   public static class Pagination
+   {
+      public const int DefaultPageNumber = 1;
+      public const int DefaultPageSize = 25;
+      public const int MaxPageSize = 200;
+   }
+
    public static class Redis
    {
       public const string ConnectionString = "Redis";

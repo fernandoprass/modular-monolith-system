@@ -34,16 +34,13 @@ public class RoleQueryRepository(IamDbContext dbContext, IUserContext userContex
 
    public async Task<IEnumerable<RoleDto>> GetAsync(RoleSearchRequest request, CancellationToken cancellationToken = default)
    {
-      var query = CreateQueryWithSecurityContextFilter();
+      var query = request.UserId.HasValue
+         ? CreateUserRoleSearchQuery(request.UserId.Value)
+         : CreateQueryWithSecurityContextFilter();
 
       if (!string.IsNullOrWhiteSpace(request.Name))
       {
          query = query.Where(r => EF.Functions.ILike(r.Name, $"%{request.Name}%"));
-      }
-
-      if (request.UserId.HasValue)
-      {
-         query = query.Where(r => r.UserRoles.Any(ur => ur.UserId == request.UserId.Value));
       }
 
       if (request.OrganizationId.HasValue)
@@ -57,8 +54,8 @@ public class RoleQueryRepository(IamDbContext dbContext, IUserContext userContex
       }
 
       return await query
-          .Select(r => r.ToRoleDto())
           .OrderBy(r => r.Name)
+          .Select(r => r.ToRoleDto())
           .ToListAsync(cancellationToken);
    }
 
@@ -149,5 +146,20 @@ public class RoleQueryRepository(IamDbContext dbContext, IUserContext userContex
       return query.Where(role =>
           _dbContext.UserRoles.Any(ru => ru.RoleId == role.Id && ru.UserId == _userContext.UserId) ||
           (_userContext.IsOrganizationAdmin && role.OrganizationId == _userContext.UserOwnerId));
+   }
+
+   private IQueryable<Role> CreateUserRoleSearchQuery(Guid userId)
+   {
+      var query = _dbContext.Roles
+         .AsNoTracking()
+         .Where(role => role.UserRoles.Any(userRole => userRole.UserId == userId));
+
+      if (_userContext.IsSystemAdmin)
+      {
+         return query;
+      }
+
+      return query.Where(role =>
+         _dbContext.Users.Any(user => user.Id == userId && user.OrganizationId == _userContext.UserOwnerId));
    }
 }

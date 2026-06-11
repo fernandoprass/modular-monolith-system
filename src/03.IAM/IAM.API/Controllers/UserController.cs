@@ -50,6 +50,16 @@ public class UserController(
       return OkOrNotFound(users);
    }
 
+   [HttpGet("lookup")]
+   [Authorize]
+   [RequirePermission(IamPermission.Users.List)]
+   public async Task<IActionResult> GetLookup([FromQuery] UserLookupRequest request, CancellationToken cancellationToken)
+   {
+      var users = await _userService.GetLookupAsync(request, cancellationToken);
+
+      return OkOrNotFound(users);
+   }
+
    [HttpPost("")]
    [Authorize]
    [RequirePermission(IamPermission.Users.Create)]

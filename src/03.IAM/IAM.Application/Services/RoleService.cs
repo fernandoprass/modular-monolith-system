@@ -130,11 +130,11 @@ public class RoleService(
 
             if (userRole != null)
             {
-               userRole.UpdateExpiration(role.ExpiresAt);
+               userRole.UpdateValidity(role.StartsAt, role.ExpiresAt);
             }
             else
             {
-               user.AddRole(role.RoleId, role.ExpiresAt);
+               user.AddRole(role.RoleId, role.StartsAt, role.ExpiresAt);
             }
          }
 
@@ -256,5 +256,11 @@ public class RoleService(
    public async Task<IEnumerable<Guid>> GetDefaultRolesByOrganizationIdAsync(Guid organizationId, CancellationToken cancellationToken = default)
    {
       return await _roleQueryRepository.GetDefaultRolesByOrganizationIdAsync(organizationId, cancellationToken);
+   }
+
+   public async Task<Result<IEnumerable<UserRoleDto>>> GetRolesByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
+   {
+      var roles = await _roleQueryRepository.GetRolesByUserIdAsync(userId, cancellationToken);
+      return Result<IEnumerable<UserRoleDto>>.Success(roles);
    }
 }

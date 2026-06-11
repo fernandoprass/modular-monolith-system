@@ -2,17 +2,13 @@ using IAM.Domain.DTOs.Requests;
 using IAM.Domain.DTOs.Responses;
 using IAM.Domain.QueryRepositories;
 using Microsoft.EntityFrameworkCore;
-using Shared.Application.Contracts;
+using Shared.Domain;
 using Shared.Domain.DTOs.Responses;
 
 namespace IAM.Infrastructure.QueryRepositories;
 
 public class OrganizationQueryRepository(IamDbContext dbContext) : IOrganizationQueryRepository
 {
-   private const int DefaultPageNumber = 1;
-   private const int DefaultPageSize = 25;
-   private const int MaxPageSize = 200;
-
    private readonly IamDbContext _dbContext = dbContext;
 
    public async Task<OrganizationDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
@@ -27,6 +23,11 @@ public class OrganizationQueryRepository(IamDbContext dbContext) : IOrganization
    public async Task<PagedResultDto<OrganizationDto>> GetAsync(OrganizationSearchRequest request, CancellationToken cancellationToken = default)
    {
       var query = _dbContext.Organizations.AsNoTracking();
+
+      if (request.OrganizationId.HasValue)
+      {
+         query = query.Where(org => org.Id == request.OrganizationId.Value);
+      }
 
       if (request.Type.HasValue)
       {
@@ -43,13 +44,14 @@ public class OrganizationQueryRepository(IamDbContext dbContext) : IOrganization
          query = query.Where(org => EF.Functions.ILike(org.Name, $"%{request.Name}%"));
       }
 
-      if (request.OrganizationId.HasValue)
+      if (request.IsActive.HasValue)
       {
-         query = query.Where(org => org.Id == request.OrganizationId.Value);
+         query = query.Where(org => org.IsActive == request.IsActive.Value);
       }
 
-      var pageNumber = request.PageNumber < 1 ? DefaultPageNumber : request.PageNumber;
-      var pageSize = request.PageSize < 1 ? DefaultPageSize : Math.Min(request.PageSize, MaxPageSize);
+
+      var pageNumber = request.PageNumber < 1 ? SharedConst.Pagination.DefaultPageNumber : request.PageNumber;
+      var pageSize = request.PageSize < 1 ? SharedConst.Pagination.DefaultPageSize : Math.Min(request.PageSize, SharedConst.Pagination.MaxPageSize);
       var totalCount = await query.LongCountAsync(cancellationToken);
 
       var items = await query

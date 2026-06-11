@@ -49,12 +49,17 @@ public class UserService(
 
    public async Task<PagedResultDto<UserLiteDto>> GetAsync(UserSearchRequest request, CancellationToken cancellationToken = default)
    {
-      var searchRequest = request with
-      {
-         OrganizationId = _userContext.IsSystemAdmin ? request.OrganizationId : _userContext.UserOwnerId
-      };
+      return await _userQueryRepository.GetAsync(request, cancellationToken);
+   }
 
-      return await _userQueryRepository.GetAsync(request,cancellationToken);
+   public async Task<IEnumerable<UserLookupDto>> GetLookupAsync(UserLookupRequest request, CancellationToken cancellationToken = default)
+   {
+      if (!_userContext.IsSystemAdmin)
+      {
+         request = request with { OrganizationId = _userContext.UserOwnerId };
+      }
+
+      return await _userQueryRepository.GetLookupAsync(request, cancellationToken);
    }
 
    public async Task<Result<UserDto>> CreateUserAsync(UserCreateRequest request,
@@ -101,14 +106,14 @@ public class UserService(
 
    private async Task AddDefaultRolesAsync( User user, CancellationToken ct)
    {
-      user.AddRole(await _parameterService.GetGuidAsync(IamParam.Role.DefaultRoleIdForNewUser, ct), null);
+      user.AddRole(await _parameterService.GetGuidAsync(IamParam.Role.DefaultRoleIdForNewUser, ct), DateTime.UtcNow, null);
 
       var rolesIds = await _roleService.GetDefaultRolesByOrganizationIdAsync(user.OrganizationId, ct);
       if (rolesIds != null)
       {
          foreach (var id in rolesIds)
          {
-            user.AddRole(id, null);
+            user.AddRole(id, DateTime.UtcNow, null);
          }
       }
    }

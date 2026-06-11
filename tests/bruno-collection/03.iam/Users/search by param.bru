@@ -5,17 +5,18 @@ meta {
 }
 
 get {
-  url: {{host.iam}}/api/{{version}}/iam/users/?name=tes&email=01&pageNumber=1&pageSize=25
+  url: {{host.iam}}/api/{{version}}/iam/users/?pageNumber=1&pageSize=25
   body: none
   auth: bearer
 }
 
 params:query {
-  name: tes
-  email: 01
   pageNumber: 1
   pageSize: 25
+  ~name: ala
+  ~email: 
   ~organizationId: {{organizationId}}
+  ~isActive: false
 }
 
 auth:bearer {
