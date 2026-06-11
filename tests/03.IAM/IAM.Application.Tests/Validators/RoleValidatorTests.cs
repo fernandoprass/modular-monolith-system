@@ -80,7 +80,7 @@ public class RoleValidatorTests
    {
       var request = new RoleAssignRequest(
           UserId: Guid.NewGuid(),
-          Roles: [new(RoleId: Guid.NewGuid(), ExpiresAt: null)] 
+          Roles: [new(RoleId: Guid.NewGuid(), StartsAt: DateTime.UtcNow, ExpiresAt: null)] 
       );
 
       var result = _validator.ValidateAssign(request, userExists: true, allRolesAvailable: false);
@@ -95,7 +95,10 @@ public class RoleValidatorTests
       var roleId = Guid.NewGuid();
       var request = new RoleAssignRequest(
           UserId: Guid.NewGuid(),
-          Roles: [new(RoleId: roleId, ExpiresAt: null), new(RoleId: roleId, ExpiresAt: null)]
+          Roles: [
+             new(RoleId: roleId, StartsAt: DateTime.UtcNow, ExpiresAt: null), 
+             new(RoleId: roleId, StartsAt: DateTime.UtcNow, ExpiresAt: null)
+             ]
       );
 
       var result = _validator.ValidateAssign(request, userExists: true, allRolesAvailable: true);
@@ -105,11 +108,25 @@ public class RoleValidatorTests
    }
 
    [Fact]
+   public void ValidateAssign_ShouldReturnFailure_WhenRoleHasPastStartDate()
+   {
+      var request = new RoleAssignRequest(
+          UserId: Guid.NewGuid(),
+          Roles: [new(RoleId: Guid.NewGuid(), StartsAt: DateTime.UtcNow.AddDays(-1), ExpiresAt: DateTime.UtcNow.AddDays(1))]
+      );
+
+      var result = _validator.ValidateAssign(request, userExists: true, allRolesAvailable: true);
+
+      result.IsSuccess.Should().BeFalse();
+      result.Messages.Should().Contain(e => e is RolesInvalidStartDateError);
+   }
+
+   [Fact]
    public void ValidateAssign_ShouldReturnFailure_WhenRoleHasPastExpirationDate()
    {
       var request = new RoleAssignRequest(
           UserId: Guid.NewGuid(),
-          Roles: [new(RoleId: Guid.NewGuid(), ExpiresAt: DateTime.UtcNow.AddDays(-1))] 
+          Roles: [new(RoleId: Guid.NewGuid(), StartsAt: DateTime.UtcNow, ExpiresAt: DateTime.UtcNow.AddDays(-1))] 
       );
 
       var result = _validator.ValidateAssign(request, userExists: true, allRolesAvailable: true);

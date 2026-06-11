@@ -5,5 +5,6 @@ public record PermissionSearchRequest(
    string? Module,
    string? Resource,
    string? Action,
+   string? Title,
    bool IncludeInactive = false
 );

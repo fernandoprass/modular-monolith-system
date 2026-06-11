@@ -1,5 +1,5 @@
-using IAM.Domain.DTOs.Responses;
 using IAM.Domain.DTOs.Requests;
+using IAM.Domain.DTOs.Responses;
 using IAM.Domain.Entities;
 using IAM.Domain.Mappers;
 using IAM.Domain.QueryRepositories;
@@ -58,6 +58,7 @@ public class RoleQueryRepository(IamDbContext dbContext, IUserContext userContex
 
       return await query
           .Select(r => r.ToRoleDto())
+          .OrderBy(r => r.Name)
           .ToListAsync(cancellationToken);
    }
 
@@ -70,19 +71,46 @@ public class RoleQueryRepository(IamDbContext dbContext, IUserContext userContex
          .ToListAsync(cancellationToken);
    }
 
+   public async Task<IEnumerable<UserRoleDto>> GetRolesByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
+   {
+      string systemUserName = "System";
+
+      var query = _dbContext.UserRoles.AsNoTracking()
+          .OrderBy(ur => ur.Role.Name)
+          .Where(ur => ur.UserId == userId)
+          .Select(ur => new UserRoleDto(
+              ur.Id,
+              ur.RoleId,
+              ur.Role.Name,
+              ur.Role.IsActive,
+              ur.Role.IsDefault,
+              ur.StartsAt,
+              ur.ExpiresAt,
+              AssignedBy: ur.CreatedBy != Guid.Empty
+                   ? _dbContext.Users.Where(u => u.Id == ur.CreatedBy).Select(u => u.Name).FirstOrDefault() ?? systemUserName
+                   : systemUserName,
+              AssignedAt: ur.Role.CreatedAt
+          ));
+
+      return await query.ToListAsync(cancellationToken);
+   }
+
    public async Task<IEnumerable<Permission>> GetRolePermissionsByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
    {
       var now = DateTime.UtcNow;
 
       return await _dbContext.UserRoles
           .AsNoTracking()
-          .Where(ur => ur.UserId == userId)
-          .Where(ur => ur.Role.IsActive && 
+          .Where(ur => ur.UserId == userId &&
+                       ur.Role.IsActive &&
                        ur.StartsAt <= now &&
                        (ur.ExpiresAt == null || ur.ExpiresAt >= now))
           .SelectMany(ur => ur.Role.RolePermissions.Select(rf => rf.Permission))
           .Where(permission => permission.IsActive)
           .Distinct()
+          .OrderBy(permission => permission.Module)
+          .ThenBy(permission => permission.Resource)
+          .ThenBy(permission => permission.Action)
           .ToListAsync(cancellationToken);
    }
 

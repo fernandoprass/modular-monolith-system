@@ -37,13 +37,16 @@ public class PermissionQueryRepository(IamDbContext dbContext, IUserContext user
       }
 
       if (!string.IsNullOrWhiteSpace(request.Module))
-         query = query.Where(p => EF.Functions.ILike(p.Module, $"%{request.Module}%"));
+         query = query.Where(p => p.Module == request.Module);
 
       if (!string.IsNullOrWhiteSpace(request.Resource))
-         query = query.Where(p => EF.Functions.ILike(p.Resource, $"%{request.Resource}%"));
+         query = query.Where(p => p.Resource == request.Resource);
 
       if (!string.IsNullOrWhiteSpace(request.Action))
          query = query.Where(p => EF.Functions.ILike(p.Action, $"%{request.Action}%"));
+
+      if (!string.IsNullOrWhiteSpace(request.Title))
+         query = query.Where(p => EF.Functions.ILike(p.Title, $"%{request.Title}%"));
 
       if (!request.IncludeInactive)
          query = query.Where(p => p.IsActive);

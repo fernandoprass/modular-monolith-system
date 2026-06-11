@@ -11,6 +11,7 @@ namespace IAM.Domain.Mappers
          (
             Id: role.Id,
             Name: role.Name,
+            Description: role.Description,
             IsActive: role.IsActive,
             IsDefault: role.IsDefault,
             OrganizationId: role.OrganizationId
