@@ -279,4 +279,30 @@ export const enMessages = {
       inactive: 'Inactive',
     },
   },
+  modules: {
+    courier:  'Courier',
+    iam:  'IAM',
+    sentinel: 'Sentinel',
+    shared:  'Shared',
+  },
+  resources2: {
+    courier: {
+      email: 'Email',
+      templates: 'Templates',       
+    },
+    sentinel: {
+      auditlogs: 'Audit logs',
+      systemlogs: 'System logs',
+    },
+    iam : {
+      organization: 'Organization',
+      organizations: 'Organizations',
+      parameter: 'Parameter',
+      parameters: 'Parameters',
+      permission: 'Permission',
+      permissions: 'Permissions',
+      role: 'Role',
+      roles: 'Roles'
+    }
+  }
 } as const

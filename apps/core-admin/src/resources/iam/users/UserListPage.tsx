@@ -14,11 +14,6 @@ import { ConfirmDialog } from '../../../components/ui/dialog-confirm'
 import { Field, FieldLabel } from '../../../components/ui/form'
 import { FilterToolbar } from '../../../components/ui/filter-toolbar'
 import { Input } from '../../../components/ui/input'
-import {
-  InputSelect,
-  InputSelectTrigger,
-} from '../../../components/ui/input-select'
-import type { SelectOption } from '../../../types'
 import { Select } from '../../../components/ui/select'
 import { DataTablePagination } from '../../../components/ui/data-table-pagination'
 import { IAM_PERMISSIONS } from '../../../shared/iamConstants'
@@ -28,15 +23,6 @@ import { OrganizationSelect } from '../organizations/OrganizationSelect'
 import { createUserTableColumns } from './UserListPageColumns'
 import { deleteUser, getUsers } from './userApi'
 import type { PagedResultDto, UserLiteDto } from './userTypes'
-
-const FRUIT_OPTIONS: SelectOption[] = [
-  { label: 'Apple', value: 'apple' },
-  { label: 'Banana', value: 'banana' },
-  { label: 'Grape', value: 'grape' },
-  { label: 'Orange', value: 'orange' },
-  { label: 'Pear', value: 'pear' },
-  { label: 'Strawberry', value: 'strawberry' },
-]
 
 export function UserListPage() {
   const t = useTranslate()
@@ -48,7 +34,6 @@ export function UserListPage() {
   const [appliedIsActiveFilter, setAppliedIsActiveFilter] = useState<string | null>(null)
   const [appliedNameFilter, setAppliedNameFilter] = useState('')
   const [appliedEmailFilter, setAppliedEmailFilter] = useState('')
-  const [singleFruit, setSingleFruit] = useState('')
   const [pageNumber, setPageNumber] = useState<number>(DEFAULT_PAGINATION.pageNumber)
   const [pageSize, setPageSize] = useState<number>(DEFAULT_PAGINATION.pageSize)
   const [result, setResult] = useState<PagedResultDto<UserLiteDto> | null>(null)
@@ -111,7 +96,6 @@ export function UserListPage() {
     setAppliedIsActiveFilter(null)
     setAppliedNameFilter('')
     setAppliedEmailFilter('')
-    setSingleFruit('')
     setPageNumber(DEFAULT_PAGINATION.pageNumber)
   }
 
@@ -155,7 +139,7 @@ export function UserListPage() {
         <filterForm.Field name="organizationId">
           {(field) => (
             <Field>
-              <FieldLabel>{t('resources.iam.users.fields.organizationId')}</FieldLabel>
+              <FieldLabel>{t('resources2.iam.organization')}</FieldLabel>
               <OrganizationSelect
                 clearable
                 onValueChange={field.handleChange}
@@ -164,18 +148,7 @@ export function UserListPage() {
             </Field>
           )}
         </filterForm.Field>
-        <Field>
-          <FieldLabel>Fruit single</FieldLabel>
-          <InputSelect
-            clearable
-            onValueChange={setSingleFruit}
-            options={FRUIT_OPTIONS}
-            placeholder="Select fruit"
-            value={singleFruit}
-          >
-            {(selectProps) => <InputSelectTrigger {...selectProps} />}
-          </InputSelect>
-        </Field>
+
         <filterForm.Field name="name">
           {(field) => (
             <Field>

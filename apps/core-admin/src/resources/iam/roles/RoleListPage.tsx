@@ -37,6 +37,7 @@ export function RoleListPage() {
   const [deleteTarget, setDeleteTarget] = useState<RoleDto | null>(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [organizationIdFilter, setOrganizationIdFilter] = useState('')
   const [sorting, setSorting] = useState<SortingState>([])
   const canCreate = hasPermissionCode(permissions, IAM_PERMISSIONS.roles.write)
   const canUpdate = hasPermissionCode(permissions, IAM_PERMISSIONS.roles.write)
@@ -47,7 +48,6 @@ export function RoleListPage() {
       await loadRoles(value)
     },
   })
-  const organizationIdFilter = filterForm.state.values.organizationId
   const columns = useMemo(() => createRoleTableColumns({
     canDelete,
     canUpdate,
@@ -82,6 +82,7 @@ export function RoleListPage() {
 
   function handleReset() {
     filterForm.reset()
+    setOrganizationIdFilter('')
     void loadRoles(EMPTY_ROLE_SEARCH)
   }
 
@@ -125,7 +126,11 @@ export function RoleListPage() {
               <FieldLabel>{t('resources.iam.roles.fields.organizationId')}</FieldLabel>
               <OrganizationSelect
                 clearable
-                onValueChange={field.handleChange}
+                onValueChange={(value) => {
+                  setOrganizationIdFilter(value)
+                  field.handleChange(value)
+                  filterForm.setFieldValue('userId', '')
+                }}
                 value={field.state.value}
               />
             </Field>
@@ -137,6 +142,7 @@ export function RoleListPage() {
               <FieldLabel>{t('resources.iam.roles.fields.userId')}</FieldLabel>
               <UserSelect
                 clearable
+                key={organizationIdFilter}
                 onValueChange={field.handleChange}
                 organizationId={organizationIdFilter}
                 value={field.state.value}

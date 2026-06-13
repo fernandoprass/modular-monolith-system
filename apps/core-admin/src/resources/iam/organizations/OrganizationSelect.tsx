@@ -1,10 +1,13 @@
-import { useCallback, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 import { useTranslate } from '../../../app/i18n/i18n'
 import { useAuth, useNotifyError } from '../../../auth/AuthProvider'
-import { AsyncLookupSelect } from '../../../components/ui/async-lookup-select'
+import {
+  InputSelect,
+  InputSelectTrigger,
+} from '../../../components/ui/input-select'
+import type { SelectOption } from '../../../types'
 import { getOrganizationLookup } from './organizationApi'
-import type { OrganizationLookupDto } from './organizationTypes'
 
 type OrganizationSelectProps = {
   clearable?: boolean
@@ -12,10 +15,6 @@ type OrganizationSelectProps = {
   includeInactive?: boolean
   onValueChange: (value: string) => void
   value: string
-}
-
-function getOptionLabel(organization: OrganizationLookupDto): string {
-  return `${organization.name} (${organization.code})`
 }
 
 export function OrganizationSelect({
@@ -28,6 +27,8 @@ export function OrganizationSelect({
   const t = useTranslate()
   const { user } = useAuth()
   const notifyError = useNotifyError()
+  const [search, setSearch] = useState('')
+  const [options, setOptions] = useState<SelectOption[]>([])
   const isDisabled = user?.isSystemAdmin === true ? disabled : true
   const effectiveValue = user?.isSystemAdmin === true
     ? value
@@ -41,31 +42,44 @@ export function OrganizationSelect({
     onValueChange(user.organizationId)
   }, [onValueChange, user?.isSystemAdmin, user?.organizationId, value])
 
-  const loadOptions = useCallback(async (request: { search: string, selectedId: string }) => {
-    return await getOrganizationLookup({
-      id: request.selectedId,
-      includeInactive,
-      search: request.search,
-      take: 25,
-    })
-  }, [includeInactive])
-  const getOptionDescription = useCallback((organization: OrganizationLookupDto) => organization.code, [])
-  const getOptionValue = useCallback((organization: OrganizationLookupDto) => organization.id, [])
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      void loadOrganizationOptions()
+    }, 350)
+
+    async function loadOrganizationOptions() {
+      try {
+        const organizations = await getOrganizationLookup({
+          id: effectiveValue,
+          includeInactive,
+          search,
+          take: 25,
+        })
+
+        setOptions(organizations.map((organization) => ({
+          label: `${organization.name} (${organization.code})`,
+          value: organization.id,
+        })))
+      } catch (error) {
+        notifyError(error, t('shared.errors.generic'))
+      }
+    }
+
+    return () => window.clearTimeout(timeoutId)
+  }, [effectiveValue, includeInactive, notifyError, search, t])
 
   return (
-    <AsyncLookupSelect
-      cacheScope={`organizations:${includeInactive}`}
-      clearLabel={t('shared.actions.clear')}
+    <InputSelect
       clearable={clearable}
       disabled={isDisabled}
-      getOptionDescription={getOptionDescription}
-      getOptionLabel={getOptionLabel}
-      getOptionValue={getOptionValue}
-      loadOptions={loadOptions}
-      onError={(error) => notifyError(error, t('shared.errors.generic'))}
+      onSearchChange={setSearch}
       onValueChange={onValueChange}
+      options={options}
       placeholder={t('resources.iam.organizations.placeholders.search')}
+      searchValue={search}
       value={effectiveValue}
-    />
+    >
+      {(selectProps) => <InputSelectTrigger {...selectProps} />}
+    </InputSelect>
   )
 }

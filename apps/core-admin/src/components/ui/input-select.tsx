@@ -40,6 +40,8 @@ export const InputSelect: React.FC<{
   clearable?: boolean;
   disabled?: boolean;
   className?: string;
+  searchValue?: string;
+  onSearchChange?: (v: string) => void;
   style?: React.CSSProperties;
   children: (v: InputSelectProvided) => React.ReactNode;
 }> = ({
@@ -50,6 +52,8 @@ export const InputSelect: React.FC<{
   clearable = false,
   disabled = false,
   className,
+  searchValue,
+  onSearchChange,
   children,
   ...restProps
 }) => {
@@ -69,10 +73,8 @@ export const InputSelect: React.FC<{
   };
 
   React.useEffect(() => {
-    if (isPopoverOpen && value !== selectedValue) {
-      setSelectedValue(value);
-    }
-  }, [isPopoverOpen])
+    setSelectedValue(value);
+  }, [value])
 
   return (
     <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
@@ -97,11 +99,15 @@ export const InputSelect: React.FC<{
         onEscapeKeyDown={() => setIsPopoverOpen(false)}
         {...restProps}
       >
-        <Command>
-          <CommandInput placeholder="Search..." />
+        <Command shouldFilter={false}>
+          <CommandInput
+            onValueChange={onSearchChange}
+            placeholder="Search..."
+            value={searchValue}
+          />
           <CommandList className="max-h-[unset] overflow-y-hidden">
             <CommandEmpty>No results found.</CommandEmpty>
-            <CommandGroup className="max-h-[28em] min-h-[10rem] overflow-y-auto">
+            <CommandGroup className="max-h-[16rem] min-h-[10rem] overflow-y-auto">
               {options.map((option) => {
                 const isSelected = selectedValue === option.value;
                 return (
@@ -169,7 +175,7 @@ export const InputSelectTrigger = React.forwardRef<
         type="button"
         disabled={disabled}
         className={cn(
-          "flex h-11 w-full items-center justify-between p-1 [&_svg]:pointer-events-auto",
+          "input-select-trigger flex h-11 w-full items-center justify-between p-1 [&_svg]:pointer-events-auto",
           "hover:bg-transparent",
           disabled && "[&_svg]:pointer-events-none",
           className,
@@ -177,8 +183,8 @@ export const InputSelectTrigger = React.forwardRef<
         style={style}
       >
         {selectedValue ? (
-          <div className="flex items-center justify-between w-full">
-            <div className="flex flex-wrap items-center px-2">
+          <div className="input-select-trigger-content flex items-center justify-between w-full min-w-0">
+            <div className="input-select-trigger-label flex flex-1 items-center px-2 min-w-0">
               {[selectedValue].map((value, index) => {
                 const option = options.find((o) => o.value === value);
 
@@ -191,14 +197,14 @@ export const InputSelectTrigger = React.forwardRef<
                 }
 
                 return (
-                  <div key={`${index}-${value}`} className={cn("text-foreground")}>
+                  <div key={`${index}-${value}`} className={cn("input-select-trigger-text text-foreground truncate")}>
                     {option?.icon && <option.icon className="mr-1 h-3.5 w-3.5" />}
                     {option?.label}
                   </div>
                 );
               })}
             </div>
-            <div className="flex items-center justify-between">
+            <div className="flex shrink-0 items-center justify-between">
               {selectedValue && clearable && (
                 <>
                   <X
