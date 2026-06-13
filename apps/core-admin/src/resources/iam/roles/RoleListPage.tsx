@@ -38,9 +38,9 @@ export function RoleListPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [sorting, setSorting] = useState<SortingState>([])
-  const canCreate = hasPermissionCode(permissions, IAM_PERMISSIONS.roles.create)
-  const canUpdate = hasPermissionCode(permissions, IAM_PERMISSIONS.roles.update)
-  const canDelete = hasPermissionCode(permissions, IAM_PERMISSIONS.roles.delete)
+  const canCreate = hasPermissionCode(permissions, IAM_PERMISSIONS.roles.write)
+  const canUpdate = hasPermissionCode(permissions, IAM_PERMISSIONS.roles.write)
+  const canDelete = hasPermissionCode(permissions, IAM_PERMISSIONS.roles.write)
   const filterForm = useForm({
     defaultValues: EMPTY_ROLE_SEARCH,
     onSubmit: async ({ value }) => {

@@ -80,7 +80,7 @@ public class AuthServiceTests
       var roleId = Guid.NewGuid();
       var user = CreateValidUser(password, isUserAtive: true, isCustumerActive: true, isLockedUser: false);
       user.UserRoles = [UserRole.Create(user.Id, roleId, DateTime.UtcNow, null)];
-      var permission = new PermissionDto(Guid.NewGuid(), "iam", "users", "list", IamPermission.Users.List, "List Users", "Allows listing users", true);
+      var permission = new PermissionDto(Guid.NewGuid(), "iam", "users", "list", IamPermission.Users.Read, "List Users", "Allows listing users", true);
 
       _userServiceMock.GetByEmailWithPasswordAsync(user.Email, Arg.Any<CancellationToken>()).Returns(user);
       _roleQueryRepositoryMock.GetPermissionsByRoleIdAsync(roleId, Arg.Any<CancellationToken>()).Returns([permission]);
@@ -91,7 +91,7 @@ public class AuthServiceTests
       Assert.True(result.IsSuccess);
       await _permissionServiceMock.Received(1).SetPermissionsAsync(
          roleId.ToString(),
-         Arg.Is<IEnumerable<string>>(permissions => permissions.Contains(IamPermission.Users.List)),
+         Arg.Is<IEnumerable<string>>(permissions => permissions.Contains(IamPermission.Users.Read)),
          Arg.Any<DateTime>(),
          Arg.Any<CancellationToken>());
    }

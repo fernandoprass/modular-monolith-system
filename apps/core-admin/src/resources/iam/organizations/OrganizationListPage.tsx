@@ -37,9 +37,9 @@ export function OrganizationListPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<OrganizationDto | null>(null)
   const [sorting, setSorting] = useState<SortingState>([])
-  const canView = hasPermissionCode(permissions, IAM_PERMISSIONS.organizations.view)
-  const canUpdate = hasPermissionCode(permissions, IAM_PERMISSIONS.organizations.update)
-  const canDelete = hasPermissionCode(permissions, IAM_PERMISSIONS.organizations.delete)
+  const canView = hasPermissionCode(permissions, IAM_PERMISSIONS.organizations.read)
+  const canUpdate = hasPermissionCode(permissions, IAM_PERMISSIONS.organizations.write)
+  const canDelete = hasPermissionCode(permissions, IAM_PERMISSIONS.organizations.write)
   const columns = useMemo(() => createOrganizationTableColumns({
     canDelete,
     canUpdate,

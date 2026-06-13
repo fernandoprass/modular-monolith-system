@@ -17,7 +17,7 @@ public class PermissionController(IPermissionService permissionService) : BaseCo
 
    [HttpGet]
    [Authorize]
-   [RequirePermission(IamPermission.Permissions.List)]
+   [RequirePermission(IamPermission.Permissions.Read)]
    public async Task<IActionResult> GetByParams([FromQuery] PermissionSearchRequest request, CancellationToken cancellationToken)
    {
       var result = await _permissionService.GetByParams(request, cancellationToken);
@@ -26,7 +26,7 @@ public class PermissionController(IPermissionService permissionService) : BaseCo
 
    [HttpPut("{id:guid}")]
    [Authorize]
-   [RequirePermission(IamPermission.Permissions.Update)]
+   [RequirePermission(IamPermission.Permissions.Write)]
    public async Task<IActionResult> Update(Guid id, [FromBody] PermissionUpdateRequest request, CancellationToken cancellationToken)
    {
       var result = await _permissionService.UpdateAsync(id, request, cancellationToken);

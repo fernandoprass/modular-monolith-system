@@ -18,7 +18,7 @@ public class AuthorizationControllerTests
       var controller = CreateController("valid-key");
       controller.ControllerContext.HttpContext.Request.Headers["X-Internal-Api-Key"] = "invalid-key";
 
-      var result = await controller.CheckPermission(new PermissionCheckRequest(IamPermission.Users.List), CancellationToken.None);
+      var result = await controller.CheckPermission(new PermissionCheckRequest(IamPermission.Users.Read), CancellationToken.None);
 
       Assert.IsType<UnauthorizedResult>(result);
    }
@@ -32,7 +32,7 @@ public class AuthorizationControllerTests
       permissionAuthorizationService.CheckPermissionAsync(Arg.Any<PermissionCheckRequest>(), Arg.Any<CancellationToken>())
          .Returns(new PermissionCheckResponse(true));
 
-      var result = await controller.CheckPermission(new PermissionCheckRequest(IamPermission.Users.List), CancellationToken.None);
+      var result = await controller.CheckPermission(new PermissionCheckRequest(IamPermission.Users.Read), CancellationToken.None);
 
       var okResult = Assert.IsType<OkObjectResult>(result);
       var response = Assert.IsType<PermissionCheckResponse>(okResult.Value);

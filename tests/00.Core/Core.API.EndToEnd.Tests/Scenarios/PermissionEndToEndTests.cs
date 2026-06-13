@@ -24,6 +24,6 @@ public class PermissionEndToEndTests(CoreApiTestFixture fixture) : IClassFixture
          new PermissionSearchRequest(null, "iam", "users", "view", null, false),
          TestContext.Current.CancellationToken);
 
-      Assert.Contains(permissions, permission => permission.Code == IamPermission.Users.View);
+      Assert.Contains(permissions, permission => permission.Code == IamPermission.Users.Read);
    }
 }

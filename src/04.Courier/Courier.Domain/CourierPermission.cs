@@ -8,19 +8,15 @@ public static class CourierPermission
    {
       private const string Resource = "emails";
 
-      public const string List = $"{Module}.{Resource}.list";
-      public const string View = $"{Module}.{Resource}.view";
-      public const string Create = $"{Module}.{Resource}.create";
+      public const string Read = $"{Module}.{Resource}.read";
+      public const string Write = $"{Module}.{Resource}.write";
    }
 
    public static class Templates
    {
       private const string Resource = "templates";
 
-      public const string List = $"{Module}.{Resource}.list";
-      public const string View = $"{Module}.{Resource}.view";
-      public const string Create = $"{Module}.{Resource}.create";
-      public const string Update = $"{Module}.{Resource}.update";
-      public const string Delete = $"{Module}.{Resource}.delete";
+      public const string Read = $"{Module}.{Resource}.read";
+      public const string Write = $"{Module}.{Resource}.write";
    }
 }

@@ -260,7 +260,14 @@ public class RoleService(
 
    public async Task<Result<IEnumerable<UserRoleDto>>> GetRolesByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
    {
-      var roles = await _roleQueryRepository.GetRolesByUserIdAsync(userId, cancellationToken);
-      return Result<IEnumerable<UserRoleDto>>.Success(roles);
+      var user = await _iamUnitOfWork.Users.GetByIdAsync(userId, cancellationToken);
+
+      if (user == null) return Result<IEnumerable<UserRoleDto>>.Failure(new NotFoundError(IamConst.Entity.User));
+
+      return await ExecuteIfUserOwnsAsync(user.OrganizationId, async (ct) =>
+      {
+         var roles = await _roleQueryRepository.GetRolesByUserIdAsync(userId, ct);
+         return Result<IEnumerable<UserRoleDto>>.Success(roles);
+      }, cancellationToken);
    }
 }

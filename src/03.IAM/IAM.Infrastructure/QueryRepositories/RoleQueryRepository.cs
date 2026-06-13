@@ -72,6 +72,8 @@ public class RoleQueryRepository(IamDbContext dbContext, IUserContext userContex
    {
       string systemUserName = "System";
 
+      userId = _userContext.IsSystemAdmin || _userContext.IsOrganizationAdmin ? userId : _userContext.UserId;
+
       var query = _dbContext.UserRoles.AsNoTracking()
           .OrderBy(ur => ur.Role.Name)
           .Where(ur => ur.UserId == userId)
@@ -95,6 +97,8 @@ public class RoleQueryRepository(IamDbContext dbContext, IUserContext userContex
    public async Task<IEnumerable<Permission>> GetRolePermissionsByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
    {
       var now = DateTime.UtcNow;
+
+      userId = _userContext.IsSystemAdmin || _userContext.IsOrganizationAdmin ? userId : _userContext.UserId;
 
       return await _dbContext.UserRoles
           .AsNoTracking()

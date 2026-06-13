@@ -17,7 +17,7 @@ public class EmailController(IEmailService emailService) : BaseController
 
    [HttpGet("")]
    [Authorize]
-   [RequirePermission(CourierPermission.Emails.List)]
+   [RequirePermission(CourierPermission.Emails.Read)]
    public async Task<IActionResult> GetByParams([FromQuery] EmailSearchRequest request, CancellationToken cancellationToken)
    {
       var result = await _emailService.GetAsync(request, cancellationToken);
@@ -26,7 +26,7 @@ public class EmailController(IEmailService emailService) : BaseController
 
    [HttpGet("{id:guid}")]
    [Authorize]
-   [RequirePermission(CourierPermission.Emails.View)]
+   [RequirePermission(CourierPermission.Emails.Read)]
    public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
    {
       var result = await _emailService.GetByIdAsync(id, cancellationToken);
@@ -35,7 +35,7 @@ public class EmailController(IEmailService emailService) : BaseController
 
    [HttpPost("")]
    [Authorize]
-   [RequirePermission(CourierPermission.Emails.Create)]
+   [RequirePermission(CourierPermission.Emails.Write)]
    public async Task<IActionResult> Create([FromBody] EmailCreateRequest request, CancellationToken cancellationToken)
    {
       var result = await _emailService.CreateAsync(request, cancellationToken);

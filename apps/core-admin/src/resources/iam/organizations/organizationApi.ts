@@ -122,7 +122,7 @@ export async function getOrganization(id: string): Promise<OrganizationDto> {
 }
 
 export async function getOwnOrganization(): Promise<OrganizationDto> {
-  const response = await getIamJson(API_PATHS.iam.organizations.own)
+  const response = await getIamJson(API_PATHS.iam.organizations.profile)
 
   return unwrapResult<OrganizationDto>(response)
 }
@@ -134,7 +134,7 @@ export async function updateOrganization(id: string, request: OrganizationUpdate
 }
 
 export async function updateOwnOrganization(request: OrganizationUpdateRequest): Promise<void> {
-  const response = await putIamJson(API_PATHS.iam.organizations.own, request)
+  const response = await putIamJson(API_PATHS.iam.organizations.profile, request)
 
   ensureResultSuccess(response)
 }

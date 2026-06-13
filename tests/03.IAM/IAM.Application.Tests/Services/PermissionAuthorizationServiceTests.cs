@@ -28,9 +28,9 @@ public class PermissionAuthorizationServiceTests
       var roleId = Guid.NewGuid();
       _userContext.Roles.Returns([roleId.ToString()]);
       _permissionService.GetPermissionsAsync(roleId.ToString(), Arg.Any<CancellationToken>())
-         .Returns([IamPermission.Users.List]);
+         .Returns([IamPermission.Users.Read]);
 
-      var result = await _service.CheckPermissionAsync(new PermissionCheckRequest(IamPermission.Users.List));
+      var result = await _service.CheckPermissionAsync(new PermissionCheckRequest(IamPermission.Users.Read));
 
       Assert.True(result.Allowed);
    }
@@ -40,7 +40,7 @@ public class PermissionAuthorizationServiceTests
    {
       _userContext.Roles.Returns([]);
 
-      var result = await _service.CheckPermissionAsync(new PermissionCheckRequest(IamPermission.Users.List));
+      var result = await _service.CheckPermissionAsync(new PermissionCheckRequest(IamPermission.Users.Read));
 
       Assert.False(result.Allowed);
       await _permissionService.DidNotReceive().GetPermissionsAsync(Arg.Any<string>(), Arg.Any<CancellationToken>());
@@ -52,9 +52,9 @@ public class PermissionAuthorizationServiceTests
       var roleId = Guid.NewGuid();
       _userContext.Roles.Returns([roleId.ToString()]);
       _permissionService.GetPermissionsAsync(roleId.ToString(), Arg.Any<CancellationToken>())
-         .Returns([IamPermission.Users.List]);
+         .Returns([IamPermission.Users.Read]);
 
-      var result = await _service.CheckPermissionAsync(new PermissionCheckRequest(IamPermission.Users.List));
+      var result = await _service.CheckPermissionAsync(new PermissionCheckRequest(IamPermission.Users.Read));
 
       Assert.True(result.Allowed);
    }

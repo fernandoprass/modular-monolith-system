@@ -33,6 +33,7 @@ export const PERMISSION_RESOURCE_OPTIONS = [
   { labelKey: 'resources.iam.permissions.resources.users', value: 'users' },
   { labelKey: 'resources.iam.permissions.resources.parameters', value: 'parameters' },
   { labelKey: 'resources.iam.permissions.resources.organizations', value: 'organizations' },
+  { labelKey: 'resources.iam.permissions.resources.organizationprofile', value: 'organizationprofile' },
   { labelKey: 'resources.iam.permissions.resources.permissions', value: 'permissions' },
   { labelKey: 'resources.iam.permissions.resources.auditlogs', value: 'auditlogs' },
   { labelKey: 'resources.iam.permissions.resources.systemlogs', value: 'systemlogs' },
@@ -40,17 +41,16 @@ export const PERMISSION_RESOURCE_OPTIONS = [
   { labelKey: 'resources.iam.permissions.resources.emailtemplates', value: 'emailtemplates' },
   { labelKey: 'resources.iam.permissions.resources.templates', value: 'templates' },
   { labelKey: 'resources.iam.permissions.resources.roles', value: 'roles' },
+  { labelKey: 'resources.iam.permissions.resources.userprofile', value: 'userprofile' },
 ] as const
 
 export const PERMISSION_ACTION_OPTIONS = [
-  { labelKey: 'resources.iam.permissions.actions.list', value: 'list' },
-  { labelKey: 'resources.iam.permissions.actions.create', value: 'create' },
-  { labelKey: 'resources.iam.permissions.actions.view', value: 'view' },
-  { labelKey: 'resources.iam.permissions.actions.update', value: 'update' },
+  { labelKey: 'resources.iam.permissions.actions.read', value: 'read' },
+  { labelKey: 'resources.iam.permissions.actions.write', value: 'write' },
   { labelKey: 'resources.iam.permissions.actions.delete', value: 'delete' },
+  { labelKey: 'resources.iam.permissions.actions.viewaccess', value: 'viewaccess' },
   { labelKey: 'resources.iam.permissions.actions.viewpermissions', value: 'viewpermissions' },
   { labelKey: 'resources.iam.permissions.actions.saveoverride', value: 'saveoverride' },
-  { labelKey: 'resources.iam.permissions.actions.updatepassword', value: 'updatepassword' },
 ] as const
 
 export type PermissionSearchForm = {

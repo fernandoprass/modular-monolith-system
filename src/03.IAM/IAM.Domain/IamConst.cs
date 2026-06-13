@@ -11,9 +11,6 @@ public static partial class IamConst
    {
       public const string ConnectionString = "IamDb";
       public const string Schema = "iam";
-
-      public const string TextType = "text";
-      public const string UuidType = "uuid";
    }
 
    public static class Entity

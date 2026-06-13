@@ -40,10 +40,10 @@ export function UserListPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<UserLiteDto | null>(null)
   const [sorting, setSorting] = useState<SortingState>([])
-  const canCreate = hasPermissionCode(permissions, IAM_PERMISSIONS.users.create)
-  const canView = hasPermissionCode(permissions, IAM_PERMISSIONS.users.view)
-  const canUpdate = hasPermissionCode(permissions, IAM_PERMISSIONS.users.update)
-  const canDelete = hasPermissionCode(permissions, IAM_PERMISSIONS.users.delete)
+  const canCreate = hasPermissionCode(permissions, IAM_PERMISSIONS.users.write)
+  const canView = hasPermissionCode(permissions, IAM_PERMISSIONS.users.read)
+  const canUpdate = hasPermissionCode(permissions, IAM_PERMISSIONS.users.write)
+  const canDelete = hasPermissionCode(permissions, IAM_PERMISSIONS.users.write)
   const columns = useMemo(() => createUserTableColumns({
     canDelete,
     canUpdate,

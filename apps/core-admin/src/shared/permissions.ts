@@ -12,8 +12,7 @@ export type PermissionDto = {
 }
 
 const RESOURCE_ACCESS_ACTIONS = new Set<string>([
-  IAM_ACTIONS.list,
-  IAM_ACTIONS.view,
+  IAM_ACTIONS.read,
 ])
 
 export function hasPermissionCode(permissions: PermissionDto[], code: string): boolean {

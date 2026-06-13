@@ -3,15 +3,18 @@ import { useCallback, useEffect, useState } from 'react'
 
 import { useToast } from '../../../app/ToastProvider'
 import { useTranslate } from '../../../app/i18n/i18n'
-import { useNotifyError } from '../../../auth/AuthProvider'
+import { useAuth, useNotifyError } from '../../../auth/AuthProvider'
 import { Button } from '../../../components/ui/button'
 import { Card, CardContent } from '../../../components/ui/card'
 import { Field, FieldGroup, FieldLabel } from '../../../components/ui/form'
 import { Input } from '../../../components/ui/input'
 import { Select } from '../../../components/ui/select'
+import { IAM_PERMISSIONS } from '../../../shared/iamConstants'
 import { LANGUAGE_CODES, LANGUAGE_OPTIONS } from '../../../shared/languages'
+import { hasPermissionCode } from '../../../shared/permissions'
 import { OrganizationSelect } from '../organizations/OrganizationSelect'
 import { getCurrentUser, updateCurrentUser } from './userApi'
+import { UserAccessTabs } from './UserAccessTabs'
 import { USER_REQUEST_FIELDS, type UserDto } from './userTypes'
 import { toTranslatedOptions } from './userUi'
 
@@ -24,8 +27,10 @@ export function UserProfilePage() {
   const t = useTranslate()
   const notifyError = useNotifyError()
   const { showSuccess } = useToast()
+  const { permissions } = useAuth()
   const [user, setUser] = useState<UserDto | null>(null)
   const [isSaving, setIsSaving] = useState(false)
+  const canViewAccess = hasPermissionCode(permissions, IAM_PERMISSIONS.userProfile.viewAccess)
   const form = useForm({
     defaultValues: {
       language: LANGUAGE_CODES.english,
@@ -125,6 +130,7 @@ export function UserProfilePage() {
           )}
         </CardContent>
       </Card>
+      {user !== null && canViewAccess && <UserAccessTabs userId={user.id} />}
     </main>
   )
 }

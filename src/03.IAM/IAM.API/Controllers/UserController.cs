@@ -24,25 +24,16 @@ public class UserController(
 
    [HttpGet("{id:guid}")]
    [Authorize]
-   [RequirePermission(IamPermission.Users.View)]
+   [RequirePermission(IamPermission.Users.Read)]
    public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
    {
       var user = await _userService.GetByIdAsync(id, cancellationToken);
       return OkOrNotFound(user);
    }
 
-   [HttpGet("me")]
-   [Authorize]
-   [RequirePermission(IamPermission.Users.ViewMe)]
-   public async Task<IActionResult> GetByCurrentUser(CancellationToken cancellationToken)
-   {
-      var user = await _userService.GetByIdAsync(_userContext.UserId, cancellationToken);
-      return OkOrNotFound(user);
-   }
-
    [HttpGet("")]
    [Authorize]
-   [RequirePermission(IamPermission.Users.List)]
+   [RequirePermission(IamPermission.Users.Read)]
    public async Task<IActionResult> GetByOrganizationId([FromQuery] UserSearchRequest request, CancellationToken cancellationToken)
    {
       var users = await _userService.GetAsync(request, cancellationToken);
@@ -52,7 +43,7 @@ public class UserController(
 
    [HttpGet("lookup")]
    [Authorize]
-   [RequirePermission(IamPermission.Users.List)]
+   [RequirePermission(IamPermission.Users.Read)]
    public async Task<IActionResult> GetLookup([FromQuery] UserLookupRequest request, CancellationToken cancellationToken)
    {
       var users = await _userService.GetLookupAsync(request, cancellationToken);
@@ -62,7 +53,7 @@ public class UserController(
 
    [HttpPost("")]
    [Authorize]
-   [RequirePermission(IamPermission.Users.Create)]
+   [RequirePermission(IamPermission.Users.Write)]
    public async Task<IActionResult> Create([FromBody] UserCreateRequest request, CancellationToken cancellationToken)
    {
       var user = await _registerOrchestrator.RegisterUserAsync(request, cancellationToken);
@@ -71,32 +62,12 @@ public class UserController(
 
    [HttpPut("{id:guid}")]
    [Authorize]
-   [RequirePermission(IamPermission.Users.Update)]
+   [RequirePermission(IamPermission.Users.Write)]
    public async Task<IActionResult> Update(Guid id, [FromBody] UserUpdateRequest request, CancellationToken cancellationToken)
    {
       var response = await _userService.UpdateAsync(id, request, cancellationToken);
 
       return OkOrNotFound(response);
-   }
-
-   [HttpPut("me")]
-   [Authorize]
-   [RequirePermission(IamPermission.Users.UpdateMe)]
-   public async Task<IActionResult> UpdateMe([FromBody] UserUpdateRequest request, CancellationToken cancellationToken)
-   {
-      var response = await _userService.UpdateMeAsync(request, cancellationToken);
-
-      return OkOrNotFound(response);
-   }
-
-   [HttpPatch("me/password")]
-   [Authorize]
-   [RequirePermission(IamPermission.Users.UpdatePassword)]
-   public async Task<IActionResult> UpdatePassword([FromBody] UserUpdatePasswordRequest request, CancellationToken cancellationToken)
-   {
-      var result = await _userService.UpdatePasswordAsync(request, cancellationToken);
-
-      return OkOrNotFound(result);
    }
 
    [HttpPatch("{id:guid}/organization-admin")]
@@ -111,7 +82,7 @@ public class UserController(
 
    [HttpDelete("{id:guid}")]
    [Authorize]
-   [RequirePermission(IamPermission.Users.Delete)]
+   [RequirePermission(IamPermission.Users.Write)]
    public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
    {
       var response = await _userService.DeleteAsync(id, cancellationToken);
@@ -119,9 +90,38 @@ public class UserController(
       return OkOrNotFound(response);
    }
 
-   [HttpDelete("me")]
+   [HttpGet("profile")]
    [Authorize]
-   [RequirePermission(IamPermission.Users.DeleteMe)]
+   [RequirePermission(IamPermission.UserProfile.Read)]
+   public async Task<IActionResult> GetByCurrentUser(CancellationToken cancellationToken)
+   {
+      var user = await _userService.GetByIdAsync(_userContext.UserId, cancellationToken);
+      return OkOrNotFound(user);
+   }
+
+   [HttpPut("profile")]
+   [Authorize]
+   [RequirePermission(IamPermission.UserProfile.Write)]
+   public async Task<IActionResult> UpdateMe([FromBody] UserUpdateRequest request, CancellationToken cancellationToken)
+   {
+      var response = await _userService.UpdateMeAsync(request, cancellationToken);
+
+      return OkOrNotFound(response);
+   }
+
+   [HttpPatch("profile/password")]
+   [Authorize]
+   [RequirePermission(IamPermission.UserProfile.Write)]
+   public async Task<IActionResult> UpdatePassword([FromBody] UserUpdatePasswordRequest request, CancellationToken cancellationToken)
+   {
+      var result = await _userService.UpdatePasswordAsync(request, cancellationToken);
+
+      return OkOrNotFound(result);
+   }
+
+   [HttpDelete("profile")]
+   [Authorize]
+   [RequirePermission(IamPermission.UserProfile.Delete)]
    public async Task<IActionResult> DeleteMe(CancellationToken cancellationToken)
    {
       var response = await _userService.DeleteMeAsync(cancellationToken);

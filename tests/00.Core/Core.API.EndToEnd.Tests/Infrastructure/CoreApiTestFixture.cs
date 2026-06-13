@@ -116,9 +116,9 @@ public sealed class CoreApiTestFixture : WebApplicationFactory<CoreApi::Program>
          organizationAdminRole.AddPermission(permission.Id);
       }
 
-      userRole.AddPermission(permissions.Single(permission => permission.Code == IamPermission.Users.UpdateMe).Id);
-      userRole.AddPermission(permissions.Single(permission => permission.Code == IamPermission.Users.DeleteMe).Id);
-      userRole.AddPermission(permissions.Single(permission => permission.Code == IamPermission.Users.UpdatePassword).Id);
+      userRole.AddPermission(permissions.Single(permission => permission.Code == IamPermission.UserProfile.Read).Id);
+      userRole.AddPermission(permissions.Single(permission => permission.Code == IamPermission.UserProfile.Write).Id);
+      userRole.AddPermission(permissions.Single(permission => permission.Code == IamPermission.UserProfile.Delete).Id);
 
       iamDbContext.Roles.AddRange(organizationAdminRole, userRole);
       await iamDbContext.SaveChangesAsync();
@@ -140,9 +140,9 @@ public sealed class CoreApiTestFixture : WebApplicationFactory<CoreApi::Program>
    {
       var requiredPermissionCodes = new[]
       {
-         IamPermission.Users.UpdateMe,
-         IamPermission.Users.DeleteMe,
-         IamPermission.Users.UpdatePassword
+         IamPermission.UserProfile.Read,
+         IamPermission.UserProfile.Write,
+         IamPermission.UserProfile.Delete
       };
 
       foreach (var permissionCode in requiredPermissionCodes)
@@ -195,11 +195,11 @@ public sealed class CoreApiTestFixture : WebApplicationFactory<CoreApi::Program>
    private static async Task EnsureRoleDeletePermissionAsync(IamDbContext iamDbContext, SharedDbContext sharedDbContext)
    {
       var roleDeletePermission = await iamDbContext.Permissions
-         .FirstOrDefaultAsync(permission => permission.Code == IamPermission.Roles.Delete);
+         .FirstOrDefaultAsync(permission => permission.Code == IamPermission.Roles.Write);
 
       if (roleDeletePermission == null)
       {
-         roleDeletePermission = CreatePermission(IamPermission.Roles.Delete);
+         roleDeletePermission = CreatePermission(IamPermission.Roles.Write);
          iamDbContext.Permissions.Add(roleDeletePermission);
          await iamDbContext.SaveChangesAsync();
       }
@@ -235,7 +235,7 @@ public sealed class CoreApiTestFixture : WebApplicationFactory<CoreApi::Program>
       organizationAdminRole ??= await roleQuery.FirstOrDefaultAsync(role => role.Name == "Organization Admin" && role.OrganizationId == null);
 
       var organizationDeletePermissionId = await iamDbContext.Permissions
-         .Where(permission => permission.Code == IamPermission.Organizations.Delete)
+         .Where(permission => permission.Code == IamPermission.Organizations.Write)
          .Select(permission => permission.Id)
          .FirstOrDefaultAsync();
 
@@ -271,7 +271,7 @@ public sealed class CoreApiTestFixture : WebApplicationFactory<CoreApi::Program>
          .SelectMany(type => type.GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static))
          .Where(field => field.IsLiteral && field.FieldType == typeof(string))
          .Select(field => (string)field.GetRawConstantValue()!)
-         .Append(IamPermission.Roles.Delete)
+         .Append(IamPermission.Roles.Write)
          .Distinct(StringComparer.OrdinalIgnoreCase)
          .Select(CreatePermission)
          .ToList();

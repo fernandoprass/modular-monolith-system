@@ -31,7 +31,7 @@ export function PermissionListPage() {
   const [selectedPermission, setSelectedPermission] = useState<PermissionDto | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [sorting, setSorting] = useState<SortingState>([])
-  const canUpdate = hasPermissionCode(userPermissions, IAM_PERMISSIONS.permissions.update)
+  const canUpdate = hasPermissionCode(userPermissions, IAM_PERMISSIONS.permissions.write)
   const filterForm = useForm({
     defaultValues: {
       action: '',

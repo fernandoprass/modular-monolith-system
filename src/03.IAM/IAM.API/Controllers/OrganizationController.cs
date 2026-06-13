@@ -22,25 +22,16 @@ public class OrganizationController(
 
    [HttpGet("{id:guid}")]
    [Authorize]
-   [RequirePermission(IamPermission.Organizations.View)]
+   [RequirePermission(IamPermission.Organizations.Read)]
    public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
    {
       var organization = await _organizationService.GetByIdAsync(id, cancellationToken);
       return OkOrNotFound(organization);
    }
 
-   [HttpGet("own")]
-   [Authorize]
-   [RequirePermission(IamPermission.Organizations.ViewOwn)]
-   public async Task<IActionResult> GetById(CancellationToken cancellationToken)
-   {
-      var organization = await _organizationService.GetByIdAsync(_userContext.UserOwnerId, cancellationToken);
-      return OkOrNotFound(organization);
-   }
-
    [HttpGet()]
    [Authorize]
-   [RequirePermission(IamPermission.Organizations.List)]
+   [RequirePermission(IamPermission.Organizations.Read)]
    public async Task<IActionResult> Get([FromQuery] OrganizationSearchRequest request, CancellationToken cancellationToken)
    {
       var organization = await _organizationService.GetAsync(request, cancellationToken);
@@ -49,7 +40,7 @@ public class OrganizationController(
 
    [HttpGet("lookup")]
    [Authorize]
-   [RequirePermission(IamPermission.Organizations.List)]
+   [RequirePermission(IamPermission.Organizations.Read)]
    public async Task<IActionResult> GetLookup([FromQuery] OrganizationLookupRequest request, CancellationToken cancellationToken)
    {
       var organization = await _organizationService.GetLookupAsync(request, cancellationToken);
@@ -65,25 +56,16 @@ public class OrganizationController(
 
    [HttpPut("{id:guid}")]
    [Authorize]
-   [RequirePermission(IamPermission.Organizations.Update)]
+   [RequirePermission(IamPermission.Organizations.Write)]
    public async Task<IActionResult> Update(Guid id, [FromBody] OrganizationUpdateRequest organization, CancellationToken cancellationToken)
    {
       var result = await _organizationService.UpdateAsync(id, organization, cancellationToken);
       return OkOrNotFound(result);
    }
 
-   [HttpPut("own")]
-   [Authorize]
-   [RequirePermission(IamPermission.Organizations.UpdateOwn)]
-   public async Task<IActionResult> Update([FromBody] OrganizationUpdateRequest organization, CancellationToken cancellationToken)
-   {
-      var result = await _organizationService.UpdateAsync(_userContext.UserOwnerId, organization, cancellationToken);
-      return OkOrNotFound(result);
-   }
-
    [HttpPatch("{id:guid}/code")]
    [Authorize]
-   [RequirePermission(IamPermission.Organizations.Update)]
+   [RequirePermission(IamPermission.Organizations.Write)]
    public async Task<IActionResult> UpdateCode(Guid id, [FromBody] OrganizationUpdateCodeRequest organization, CancellationToken cancellationToken)
    {
       var result = await _organizationService.UpdateCodeAsync(id, organization, cancellationToken);
@@ -92,16 +74,35 @@ public class OrganizationController(
 
    [HttpDelete("{id:guid}")]
    [Authorize]
-   [RequirePermission(IamPermission.Organizations.Delete)]
+   [RequirePermission(IamPermission.Organizations.Write)]
    public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
    {
       var result = await _registerOrchestrator.DeleteOrganizationAsync(id, cancellationToken);
       return OkOrNotFound(result);
    }
 
-   [HttpDelete("own")]
+
+   [HttpGet("profile")]
    [Authorize]
-   [RequirePermission(IamPermission.Organizations.DeleteOwn)]
+   [RequirePermission(IamPermission.OrganizationProfile.Read)]
+   public async Task<IActionResult> GetById(CancellationToken cancellationToken)
+   {
+      var organization = await _organizationService.GetByIdAsync(_userContext.UserOwnerId, cancellationToken);
+      return OkOrNotFound(organization);
+   }
+
+   [HttpPut("profile")]
+   [Authorize]
+   [RequirePermission(IamPermission.OrganizationProfile.Write)]
+   public async Task<IActionResult> Update([FromBody] OrganizationUpdateRequest organization, CancellationToken cancellationToken)
+   {
+      var result = await _organizationService.UpdateAsync(_userContext.UserOwnerId, organization, cancellationToken);
+      return OkOrNotFound(result);
+   }
+
+   [HttpDelete("profile")]
+   [Authorize]
+   [RequirePermission(IamPermission.OrganizationProfile.Delete)]
    public async Task<IActionResult> Delete(CancellationToken cancellationToken)
    {
       var result = await _registerOrchestrator.DeleteOrganizationAsync(_userContext.UserOwnerId, cancellationToken);

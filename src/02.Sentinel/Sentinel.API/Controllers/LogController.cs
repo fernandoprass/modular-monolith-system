@@ -17,7 +17,7 @@ public class LogController(ISentinelLogService sentinelLogService) : BaseControl
 
    [HttpGet("audit")]
    [Authorize]
-   [RequirePermission(SentinelPermission.AuditLogs.List)]
+   [RequirePermission(SentinelPermission.AuditLogs.Read)]
    public async Task<IActionResult> GetAuditLogsByParams([FromQuery] AuditLogSearchRequest request, CancellationToken cancellationToken)
    {
       var result = await _sentinelLogService.GetAuditLogsByParamsAsync(request, cancellationToken);
@@ -26,7 +26,7 @@ public class LogController(ISentinelLogService sentinelLogService) : BaseControl
 
    [HttpGet("audit/{id:guid}")]
    [Authorize]
-   [RequirePermission(SentinelPermission.AuditLogs.View)]
+   [RequirePermission(SentinelPermission.AuditLogs.Read)]
    public async Task<IActionResult> GetAuditLogById(Guid id, CancellationToken cancellationToken)
    {
       var result = await _sentinelLogService.GetAuditLogByIdAsync(id, cancellationToken);
@@ -35,7 +35,7 @@ public class LogController(ISentinelLogService sentinelLogService) : BaseControl
 
    [HttpGet("system")]
    [Authorize]
-   [RequirePermission(SentinelPermission.SystemLogs.List)]
+   [RequirePermission(SentinelPermission.SystemLogs.Read)]
    public async Task<IActionResult> GetSystemLogsByParams([FromQuery] SystemLogSearchRequest request, CancellationToken cancellationToken)
    {
       var result = await _sentinelLogService.GetSystemLogsByParamsAsync(request, cancellationToken);
@@ -44,7 +44,7 @@ public class LogController(ISentinelLogService sentinelLogService) : BaseControl
 
    [HttpGet("system/{id:guid}")]
    [Authorize]
-   [RequirePermission(SentinelPermission.SystemLogs.View)]
+   [RequirePermission(SentinelPermission.SystemLogs.Read)]
    public async Task<IActionResult> GetSystemLogById(Guid id, CancellationToken cancellationToken)
    {
       var result = await _sentinelLogService.GetSystemLogByIdAsync(id, cancellationToken);
