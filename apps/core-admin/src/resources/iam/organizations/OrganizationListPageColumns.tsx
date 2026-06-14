@@ -29,22 +29,22 @@ export function createOrganizationTableColumns({
     {
       accessorKey: 'type',
       cell: ({ row }) => getOrganizationTypeLabel(row.original.type, t),
-      header: t('resources.iam.organizations.fields.type'),
+      header: t('shared.fields.type'),
       sortingFn: (left, right) =>
         getOrganizationTypeLabel(left.original.type, t).localeCompare(getOrganizationTypeLabel(right.original.type, t)),
     },
     {
       accessorKey: 'code',
-      header: t('resources.iam.organizations.fields.code'),
+      header: t('shared.fields.code'),
     },
     {
       accessorKey: 'name',
-      header: t('resources.iam.organizations.fields.name'),
+      header: t('shared.fields.name'),
     },
     {
       accessorKey: 'defaultLanguage',
       cell: ({ row }) => getLanguageLabel(row.original.defaultLanguage, t),
-      header: t('resources.iam.organizations.fields.defaultLanguage'),
+      header: t('shared.fields.defaultLanguage'),
       sortingFn: (left, right) =>
         getLanguageLabel(left.original.defaultLanguage, t).localeCompare(getLanguageLabel(right.original.defaultLanguage, t)),
     },
@@ -55,7 +55,7 @@ export function createOrganizationTableColumns({
           {row.original.isActive ? t('shared.status.active') : t('shared.status.inactive')}
         </Badge>
       ),
-      header: t('resources.iam.organizations.fields.isActive'),
+      header: t('shared.fields.isActive'),
     },
     {
       cell: ({ row }) => (
@@ -64,19 +64,19 @@ export function createOrganizationTableColumns({
             {
               isVisible: canView,
               kind: DATA_TABLE_ROW_ACTION_KINDS.view,
-              label: t('resources.iam.organizations.actions.view'),
+              label: t('shared.actions.view'),
               onClick: () => navigate(APP_ROUTES.organizationView(row.original.id)),
             },
             {
               isVisible: canUpdate,
               kind: DATA_TABLE_ROW_ACTION_KINDS.edit,
-              label: t('resources.iam.organizations.actions.edit'),
+              label: t('shared.actions.edit'),
               onClick: () => navigate(APP_ROUTES.organizationEdit(row.original.id)),
             },
             {
               isVisible: canDelete,
               kind: DATA_TABLE_ROW_ACTION_KINDS.delete,
-              label: t('resources.iam.organizations.actions.delete'),
+              label: t('shared.actions.delete'),
               onClick: () => setDeleteTarget(row.original),
             },
           ]}
@@ -84,7 +84,7 @@ export function createOrganizationTableColumns({
       ),
       enableHiding: false,
       enableSorting: false,
-      header: t('resources.iam.organizations.fields.actions'),
+      header: t('shared.fields.actions'),
       id: 'actions',
     },
   ]

@@ -52,29 +52,12 @@ export const enMessages = {
       title: 'Create organization',
     },
   },
-  resources: {
+  features: {
     iam: {
       authorization: {
         name: 'Authorization',
       },
       organizations: {
-        actions: {
-          delete: 'Delete',
-          edit: 'Edit',
-          editCode: 'Edit code',
-          filter: 'Filter',
-          reset: 'Reset',
-          view: 'View',
-        },
-        fields: {
-          actions: 'Actions',
-          code: 'Code',
-          defaultLanguage: 'Default language',
-          description: 'Description',
-          isActive: 'Active',
-          name: 'Name',
-          type: 'Type',
-        },
         messages: {
           deleteConfirm: 'Delete this organization?',
           empty: 'No organizations found.',
@@ -103,36 +86,8 @@ export const enMessages = {
         name: 'Parameters',
       },
       permissions: {
-        actions: {
-          create: 'Create',
-          delete: 'Delete',
-          edit: 'Edit permission',
-          list: 'List',
-          read: 'Read',
-          saveoverride: 'Save override',
-          update: 'Update',
-          view: 'View',
-          viewaccess: 'View access',
-          viewpermissions: 'View permissions',
-          write: 'Write',
-        },
-        fields: {
-          action: 'Action',
-          actions: 'Actions',
-          description: 'Description',
-          isActive: 'Active',
-          module: 'Module',
-          resource: 'Resource',
-          title: 'Title',
-        },
         messages: {
           empty: 'No permissions found.',
-        },
-        modules: {
-          courier: 'Courier',
-          iam: 'IAM',
-          sentinel: 'Sentinel',
-          shared: 'Shared',
         },
         name: 'Permissions',
         notifications: {
@@ -141,40 +96,8 @@ export const enMessages = {
         pages: {
           list: 'Permissions',
         },
-        resources: {
-          auditlogs: 'Audit logs',
-          emails: 'Emails',
-          emailtemplates: 'Email templates',
-          organizationprofile: 'Organization profile',
-          organizations: 'Organizations',
-          parameters: 'Parameters',
-          permissions: 'Permissions',
-          roles: 'Roles',
-          systemlogs: 'System logs',
-          templates: 'Templates',
-          userprofile: 'User profile',
-          users: 'Users',
-        },
       },
       roles: {
-        actions: {
-          create: 'Create role',
-          delete: 'Delete',
-          edit: 'Edit role',
-        },
-        fields: {
-          actions: 'Actions',
-          assignedBy: 'Assigned by',
-          assignedAt: 'Assigned at',
-          description: 'Description',
-          isActive: 'Active',
-          isDefault: 'Default',
-          name: 'Name',
-          organizationId: 'Organization',
-          startsAt: 'Starts at',
-          expiresAt: 'Expires at',
-          userId: 'User ID',
-        },
         messages: {
           deleteConfirm: 'Delete this role?',
           empty: 'No roles found.',
@@ -190,24 +113,6 @@ export const enMessages = {
         },
       },
       users: {
-        actions: {
-          create: 'Create user',
-          delete: 'Delete',
-          edit: 'Edit',
-          view: 'View',
-        },
-        fields: {
-          actions: 'Actions',
-          email: 'Email',
-          isActive: 'Active',
-          isOrganizationAdmin: 'Organization admin',
-          isSystemAdmin: 'System admin',
-          language: 'Language',
-          name: 'Name',
-          organizationId: 'Organization ID',
-          organizationName: 'Organization',
-          password: 'Password',
-        },
         messages: {
           deleteConfirm: 'Delete this user?',
           empty: 'No users found.',
@@ -241,17 +146,29 @@ export const enMessages = {
   },
   shared: {
     actions: {
-      cancel: 'Cancel',
       back: 'Back',
+      cancel: 'Cancel',
       clear: 'Clear',
       columns: 'Columns',
+      create: 'Create',
+      delete: 'Delete',
+      edit: 'Edit',
+      editCode: 'Edit code',
       filter: 'Filter',
       firstPage: '<<', 
+      lastPage: '>>', 
+      list: 'List',
       nextPage: '>',
       previousPage: '<',
-      lastPage: '>>', 
+      read: 'Read',
       reset: 'Reset',
       save: 'Save',
+      saveOverride: 'Save override',
+      update: 'Update',
+      view: 'View',
+      viewAccess: 'View access',
+      viewPermissions: 'View permissions',
+      write: 'Write',
     },
     common: {
       loading: 'Loading...',
@@ -260,6 +177,33 @@ export const enMessages = {
     },
     errors: {
       generic: 'Something went wrong.',
+    },
+    fields: {
+      action: 'Action',
+      actions: 'Actions',
+      assignedAt: 'Assigned at',
+      assignedBy: 'Assigned by',
+      code: 'Code',
+      defaultLanguage: 'Default language',
+      description: 'Description',
+      email: 'Email',
+      expiresAt: 'Expires at',
+      isActive: 'Active',
+      isDefault: 'Default',
+      isOrganizationAdmin: 'Organization admin',
+      isSystemAdmin: 'System admin',
+      language: 'Language',
+      module: 'Module',
+      name: 'Name',
+      organization: 'Organization',
+      organizationId: 'Organization ID',
+      password: 'Password',
+      resource: 'Resource',
+      startsAt: 'Starts at',
+      title: 'Title',
+      type: 'Type',
+      user: 'User',
+      userId: 'User ID',
     },
     languages: {
       en: 'English',
@@ -285,9 +229,10 @@ export const enMessages = {
     sentinel: 'Sentinel',
     shared:  'Shared',
   },
-  resources2: {
+  resources: {
     courier: {
-      email: 'Email',
+      emailtemplates: 'Email templates',
+      emails: 'Emails',
       templates: 'Templates',       
     },
     sentinel: {
@@ -296,13 +241,16 @@ export const enMessages = {
     },
     iam : {
       organization: 'Organization',
+      organizationprofile: 'Organization profile',
       organizations: 'Organizations',
       parameter: 'Parameter',
       parameters: 'Parameters',
       permission: 'Permission',
       permissions: 'Permissions',
       role: 'Role',
-      roles: 'Roles'
+      roles: 'Roles',
+      userprofile: 'User profile',
+      users: 'Users',
     }
   }
 } as const

@@ -35,7 +35,7 @@ export function UserCreatePage() {
     } as UserCreateForm,
     onSubmit: async ({ value }) => {
       if (value.organizationId.trim().length === 0) {
-        showError(t('resources.iam.users.messages.organizationRequired'))
+        showError(t('features.iam.users.messages.organizationRequired'))
         return
       }
 
@@ -43,7 +43,7 @@ export function UserCreatePage() {
 
       try {
         const created = await createUser(value)
-        showSuccess(t('resources.iam.users.notifications.created'))
+        showSuccess(t('features.iam.users.notifications.created'))
         navigate(APP_ROUTES.userView(created.id))
       } catch (error) {
         notifyError(error, t('shared.errors.generic'))
@@ -56,7 +56,7 @@ export function UserCreatePage() {
   return (
     <main className="page">
       <div className="page-header">
-        <h1 className="page-title">{t('resources.iam.users.pages.create')}</h1>
+        <h1 className="page-title">{t('features.iam.users.pages.create')}</h1>
         <Button onClick={() => navigate(APP_ROUTES.users)} type="button" variant="outline">
           <ArrowLeft data-icon="inline-start" />
           {t('shared.actions.back')}
@@ -72,7 +72,7 @@ export function UserCreatePage() {
               <form.Field name="organizationId">
                 {(field) => (
                   <Field>
-                    <FieldLabel>{t('resources.iam.users.fields.organizationId')}</FieldLabel>
+                    <FieldLabel>{t('shared.fields.organizationId')}</FieldLabel>
                     <OrganizationSelect
                       onValueChange={field.handleChange}
                       value={field.state.value}
@@ -83,7 +83,7 @@ export function UserCreatePage() {
               <form.Field name="name">
                 {(field) => (
                   <Field>
-                    <FieldLabel htmlFor={field.name}>{t('resources.iam.users.fields.name')}</FieldLabel>
+                    <FieldLabel htmlFor={field.name}>{t('shared.fields.name')}</FieldLabel>
                     <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required value={field.state.value} />
                   </Field>
                 )}
@@ -91,7 +91,7 @@ export function UserCreatePage() {
               <form.Field name="email">
                 {(field) => (
                   <Field>
-                    <FieldLabel htmlFor={field.name}>{t('resources.iam.users.fields.email')}</FieldLabel>
+                    <FieldLabel htmlFor={field.name}>{t('shared.fields.email')}</FieldLabel>
                     <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required type="email" value={field.state.value} />
                   </Field>
                 )}
@@ -99,7 +99,7 @@ export function UserCreatePage() {
               <form.Field name="password">
                 {(field) => (
                   <Field>
-                    <FieldLabel htmlFor={field.name}>{t('resources.iam.users.fields.password')}</FieldLabel>
+                    <FieldLabel htmlFor={field.name}>{t('shared.fields.password')}</FieldLabel>
                     <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required type="password" value={field.state.value} />
                   </Field>
                 )}
@@ -107,7 +107,7 @@ export function UserCreatePage() {
               <form.Field name="language">
                 {(field) => (
                   <Field>
-                    <FieldLabel>{t('resources.iam.users.fields.language')}</FieldLabel>
+                    <FieldLabel>{t('shared.fields.language')}</FieldLabel>
                     <Select
                       onValueChange={field.handleChange}
                       options={toTranslatedOptions(LANGUAGE_OPTIONS, t)}
@@ -118,7 +118,7 @@ export function UserCreatePage() {
               </form.Field>
             </FieldGroup>
             <div className="form-actions">
-              <Button disabled={isSubmitting} type="submit">{t('resources.iam.users.actions.create')}</Button>
+              <Button disabled={isSubmitting} type="submit">{t('shared.actions.create')}</Button>
             </div>
           </form>
         </CardContent>

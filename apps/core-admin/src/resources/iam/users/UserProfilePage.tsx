@@ -49,7 +49,7 @@ export function UserProfilePage() {
           [USER_REQUEST_FIELDS.isActive]: user.isActive,
           [USER_REQUEST_FIELDS.language]: value.language,
         })
-        showSuccess(t('resources.iam.users.notifications.profileUpdated'))
+        showSuccess(t('features.iam.users.notifications.profileUpdated'))
         await loadUser()
       } catch (error) {
         notifyError(error, t('shared.errors.generic'))
@@ -78,7 +78,7 @@ export function UserProfilePage() {
 
   return (
     <main className="page">
-      <h1 className="page-title">{t('resources.iam.users.pages.profile')}</h1>
+      <h1 className="page-title">{t('features.iam.users.pages.profile')}</h1>
       <Card>
         <CardContent>
           {user === null ? (
@@ -90,7 +90,7 @@ export function UserProfilePage() {
             }}>
               <FieldGroup>
                 <Field data-disabled>
-                  <FieldLabel>{t('resources.iam.users.fields.organizationId')}</FieldLabel>
+                  <FieldLabel>{t('shared.fields.organizationId')}</FieldLabel>
                   <OrganizationSelect
                     disabled
                     includeInactive
@@ -99,13 +99,13 @@ export function UserProfilePage() {
                   />
                 </Field>
                 <Field data-disabled>
-                  <FieldLabel>{t('resources.iam.users.fields.email')}</FieldLabel>
+                  <FieldLabel>{t('shared.fields.email')}</FieldLabel>
                   <Input disabled value={user.email} />
                 </Field>
                 <form.Field name="name">
                   {(field) => (
                     <Field>
-                      <FieldLabel htmlFor={field.name}>{t('resources.iam.users.fields.name')}</FieldLabel>
+                      <FieldLabel htmlFor={field.name}>{t('shared.fields.name')}</FieldLabel>
                       <Input onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required value={field.state.value} />
                     </Field>
                   )}
@@ -113,7 +113,7 @@ export function UserProfilePage() {
                 <form.Field name="language">
                   {(field) => (
                     <Field>
-                      <FieldLabel>{t('resources.iam.users.fields.language')}</FieldLabel>
+                      <FieldLabel>{t('shared.fields.language')}</FieldLabel>
                       <Select
                         onValueChange={field.handleChange}
                         options={toTranslatedOptions(LANGUAGE_OPTIONS, t)}

@@ -22,19 +22,19 @@ export function createPermissionTableColumns({
   return [
     {
       accessorKey: 'module',
-      header: t('resources.iam.permissions.fields.module'),
+      header: t('shared.fields.module'),
     },
     {
       accessorKey: 'resource',
-      header: t('resources.iam.permissions.fields.resource'),
+      header: t('shared.fields.resource'),
     },
     {
       accessorKey: 'action',
-      header: t('resources.iam.permissions.fields.action'),
+      header: t('shared.fields.action'),
     },
     {
       accessorKey: 'title',
-      header: t('resources.iam.permissions.fields.title'),
+      header: t('shared.fields.title'),
     },
     {
       accessorKey: 'isActive',
@@ -43,7 +43,7 @@ export function createPermissionTableColumns({
           {row.original.isActive ? t('shared.status.active') : t('shared.status.inactive')}
         </Badge>
       ),
-      header: t('resources.iam.permissions.fields.isActive'),
+      header: t('shared.fields.isActive'),
     },
     {
       cell: ({ row }) => (
@@ -52,14 +52,14 @@ export function createPermissionTableColumns({
             {
               isVisible: canUpdate,
               kind: DATA_TABLE_ROW_ACTION_KINDS.edit,
-              label: t('resources.iam.permissions.actions.edit'),
+              label: t('shared.actions.edit'),
               onClick: () => onEdit(row.original),
             },
           ]}
         />
       ),
       enableSorting: false,
-      header: t('resources.iam.permissions.fields.actions'),
+      header: t('shared.fields.actions'),
       id: 'actions',
     },
   ]

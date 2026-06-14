@@ -52,7 +52,7 @@ export function UserEditPage() {
           [USER_REQUEST_FIELDS.isActive]: value.isActive,
           [USER_REQUEST_FIELDS.language]: value.language,
         })
-        showSuccess(t('resources.iam.users.notifications.updated'))
+        showSuccess(t('features.iam.users.notifications.updated'))
         await loadUser()
       } catch (error) {
         notifyError(error, t('shared.errors.generic'))
@@ -87,7 +87,7 @@ export function UserEditPage() {
   return (
     <main className="page">
       <div className="page-header">
-        <h1 className="page-title">{t('resources.iam.users.pages.edit')}</h1>
+        <h1 className="page-title">{t('features.iam.users.pages.edit')}</h1>
         <Button onClick={() => navigate(APP_ROUTES.users)} type="button" variant="outline">
           <ArrowLeft data-icon="inline-start" />
           {t('shared.actions.back')}
@@ -105,7 +105,7 @@ export function UserEditPage() {
                 }}>
                   <FieldGroup>
                     <Field data-disabled>
-                      <FieldLabel>{t('resources.iam.users.fields.organizationId')}</FieldLabel>
+                      <FieldLabel>{t('shared.fields.organizationId')}</FieldLabel>
                       <OrganizationSelect
                         disabled
                         includeInactive
@@ -114,13 +114,13 @@ export function UserEditPage() {
                       />
                     </Field>
                     <Field data-disabled>
-                      <FieldLabel>{t('resources.iam.users.fields.email')}</FieldLabel>
+                      <FieldLabel>{t('shared.fields.email')}</FieldLabel>
                       <Input disabled value={user.email} />
                     </Field>
                     <form.Field name="name">
                       {(field) => (
                         <Field>
-                          <FieldLabel htmlFor={field.name}>{t('resources.iam.users.fields.name')}</FieldLabel>
+                          <FieldLabel htmlFor={field.name}>{t('shared.fields.name')}</FieldLabel>
                           <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required value={field.state.value} />
                         </Field>
                       )}
@@ -128,7 +128,7 @@ export function UserEditPage() {
                     <form.Field name="language">
                       {(field) => (
                         <Field>
-                          <FieldLabel>{t('resources.iam.users.fields.language')}</FieldLabel>
+                          <FieldLabel>{t('shared.fields.language')}</FieldLabel>
                           <Select
                             onValueChange={field.handleChange}
                             options={toTranslatedOptions(LANGUAGE_OPTIONS, t)}
@@ -141,7 +141,7 @@ export function UserEditPage() {
                       {(field) => (
                         <Checkbox
                           checked={field.state.value}
-                          label={t('resources.iam.users.fields.isActive')}
+                          label={t('shared.fields.isActive')}
                           onCheckedChange={(checked) => field.handleChange(checked === true)}
                         />
                       )}

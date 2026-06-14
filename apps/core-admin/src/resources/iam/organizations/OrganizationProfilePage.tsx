@@ -45,7 +45,7 @@ export function OrganizationProfilePage() {
           [ORGANIZATION_REQUEST_FIELDS.isActive]: value.isActive,
           [ORGANIZATION_REQUEST_FIELDS.defaultLanguage]: value.defaultLanguage,
         })
-        showSuccess(t('resources.iam.organizations.notifications.updated'))
+        showSuccess(t('features.iam.organizations.notifications.updated'))
         await loadOrganization()
       } catch (error) {
         notifyError(error, t('shared.errors.generic'))
@@ -84,7 +84,7 @@ export function OrganizationProfilePage() {
   return (
     <main className="page">
       <div className="page-header">
-        <h1 className="page-title">{t('resources.iam.organizations.pages.profile')}</h1>
+        <h1 className="page-title">{t('features.iam.organizations.pages.profile')}</h1>
       </div>
       <Card>
         <CardContent>
@@ -97,13 +97,13 @@ export function OrganizationProfilePage() {
             }}>
               <FieldGroup>
                 <Field data-disabled>
-                  <FieldLabel>{t('resources.iam.organizations.fields.code')}</FieldLabel>
+                  <FieldLabel>{t('shared.fields.code')}</FieldLabel>
                   <Input disabled value={organization.code} />
                 </Field>
                 <form.Field name="name">
                   {(field) => (
                     <Field>
-                      <FieldLabel htmlFor={field.name}>{t('resources.iam.organizations.fields.name')}</FieldLabel>
+                      <FieldLabel htmlFor={field.name}>{t('shared.fields.name')}</FieldLabel>
                       <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required value={field.state.value} />
                     </Field>
                   )}
@@ -111,7 +111,7 @@ export function OrganizationProfilePage() {
                 <form.Field name="description">
                   {(field) => (
                     <Field>
-                      <FieldLabel htmlFor={field.name}>{t('resources.iam.organizations.fields.description')}</FieldLabel>
+                      <FieldLabel htmlFor={field.name}>{t('shared.fields.description')}</FieldLabel>
                       <Textarea
                         id={field.name}
                         onBlur={field.handleBlur}
@@ -125,7 +125,7 @@ export function OrganizationProfilePage() {
                 <form.Field name="defaultLanguage">
                   {(field) => (
                     <Field>
-                      <FieldLabel>{t('resources.iam.organizations.fields.defaultLanguage')}</FieldLabel>
+                      <FieldLabel>{t('shared.fields.defaultLanguage')}</FieldLabel>
                       <Select
                         onValueChange={field.handleChange}
                         options={toTranslatedOptions(LANGUAGE_OPTIONS, t)}

@@ -26,7 +26,7 @@ export function createRoleTableColumns({
   return [
     {
       accessorKey: 'name',
-      header: t('resources.iam.roles.fields.name'),
+      header: t('shared.fields.name'),
     },
     {
       accessorKey: 'isActive',
@@ -35,7 +35,7 @@ export function createRoleTableColumns({
           {row.original.isActive ? t('shared.status.active') : t('shared.status.inactive')}
         </Badge>
       ),
-      header: t('resources.iam.roles.fields.isActive'),
+      header: t('shared.fields.isActive'),
     },
     {
       accessorKey: 'isDefault',
@@ -44,7 +44,7 @@ export function createRoleTableColumns({
           {row.original.isDefault ? t('shared.common.yes') : t('shared.common.no')}
         </Badge>
       ),
-      header: t('resources.iam.roles.fields.isDefault'),
+      header: t('shared.fields.isDefault'),
     },
     {
       cell: ({ row }) => (
@@ -53,20 +53,20 @@ export function createRoleTableColumns({
             {
               isVisible: canUpdate,
               kind: DATA_TABLE_ROW_ACTION_KINDS.edit,
-              label: t('resources.iam.roles.actions.edit'),
+              label: t('shared.actions.edit'),
               onClick: () => onEdit(row.original),
             },
             {
               isVisible: canDelete,
               kind: DATA_TABLE_ROW_ACTION_KINDS.delete,
-              label: t('resources.iam.roles.actions.delete'),
+              label: t('shared.actions.delete'),
               onClick: () => onDelete(row.original),
             },
           ]}
         />
       ),
       enableSorting: false,
-      header: t('resources.iam.roles.fields.actions'),
+      header: t('shared.fields.actions'),
       id: 'actions',
     },
   ]

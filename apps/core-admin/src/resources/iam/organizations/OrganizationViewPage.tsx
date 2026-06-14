@@ -41,7 +41,7 @@ export function OrganizationViewPage() {
   return (
     <main className="page">
       <div className="page-header">
-        <h1 className="page-title">{t('resources.iam.organizations.pages.show')}</h1>
+        <h1 className="page-title">{t('features.iam.organizations.pages.show')}</h1>
         <Button onClick={() => navigate(APP_ROUTES.organizations)} type="button" variant="outline">
           <ArrowLeft data-icon="inline-start" />
           {t('shared.actions.back')}
@@ -53,18 +53,18 @@ export function OrganizationViewPage() {
             <p className="page-subtitle">{t('shared.common.loading')}</p>
           ) : (
             <div className="detail-grid">
-              <Field label={t('resources.iam.organizations.fields.type')}>
+              <Field label={t('shared.fields.type')}>
                 {getOrganizationTypeLabel(organization.type, t)}
               </Field>
-              <Field label={t('resources.iam.organizations.fields.code')}>{organization.code}</Field>
-              <Field label={t('resources.iam.organizations.fields.name')}>{organization.name}</Field>
-              <Field label={t('resources.iam.organizations.fields.defaultLanguage')}>
+              <Field label={t('shared.fields.code')}>{organization.code}</Field>
+              <Field label={t('shared.fields.name')}>{organization.name}</Field>
+              <Field label={t('shared.fields.defaultLanguage')}>
                 {getLanguageLabel(organization.defaultLanguage, t)}
               </Field>
-              <Field label={t('resources.iam.organizations.fields.description')}>
+              <Field label={t('shared.fields.description')}>
                 {organization.description ?? ''}
               </Field>
-              <Field label={t('resources.iam.organizations.fields.isActive')}>
+              <Field label={t('shared.fields.isActive')}>
                 <Badge variant={organization.isActive ? 'active' : 'inactive'}>
                   {organization.isActive ? t('shared.status.active') : t('shared.status.inactive')}
                 </Badge>

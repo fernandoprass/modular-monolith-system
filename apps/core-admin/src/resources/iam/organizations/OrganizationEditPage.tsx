@@ -57,7 +57,7 @@ export function OrganizationEditPage() {
           [ORGANIZATION_REQUEST_FIELDS.isActive]: value.isActive,
           [ORGANIZATION_REQUEST_FIELDS.defaultLanguage]: value.defaultLanguage,
         })
-        showSuccess(t('resources.iam.organizations.notifications.updated'))
+        showSuccess(t('features.iam.organizations.notifications.updated'))
         await loadOrganization()
       } catch (error) {
         notifyError(error, t('shared.errors.generic'))
@@ -100,7 +100,7 @@ export function OrganizationEditPage() {
   return (
     <main className="page">
       <div className="page-header">
-        <h1 className="page-title">{t('resources.iam.organizations.pages.edit')}</h1>
+        <h1 className="page-title">{t('features.iam.organizations.pages.edit')}</h1>
         <Button onClick={() => navigate(APP_ROUTES.organizations)} type="button" variant="outline">
           <ArrowLeft data-icon="inline-start" />
           {t('shared.actions.back')}
@@ -118,18 +118,18 @@ export function OrganizationEditPage() {
               <FieldGroup>
                 <Field className="code-row" data-disabled>
                   <div className="grow-field">
-                    <FieldLabel>{t('resources.iam.organizations.fields.code')}</FieldLabel>
+                    <FieldLabel>{t('shared.fields.code')}</FieldLabel>
                     <Input disabled value={organization.code} />
                   </div>
                   <Button onClick={() => setIsCodeDialogOpen(true)} type="button" variant="outline">
                     <Edit data-icon="inline-start" />
-                    {t('resources.iam.organizations.actions.editCode')}
+                    {t('shared.actions.editCode')}
                   </Button>
                 </Field>
                 <form.Field name="name">
                   {(field) => (
                     <Field>
-                      <FieldLabel htmlFor={field.name}>{t('resources.iam.organizations.fields.name')}</FieldLabel>
+                      <FieldLabel htmlFor={field.name}>{t('shared.fields.name')}</FieldLabel>
                       <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required value={field.state.value} />
                     </Field>
                   )}
@@ -137,7 +137,7 @@ export function OrganizationEditPage() {
                 <form.Field name="description">
                   {(field) => (
                     <Field>
-                      <FieldLabel htmlFor={field.name}>{t('resources.iam.organizations.fields.description')}</FieldLabel>
+                      <FieldLabel htmlFor={field.name}>{t('shared.fields.description')}</FieldLabel>
                       <Textarea id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required value={field.state.value} />
                     </Field>
                   )}
@@ -145,7 +145,7 @@ export function OrganizationEditPage() {
                 <form.Field name="defaultLanguage">
                   {(field) => (
                     <Field>
-                      <FieldLabel>{t('resources.iam.organizations.fields.defaultLanguage')}</FieldLabel>
+                      <FieldLabel>{t('shared.fields.defaultLanguage')}</FieldLabel>
                       <Select
                         onValueChange={field.handleChange}
                         options={toTranslatedOptions(LANGUAGE_OPTIONS, t)}
@@ -158,7 +158,7 @@ export function OrganizationEditPage() {
                   {(field) => (
                     <Checkbox
                       checked={field.state.value}
-                      label={t('resources.iam.organizations.fields.isActive')}
+                      label={t('shared.fields.isActive')}
                       onCheckedChange={(checked) => field.handleChange(checked === true)}
                     />
                   )}

@@ -92,11 +92,11 @@ export type PagedResultDto<TItem> = {
 
 export const ORGANIZATION_TYPE_OPTIONS = [
   {
-    labelKey: 'resources.iam.organizations.types.company',
+    labelKey: 'features.iam.organizations.types.company',
     value: String(ORGANIZATION_TYPES.company),
   },
   {
-    labelKey: 'resources.iam.organizations.types.individual',
+    labelKey: 'features.iam.organizations.types.individual',
     value: String(ORGANIZATION_TYPES.individual),
   },
 ] as const

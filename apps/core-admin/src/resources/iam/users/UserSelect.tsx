@@ -73,7 +73,7 @@ export function UserSelect({
       onSearchChange={setSearch}
       onValueChange={onValueChange}
       options={options}
-      placeholder={t('resources.iam.users.placeholders.search')}
+      placeholder={t('features.iam.users.placeholders.search')}
       searchValue={search}
       value={value}
     >

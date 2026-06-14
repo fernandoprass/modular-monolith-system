@@ -42,7 +42,7 @@ export function UserViewPage() {
   return (
     <main className="page">
       <div className="page-header">
-        <h1 className="page-title">{t('resources.iam.users.pages.show')}</h1>
+        <h1 className="page-title">{t('features.iam.users.pages.show')}</h1>
         <Button onClick={() => navigate(APP_ROUTES.users)} type="button" variant="outline">
           <ArrowLeft data-icon="inline-start" />
           {t('shared.actions.back')}
@@ -55,17 +55,17 @@ export function UserViewPage() {
           ) : (
             <div className="detail-stack">
                 <div className="detail-grid">
-                  <Field label={t('resources.iam.users.fields.organizationName')}>{user.organizationName}</Field>
-                  <Field label={t('resources.iam.users.fields.language')}>{getLanguageLabel(user.language, t)}</Field>
-                  <Field label={t('resources.iam.users.fields.name')}>{user.name}</Field>
-                  <Field label={t('resources.iam.users.fields.email')}>{user.email}</Field>
-                  <Field label={t('resources.iam.users.fields.isSystemAdmin')}>
+                  <Field label={t('shared.fields.organization')}>{user.organizationName}</Field>
+                  <Field label={t('shared.fields.language')}>{getLanguageLabel(user.language, t)}</Field>
+                  <Field label={t('shared.fields.name')}>{user.name}</Field>
+                  <Field label={t('shared.fields.email')}>{user.email}</Field>
+                  <Field label={t('shared.fields.isSystemAdmin')}>
                     {user.isSystemAdmin ? t('shared.common.yes') : t('shared.common.no')}
                   </Field>
-                  <Field label={t('resources.iam.users.fields.isOrganizationAdmin')}>
+                  <Field label={t('shared.fields.isOrganizationAdmin')}>
                     {user.isOrganizationAdmin ? t('shared.common.yes') : t('shared.common.no')}
                   </Field>
-                  <Field label={t('resources.iam.users.fields.isActive')}>
+                  <Field label={t('shared.fields.isActive')}>
                     <Badge variant={user.isActive ? 'active' : 'inactive'}>
                       {user.isActive ? t('shared.status.active') : t('shared.status.inactive')}
                     </Badge>

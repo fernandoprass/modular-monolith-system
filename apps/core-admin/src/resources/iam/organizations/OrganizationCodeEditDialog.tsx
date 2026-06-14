@@ -39,7 +39,7 @@ export function OrganizationCodeEditDialog({
         await updateOrganizationCode(organization.id, {
           [ORGANIZATION_REQUEST_FIELDS.code]: value.code,
         })
-        showSuccess(t('resources.iam.organizations.notifications.codeUpdated'))
+        showSuccess(t('features.iam.organizations.notifications.codeUpdated'))
         await onSaved()
         onClose()
       } catch (error) {
@@ -61,7 +61,7 @@ export function OrganizationCodeEditDialog({
       backLabel={t('shared.actions.back')}
       onOpenChange={(open) => !open && onClose()}
       open={isOpen}
-      title={t('resources.iam.organizations.actions.editCode')}
+      title={t('shared.actions.editCode')}
     >
       <form onSubmit={(event) => {
         event.preventDefault()
@@ -72,7 +72,7 @@ export function OrganizationCodeEditDialog({
             <form.Field name="code">
               {(field) => (
                 <Field>
-                  <FieldLabel htmlFor={field.name}>{t('resources.iam.organizations.fields.code')}</FieldLabel>
+                  <FieldLabel htmlFor={field.name}>{t('shared.fields.code')}</FieldLabel>
                   <Input autoFocus id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required value={field.state.value} />
                 </Field>
               )}
