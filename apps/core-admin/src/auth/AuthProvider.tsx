@@ -62,7 +62,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
   const login = useCallback(async (request: LoginRequest) => {
     try {
       const loginResponse = unwrapResult<LoginResponse>(
-        await postIamJson(API_PATHS.iam.users.login, {
+        await postIamJson(API_PATHS.iam.authentication.login, {
           email: request.email,
           password: request.password,
         }),
@@ -72,7 +72,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
       tokenStorage.setToken(loginResponse.token)
 
       const loadedPermissions = unwrapResult<PermissionDto[]>(
-        await getIamJson(API_PATHS.iam.roles.userPermissions(storedUser.id)),
+        await getIamJson(API_PATHS.iam.userAccess.userPermissions(storedUser.id)),
       )
 
       tokenStorage.setUser(storedUser)

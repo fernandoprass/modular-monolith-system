@@ -11,9 +11,12 @@ namespace IAM.API.Controllers;
 [ApiVersion(1)]
 [Route("api/v{version:apiVersion}/iam/roles")]
 [Authorize]
-public class RoleController(IRoleService roleService) : BaseController
+public class RoleController(
+   IRoleService roleService,
+   IPermissionService permissionService) : BaseController
 {
    private readonly IRoleService _roleService = roleService;
+   private readonly IPermissionService _permissionService = permissionService;
 
    [HttpGet("")]
    [Authorize]
@@ -51,39 +54,21 @@ public class RoleController(IRoleService roleService) : BaseController
       return OkOrNotFound(result);
    }
 
-   [HttpPost("assign")]
+   [HttpPost("permissions/assign")]
    [Authorize]
-   [RequirePermission(IamPermission.Roles.Assign)]
-   public async Task<IActionResult> AssignToUser([FromBody] RoleAssignRequest request, CancellationToken cancellationToken)
+   [RequirePermission(IamPermission.Permissions.Assign)]
+   public async Task<IActionResult> AssignPermission([FromBody] RolePermissionAssignRequest request, CancellationToken cancellationToken)
    {
-      var result = await _roleService.AssignToUserAsync(request, cancellationToken);
+      var result = await _permissionService.AssignToRoleAsync(request, cancellationToken);
       return OkOrNotFound(result);
    }
 
-   [HttpDelete("unassign")]
+   [HttpDelete("permissions/unassign")]
    [Authorize]
-   [RequirePermission(IamPermission.Roles.Assign)]
-   public async Task<IActionResult> UnassignFromUser([FromBody] RoleUnassignRequest request, CancellationToken cancellationToken)
+   [RequirePermission(IamPermission.Permissions.Assign)]
+   public async Task<IActionResult> UnassignPermission([FromBody] RolePermissionUnassignRequest request, CancellationToken cancellationToken)
    {
-      var result = await _roleService.UnassignFromUserAsync(request, cancellationToken);
-      return OkOrNotFound(result);
-   }
-
-   [HttpGet("user/{userId:guid}/permissions")]
-   [Authorize]
-   [RequirePermission(IamPermission.UserProfile.ViewAccess)]
-   public async Task<IActionResult> GetRoleUserPermissions(Guid userId, CancellationToken cancellationToken)
-   {
-      var result = await _roleService.GetRolePermissionsByUserIdAsync(userId, cancellationToken);
-      return OkOrNotFound(result);
-   }
-
-   [HttpGet("user/{userId:guid}/roles")]
-   [Authorize]
-   [RequirePermission(IamPermission.UserProfile.ViewAccess)]
-   public async Task<IActionResult> GetRoleUserRoles(Guid userId, CancellationToken cancellationToken)
-   {
-      var result = await _roleService.GetRolesByUserIdAsync(userId, cancellationToken);
+      var result = await _permissionService.UnassignFromRoleAsync(request, cancellationToken);
       return OkOrNotFound(result);
    }
 }

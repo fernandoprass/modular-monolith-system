@@ -184,7 +184,7 @@ public sealed class AuthenticatedCoreApiClient
       RoleAssignRequest request,
       CancellationToken cancellationToken = default)
    {
-      var response = await SendAsync(HttpMethod.Post, "/api/v1/iam/roles/assign", request, cancellationToken);
+      var response = await SendAsync(HttpMethod.Post, "/api/v1/iam/user-access/roles/assign", request, cancellationToken);
       await response.EnsureSuccessStatusCodeAsync(cancellationToken);
    }
 
@@ -192,7 +192,7 @@ public sealed class AuthenticatedCoreApiClient
       Guid userId,
       CancellationToken cancellationToken = default)
    {
-      var response = await SendAsync(HttpMethod.Get, $"/api/v1/iam/roles/user/{userId}/permissions", cancellationToken: cancellationToken);
+      var response = await SendAsync(HttpMethod.Get, $"/api/v1/iam/user-access/users/{userId}/permissions", cancellationToken: cancellationToken);
       await response.EnsureSuccessStatusCodeAsync(cancellationToken);
 
       return await response.ReadResultDataAsync<List<PermissionDto>>(cancellationToken);
@@ -242,7 +242,7 @@ public sealed class AuthenticatedCoreApiClient
       RolePermissionAssignRequest request,
       CancellationToken cancellationToken = default)
    {
-      var response = await SendAsync(HttpMethod.Post, "/api/v1/iam/permissions/assign", request, cancellationToken);
+      var response = await SendAsync(HttpMethod.Post, "/api/v1/iam/roles/permissions/assign", request, cancellationToken);
       await response.EnsureSuccessStatusCodeAsync(cancellationToken);
    }
 
@@ -250,7 +250,7 @@ public sealed class AuthenticatedCoreApiClient
       RolePermissionUnassignRequest request,
       CancellationToken cancellationToken = default)
    {
-      var response = await SendAsync(HttpMethod.Delete, "/api/v1/iam/permissions/unassign", request, cancellationToken);
+      var response = await SendAsync(HttpMethod.Delete, "/api/v1/iam/roles/permissions/unassign", request, cancellationToken);
       await response.EnsureSuccessStatusCodeAsync(cancellationToken);
    }
 

@@ -61,6 +61,8 @@ public class RoleQueryRepository(IamDbContext dbContext, IUserContext userContex
 
    public async Task<IEnumerable<Guid>> GetDefaultRolesByOrganizationIdAsync(Guid organizationId, CancellationToken cancellationToken = default)
    {
+      organizationId = _userContext.IsSystemAdmin ? organizationId : _userContext.UserOwnerId;
+
       return await _dbContext.Roles
          .AsNoTracking()
          .Where(r => r.OrganizationId == organizationId && r.IsDefault && r.IsActive)
@@ -72,7 +74,7 @@ public class RoleQueryRepository(IamDbContext dbContext, IUserContext userContex
    {
       string systemUserName = "System";
 
-      userId = _userContext.IsSystemAdmin || _userContext.IsOrganizationAdmin ? userId : _userContext.UserId;
+      userId = GetUserWithSecurityContext(userId);
 
       var query = _dbContext.UserRoles.AsNoTracking()
           .OrderBy(ur => ur.Role.Name)
@@ -94,11 +96,39 @@ public class RoleQueryRepository(IamDbContext dbContext, IUserContext userContex
       return await query.ToListAsync(cancellationToken);
    }
 
+   public async Task<IEnumerable<RoleDto>> GetAvailableRolesByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
+   {
+      userId = GetUserWithSecurityContext(userId);
+
+      // 1. Get a flat subquery list of all RoleIds the user currently possesses
+      var assignedRoleIds = _dbContext.UserRoles
+          .Where(ur => ur.UserId == userId)
+          .Select(ur => ur.RoleId);
+
+      // 2. Query the master Roles table, filtering out the ones they already have
+      var query = _dbContext.Roles.AsNoTracking()
+          .Where(r => r.IsActive && 
+                      r.OrganizationId == _userContext.UserOwnerId &&
+                      !assignedRoleIds.Contains(r.Id)) // Core logic change
+          .OrderBy(r => r.Name)
+          .Select(r => new RoleDto(
+              r.Id,          
+              r.Name,
+              r.Description,
+              r.IsActive,
+              r.IsDefault,
+              r.OrganizationId
+          ));
+
+      return await query.ToListAsync(cancellationToken);
+   }
+
+
    public async Task<IEnumerable<Permission>> GetRolePermissionsByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
    {
       var now = DateTime.UtcNow;
 
-      userId = _userContext.IsSystemAdmin || _userContext.IsOrganizationAdmin ? userId : _userContext.UserId;
+      userId = GetUserWithSecurityContext(userId);
 
       return await _dbContext.UserRoles
           .AsNoTracking()
@@ -133,6 +163,12 @@ public class RoleQueryRepository(IamDbContext dbContext, IUserContext userContex
    {
       return await _dbContext.Roles.AsNoTracking()
          .AnyAsync(r => r.Name == name && r.OrganizationId == organizationId, cancellationToken);
+   }
+
+   private Guid GetUserWithSecurityContext(Guid userId)
+   {
+      userId = _userContext.IsSystemAdmin || _userContext.IsOrganizationAdmin ? userId : _userContext.UserId;
+      return userId;
    }
 
    private IQueryable<Role> CreateQueryWithSecurityContextFilter()

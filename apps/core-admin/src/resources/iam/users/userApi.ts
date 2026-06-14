@@ -110,13 +110,13 @@ export async function getCurrentUser(): Promise<UserDto> {
 }
 
 export async function getUserRoles(userId: string): Promise<UserRoleDto[]> {
-  const response = await getIamJson(API_PATHS.iam.roles.userRoles(userId))
+  const response = await getIamJson(API_PATHS.iam.userAccess.userRoles(userId))
 
   return unwrapResult<UserRoleDto[]>(response)
 }
 
 export async function getUserPermissions(userId: string): Promise<PermissionDto[]> {
-  const response = await getIamJson(API_PATHS.iam.roles.userPermissions(userId))
+  const response = await getIamJson(API_PATHS.iam.userAccess.userPermissions(userId))
 
   return unwrapResult<PermissionDto[]>(response)
 }

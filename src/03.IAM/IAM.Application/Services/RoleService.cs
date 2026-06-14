@@ -270,4 +270,17 @@ public class RoleService(
          return Result<IEnumerable<UserRoleDto>>.Success(roles);
       }, cancellationToken);
    }
+
+   public async Task<Result<IEnumerable<RoleDto>>> GetAvailableRolesByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
+   {
+      var user = await _iamUnitOfWork.Users.GetByIdAsync(userId, cancellationToken);
+
+      if (user == null) return Result<IEnumerable<RoleDto>>.Failure(new NotFoundError(IamConst.Entity.User));
+
+      return await ExecuteIfUserOwnsAsync(user.OrganizationId, async (ct) =>
+      {
+         var roles = await _roleQueryRepository.GetAvailableRolesByUserIdAsync(userId, ct);
+         return Result<IEnumerable<RoleDto>>.Success(roles);
+      }, cancellationToken);
+   }
 }

@@ -24,7 +24,7 @@ public sealed class CoreApiClient(HttpClient httpClient)
       CancellationToken cancellationToken = default)
    {
       var response = await _httpClient.PostAsJsonAsync(
-         "/api/v1/iam/users/login",
+         "/api/v1/iam/authentication/login",
          new UserLoginRequest(email, password),
          cancellationToken);
       await response.EnsureSuccessStatusCodeAsync(cancellationToken);

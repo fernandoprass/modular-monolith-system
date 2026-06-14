@@ -12,6 +12,7 @@ public interface IRoleQueryRepository
    Task<IEnumerable<RoleDto>> GetAsync(RoleSearchRequest request, CancellationToken cancellationToken = default);
    Task<IEnumerable<PermissionDto>> GetPermissionsByRoleIdAsync(Guid roleId, CancellationToken cancellationToken = default);
    Task<IEnumerable<UserRoleDto>> GetRolesByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
+   Task<IEnumerable<RoleDto>> GetAvailableRolesByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
    Task<IEnumerable<Permission>> GetRolePermissionsByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
    Task<bool> NameExistsAsync(string name, Guid? organizationId, CancellationToken cancellationToken = default); 
 }
