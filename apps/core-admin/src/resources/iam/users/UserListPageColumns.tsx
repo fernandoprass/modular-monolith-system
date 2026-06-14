@@ -28,16 +28,16 @@ export function createUserTableColumns({
   return [
     {
       accessorKey: 'name',
-      header: t('resources.iam.users.fields.name'),
+      header: t('shared.fields.name'),
     },
     {
       accessorKey: 'email',
-      header: t('resources.iam.users.fields.email'),
+      header: t('shared.fields.email'),
     },
     {
       accessorKey: 'language',
       cell: ({ row }) => getLanguageLabel(row.original.language, t),
-      header: t('resources.iam.users.fields.language'),
+      header: t('shared.fields.language'),
       sortingFn: (left, right) =>
         getLanguageLabel(left.original.language, t).localeCompare(getLanguageLabel(right.original.language, t)),
     },
@@ -48,7 +48,7 @@ export function createUserTableColumns({
           {row.original.isActive ? t('shared.status.active') : t('shared.status.inactive')}
         </Badge>
       ),
-      header: t('resources.iam.users.fields.isActive'),
+      header: t('shared.fields.isActive'),
     },
     {
       cell: ({ row }) => (
@@ -57,19 +57,19 @@ export function createUserTableColumns({
             {
               isVisible: canView,
               kind: DATA_TABLE_ROW_ACTION_KINDS.view,
-              label: t('resources.iam.users.actions.view'),
+              label: t('shared.actions.view'),
               onClick: () => navigate(APP_ROUTES.userView(row.original.id)),
             },
             {
               isVisible: canUpdate,
               kind: DATA_TABLE_ROW_ACTION_KINDS.edit,
-              label: t('resources.iam.users.actions.edit'),
+              label: t('shared.actions.edit'),
               onClick: () => navigate(APP_ROUTES.userEdit(row.original.id)),
             },
             {
               isVisible: canDelete,
               kind: DATA_TABLE_ROW_ACTION_KINDS.delete,
-              label: t('resources.iam.users.actions.delete'),
+              label: t('shared.actions.delete'),
               onClick: () => setDeleteTarget(row.original),
             },
           ]}
@@ -77,7 +77,7 @@ export function createUserTableColumns({
       ),
       enableHiding: false,
       enableSorting: false,
-      header: t('resources.iam.users.fields.actions'),
+      header: t('shared.fields.actions'),
       id: 'actions',
     },
   ]

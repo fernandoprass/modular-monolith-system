@@ -91,8 +91,7 @@ public class SeederRolePermissions(
    {
       var sentinelSytemAdminPermissions = new List<string>
       {
-         SentinelPermission.SystemLogs.List,
-         SentinelPermission.SystemLogs.View
+         SentinelPermission.SystemLogs.Read
       };
 
       sentinelSytemAdminPermissions.AddRange(GetSentinelOrganizationAdminPermissions());
@@ -104,8 +103,7 @@ public class SeederRolePermissions(
    {
       List<string> sentinelOrgPermissions = 
       [
-         SentinelPermission.AuditLogs.List,
-         SentinelPermission.AuditLogs.View
+         SentinelPermission.AuditLogs.Read
       ];
 
       sentinelOrgPermissions.AddRange(GetSentinelUserPermissions());
@@ -123,12 +121,10 @@ public class SeederRolePermissions(
    private static List<string> GetIamSystemAdminPermissions()
    {
       List<string> sysAdminPermissions = [
-         IamPermission.Organizations.List,
-         IamPermission.Organizations.View,
-         IamPermission.Organizations.Create,
-         IamPermission.Organizations.Update,
-         IamPermission.Organizations.Delete,
-         IamPermission.Permissions.Update,
+         IamPermission.Organizations.Read,
+         IamPermission.Organizations.Write,
+         IamPermission.Parameters.Write,
+         IamPermission.Permissions.Write
       ];
 
       sysAdminPermissions.AddRange(GetIamOrganizationAdminPermissions());
@@ -141,27 +137,19 @@ public class SeederRolePermissions(
    {
       List<string> organizationPermissions =
       [
-         IamPermission.Organizations.ViewOwn,
-         IamPermission.Organizations.UpdateOwn,
-         IamPermission.Organizations.DeleteOwn,
-         IamPermission.Roles.View,
-         IamPermission.Roles.List,
-         IamPermission.Roles.Create,
-         IamPermission.Roles.Update,
+         IamPermission.OrganizationProfile.Read,
+         IamPermission.OrganizationProfile.Write,
+         IamPermission.OrganizationProfile.Delete,
+         IamPermission.Roles.Read,
+         IamPermission.Roles.Write,
          IamPermission.Roles.Assign,
          IamPermission.Roles.ViewPermissions,
-         IamPermission.Roles.Delete,
-         IamPermission.Parameters.View,
-         IamPermission.Parameters.List,
-         IamPermission.Parameters.SaveOverride,
-         IamPermission.Parameters.DeleteOverride,
-         IamPermission.Permissions.List,
+         IamPermission.Parameters.Read,
+         IamPermission.Parameters.Override,
+         IamPermission.Permissions.Read,
          IamPermission.Permissions.Assign,
-         IamPermission.Users.List,
-         IamPermission.Users.View,
-         IamPermission.Users.Create,
-         IamPermission.Users.Update,
-         IamPermission.Users.Delete,
+         IamPermission.Users.Read,
+         IamPermission.Users.Write,
          IamPermission.Users.UpdateOrganizationAdmin
       ];
 
@@ -174,10 +162,10 @@ public class SeederRolePermissions(
    {
       return
       [
-         IamPermission.Users.ViewMe,
-         IamPermission.Users.UpdateMe,
-         IamPermission.Users.DeleteMe,
-         IamPermission.Users.UpdatePassword
+         IamPermission.UserProfile.Read,
+         IamPermission.UserProfile.Write,
+         IamPermission.UserProfile.Delete,
+         IamPermission.UserProfile.ViewAccess
       ];
    }
    #endregion
@@ -187,14 +175,10 @@ public class SeederRolePermissions(
    {
       var courierSystemAdminPermissions = new List<string>
       {
-         CourierPermission.Emails.List,
-         CourierPermission.Emails.Create,
-         CourierPermission.Emails.View,
-         CourierPermission.Templates.List,
-         CourierPermission.Templates.Create,
-         CourierPermission.Templates.View,
-         CourierPermission.Templates.Update,
-         CourierPermission.Templates.Delete
+         CourierPermission.Emails.Read,
+         CourierPermission.Emails.Write,
+         CourierPermission.Templates.Read,
+         CourierPermission.Templates.Write
       };
 
       courierSystemAdminPermissions.AddRange(GetCourierOrganizationAdminPermissions());

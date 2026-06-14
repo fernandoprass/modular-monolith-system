@@ -6,7 +6,7 @@ import { useTranslate } from '../../../app/i18n/i18n'
 import { useNotifyError } from '../../../auth/AuthProvider'
 import { Button } from '../../../components/ui/button'
 import { Checkbox } from '../../../components/ui/checkbox'
-import { Dialog } from '../../../components/ui/dialog'
+import { Dialog } from '../../../components/ui/dialog-confirm'
 import { Field, FieldGroup, FieldLabel } from '../../../components/ui/form'
 import { Input } from '../../../components/ui/input'
 import { Textarea } from '../../../components/ui/textarea'
@@ -43,10 +43,10 @@ export function RoleEditDialog({ isOpen, onClose, onSaved, role }: RoleEditDialo
       try {
         if (role === null) {
           await createRole(value)
-          showSuccess(t('resources.iam.roles.notifications.created'))
+          showSuccess(t('features.iam.roles.notifications.created'))
         } else {
           await updateRole(role.id, value)
-          showSuccess(t('resources.iam.roles.notifications.updated'))
+          showSuccess(t('features.iam.roles.notifications.updated'))
         }
 
         await onSaved()
@@ -78,7 +78,7 @@ export function RoleEditDialog({ isOpen, onClose, onSaved, role }: RoleEditDialo
       backLabel={t('shared.actions.back')}
       onOpenChange={(open) => !open && onClose()}
       open={isOpen}
-      title={isCreate ? t('resources.iam.roles.actions.create') : t('resources.iam.roles.actions.edit')}
+      title={isCreate ? t('shared.actions.create') : t('shared.actions.edit')}
     >
       <form onSubmit={(event) => {
         event.preventDefault()
@@ -89,7 +89,7 @@ export function RoleEditDialog({ isOpen, onClose, onSaved, role }: RoleEditDialo
             <form.Field name="organizationId">
               {(field) => (
                 <Field data-disabled={!isCreate}>
-                  <FieldLabel>{t('resources.iam.roles.fields.organizationId')}</FieldLabel>
+                  <FieldLabel>{t('shared.fields.organization')}</FieldLabel>
                   <OrganizationSelect
                     clearable
                     disabled={!isCreate}
@@ -103,7 +103,7 @@ export function RoleEditDialog({ isOpen, onClose, onSaved, role }: RoleEditDialo
             <form.Field name="name">
               {(field) => (
                 <Field>
-                  <FieldLabel htmlFor={field.name}>{t('resources.iam.roles.fields.name')}</FieldLabel>
+                  <FieldLabel htmlFor={field.name}>{t('shared.fields.name')}</FieldLabel>
                   <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required value={field.state.value} />
                 </Field>
               )}
@@ -111,7 +111,7 @@ export function RoleEditDialog({ isOpen, onClose, onSaved, role }: RoleEditDialo
             <form.Field name="description">
               {(field) => (
                 <Field>
-                  <FieldLabel htmlFor={field.name}>{t('resources.iam.roles.fields.description')}</FieldLabel>
+                  <FieldLabel htmlFor={field.name}>{t('shared.fields.description')}</FieldLabel>
                   <Textarea id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required value={field.state.value} />
                 </Field>
               )}
@@ -120,7 +120,7 @@ export function RoleEditDialog({ isOpen, onClose, onSaved, role }: RoleEditDialo
               {(field) => (
                 <Checkbox
                   checked={field.state.value}
-                  label={t('resources.iam.roles.fields.isActive')}
+                  label={t('shared.fields.isActive')}
                   onCheckedChange={(checked) => field.handleChange(checked === true)}
                 />
               )}
@@ -129,7 +129,7 @@ export function RoleEditDialog({ isOpen, onClose, onSaved, role }: RoleEditDialo
               {(field) => (
                 <Checkbox
                   checked={field.state.value}
-                  label={t('resources.iam.roles.fields.isDefault')}
+                  label={t('shared.fields.isDefault')}
                   onCheckedChange={(checked) => field.handleChange(checked === true)}
                 />
               )}

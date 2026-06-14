@@ -6,7 +6,7 @@ import { useTranslate } from '../../../app/i18n/i18n'
 import { useNotifyError } from '../../../auth/AuthProvider'
 import { Button } from '../../../components/ui/button'
 import { Checkbox } from '../../../components/ui/checkbox'
-import { Dialog } from '../../../components/ui/dialog'
+import { Dialog } from '../../../components/ui/dialog-confirm'
 import { Field, FieldGroup, FieldLabel } from '../../../components/ui/form'
 import { Input } from '../../../components/ui/input'
 import { Select } from '../../../components/ui/select'
@@ -45,7 +45,7 @@ export function PermissionEditDialog({
 
       try {
         await updatePermission(permission.id, value)
-        showSuccess(t('resources.iam.permissions.notifications.updated'))
+        showSuccess(t('features.iam.permissions.notifications.updated'))
         await onSaved()
         onClose()
       } catch (error) {
@@ -67,7 +67,7 @@ export function PermissionEditDialog({
       backLabel={t('shared.actions.back')}
       onOpenChange={(open) => !open && onClose()}
       open={isOpen}
-      title={t('resources.iam.permissions.actions.edit')}
+      title={t('shared.actions.edit')}
     >
       <form onSubmit={(event) => {
         event.preventDefault()
@@ -78,7 +78,7 @@ export function PermissionEditDialog({
             <form.Field name="module">
               {(field) => (
                 <Field>
-                  <FieldLabel>{t('resources.iam.permissions.fields.module')}</FieldLabel>
+                  <FieldLabel>{t('shared.fields.module')}</FieldLabel>
                   <Select
                     onValueChange={field.handleChange}
                     options={toTranslatedOptions(PERMISSION_MODULE_OPTIONS, t)}
@@ -90,7 +90,7 @@ export function PermissionEditDialog({
             <form.Field name="resource">
               {(field) => (
                 <Field>
-                  <FieldLabel>{t('resources.iam.permissions.fields.resource')}</FieldLabel>
+                  <FieldLabel>{t('shared.fields.resource')}</FieldLabel>
                   <Select
                     onValueChange={field.handleChange}
                     options={toTranslatedOptions(PERMISSION_RESOURCE_OPTIONS, t)}
@@ -102,7 +102,7 @@ export function PermissionEditDialog({
             <form.Field name="action">
               {(field) => (
                 <Field>
-                  <FieldLabel>{t('resources.iam.permissions.fields.action')}</FieldLabel>
+                  <FieldLabel>{t('shared.fields.action')}</FieldLabel>
                   <Select
                     onValueChange={field.handleChange}
                     options={toTranslatedOptions(PERMISSION_ACTION_OPTIONS, t)}
@@ -114,7 +114,7 @@ export function PermissionEditDialog({
             <form.Field name="title">
               {(field) => (
                 <Field>
-                  <FieldLabel htmlFor={field.name}>{t('resources.iam.permissions.fields.title')}</FieldLabel>
+                  <FieldLabel htmlFor={field.name}>{t('shared.fields.title')}</FieldLabel>
                   <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required value={field.state.value} />
                 </Field>
               )}
@@ -122,7 +122,7 @@ export function PermissionEditDialog({
             <form.Field name="description">
               {(field) => (
                 <Field>
-                  <FieldLabel htmlFor={field.name}>{t('resources.iam.permissions.fields.description')}</FieldLabel>
+                  <FieldLabel htmlFor={field.name}>{t('shared.fields.description')}</FieldLabel>
                   <Textarea id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required value={field.state.value} />
                 </Field>
               )}
@@ -131,7 +131,7 @@ export function PermissionEditDialog({
               {(field) => (
                 <Checkbox
                   checked={field.state.value}
-                  label={t('resources.iam.permissions.fields.isActive')}
+                  label={t('shared.fields.isActive')}
                   onCheckedChange={(checked) => field.handleChange(checked === true)}
                 />
               )}

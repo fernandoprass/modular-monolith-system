@@ -62,8 +62,8 @@ public class UserEndToEndTests(CoreApiTestFixture fixture) : IClassFixture<CoreA
       var organizationPermissions = await adminApi.SearchPermissionsAsync(
          new PermissionSearchRequest(null, "iam", "organizations", null, null, false),
          TestContext.Current.CancellationToken);
-      var viewPermission = organizationPermissions.First(permission => permission.Code == IamPermission.Organizations.View);
-      var updatePermission = organizationPermissions.First(permission => permission.Code == IamPermission.Organizations.Update);
+      var viewPermission = organizationPermissions.First(permission => permission.Code == IamPermission.Organizations.Read);
+      var updatePermission = organizationPermissions.First(permission => permission.Code == IamPermission.Organizations.Write);
       await adminApi.AssignPermissionsAsync(
          new RolePermissionAssignRequest(role.Id, [viewPermission.Id, updatePermission.Id]),
          TestContext.Current.CancellationToken);

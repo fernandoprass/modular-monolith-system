@@ -7,7 +7,7 @@ import { useToast } from '../../../app/ToastProvider'
 import { useTranslate } from '../../../app/i18n/i18n'
 import { useAuth, useNotifyError } from '../../../auth/AuthProvider'
 import { DataTable } from '../../../components/ui/data-table'
-import { ConfirmDialog } from '../../../components/ui/dialog'
+import { ConfirmDialog } from '../../../components/ui/dialog-confirm'
 import { Field, FieldLabel } from '../../../components/ui/form'
 import { FilterToolbar } from '../../../components/ui/filter-toolbar'
 import { Input } from '../../../components/ui/input'
@@ -37,9 +37,9 @@ export function OrganizationListPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<OrganizationDto | null>(null)
   const [sorting, setSorting] = useState<SortingState>([])
-  const canView = hasPermissionCode(permissions, IAM_PERMISSIONS.organizations.view)
-  const canUpdate = hasPermissionCode(permissions, IAM_PERMISSIONS.organizations.update)
-  const canDelete = hasPermissionCode(permissions, IAM_PERMISSIONS.organizations.delete)
+  const canView = hasPermissionCode(permissions, IAM_PERMISSIONS.organizations.read)
+  const canUpdate = hasPermissionCode(permissions, IAM_PERMISSIONS.organizations.write)
+  const canDelete = hasPermissionCode(permissions, IAM_PERMISSIONS.organizations.write)
   const columns = useMemo(() => createOrganizationTableColumns({
     canDelete,
     canUpdate,
@@ -107,7 +107,7 @@ export function OrganizationListPage() {
 
     try {
       await deleteOrganization(deleteTarget.id)
-      showSuccess(t('resources.iam.organizations.notifications.deleted'))
+      showSuccess(t('features.iam.organizations.notifications.deleted'))
       setDeleteTarget(null)
       await loadOrganizations(pageNumber)
     } catch (error) {
@@ -119,7 +119,7 @@ export function OrganizationListPage() {
 
   return (
     <main className="page">
-      <h1 className="page-title">{t('resources.iam.organizations.pages.list')}</h1>
+      <h1 className="page-title">{t('features.iam.organizations.pages.list')}</h1>
       <FilterToolbar onReset={handleReset} onSubmit={(event) => {
         event.preventDefault()
         void filterForm.handleSubmit()
@@ -127,7 +127,7 @@ export function OrganizationListPage() {
         <filterForm.Field name="type">
           {(field) => (
             <Field>
-              <FieldLabel>{t('resources.iam.organizations.fields.type')}</FieldLabel>
+              <FieldLabel>{t('shared.fields.type')}</FieldLabel>
               <Select
                 onValueChange={field.handleChange}
                 options={[{ label: t('shared.filters.all'), value: 'all' }, ...toTranslatedOptions(ORGANIZATION_TYPE_OPTIONS, t)]}
@@ -139,7 +139,7 @@ export function OrganizationListPage() {
         <filterForm.Field name="code">
           {(field) => (
             <Field>
-              <FieldLabel htmlFor={field.name}>{t('resources.iam.organizations.fields.code')}</FieldLabel>
+              <FieldLabel htmlFor={field.name}>{t('shared.fields.code')}</FieldLabel>
               <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} value={field.state.value} />
             </Field>
           )}
@@ -147,7 +147,7 @@ export function OrganizationListPage() {
         <filterForm.Field name="name">
           {(field) => (
             <Field>
-              <FieldLabel htmlFor={field.name}>{t('resources.iam.organizations.fields.name')}</FieldLabel>
+              <FieldLabel htmlFor={field.name}>{t('shared.fields.name')}</FieldLabel>
               <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} value={field.state.value} />
             </Field>
           )}
@@ -155,7 +155,7 @@ export function OrganizationListPage() {
                 <filterForm.Field name="isActive">
           {(field) => (
             <Field>
-              <FieldLabel>{t('resources.iam.organizations.fields.isActive')}</FieldLabel>
+              <FieldLabel>{t('shared.fields.isActive')}</FieldLabel>
               <Select
                 onValueChange={field.handleChange}
                 options={[
@@ -173,7 +173,7 @@ export function OrganizationListPage() {
       <DataTable
         columns={columns}
         data={result?.items ?? []}
-        emptyText={t('resources.iam.organizations.messages.empty')}
+        emptyText={t('features.iam.organizations.messages.empty')}
         isLoading={isLoading}
         loadingText={t('shared.common.loading')}
         onSortingChange={setSorting}
@@ -192,13 +192,13 @@ export function OrganizationListPage() {
       <ConfirmDialog
         cancelText={t('shared.actions.cancel')}
         backLabel={t('shared.actions.back')}
-        confirmText={t('resources.iam.organizations.actions.delete')}
+        confirmText={t('shared.actions.delete')}
         onConfirm={() => void handleConfirmDelete()}
         onOpenChange={(open) => !open && setDeleteTarget(null)}
         open={deleteTarget !== null}
-        title={t('resources.iam.organizations.actions.delete')}
+        title={t('shared.actions.delete')}
       >
-        <p>{t('resources.iam.organizations.messages.deleteConfirm')}</p>
+        <p>{t('features.iam.organizations.messages.deleteConfirm')}</p>
       </ConfirmDialog>
     </main>
   )

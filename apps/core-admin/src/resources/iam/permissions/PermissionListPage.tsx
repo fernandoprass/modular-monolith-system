@@ -31,7 +31,7 @@ export function PermissionListPage() {
   const [selectedPermission, setSelectedPermission] = useState<PermissionDto | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [sorting, setSorting] = useState<SortingState>([])
-  const canUpdate = hasPermissionCode(userPermissions, IAM_PERMISSIONS.permissions.update)
+  const canUpdate = hasPermissionCode(userPermissions, IAM_PERMISSIONS.permissions.write)
   const filterForm = useForm({
     defaultValues: {
       action: '',
@@ -83,7 +83,7 @@ export function PermissionListPage() {
 
   return (
     <main className="page">
-      <h1 className="page-title">{t('resources.iam.permissions.pages.list')}</h1>
+      <h1 className="page-title">{t('features.iam.permissions.pages.list')}</h1>
       <FilterToolbar onReset={handleReset} onSubmit={(event) => {
         event.preventDefault()
         void filterForm.handleSubmit()
@@ -91,7 +91,7 @@ export function PermissionListPage() {
         <filterForm.Field name="module">
           {(field) => (
             <Field>
-              <FieldLabel>{t('resources.iam.permissions.fields.module')}</FieldLabel>
+              <FieldLabel>{t('shared.fields.module')}</FieldLabel>
               <Select
                 onValueChange={field.handleChange}
                 options={[{ label: t('shared.filters.all'), value: PERMISSION_FILTER_VALUES.all }, ...toTranslatedOptions(PERMISSION_MODULE_OPTIONS, t)]}
@@ -103,7 +103,7 @@ export function PermissionListPage() {
         <filterForm.Field name="resource">
           {(field) => (
             <Field>
-              <FieldLabel>{t('resources.iam.permissions.fields.resource')}</FieldLabel>
+              <FieldLabel>{t('shared.fields.resource')}</FieldLabel>
               <Select
                 onValueChange={field.handleChange}
                 options={[{ label: t('shared.filters.all'), value: PERMISSION_FILTER_VALUES.all }, ...toTranslatedOptions(PERMISSION_RESOURCE_OPTIONS, t)]}
@@ -115,7 +115,7 @@ export function PermissionListPage() {
         <filterForm.Field name="action">
           {(field) => (
             <Field>
-              <FieldLabel htmlFor={field.name}>{t('resources.iam.permissions.fields.action')}</FieldLabel>
+              <FieldLabel htmlFor={field.name}>{t('shared.fields.action')}</FieldLabel>
               <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} value={field.state.value} />
             </Field>
           )}
@@ -123,7 +123,7 @@ export function PermissionListPage() {
         <filterForm.Field name="title">
           {(field) => (
             <Field>
-              <FieldLabel htmlFor={field.name}>{t('resources.iam.permissions.fields.title')}</FieldLabel>
+              <FieldLabel htmlFor={field.name}>{t('shared.fields.title')}</FieldLabel>
               <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} value={field.state.value} />
             </Field>
           )}
@@ -132,7 +132,7 @@ export function PermissionListPage() {
       <DataTable
         columns={columns}
         data={permissions}
-        emptyText={t('resources.iam.permissions.messages.empty')}
+        emptyText={t('features.iam.permissions.messages.empty')}
         isLoading={isLoading}
         loadingText={t('shared.common.loading')}
         onSortingChange={setSorting}

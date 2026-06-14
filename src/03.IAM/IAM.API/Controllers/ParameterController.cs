@@ -16,7 +16,7 @@ public class ParameterController(IParameterService parameterService) : BaseContr
 
    [HttpGet("{id:guid}")]
    [Authorize]
-   [RequirePermission(IamPermission.Parameters.View)]
+   [RequirePermission(IamPermission.Parameters.Read)]
    public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
    {
       var parameter = await _parameterService.GetByIdAsync(id, cancellationToken);
@@ -25,7 +25,7 @@ public class ParameterController(IParameterService parameterService) : BaseContr
 
    [HttpGet]
    [Authorize]
-   [RequirePermission(IamPermission.Parameters.List)]
+   [RequirePermission(IamPermission.Parameters.Read)]
    public async Task<IActionResult> GetByParams([FromQuery] ParameterSearchRequest request, CancellationToken cancellationToken)
    {
       var parameters = await _parameterService.GetAsync(request, cancellationToken);
@@ -34,7 +34,7 @@ public class ParameterController(IParameterService parameterService) : BaseContr
 
    [HttpGet("value")]
    [Authorize]
-   [RequirePermission(IamPermission.Parameters.View)]
+   [RequirePermission(IamPermission.Parameters.Read)]
    public async Task<IActionResult> GetValue([FromQuery] string key, CancellationToken cancellationToken)
    {
       var parameter = await _parameterService.GetValueAsync(key, cancellationToken);
@@ -44,7 +44,7 @@ public class ParameterController(IParameterService parameterService) : BaseContr
 
    [HttpPut("{id:guid}")]
    [Authorize]
-   [RequirePermission(IamPermission.Parameters.Update)]
+   [RequirePermission(IamPermission.Parameters.Write)]
    public async Task<IActionResult> Update(Guid id, [FromBody] ParameterUpdateRequest request, CancellationToken cancellationToken)
    {
       var response = await _parameterService.UpdateAsync(id, request, cancellationToken);
@@ -55,7 +55,7 @@ public class ParameterController(IParameterService parameterService) : BaseContr
 
    [HttpPut("{id:guid}/override")]
    [Authorize]
-   [RequirePermission(IamPermission.Parameters.SaveOverride)]
+   [RequirePermission(IamPermission.Parameters.Override)]
    public async Task<IActionResult> SaveOverride(Guid id, ParameterOwnerUpdateRequest request, CancellationToken cancellationToken)
    {
       var result = await _parameterService.SaveOverrideValueAsync(id, request, cancellationToken);
@@ -64,7 +64,7 @@ public class ParameterController(IParameterService parameterService) : BaseContr
 
    [HttpDelete("{id:guid}/override")]
    [Authorize]
-   [RequirePermission(IamPermission.Parameters.DeleteOverride)]
+   [RequirePermission(IamPermission.Parameters.Override)]
    public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
    {
       var result = await _parameterService.DeleteOverrideValueAsync(id, cancellationToken);

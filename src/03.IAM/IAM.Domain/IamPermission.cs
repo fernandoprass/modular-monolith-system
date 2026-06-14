@@ -7,43 +7,16 @@ public static class IamPermission
    public static class Organizations
    {
       private const string Resource = "organizations";
-
-      public const string List = $"{Module}.{Resource}.list";
-      public const string View = $"{Module}.{Resource}.view";
-      public const string ViewOwn = $"{Module}.{Resource}.viewown";
-      public const string Create = $"{Module}.{Resource}.create";
-      public const string Update = $"{Module}.{Resource}.update";
-      public const string UpdateOwn = $"{Module}.{Resource}.updateown";
-      public const string Delete = $"{Module}.{Resource}.delete";
-      public const string DeleteOwn = $"{Module}.{Resource}.deleteown";
+      public const string Read = $"{Module}.{Resource}.read";
+      public const string Write = $"{Module}.{Resource}.write";
    }
 
-   public static class Users
+   public static class OrganizationProfile
    {
-      private const string Resource = "users";
+      private const string Resource = "organizationprofile";
 
-      public const string List = $"{Module}.{Resource}.list";
-      public const string View = $"{Module}.{Resource}.view";
-      public const string ViewMe = $"{Module}.{Resource}.viewme";
-      public const string Create = $"{Module}.{Resource}.create";
-      public const string Update = $"{Module}.{Resource}.update";
-      public const string UpdateMe = $"{Module}.{Resource}.updateme";
-      public const string UpdateOrganizationAdmin = $"{Module}.{Resource}.updateorganizationadmin";
-      public const string UpdatePassword = $"{Module}.{Resource}.updatepassword";
-      public const string Delete = $"{Module}.{Resource}.delete";
-      public const string DeleteMe = $"{Module}.{Resource}.deleteme";
-   }
-
-   public static class Roles
-   {
-      private const string Resource = "roles";
-
-      public const string List = $"{Module}.{Resource}.list";
-      public const string View = $"{Module}.{Resource}.view";
-      public const string Create = $"{Module}.{Resource}.create";
-      public const string Update = $"{Module}.{Resource}.update";
-      public const string Assign = $"{Module}.{Resource}.assign";
-      public const string ViewPermissions = $"{Module}.{Resource}.viewpermissions";
+      public const string Read = $"{Module}.{Resource}.read";
+      public const string Write = $"{Module}.{Resource}.write";
       public const string Delete = $"{Module}.{Resource}.delete";
    }
 
@@ -51,19 +24,48 @@ public static class IamPermission
    {
       private const string Resource = "parameters";
 
-      public const string List = $"{Module}.{Resource}.list";
-      public const string View = $"{Module}.{Resource}.view";
-      public const string Update = $"{Module}.{Resource}.update";
-      public const string SaveOverride = $"{Module}.{Resource}.saveoverride";
-      public const string DeleteOverride = $"{Module}.{Resource}.deleteoverride";
+      public const string Read = $"{Module}.{Resource}.read";
+      public const string Write = $"{Module}.{Resource}.write";
+      public const string Override = $"{Module}.{Resource}.override";
    }
 
    public static class Permissions
    {
       private const string Resource = "permissions";
 
-      public const string List = $"{Module}.{Resource}.list";
-      public const string Update = $"{Module}.{Resource}.update";
+      public const string Read = $"{Module}.{Resource}.read";
+      public const string Write = $"{Module}.{Resource}.write";
       public const string Assign = $"{Module}.{Resource}.assign";
+   }
+
+   public static class Roles
+   {
+      private const string Resource = "roles";
+
+      public const string Read = $"{Module}.{Resource}.read";
+      public const string Write = $"{Module}.{Resource}.write";
+
+      public const string Assign = $"{Module}.{Resource}.assign";
+      public const string ViewPermissions = $"{Module}.{Resource}.viewpermissions";
+   }
+
+   public static class Users
+   {
+      private const string Resource = "users";
+
+      public const string Read = $"{Module}.{Resource}.read";
+      public const string Write = $"{Module}.{Resource}.write";
+
+      public const string UpdateOrganizationAdmin = $"{Module}.{Resource}.updateorganizationadmin";
+   }
+
+   public static class UserProfile
+   {
+      private const string Resource = "userprofile";
+
+      public const string Read = $"{Module}.{Resource}.read";
+      public const string Write = $"{Module}.{Resource}.write";
+      public const string Delete = $"{Module}.{Resource}.delete";
+      public const string ViewAccess = $"{Module}.{Resource}.vieraccess";
    }
 }

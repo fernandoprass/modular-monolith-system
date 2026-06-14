@@ -10,7 +10,7 @@ import { APP_ROUTES } from '../../../app/routes'
 import { useAuth, useNotifyError } from '../../../auth/AuthProvider'
 import { Button } from '../../../components/ui/button'
 import { DataTable } from '../../../components/ui/data-table'
-import { ConfirmDialog } from '../../../components/ui/dialog'
+import { ConfirmDialog } from '../../../components/ui/dialog-confirm'
 import { Field, FieldLabel } from '../../../components/ui/form'
 import { FilterToolbar } from '../../../components/ui/filter-toolbar'
 import { Input } from '../../../components/ui/input'
@@ -40,10 +40,10 @@ export function UserListPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<UserLiteDto | null>(null)
   const [sorting, setSorting] = useState<SortingState>([])
-  const canCreate = hasPermissionCode(permissions, IAM_PERMISSIONS.users.create)
-  const canView = hasPermissionCode(permissions, IAM_PERMISSIONS.users.view)
-  const canUpdate = hasPermissionCode(permissions, IAM_PERMISSIONS.users.update)
-  const canDelete = hasPermissionCode(permissions, IAM_PERMISSIONS.users.delete)
+  const canCreate = hasPermissionCode(permissions, IAM_PERMISSIONS.users.write)
+  const canView = hasPermissionCode(permissions, IAM_PERMISSIONS.users.read)
+  const canUpdate = hasPermissionCode(permissions, IAM_PERMISSIONS.users.write)
+  const canDelete = hasPermissionCode(permissions, IAM_PERMISSIONS.users.write)
   const columns = useMemo(() => createUserTableColumns({
     canDelete,
     canUpdate,
@@ -111,7 +111,7 @@ export function UserListPage() {
 
     try {
       await deleteUser(deleteTarget.id)
-      showSuccess(t('resources.iam.users.notifications.deleted'))
+      showSuccess(t('features.iam.users.notifications.deleted'))
       setDeleteTarget(null)
       await loadUsers(pageNumber)
     } catch (error) {
@@ -124,11 +124,11 @@ export function UserListPage() {
   return (
     <main className="page">
       <div className="page-header">
-        <h1 className="page-title">{t('resources.iam.users.pages.list')}</h1>
+        <h1 className="page-title">{t('features.iam.users.pages.list')}</h1>
         {canCreate && (
           <Button onClick={() => navigate(APP_ROUTES.userCreate)} type="button">
             <Plus data-icon="inline-start" />
-            {t('resources.iam.users.actions.create')}
+            {t('shared.actions.create')}
           </Button>
         )}
       </div>
@@ -139,7 +139,7 @@ export function UserListPage() {
         <filterForm.Field name="organizationId">
           {(field) => (
             <Field>
-              <FieldLabel>{t('resources.iam.users.fields.organizationId')}</FieldLabel>
+              <FieldLabel>{t('resources.iam.organization')}</FieldLabel>
               <OrganizationSelect
                 clearable
                 onValueChange={field.handleChange}
@@ -148,10 +148,11 @@ export function UserListPage() {
             </Field>
           )}
         </filterForm.Field>
+
         <filterForm.Field name="name">
           {(field) => (
             <Field>
-              <FieldLabel htmlFor={field.name}>{t('resources.iam.users.fields.name')}</FieldLabel>
+              <FieldLabel htmlFor={field.name}>{t('shared.fields.name')}</FieldLabel>
               <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} value={field.state.value} />
             </Field>
           )}
@@ -159,7 +160,7 @@ export function UserListPage() {
         <filterForm.Field name="email">
           {(field) => (
             <Field>
-              <FieldLabel htmlFor={field.name}>{t('resources.iam.users.fields.email')}</FieldLabel>
+              <FieldLabel htmlFor={field.name}>{t('shared.fields.email')}</FieldLabel>
               <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} value={field.state.value} />
             </Field>
           )}
@@ -167,7 +168,7 @@ export function UserListPage() {
                 <filterForm.Field name="isActive">
           {(field) => (
             <Field>
-              <FieldLabel>{t('resources.iam.users.fields.isActive')}</FieldLabel>
+              <FieldLabel>{t('shared.fields.isActive')}</FieldLabel>
               <Select
                 onValueChange={field.handleChange}
                 options={[
@@ -185,7 +186,7 @@ export function UserListPage() {
       <DataTable
         columns={columns}
         data={result?.items ?? []}
-        emptyText={t('resources.iam.users.messages.empty')}
+        emptyText={t('features.iam.users.messages.empty')}
         isLoading={isLoading}
         loadingText={t('shared.common.loading')}
         onSortingChange={setSorting}
@@ -204,13 +205,13 @@ export function UserListPage() {
       <ConfirmDialog
         cancelText={t('shared.actions.cancel')}
         backLabel={t('shared.actions.back')}
-        confirmText={t('resources.iam.users.actions.delete')}
+        confirmText={t('shared.actions.delete')}
         onConfirm={() => void handleConfirmDelete()}
         onOpenChange={(open) => !open && setDeleteTarget(null)}
         open={deleteTarget !== null}
-        title={t('resources.iam.users.actions.delete')}
+        title={t('shared.actions.delete')}
       >
-        <p>{t('resources.iam.users.messages.deleteConfirm')}</p>
+        <p>{t('features.iam.users.messages.deleteConfirm')}</p>
       </ConfirmDialog>
     </main>
   )

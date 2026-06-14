@@ -34,66 +34,53 @@ public class SeederPermissions(
    private async Task AddSentinelPermissions(CancellationToken cancellationToken)
    {
       Console.WriteLine("Adding Sentinel permissions...");
-      await AddPermissionAsync(SentinelPermission.AuditLogs.List, "List Audit Logs", "Allows listing Sentinel audit logs.", cancellationToken);
-      await AddPermissionAsync(SentinelPermission.AuditLogs.View, "View Audit Logs", "Allows viewing Sentinel audit logs.", cancellationToken);
-      await AddPermissionAsync(SentinelPermission.SystemLogs.List, "List System Logs", "Allows listing Sentinel system logs.", cancellationToken);
-      await AddPermissionAsync(SentinelPermission.SystemLogs.View, "View System Logs", "Allows viewing Sentinel system logs.", cancellationToken);
+      await AddPermissionAsync(SentinelPermission.AuditLogs.Read, "Read Audit Logs", "Allows reading Sentinel audit logs.", cancellationToken);
+      await AddPermissionAsync(SentinelPermission.SystemLogs.Read, "Read System Logs", "Allows reading Sentinel system logs.", cancellationToken);
    }
 
    private async Task AddIamPermissions(CancellationToken cancellationToken)
    {
       Console.WriteLine("Adding IAM permissions...");
-      await AddPermissionAsync(IamPermission.Organizations.List, "List Organizations", "Allows listing organizations.", cancellationToken);
-      await AddPermissionAsync(IamPermission.Organizations.View, "View Organizations", "Allows viewing organizations.", cancellationToken);
-      await AddPermissionAsync(IamPermission.Organizations.ViewOwn, "View Own Organization", "Allows viewing own organization.", cancellationToken);
-      await AddPermissionAsync(IamPermission.Organizations.Create, "Create Organizations", "Allows creating organizations.", cancellationToken);
-      await AddPermissionAsync(IamPermission.Organizations.Update, "Update Organizations", "Allows updating organizations.", cancellationToken);
-      await AddPermissionAsync(IamPermission.Organizations.UpdateOwn, "Update Own Organization", "Allows updating own organization.", cancellationToken);
-      await AddPermissionAsync(IamPermission.Organizations.Delete, "Delete Organizations", "Allows deleting organizations.", cancellationToken);
-      await AddPermissionAsync(IamPermission.Organizations.DeleteOwn, "Delete Own Organization", "Allows deleting own organization.", cancellationToken);
+      await AddPermissionAsync(IamPermission.Organizations.Read, "Read Organizations", "Allows reading organizations.", cancellationToken);
+      await AddPermissionAsync(IamPermission.Organizations.Write, "Edit Organizations", "Allows creating, updating, and deleting organizations.", cancellationToken);
 
-      await AddPermissionAsync(IamPermission.Users.List, "List Users", "Allows listing users.", cancellationToken);
-      await AddPermissionAsync(IamPermission.Users.View, "View Users", "Allows viewing users.", cancellationToken);
-      await AddPermissionAsync(IamPermission.Users.ViewMe, "View Me", "Allows users to view their own profile.", cancellationToken);
-      await AddPermissionAsync(IamPermission.Users.Create, "Create Users", "Allows creating users.", cancellationToken);
-      await AddPermissionAsync(IamPermission.Users.UpdateMe, "Update Me", "Allows users to update their own profile.", cancellationToken);
-      await AddPermissionAsync(IamPermission.Users.Update, "Update Users", "Allows updating users.", cancellationToken);
-      await AddPermissionAsync(IamPermission.Users.UpdateOrganizationAdmin, "Update User Organization Admin", "Allows updating the user organization admin flag.", cancellationToken);
-      await AddPermissionAsync(IamPermission.Users.UpdatePassword, "Update User Password", "Allows updating user passwords.", cancellationToken);
-      await AddPermissionAsync(IamPermission.Users.DeleteMe, "Delete Me", "Allows users to delete their own account.", cancellationToken);
-      await AddPermissionAsync(IamPermission.Users.Delete, "Delete Users", "Allows deleting users.", cancellationToken);
+      await AddPermissionAsync(IamPermission.OrganizationProfile.Read, "Read Own Organization Profile", "Allows viewing own organization profile.", cancellationToken);
+      await AddPermissionAsync(IamPermission.OrganizationProfile.Write, "Update Own Organization Profile", "Allows updating own organization profile.", cancellationToken);
+      await AddPermissionAsync(IamPermission.OrganizationProfile.Delete, "Delete Own Organization Profile", "Allows deleting own organization profile.", cancellationToken);
 
-      await AddPermissionAsync(IamPermission.Roles.List, "List Roles", "Allows listing roles.", cancellationToken);
-      await AddPermissionAsync(IamPermission.Roles.View, "View Roles", "Allows viewing roles.", cancellationToken);
-      await AddPermissionAsync(IamPermission.Roles.Create, "Create Roles", "Allows creating roles.", cancellationToken);
-      await AddPermissionAsync(IamPermission.Roles.Update, "Update Roles", "Allows updating roles.", cancellationToken);
-      await AddPermissionAsync(IamPermission.Roles.Assign, "Assign Roles", "Allows assigning roles to users.", cancellationToken);
-      await AddPermissionAsync(IamPermission.Roles.ViewPermissions, "View Role Permissions", "Allows viewing user permissions.", cancellationToken);
-      await AddPermissionAsync(IamPermission.Roles.Delete, "Delete Roles", "Allows deleting roles.", cancellationToken);
+      await AddPermissionAsync(IamPermission.Parameters.Read, "Read Parameters", "Allows reading parameters.", cancellationToken);
+      await AddPermissionAsync(IamPermission.Parameters.Write, "Edit Parameters", "Allows updating parameters.", cancellationToken);
+      await AddPermissionAsync(IamPermission.Parameters.Override, "Override Parameters", "Allows overriding parameters.", cancellationToken);
 
-      await AddPermissionAsync(IamPermission.Parameters.List, "List Parameters", "Allows listing parameters.", cancellationToken);
-      await AddPermissionAsync(IamPermission.Parameters.View, "View Parameters", "Allows viewing parameters.", cancellationToken);
-      await AddPermissionAsync(IamPermission.Parameters.Update, "Update Parameters", "Allows updating parameters.", cancellationToken);
-      await AddPermissionAsync(IamPermission.Parameters.SaveOverride, "Save Parameter Overrides", "Allows saving parameter overrides.", cancellationToken);
-      await AddPermissionAsync(IamPermission.Parameters.DeleteOverride, "Delete Parameter Overrides", "Allows deleting parameter overrides.", cancellationToken);
-
-      await AddPermissionAsync(IamPermission.Permissions.List, "List Permissions", "Allows listing permissions.", cancellationToken);
-      await AddPermissionAsync(IamPermission.Permissions.Update, "Update Permissions", "Allows updating permissions.", cancellationToken);
+      await AddPermissionAsync(IamPermission.Permissions.Read, "Read Permissions", "Allows reading permissions.", cancellationToken);
+      await AddPermissionAsync(IamPermission.Permissions.Write, "Edit Permissions", "Allows updating permissions.", cancellationToken);
       await AddPermissionAsync(IamPermission.Permissions.Assign, "Assign Permissions", "Allows assigning permissions to roles.", cancellationToken);
+
+      await AddPermissionAsync(IamPermission.Roles.Read, "List Roles", "Allows reading roles.", cancellationToken);
+      await AddPermissionAsync(IamPermission.Roles.Write, "Edit Roles", "Allows creating, updating, and deleting roles.", cancellationToken);
+      await AddPermissionAsync(IamPermission.Roles.Assign, "Assign Roles", "Allows assigning roles to users.", cancellationToken);
+
+      await AddPermissionAsync(IamPermission.Roles.ViewPermissions, "View Role Permissions", "Allows viewing user permissions.", cancellationToken);
+
+      await AddPermissionAsync(IamPermission.Users.Read, "Read Users", "Allows reading users.", cancellationToken);
+      await AddPermissionAsync(IamPermission.Users.Write, "Edit Users", "Allows creating, updating, and deleting users.", cancellationToken);
+      await AddPermissionAsync(IamPermission.Users.UpdateOrganizationAdmin, "Update User Organization Admin", "Allows updating the user organization admin flag.", cancellationToken);
+
+      await AddPermissionAsync(IamPermission.UserProfile.Read, "View Own Profile", "Allows users to view their own profile.", cancellationToken);
+      await AddPermissionAsync(IamPermission.UserProfile.Write, "Update Own Profile", "Allows users to update their own profile.", cancellationToken);
+      await AddPermissionAsync(IamPermission.UserProfile.Delete, "Delete Own Profile", "Allows users to delete their own profile.", cancellationToken);
+      await AddPermissionAsync(IamPermission.UserProfile.ViewAccess, "View Own Roles and Permissions", "Allows users to view their own roles and permissions.", cancellationToken);
+
    }
 
    private async Task AddCourierPermissions(CancellationToken cancellationToken)
    {
       Console.WriteLine("Adding Courier permissions...");
-      await AddPermissionAsync(CourierPermission.Emails.List, "List Emails", "Allows listing Courier emails.", cancellationToken);
-      await AddPermissionAsync(CourierPermission.Emails.View, "View Emails", "Allows viewing Courier emails.", cancellationToken);
-      await AddPermissionAsync(CourierPermission.Emails.Create, "Create Emails", "Allows creating Courier emails.", cancellationToken);
+      await AddPermissionAsync(CourierPermission.Emails.Read, "Read Emails", "Allows reading Courier emails.", cancellationToken);
+      await AddPermissionAsync(CourierPermission.Emails.Write, "Create Emails", "Allows creating Courier emails.", cancellationToken);
 
-      await AddPermissionAsync(CourierPermission.Templates.List, "List Templates", "Allows listing templates.", cancellationToken);
-      await AddPermissionAsync(CourierPermission.Templates.View, "View Templates", "Allows viewing templates.", cancellationToken);
-      await AddPermissionAsync(CourierPermission.Templates.Create, "Create Templates", "Allows creating templates.", cancellationToken);
-      await AddPermissionAsync(CourierPermission.Templates.Update, "Update Templates", "Allows updating templates.", cancellationToken);
-      await AddPermissionAsync(CourierPermission.Templates.Delete, "Delete Templates", "Allows deleting templates.", cancellationToken);
+      await AddPermissionAsync(CourierPermission.Templates.Read, "Read Templates", "Allows reading templates.", cancellationToken);
+      await AddPermissionAsync(CourierPermission.Templates.Write, "Edit Templates", "Allows creating, updating, and deleting templates.", cancellationToken);
    }
 
    private async Task AddPermissionAsync(string code, string title, string description, CancellationToken cancellationToken)

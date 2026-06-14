@@ -123,7 +123,7 @@ export function AppLayout() {
                 <NavItem
                   active={location.pathname.startsWith(APP_ROUTES.organizations)}
                   icon={<Building2 data-icon="inline-start" />}
-                  label={t('resources.iam.organizations.name')}
+                  label={t('features.iam.organizations.name')}
                   to={APP_ROUTES.organizations}
                 />
               )}
@@ -131,7 +131,7 @@ export function AppLayout() {
                 <NavItem
                   active={location.pathname.startsWith(APP_ROUTES.users)}
                   icon={<Users data-icon="inline-start" />}
-                  label={t('resources.iam.users.name')}
+                  label={t('features.iam.users.name')}
                   to={APP_ROUTES.users}
                 />
               )}
@@ -139,7 +139,7 @@ export function AppLayout() {
                 <NavItem
                   active={location.pathname.startsWith(APP_ROUTES.parameters)}
                   icon={<Settings data-icon="inline-start" />}
-                  label={t('resources.iam.parameters.name')}
+                  label={t('features.iam.parameters.name')}
                   to={APP_ROUTES.parameters}
                 />
               )}
@@ -155,7 +155,7 @@ export function AppLayout() {
                   <NavItem
                     active={location.pathname.startsWith(APP_ROUTES.roles)}
                     icon={<UserCog data-icon="inline-start" />}
-                    label={t('resources.iam.roles.name')}
+                    label={t('features.iam.roles.name')}
                     to={APP_ROUTES.roles}
                   />
                 )}
@@ -163,7 +163,7 @@ export function AppLayout() {
                   <NavItem
                     active={location.pathname.startsWith(APP_ROUTES.permissions)}
                     icon={<Key data-icon="inline-start" />}
-                    label={t('resources.iam.permissions.name')}
+                    label={t('features.iam.permissions.name')}
                     to={APP_ROUTES.permissions}
                   />
                 )}
@@ -212,7 +212,7 @@ export function AppLayout() {
                 <DropdownMenuGroup>
                   <DropdownMenuItem onClick={handleUserProfile}>
                     <UserRound data-icon="inline-start" />
-                    {t('resources.iam.users.pages.profile')}
+                    {t('features.iam.users.pages.profile')}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={handleLogout}>
                     <LogOut data-icon="inline-start" />

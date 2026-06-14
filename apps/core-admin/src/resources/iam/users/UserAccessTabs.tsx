@@ -76,8 +76,8 @@ export function UserAccessTabs({ userId }: UserAccessTabsProps) {
   return (
     <Tabs defaultValue="roles">
       <TabsList>
-        <TabsTrigger value="roles">{t('resources.iam.users.tabs.roles')}</TabsTrigger>
-        <TabsTrigger value="permissions">{t('resources.iam.users.tabs.permissions')}</TabsTrigger>
+        <TabsTrigger value="roles">{t('features.iam.users.tabs.roles')}</TabsTrigger>
+        <TabsTrigger value="permissions">{t('features.iam.users.tabs.permissions')}</TabsTrigger>
       </TabsList>
       <TabsContent value="roles">
         <RoleList isLoading={isLoadingRoles} roles={roles} />
@@ -104,7 +104,7 @@ function RoleList({ isLoading, roles }: RoleListProps) {
   if (roles.length === 0) {
     return (
       <Empty>
-        <EmptyDescription>{t('resources.iam.users.messages.noRoles')}</EmptyDescription>
+        <EmptyDescription>{t('features.iam.users.messages.noRoles')}</EmptyDescription>
       </Empty>
     )
   }
@@ -114,13 +114,13 @@ function RoleList({ isLoading, roles }: RoleListProps) {
       <table className="access-table">
         <thead>
           <tr>
-            <th>{t('resources.iam.roles.fields.name')}</th>
-            <th>{t('resources.iam.roles.fields.startsAt')}</th>
-            <th>{t('resources.iam.roles.fields.expiresAt')}</th>
-            <th>{t('resources.iam.roles.fields.assignedBy')}</th>
-            <th>{t('resources.iam.roles.fields.assignedAt')}</th>
-            <th>{t('resources.iam.roles.fields.isActive')}</th>
-            <th>{t('resources.iam.roles.fields.isDefault')}</th>
+            <th>{t('shared.fields.name')}</th>
+            <th>{t('shared.fields.startsAt')}</th>
+            <th>{t('shared.fields.expiresAt')}</th>
+            <th>{t('shared.fields.assignedBy')}</th>
+            <th>{t('shared.fields.assignedAt')}</th>
+            <th>{t('shared.fields.isActive')}</th>
+            <th>{t('shared.fields.isDefault')}</th>
           </tr>
         </thead>
         <tbody>
@@ -164,7 +164,7 @@ function PermissionList({ isLoading, permissions }: PermissionListProps) {
   if (permissions.length === 0) {
     return (
       <Empty>
-        <EmptyDescription>{t('resources.iam.users.messages.noPermissions')}</EmptyDescription>
+        <EmptyDescription>{t('features.iam.users.messages.noPermissions')}</EmptyDescription>
       </Empty>
     )
   }
@@ -174,8 +174,8 @@ function PermissionList({ isLoading, permissions }: PermissionListProps) {
       <table className="access-table">
         <thead>
           <tr>
-            <th>{t('resources.iam.permissions.fields.title')}</th>
-            <th>{t('resources.iam.permissions.fields.isActive')}</th>
+            <th>{t('shared.fields.title')}</th>
+            <th>{t('shared.fields.isActive')}</th>
           </tr>
         </thead>
         <tbody>

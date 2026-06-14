@@ -2,6 +2,7 @@ using IAM.Domain;
 using IAM.Domain.Entities;
 using IAM.Infrastructure.Configurations;
 using Microsoft.EntityFrameworkCore;
+using Shared.Domain;
 
 namespace IAM.Infrastructure;
 
@@ -29,6 +30,6 @@ public class IamDbContext(DbContextOptions<IamDbContext> options) : DbContext(op
 
    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
    {
-      configurationBuilder.Properties<Guid>().HaveColumnType(IamConst.Database.UuidType);
+      configurationBuilder.Properties<Guid>().HaveColumnType(SharedConst.Database.PostgreSQL.UuidType);
    }
 }

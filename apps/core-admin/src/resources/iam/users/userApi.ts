@@ -104,7 +104,7 @@ export async function getUser(id: string): Promise<UserDto> {
 }
 
 export async function getCurrentUser(): Promise<UserDto> {
-  const response = await getIamJson(API_PATHS.iam.users.me)
+  const response = await getIamJson(API_PATHS.iam.users.profile)
 
   return unwrapResult<UserDto>(response)
 }
@@ -134,7 +134,7 @@ export async function updateUser(id: string, request: UserUpdateRequest): Promis
 }
 
 export async function updateCurrentUser(request: UserUpdateRequest): Promise<void> {
-  const response = await putIamJson(API_PATHS.iam.users.me, request)
+  const response = await putIamJson(API_PATHS.iam.users.profile, request)
 
   ensureResultSuccess(response)
 }

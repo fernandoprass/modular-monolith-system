@@ -17,7 +17,7 @@ public class TemplateController(ITemplateService templateService) : BaseControll
 
    [HttpGet("")]
    [Authorize]
-   [RequirePermission(CourierPermission.Templates.List)]
+   [RequirePermission(CourierPermission.Templates.Read)]
    public async Task<IActionResult> GetByParams([FromQuery] TemplateSearchRequest request, CancellationToken cancellationToken)
    {
       var result = await _templateService.GetAsync(request, cancellationToken);
@@ -26,7 +26,7 @@ public class TemplateController(ITemplateService templateService) : BaseControll
 
    [HttpGet("{id:guid}")]
    [Authorize]
-   [RequirePermission(CourierPermission.Templates.View)]
+   [RequirePermission(CourierPermission.Templates.Read)]
    public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
    {
       var result = await _templateService.GetByIdAsync(id, cancellationToken);
@@ -35,7 +35,7 @@ public class TemplateController(ITemplateService templateService) : BaseControll
 
    [HttpPost("")]
    [Authorize]
-   [RequirePermission(CourierPermission.Templates.Create)]
+   [RequirePermission(CourierPermission.Templates.Write)]
    public async Task<IActionResult> Create([FromBody] TemplateCreateRequest request, CancellationToken cancellationToken)
    {
       var result = await _templateService.CreateAsync(request, cancellationToken);
@@ -44,7 +44,7 @@ public class TemplateController(ITemplateService templateService) : BaseControll
 
    [HttpPut("{id:guid}")]
    [Authorize]
-   [RequirePermission(CourierPermission.Templates.Update)]
+   [RequirePermission(CourierPermission.Templates.Write)]
    public async Task<IActionResult> Update(Guid id, [FromBody] TemplateUpdateRequest request, CancellationToken cancellationToken)
    {
       var result = await _templateService.UpdateAsync(id, request, cancellationToken);
@@ -53,7 +53,7 @@ public class TemplateController(ITemplateService templateService) : BaseControll
 
    [HttpDelete("{id:guid}")]
    [Authorize]
-   [RequirePermission(CourierPermission.Templates.Delete)]
+   [RequirePermission(CourierPermission.Templates.Write)]
    public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
    {
       var result = await _templateService.DeleteAsync(id, cancellationToken);
@@ -62,7 +62,7 @@ public class TemplateController(ITemplateService templateService) : BaseControll
 
    [HttpPost("{id:guid}/email-translations")]
    [Authorize]
-   [RequirePermission(CourierPermission.Templates.Update)]
+   [RequirePermission(CourierPermission.Templates.Write)]
    public async Task<IActionResult> AddEmailTranslation(Guid id, [FromBody] TemplateEmailTranslationRequest request, CancellationToken cancellationToken)
    {
       var result = await _templateService.AddEmailTranslationAsync(id, request, cancellationToken);
@@ -71,7 +71,7 @@ public class TemplateController(ITemplateService templateService) : BaseControll
 
    [HttpPut("{id:guid}/email-translations/{language}")]
    [Authorize]
-   [RequirePermission(CourierPermission.Templates.Update)]
+   [RequirePermission(CourierPermission.Templates.Write)]
    public async Task<IActionResult> UpdateEmailTranslation(Guid id, string language, [FromBody] TemplateEmailTranslationRequest request, CancellationToken cancellationToken)
    {
       var result = await _templateService.UpdateEmailTranslationAsync(id, language, request, cancellationToken);
@@ -80,7 +80,7 @@ public class TemplateController(ITemplateService templateService) : BaseControll
 
    [HttpDelete("{id:guid}/translations/{language}")]
    [Authorize]
-   [RequirePermission(CourierPermission.Templates.Update)]
+   [RequirePermission(CourierPermission.Templates.Write)]
    public async Task<IActionResult> RemoveTranslation(Guid id, string language, CancellationToken cancellationToken)
    {
       var result = await _templateService.RemoveTranslationAsync(id, language, cancellationToken);

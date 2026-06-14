@@ -5,7 +5,7 @@ export const API_PATHS = {
       code: (id: string | number) => `/api/v1/iam/organizations/${id}/code`,
       list: '/api/v1/iam/organizations',
       lookup: '/api/v1/iam/organizations/lookup',
-      own: '/api/v1/iam/organizations/own',
+      profile: '/api/v1/iam/organizations/profile',
     },
     permissions: {
       byId: (id: string | number) => `/api/v1/iam/permissions/${id}`,
@@ -22,7 +22,7 @@ export const API_PATHS = {
       list: '/api/v1/iam/users',
       login: '/api/v1/iam/users/login',
       lookup: '/api/v1/iam/users/lookup',
-      me: '/api/v1/iam/users/me',
+      profile: '/api/v1/iam/users/profile',
     },
   },
 } as const

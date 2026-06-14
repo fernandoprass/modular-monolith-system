@@ -1,10 +1,13 @@
-import { useCallback } from 'react'
+import { useEffect, useState } from 'react'
 
 import { useTranslate } from '../../../app/i18n/i18n'
 import { useAuth, useNotifyError } from '../../../auth/AuthProvider'
-import { AsyncLookupSelect } from '../../../components/ui/async-lookup-select'
+import {
+  InputSelect,
+  InputSelectTrigger,
+} from '../../../components/ui/input-select'
+import type { SelectOption } from '../../../types'
 import { getUserLookup } from './userApi'
-import type { UserLookupDto } from './userTypes'
 
 type UserSelectProps = {
   clearable?: boolean
@@ -13,10 +16,6 @@ type UserSelectProps = {
   onValueChange: (value: string) => void
   organizationId?: string
   value: string
-}
-
-function getOptionLabel(user: UserLookupDto): string {
-  return user.name
 }
 
 export function UserSelect({
@@ -30,33 +29,55 @@ export function UserSelect({
   const t = useTranslate()
   const { user } = useAuth()
   const notifyError = useNotifyError()
+  const [search, setSearch] = useState('')
+  const [options, setOptions] = useState<SelectOption[]>([])
   const effectiveOrganizationId = user?.isSystemAdmin === true
     ? organizationId
     : user?.organizationId ?? ''
-  const loadOptions = useCallback(async (request: { search: string, selectedId: string }) => {
-    return await getUserLookup({
-      id: request.selectedId,
-      includeInactive,
-      organizationId: effectiveOrganizationId,
-      search: request.search,
-      take: 25,
-    })
-  }, [effectiveOrganizationId, includeInactive])
-  const getOptionValue = useCallback((lookupUser: UserLookupDto) => lookupUser.id, [])
+
+  useEffect(() => {
+    setSearch('')
+  }, [effectiveOrganizationId])
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      void loadUserOptions()
+    }, 350)
+
+    async function loadUserOptions() {
+      try {
+        const users = await getUserLookup({
+          id: value,
+          includeInactive,
+          organizationId: effectiveOrganizationId,
+          search,
+          take: 25,
+        })
+
+        setOptions(users.map((lookupUser) => ({
+          label: lookupUser.name,
+          value: lookupUser.id,
+        })))
+      } catch (error) {
+        notifyError(error, t('shared.errors.generic'))
+      }
+    }
+
+    return () => window.clearTimeout(timeoutId)
+  }, [effectiveOrganizationId, includeInactive, notifyError, search, t, value])
 
   return (
-    <AsyncLookupSelect
-      cacheScope={`users:${effectiveOrganizationId}:${includeInactive}`}
-      clearLabel={t('shared.actions.clear')}
+    <InputSelect
       clearable={clearable}
       disabled={disabled}
-      getOptionLabel={getOptionLabel}
-      getOptionValue={getOptionValue}
-      loadOptions={loadOptions}
-      onError={(error) => notifyError(error, t('shared.errors.generic'))}
+      onSearchChange={setSearch}
       onValueChange={onValueChange}
-      placeholder={t('resources.iam.users.placeholders.search')}
+      options={options}
+      placeholder={t('features.iam.users.placeholders.search')}
+      searchValue={search}
       value={value}
-    />
+    >
+      {(selectProps) => <InputSelectTrigger {...selectProps} />}
+    </InputSelect>
   )
 }

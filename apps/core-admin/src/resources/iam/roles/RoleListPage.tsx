@@ -8,7 +8,7 @@ import { useTranslate } from '../../../app/i18n/i18n'
 import { useAuth, useNotifyError } from '../../../auth/AuthProvider'
 import { Button } from '../../../components/ui/button'
 import { DataTable } from '../../../components/ui/data-table'
-import { ConfirmDialog } from '../../../components/ui/dialog'
+import { ConfirmDialog } from '../../../components/ui/dialog-confirm'
 import { Field, FieldLabel } from '../../../components/ui/form'
 import { FilterToolbar } from '../../../components/ui/filter-toolbar'
 import { Input } from '../../../components/ui/input'
@@ -37,17 +37,17 @@ export function RoleListPage() {
   const [deleteTarget, setDeleteTarget] = useState<RoleDto | null>(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [organizationIdFilter, setOrganizationIdFilter] = useState('')
   const [sorting, setSorting] = useState<SortingState>([])
-  const canCreate = hasPermissionCode(permissions, IAM_PERMISSIONS.roles.create)
-  const canUpdate = hasPermissionCode(permissions, IAM_PERMISSIONS.roles.update)
-  const canDelete = hasPermissionCode(permissions, IAM_PERMISSIONS.roles.delete)
+  const canCreate = hasPermissionCode(permissions, IAM_PERMISSIONS.roles.write)
+  const canUpdate = hasPermissionCode(permissions, IAM_PERMISSIONS.roles.write)
+  const canDelete = hasPermissionCode(permissions, IAM_PERMISSIONS.roles.write)
   const filterForm = useForm({
     defaultValues: EMPTY_ROLE_SEARCH,
     onSubmit: async ({ value }) => {
       await loadRoles(value)
     },
   })
-  const organizationIdFilter = filterForm.state.values.organizationId
   const columns = useMemo(() => createRoleTableColumns({
     canDelete,
     canUpdate,
@@ -82,6 +82,7 @@ export function RoleListPage() {
 
   function handleReset() {
     filterForm.reset()
+    setOrganizationIdFilter('')
     void loadRoles(EMPTY_ROLE_SEARCH)
   }
 
@@ -96,7 +97,7 @@ export function RoleListPage() {
 
     try {
       await deleteRole(deleteTarget.id)
-      showSuccess(t('resources.iam.roles.notifications.deleted'))
+      showSuccess(t('features.iam.roles.notifications.deleted'))
       setDeleteTarget(null)
       await loadRoles()
     } catch (error) {
@@ -107,11 +108,11 @@ export function RoleListPage() {
   return (
     <main className="page">
       <div className="page-header">
-        <h1 className="page-title">{t('resources.iam.roles.pages.list')}</h1>
+        <h1 className="page-title">{t('features.iam.roles.pages.list')}</h1>
         {canCreate && (
           <Button onClick={handleCreate} type="button">
             <Plus data-icon="inline-start" />
-            {t('resources.iam.roles.actions.create')}
+            {t('shared.actions.create')}
           </Button>
         )}
       </div>
@@ -122,10 +123,14 @@ export function RoleListPage() {
         <filterForm.Field name="organizationId">
           {(field) => (
             <Field>
-              <FieldLabel>{t('resources.iam.roles.fields.organizationId')}</FieldLabel>
+              <FieldLabel>{t('shared.fields.organization')}</FieldLabel>
               <OrganizationSelect
                 clearable
-                onValueChange={field.handleChange}
+                onValueChange={(value) => {
+                  setOrganizationIdFilter(value)
+                  field.handleChange(value)
+                  filterForm.setFieldValue('userId', '')
+                }}
                 value={field.state.value}
               />
             </Field>
@@ -134,9 +139,10 @@ export function RoleListPage() {
         <filterForm.Field name="userId">
           {(field) => (
             <Field>
-              <FieldLabel>{t('resources.iam.roles.fields.userId')}</FieldLabel>
+              <FieldLabel>{t('shared.fields.user')}</FieldLabel>
               <UserSelect
                 clearable
+                key={organizationIdFilter}
                 onValueChange={field.handleChange}
                 organizationId={organizationIdFilter}
                 value={field.state.value}
@@ -147,7 +153,7 @@ export function RoleListPage() {
         <filterForm.Field name="name">
           {(field) => (
             <Field>
-              <FieldLabel htmlFor={field.name}>{t('resources.iam.roles.fields.name')}</FieldLabel>
+              <FieldLabel htmlFor={field.name}>{t('shared.fields.name')}</FieldLabel>
               <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} value={field.state.value} />
             </Field>
           )}
@@ -156,7 +162,7 @@ export function RoleListPage() {
       <DataTable
         columns={columns}
         data={roles}
-        emptyText={t('resources.iam.roles.messages.empty')}
+        emptyText={t('features.iam.roles.messages.empty')}
         isLoading={isLoading}
         loadingText={t('shared.common.loading')}
         onSortingChange={setSorting}
@@ -173,13 +179,13 @@ export function RoleListPage() {
       <ConfirmDialog
         cancelText={t('shared.actions.cancel')}
         backLabel={t('shared.actions.back')}
-        confirmText={t('resources.iam.roles.actions.delete')}
+        confirmText={t('shared.actions.delete')}
         onConfirm={() => void handleConfirmDelete()}
         onOpenChange={(open) => !open && setDeleteTarget(null)}
         open={deleteTarget !== null}
-        title={t('resources.iam.roles.actions.delete')}
+        title={t('shared.actions.delete')}
       >
-        <p>{t('resources.iam.roles.messages.deleteConfirm')}</p>
+        <p>{t('features.iam.roles.messages.deleteConfirm')}</p>
       </ConfirmDialog>
     </main>
   )
