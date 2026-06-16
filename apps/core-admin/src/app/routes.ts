@@ -12,6 +12,7 @@ export const APP_ROUTES = {
   roleEdit: (id: string) => `/roles/${id}`,
   roles: '/roles',
   userCreate: '/users/create',
+  userAccess: '/user-access',
   userEdit: (id: string) => `/users/${id}`,
   userProfile: '/user-profile',
   userView: (id: string) => `/users/${id}/show`,

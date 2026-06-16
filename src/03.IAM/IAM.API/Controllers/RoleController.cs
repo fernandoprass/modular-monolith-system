@@ -27,6 +27,15 @@ public class RoleController(
       return OkOrNotFound(result);
    }
 
+   [HttpGet("{id:guid}")]
+   [Authorize]
+   [RequirePermission(IamPermission.Roles.Read)]
+   public async Task<IActionResult> GetByRoleId(Guid id, CancellationToken cancellationToken)
+   {
+      var result = await _roleService.GetByIdAsync(id, cancellationToken);
+      return OkOrNotFound(result);
+   }
+
    [HttpPost]
    [Authorize]
    [RequirePermission(IamPermission.Roles.Write)]

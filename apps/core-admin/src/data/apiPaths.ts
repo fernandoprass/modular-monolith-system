@@ -23,6 +23,7 @@ export const API_PATHS = {
       permissions: (id: string | number) => `/api/v1/iam/roles/${id}/permissions`,
     },
     userAccess: {
+      availableRoles: (userId: string) => `/api/v1/iam/user-access/users/${userId}/available-roles`,
       roleAssign: '/api/v1/iam/user-access/roles/assign',
       roleUnassign: '/api/v1/iam/user-access/roles/unassign',
       userPermissionCodes: (userId: string) => `/api/v1/iam/user-access/users/${userId}/permission-codes`,
@@ -33,6 +34,7 @@ export const API_PATHS = {
       byId: (id: string | number) => `/api/v1/iam/users/${id}`,
       list: '/api/v1/iam/users',
       lookup: '/api/v1/iam/users/lookup',
+      password: '/api/v1/iam/users/profile/password',
       profile: '/api/v1/iam/users/profile',
     },
   },

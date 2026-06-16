@@ -5,23 +5,23 @@ meta {
 }
 
 get {
-  url: {{host.sentinel}}/api/{{version}}/sentinel/logs/audit
+  url: {{host.sentinel}}/api/{{version}}/sentinel/logs/audit?from=2026-06-16T17:00:25.839Z&pageNumber=1&pageSize=50
   body: none
   auth: bearer
 }
 
 params:query {
-  ~organizationId: {{organizationId}}
-  ~userId: {{userId}}
-  ~module:
-  ~feature:
-  ~action:
-  ~privacyLevel:
-  ~targetId:
-  ~from:
-  ~to:
+  from: 2026-06-16T17:00:25.839Z
   pageNumber: 1
   pageSize: 50
+  ~organizationId: {{organizationId}}
+  ~userId: {{userId}}
+  ~module: 
+  ~feature: 
+  ~action: 
+  ~privacyLevel: 
+  ~targetId: 
+  ~to: 
 }
 
 auth:bearer {

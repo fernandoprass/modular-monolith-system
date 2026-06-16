@@ -11,6 +11,7 @@ import { PermissionListPage } from '../resources/iam/permissions/PermissionListP
 import { RoleEditPage } from '../resources/iam/roles/RoleEditPage'
 import { RoleListPage } from '../resources/iam/roles/RoleListPage'
 import { UserCreatePage } from '../resources/iam/users/UserCreatePage'
+import { UserAccessPage } from '../resources/iam/user-access/UserAccessPage'
 import { UserEditPage } from '../resources/iam/users/UserEditPage'
 import { UserListPage } from '../resources/iam/users/UserListPage'
 import { UserProfilePage } from '../resources/iam/users/UserProfilePage'
@@ -43,6 +44,7 @@ function App() {
                 <Route path={APP_ROUTES.roles.slice(1)} element={<RoleListPage />} />
                 <Route path="roles/create" element={<RoleEditPage />} />
                 <Route path="roles/:id" element={<RoleEditPage />} />
+                <Route path={APP_ROUTES.userAccess.slice(1)} element={<UserAccessPage />} />
                 <Route path={APP_ROUTES.permissions.slice(1)} element={<PermissionListPage />} />
                 <Route path="*" element={<Navigate to={APP_ROUTES.dashboard} replace />} />
               </Route>

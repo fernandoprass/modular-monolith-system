@@ -153,8 +153,9 @@ public class UserServiceTests
    [Fact]
    public async Task UpdatePasswordAsync_ShouldUpdateHashAndExpiration_WhenRequestIsValid()
    {
+      var passwordExpirasAt = DateTime.UtcNow;
       var request = new UserUpdatePasswordRequest("OldPass123", "NewSecurePass123");
-      var user = User.Create("Name", "test@test.com", "OldHash", DateTime.UtcNow, LanguageOptions.English, _userContextMock.UserOwnerId);
+      var user = User.Create("Name", "test@test.com", "OldHash", passwordExpirasAt, LanguageOptions.English, _userContextMock.UserOwnerId);
 
       _userContextMock.UserId.Returns(user.Id);
       _userRepositoryMock.GetByIdAsync(user.Id, Arg.Any<CancellationToken>()).Returns(user);

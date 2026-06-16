@@ -37,6 +37,12 @@ const EMPTY_ROLE_FORM: RoleForm = {
   organizationId: '',
 }
 
+function getSelectedIds(selection: RowSelectionState): string[] {
+  return Object.entries(selection)
+    .filter(([, selected]) => selected)
+    .map(([id]) => id)
+}
+
 export function RoleEditPage() {
   const t = useTranslate()
   const navigate = useNavigate()
@@ -110,8 +116,9 @@ export function RoleEditPage() {
       try {
         if (isCreate) {
           const created = await createRole(value)
+          setRole(created)
           showSuccess(t('features.iam.roles.notifications.created'))
-          navigate(APP_ROUTES.roleEdit(created.id))
+          navigate(APP_ROUTES.roleEdit(created.id), { replace: true })
         } else {
           await updateRole(id, value)
           showSuccess(t('features.iam.roles.notifications.updated'))
@@ -193,7 +200,7 @@ export function RoleEditPage() {
       return
     }
 
-    const permissionIds = Object.keys(availableSelection)
+    const permissionIds = getSelectedIds(availableSelection)
 
     if (permissionIds.length === 0) {
       return
@@ -217,7 +224,7 @@ export function RoleEditPage() {
       return
     }
 
-    const permissionIds = Object.keys(rolePermissionSelection)
+    const permissionIds = getSelectedIds(rolePermissionSelection)
 
     if (permissionIds.length === 0) {
       return
@@ -334,7 +341,7 @@ export function RoleEditPage() {
               </div>
               <div className="permission-action-column">
                 <Button
-                  disabled={isPermissionSaving || Object.keys(availableSelection).length === 0}
+                  disabled={isPermissionSaving || getSelectedIds(availableSelection).length === 0}
                   onClick={() => void handleAssignPermissions()}
                   type="button"
                 >
@@ -342,7 +349,7 @@ export function RoleEditPage() {
                   Add
                 </Button>
                 <Button
-                  disabled={isPermissionSaving || Object.keys(rolePermissionSelection).length === 0}
+                  disabled={isPermissionSaving || getSelectedIds(rolePermissionSelection).length === 0}
                   onClick={() => void handleUnassignPermissions()}
                   type="button"
                   variant="outline"

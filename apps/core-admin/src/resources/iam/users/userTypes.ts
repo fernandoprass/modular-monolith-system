@@ -18,6 +18,8 @@ export const USER_REQUEST_FIELDS = {
   name: 'Name',
   organizationId: 'OrganizationId',
   password: 'Password',
+  passwordNew: 'PasswordNew',
+  passwordOld: 'PasswordOld',
 } as const
 
 export type UserLiteDto = {
@@ -75,6 +77,17 @@ export type UserUpdateRequest = {
   Name: string
   IsActive: boolean
   Language: string
+}
+
+export type UserPasswordUpdateForm = {
+  passwordConfirm: string
+  passwordNew: string
+  passwordOld: string
+}
+
+export type UserPasswordUpdateRequest = {
+  PasswordOld: string
+  PasswordNew: string
 }
 
 export type PagedResultDto<TItem> = {

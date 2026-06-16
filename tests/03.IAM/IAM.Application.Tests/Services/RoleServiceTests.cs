@@ -242,7 +242,9 @@ public class RoleServiceTests
 
       var request = new RoleAssignRequest(
          UserId: Guid.NewGuid(),
-         Roles: [new RoleAssignRoleRequest(RoleId: Guid.NewGuid(), StartsAt: DateTime.UtcNow, ExpiresAt: DateTime.UtcNow.AddDays(-1))]);
+         StartsAt: DateTime.UtcNow, 
+         ExpiresAt: DateTime.UtcNow.AddDays(-1),
+         RoleIds: [Guid.NewGuid()]);
 
       var user = User.Create("Test User", "test@example.com", "hash", DateTime.UtcNow.AddMonths(1), LanguageOptions.English, organizationId);
 
@@ -298,8 +300,10 @@ public class RoleServiceTests
    private static RoleAssignRequest CreateRoleAssignRequestRecord(DateTime? expiresAt)
    {
       return new RoleAssignRequest(
-         UserId: Guid.NewGuid(),
-         Roles: [new RoleAssignRoleRequest(RoleId: Guid.NewGuid(), StartsAt: DateTime.UtcNow, ExpiresAt: expiresAt)]);
+         UserId: Guid.NewGuid(), 
+         StartsAt: DateTime.UtcNow, 
+         ExpiresAt: expiresAt,
+         RoleIds: [Guid.NewGuid()]);
    }
 
    [Fact]
@@ -312,11 +316,9 @@ public class RoleServiceTests
       // Same role ID listed twice
       var request = new RoleAssignRequest(
          UserId: Guid.NewGuid(),
-         Roles:
-         [
-            new RoleAssignRoleRequest(roleId, StartsAt: DateTime.UtcNow, ExpiresAt: null),
-            new RoleAssignRoleRequest(roleId, StartsAt: DateTime.UtcNow, ExpiresAt: null),
-         ]);
+         StartsAt: DateTime.UtcNow, 
+         ExpiresAt: null,
+         RoleIds: [roleId, roleId]);
 
       var user = User.Create("Test User", "test@example.com", "hash", DateTime.UtcNow.AddMonths(1), LanguageOptions.English, organizationId);
 

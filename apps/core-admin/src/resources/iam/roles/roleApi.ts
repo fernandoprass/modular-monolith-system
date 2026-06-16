@@ -1,5 +1,5 @@
 import { API_PATHS } from '../../../data/apiPaths'
-import { deleteIamJson, deleteIamJsonWithBody, getIamJsonWithQuery, postIamJson, putIamJson } from '../../../data/httpClient'
+import { deleteIamJson, deleteIamJsonWithBody, getIamJson, getIamJsonWithQuery, postIamJson, putIamJson } from '../../../data/httpClient'
 import { ensureResultSuccess, unwrapResult } from '../../../data/result'
 import type { PermissionDto } from '../../../shared/permissions'
 import {
@@ -47,31 +47,76 @@ function toRoleUpdateRequest(data: RoleForm): RoleUpdateRequest {
   }
 }
 
+function readString(value: Record<string, unknown>, ...keys: string[]): string {
+  for (const key of keys) {
+    const data = value[key]
+
+    if (typeof data === 'string') {
+      return data
+    }
+  }
+
+  return ''
+}
+
+function readNullableString(value: Record<string, unknown>, ...keys: string[]): string | null {
+  for (const key of keys) {
+    const data = value[key]
+
+    if (typeof data === 'string') {
+      return data
+    }
+
+    if (data === null) {
+      return null
+    }
+  }
+
+  return null
+}
+
+function readBoolean(value: Record<string, unknown>, ...keys: string[]): boolean {
+  for (const key of keys) {
+    const data = value[key]
+
+    if (typeof data === 'boolean') {
+      return data
+    }
+  }
+
+  return false
+}
+
+function normalizeRoleDto(value: RoleDto): RoleDto {
+  const source = value as unknown as Record<string, unknown>
+
+  return {
+    ...value,
+    description: readString(source, 'description', 'Description'),
+    id: readString(source, 'id', 'Id'),
+    isActive: readBoolean(source, 'isActive', 'IsActive'),
+    isDefault: readBoolean(source, 'isDefault', 'IsDefault'),
+    name: readString(source, 'name', 'Name'),
+    organizationId: readNullableString(source, 'organizationId', 'OrganizationId'),
+  }
+}
+
 export async function getRoles(request: RoleSearchForm): Promise<RoleDto[]> {
   const response = await getIamJsonWithQuery(API_PATHS.iam.roles.list, toRoleQuery(request))
 
-  return unwrapResult<RoleDto[]>(response)
+  return unwrapResult<RoleDto[]>(response).map(normalizeRoleDto)
 }
 
 export async function getRole(id: string): Promise<RoleDto> {
-  const roles = await getRoles({
-    name: '',
-    organizationId: '',
-    userId: '',
-  })
-  const role = roles.find((item) => item.id === id)
+  const response = await getIamJson(API_PATHS.iam.roles.byId(id))
 
-  if (role === undefined) {
-    throw new Error('Role not found.')
-  }
-
-  return role
+  return normalizeRoleDto(unwrapResult<RoleDto>(response))
 }
 
 export async function createRole(request: RoleForm): Promise<RoleDto> {
   const response = await postIamJson(API_PATHS.iam.roles.list, toRoleCreateRequest(request))
 
-  return unwrapResult<RoleDto>(response)
+  return normalizeRoleDto(unwrapResult<RoleDto>(response))
 }
 
 export async function updateRole(id: string, request: RoleForm): Promise<void> {

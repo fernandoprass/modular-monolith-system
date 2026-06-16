@@ -3,6 +3,7 @@ import {
   deleteIamJson,
   getIamJson,
   getIamJsonWithQuery,
+  patchIamJson,
   postIamJson,
   putIamJson,
 } from '../../../data/httpClient'
@@ -17,6 +18,7 @@ import {
   type UserDto,
   type UserLiteDto,
   type UserLookupDto,
+  type UserPasswordUpdateRequest,
   type UserRoleDto,
   type UserUpdateRequest,
 } from './userTypes'
@@ -179,6 +181,12 @@ export async function updateUser(id: string, request: UserUpdateRequest): Promis
 
 export async function updateCurrentUser(request: UserUpdateRequest): Promise<void> {
   const response = await putIamJson(API_PATHS.iam.users.profile, request)
+
+  ensureResultSuccess(response)
+}
+
+export async function updateCurrentUserPassword(request: UserPasswordUpdateRequest): Promise<void> {
+  const response = await patchIamJson(API_PATHS.iam.users.password, request)
 
   ensureResultSuccess(response)
 }

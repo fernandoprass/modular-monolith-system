@@ -92,6 +92,8 @@ export function DataTable<TData>({
                 <th className={header.column.id === 'actions' ? 'actions-column' : undefined} key={header.id}>
                   {header.isPlaceholder
                     ? null
+                    : !header.column.getCanSort()
+                      ? flexRender(header.column.columnDef.header, header.getContext())
                     : (
                       <DataTableSortableButton
                         canSort={header.column.getCanSort()}

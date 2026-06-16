@@ -1,5 +1,4 @@
 namespace IAM.Domain.DTOs.Requests;
 
-public record RoleAssignRequest(Guid UserId, IEnumerable<RoleAssignRoleRequest> Roles);
+public record RoleAssignRequest(Guid UserId, DateTime StartsAt, DateTime? ExpiresAt, IEnumerable<Guid> RoleIds);
 
-public record RoleAssignRoleRequest(Guid RoleId, DateTime StartsAt, DateTime? ExpiresAt);

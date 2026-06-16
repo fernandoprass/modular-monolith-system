@@ -69,7 +69,7 @@ public class UserEndToEndTests(CoreApiTestFixture fixture) : IClassFixture<CoreA
          TestContext.Current.CancellationToken);
       var user = await adminApi.CreateUserAsync(userRequest, TestContext.Current.CancellationToken);
       await adminApi.AssignRoleAsync(
-         new RoleAssignRequest(user.Id, [new RoleAssignRoleRequest(role.Id, DateTime.UtcNow, null)]),
+         new RoleAssignRequest(user.Id, DateTime.UtcNow, null, [role.Id]),
          TestContext.Current.CancellationToken);
       await adminApi.UpdateOrganizationAdminAsync(
          user.Id,

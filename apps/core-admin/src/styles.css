@@ -836,6 +836,10 @@ textarea {
   padding-top: 44px;
 }
 
+.user-access-action-column {
+  min-width: 190px;
+}
+
 .permission-table-column {
   display: grid;
   gap: 8px;
@@ -1151,6 +1155,10 @@ textarea {
   .permission-action-column {
     flex-direction: row;
     padding-top: 0;
+  }
+
+  .user-access-action-column {
+    display: grid;
   }
 
   .code-row {

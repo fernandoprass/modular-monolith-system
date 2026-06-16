@@ -125,15 +125,18 @@ export const enMessages = {
           noPermissions: 'No permissions found.',
           noRoles: 'No roles found.',
           organizationRequired: 'Select an organization.',
+          passwordsDoNotMatch: 'Passwords do not match.',
         },
         name: 'Users',
         notifications: {
           created: 'User created.',
           deleted: 'User deleted.',
+          passwordUpdated: 'Password updated.',
           profileUpdated: 'Profile updated.',
           updated: 'User updated.',
         },
         pages: {
+          changePassword: 'Change password',
           create: 'Create user',
           edit: 'Edit user',
           list: 'Users',
@@ -146,6 +149,24 @@ export const enMessages = {
         tabs: {
           permissions: 'Permissions',
           roles: 'Roles',
+        },
+      },
+      userAccess: {
+        labels: {
+          assignedRoles: 'Assigned roles',
+          availableRoles: 'Available roles',
+        },
+        messages: {
+          noUserSelected: 'Select a user to manage access.',
+          noRoles: 'No roles found.',
+        },
+        name: 'User Access',
+        notifications: {
+          rolesAssigned: 'Roles assigned.',
+          rolesUnassigned: 'Roles removed.',
+        },
+        pages: {
+          list: 'User Access',
         },
       },
     },
@@ -190,6 +211,8 @@ export const enMessages = {
       assignedAt: 'Assigned at',
       assignedBy: 'Assigned by',
       code: 'Code',
+      confirmPassword: 'Confirm password',
+      currentPassword: 'Current password',
       defaultLanguage: 'Default language',
       description: 'Description',
       email: 'Email',
@@ -202,6 +225,7 @@ export const enMessages = {
       language: 'Language',
       module: 'Module',
       name: 'Name',
+      newPassword: 'New password',
       organization: 'Organization',
       organizationId: 'Organization ID',
       password: 'Password',

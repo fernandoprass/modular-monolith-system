@@ -37,13 +37,11 @@ public class RoleValidator(IUserContext userContext) : IRoleValidator
    public Result ValidateAssign(RoleAssignRequest request, bool userExists, bool allRolesAvailable)
    {
       var validator = new FluentValidator<RoleAssignRequest>()
+         .RuleFor(x => x.RoleIds).HasItems().HasNoDuplicates()
+         .RuleFor(x => x.StartsAt).IsGreaterThanOrEqualTo(DateTime.Today, new RolesInvalidStartDateError())
+         .RuleFor(x => x.ExpiresAt).Custom(expireDate => expireDate == null || expireDate >= DateTime.Today, new RolesInvalidExpirationError())
          .RuleForValue(userExists).IsTrue(new NotFoundError(IamConst.Entity.User))
-         .RuleForValue(allRolesAvailable).IsTrue(new RolesCannotBeAssignedError())
-         .RuleFor(x => x.Roles.Select(r => r.RoleId)).HasItems().HasNoDuplicates()
-         .RuleFor(x => x.Roles.Select(r => r.StartsAt))
-            .All<RoleAssignRequest, IEnumerable<DateTime>, DateTime>(startDate => startDate >= DateTime.Today, new RolesInvalidStartDateError())
-         .RuleFor(x => x.Roles.Select(r => r.ExpiresAt))
-            .All<RoleAssignRequest, IEnumerable<DateTime?>, DateTime?>(expireDate => expireDate == null || expireDate >= DateTime.UtcNow, new RolesInvalidExpirationError());
+         .RuleForValue(allRolesAvailable).IsTrue(new RolesCannotBeAssignedError());
 
       var isValid = validator.Validate(request, shortCircuitMode: true);
 
