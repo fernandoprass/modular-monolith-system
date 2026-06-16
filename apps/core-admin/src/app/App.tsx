@@ -8,6 +8,7 @@ import { OrganizationProfilePage } from '../resources/iam/organizations/Organiza
 import { OrganizationViewPage } from '../resources/iam/organizations/OrganizationViewPage'
 import { PublicOrganizationCreatePage } from '../resources/iam/organizations/PublicOrganizationCreatePage'
 import { PermissionListPage } from '../resources/iam/permissions/PermissionListPage'
+import { RoleEditPage } from '../resources/iam/roles/RoleEditPage'
 import { RoleListPage } from '../resources/iam/roles/RoleListPage'
 import { UserCreatePage } from '../resources/iam/users/UserCreatePage'
 import { UserEditPage } from '../resources/iam/users/UserEditPage'
@@ -40,6 +41,8 @@ function App() {
                 <Route path="users/:id/show" element={<UserViewPage />} />
                 <Route path={APP_ROUTES.userProfile.slice(1)} element={<UserProfilePage />} />
                 <Route path={APP_ROUTES.roles.slice(1)} element={<RoleListPage />} />
+                <Route path="roles/create" element={<RoleEditPage />} />
+                <Route path="roles/:id" element={<RoleEditPage />} />
                 <Route path={APP_ROUTES.permissions.slice(1)} element={<PermissionListPage />} />
                 <Route path="*" element={<Navigate to={APP_ROUTES.dashboard} replace />} />
               </Route>

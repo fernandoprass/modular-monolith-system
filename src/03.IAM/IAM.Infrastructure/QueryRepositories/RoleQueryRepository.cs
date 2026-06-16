@@ -123,7 +123,6 @@ public class RoleQueryRepository(IamDbContext dbContext, IUserContext userContex
       return await query.ToListAsync(cancellationToken);
    }
 
-
    public async Task<IEnumerable<Permission>> GetRolePermissionsByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
    {
       var now = DateTime.UtcNow;
@@ -154,6 +153,34 @@ public class RoleQueryRepository(IamDbContext dbContext, IUserContext userContex
          .Where(rp => rp.RoleId == roleId && rp.Role.IsActive && rp.Permission.IsActive)
          .Select(rp => rp.Permission.ToPermissionDto())
          .ToListAsync(cancellationToken);
+   }
+
+   public async Task<IEnumerable<RolePermissionCodeDto>> GetPermissionCodesByRoleIdsAsync(
+      IEnumerable<Guid> roleIds, 
+      CancellationToken cancellationToken = default)
+   {
+      return await _dbContext.RolePermissions
+         .AsNoTracking()
+         .Where(rp => roleIds.Contains(rp.RoleId) && rp.Role.IsActive && rp.Permission.IsActive)
+         .Select(rp => new RolePermissionCodeDto(rp.RoleId, rp.Permission.Code))
+         .ToListAsync(cancellationToken);
+   }
+
+   public async Task<IEnumerable<string>> GetPermissionCodesByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
+   {
+      var now = DateTime.UtcNow;
+
+      userId = GetUserWithSecurityContext(userId);
+
+      return await _dbContext.UserRoles
+          .AsNoTracking()
+          .Where(ur => ur.UserId == userId &&
+                       ur.Role.IsActive &&
+                       ur.StartsAt <= now &&
+                       (ur.ExpiresAt == null || ur.ExpiresAt >= now))
+          .SelectMany(ur => ur.Role.RolePermissions.Where(rp => rp.Permission.IsActive).Select(rp => rp.Permission.Code))
+          .Distinct()
+          .ToListAsync(cancellationToken);
    }
 
    public async Task<bool> NameExistsAsync(

@@ -70,11 +70,6 @@ export function UserEditPage() {
     try {
       const loaded = await getUser(id)
       setUser(loaded)
-      form.reset({
-        isActive: loaded.isActive,
-        language: loaded.language,
-        name: loaded.name,
-      })
     } catch (error) {
       notifyError(error, t('shared.errors.generic'))
     }
@@ -83,6 +78,18 @@ export function UserEditPage() {
   useEffect(() => {
     void loadUser()
   }, [loadUser])
+
+  useEffect(() => {
+    if (user === null) {
+      return
+    }
+
+    form.reset({
+      isActive: user.isActive,
+      language: user.language,
+      name: user.name,
+    })
+  }, [form, user])
 
   return (
     <main className="page">

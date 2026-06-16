@@ -143,7 +143,6 @@ public class SeederRolePermissions(
          IamPermission.Roles.Read,
          IamPermission.Roles.Write,
          IamPermission.Roles.Assign,
-         IamPermission.Roles.ViewPermissions,
          IamPermission.Parameters.Read,
          IamPermission.Parameters.Override,
          IamPermission.Permissions.Read,

@@ -41,7 +41,6 @@ public static class IamPermission
       public const string Read = $"{Module}.{Resource}.read";
       public const string Write = $"{Module}.{Resource}.write";
       public const string Assign = $"{Module}.{Resource}.assign";
-      public const string ViewPermissions = $"{Module}.{Resource}.viewpermissions";
    }
 
    public static class Users
@@ -49,6 +48,7 @@ public static class IamPermission
       private const string Resource = "users";
       public const string Read = $"{Module}.{Resource}.read";
       public const string Write = $"{Module}.{Resource}.write";
+      public const string ViewAccess = $"{Module}.{Resource}.viewaccess";
       public const string UpdateOrganizationAdmin = $"{Module}.{Resource}.updateorganizationadmin";
    }
 

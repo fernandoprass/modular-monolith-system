@@ -54,6 +54,24 @@ public class RoleController(
       return OkOrNotFound(result);
    }
 
+   [HttpPost("{id:guid}/permissions")]
+   [Authorize]
+   [RequirePermission(IamPermission.Permissions.Assign)]
+   public async Task<IActionResult> GetPermission(Guid id, CancellationToken cancellationToken)
+   {
+      var result = await _permissionService.GetByRoleId(id, cancellationToken);
+      return OkOrNotFound(result);
+   }
+
+   [HttpPost("{id:guid}/available-permissions")]
+   [Authorize]
+   [RequirePermission(IamPermission.Permissions.Assign)]
+   public async Task<IActionResult> GetAvailablePermission(Guid id, CancellationToken cancellationToken)
+   {
+      var result = await _permissionService.GetAvailablePermissionByRoleIdAsync(id, cancellationToken);
+      return OkOrNotFound(result);
+   }
+
    [HttpPost("permissions/assign")]
    [Authorize]
    [RequirePermission(IamPermission.Permissions.Assign)]

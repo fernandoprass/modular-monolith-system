@@ -69,6 +69,50 @@ function buildUserLookupQuery(request: UserLookupQuery): URLSearchParams {
   return query
 }
 
+function readString(value: Record<string, unknown>, ...keys: string[]): string {
+  for (const key of keys) {
+    const data = value[key]
+
+    if (typeof data === 'string') {
+      return data
+    }
+  }
+
+  return ''
+}
+
+function readBoolean(value: Record<string, unknown>, ...keys: string[]): boolean {
+  for (const key of keys) {
+    const data = value[key]
+
+    if (typeof data === 'boolean') {
+      return data
+    }
+  }
+
+  return false
+}
+
+function normalizeUserDto(value: UserDto): UserDto {
+  const source = value as unknown as Record<string, unknown>
+
+  return {
+    ...value,
+    createdAt: readString(source, 'createdAt', 'CreatedAt'),
+    email: readString(source, 'email', 'Email'),
+    emailVerifiedAt: readString(source, 'emailVerifiedAt', 'EmailVerifiedAt') || null,
+    id: readString(source, 'id', 'Id'),
+    isActive: readBoolean(source, 'isActive', 'IsActive'),
+    isOrganizationAdmin: readBoolean(source, 'isOrganizationAdmin', 'IsOrganizationAdmin'),
+    isSystemAdmin: readBoolean(source, 'isSystemAdmin', 'IsSystemAdmin'),
+    language: readString(source, 'language', 'Language'),
+    lastLoginAt: readString(source, 'lastLoginAt', 'LastLoginAt') || null,
+    name: readString(source, 'name', 'Name', 'fullName', 'FullName'),
+    organizationId: readString(source, 'organizationId', 'OrganizationId'),
+    organizationName: readString(source, 'organizationName', 'OrganizationName'),
+  }
+}
+
 export function toUserCreateRequest(data: UserCreateForm): UserCreateRequest {
   return {
     [USER_REQUEST_FIELDS.name]: data.name,
@@ -100,7 +144,7 @@ export async function getUserLookup(request: UserLookupQuery): Promise<UserLooku
 export async function getUser(id: string): Promise<UserDto> {
   const response = await getIamJson(API_PATHS.iam.users.byId(id))
 
-  return unwrapResult<UserDto>(response)
+  return normalizeUserDto(unwrapResult<UserDto>(response))
 }
 
 export async function getCurrentUser(): Promise<UserDto> {

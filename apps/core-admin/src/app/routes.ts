@@ -8,6 +8,8 @@ export const APP_ROUTES = {
   parameters: '/parameters',
   permissions: '/permissions',
   registerOrganization: '/register-organization',
+  roleCreate: '/roles/create',
+  roleEdit: (id: string) => `/roles/${id}`,
   roles: '/roles',
   userCreate: '/users/create',
   userEdit: (id: string) => `/users/${id}`,

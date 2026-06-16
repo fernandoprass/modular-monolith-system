@@ -50,7 +50,7 @@ public class AuthService(
       await _userService.UpdateLastLoginAsync(user!.Id, cancellationToken);
 
       var expiresAt = await GetJwtExpireTime();
-      await HydratePermissionCacheAsync(user, expiresAt, cancellationToken);
+      await HydratePermissionCacheAsync(user.RoleIds, expiresAt, cancellationToken);
       var token = GenerateJwtToken(user, expiresAt);
 
       var response = new LoginResponse(token, expiresAt, user.ToUserDto());
@@ -88,16 +88,17 @@ public class AuthService(
    }
 
    private async Task HydratePermissionCacheAsync(
-      UserPasswordDto user,
+      IEnumerable<Guid> roleIds,
       DateTime expiresAt,
       CancellationToken cancellationToken)
    {
-      foreach (var userRole in user.UserRoles)
+      var rolePermissionCodes = await _roleQueryRepository.GetPermissionCodesByRoleIdsAsync(roleIds, cancellationToken);
+      foreach (var roleId in roleIds)
       {
-         var permissions = await _roleQueryRepository.GetPermissionsByRoleIdAsync(userRole.RoleId, cancellationToken);
+         var permissionCodes = rolePermissionCodes.Where(rpc => rpc.RoleId == roleId).Select(rpc => rpc.Code);
          await _permissionService.SetPermissionsAsync(
-            userRole.RoleId.ToString(),
-            permissions.Select(permission => permission.Code),
+            roleId.ToString(),
+            permissionCodes,
             expiresAt,
             cancellationToken);
       }
@@ -157,9 +158,9 @@ public class AuthService(
             new (JwtRegisteredClaimNames.Jti, Guid.CreateVersion7().ToString())
         };
 
-      foreach (var userRole in user.UserRoles)
+      foreach (var roleId in user.RoleIds)
       {
-         claims.Add(new Claim(SharedConst.Security.Claim.Role, userRole.RoleId.ToString()));
+         claims.Add(new Claim(SharedConst.Security.Claim.Role, roleId.ToString()));
       }
 
       var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSecret));

@@ -1,0 +1,19 @@
+meta {
+  name: permission-codes
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{host.iam}}/api/{{version}}/iam/user-access/users/{{userId}}/permission-codes
+  body: none
+  auth: bearer
+}
+
+params:query {
+  ~name: a
+}
+
+auth:bearer {
+  token: {{token}}
+}

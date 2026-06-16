@@ -253,6 +253,12 @@ public class RoleService(
       return await _roleQueryRepository.GetPermissionsByRoleIdAsync(roleId, cancellationToken);
    }
 
+   public async Task<Result<IEnumerable<string>>> GetPermissionCodesByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
+   {
+      var permissionCodes = await _roleQueryRepository.GetPermissionCodesByUserIdAsync(userId, cancellationToken);
+      return Result<IEnumerable<string>>.Success(permissionCodes);
+   }
+
    public async Task<IEnumerable<Guid>> GetDefaultRolesByOrganizationIdAsync(Guid organizationId, CancellationToken cancellationToken = default)
    {
       return await _roleQueryRepository.GetDefaultRolesByOrganizationIdAsync(organizationId, cancellationToken);

@@ -1,10 +1,10 @@
 using Asp.Versioning;
-using Shared.Infrastructure.Authorization;
 using IAM.Application.Contracts;
 using IAM.Domain;
 using IAM.Domain.DTOs.Requests;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Shared.Infrastructure.Authorization;
 
 namespace IAM.API.Controllers;
 
@@ -33,6 +33,15 @@ public class UserAccessController(IRoleService roleService) : BaseController
       return OkOrNotFound(result);
    }
 
+   [HttpGet("users/{userId:guid}/available-roles")]
+   [Authorize]
+   [RequirePermission(IamPermission.Roles.Assign)]
+   public async Task<IActionResult> GetAvailableRoles(Guid userId, CancellationToken cancellationToken)
+   {
+      var result = await _roleService.GetAvailableRolesByUserIdAsync(userId, cancellationToken);
+      return OkOrNotFound(result);
+   }
+
    [HttpGet("users/{userId:guid}/permissions")]
    [Authorize]
    [RequirePermission(IamPermission.UserProfile.ViewAccess)]
@@ -42,21 +51,21 @@ public class UserAccessController(IRoleService roleService) : BaseController
       return OkOrNotFound(result);
    }
 
+   [HttpGet("users/{userId:guid}/permission-codes")]
+   [Authorize]
+   [RequirePermission(IamPermission.UserProfile.ViewAccess)]
+   public async Task<IActionResult> GetUserPermissionCodes(Guid userId, CancellationToken cancellationToken)
+   {
+      var result = await _roleService.GetPermissionCodesByUserIdAsync(userId, cancellationToken);
+      return OkOrNotFound(result);
+   }
+
    [HttpGet("users/{userId:guid}/roles")]
    [Authorize]
    [RequirePermission(IamPermission.UserProfile.ViewAccess)]
    public async Task<IActionResult> GetUserRoles(Guid userId, CancellationToken cancellationToken)
    {
       var result = await _roleService.GetRolesByUserIdAsync(userId, cancellationToken);
-      return OkOrNotFound(result);
-   }
-
-   [HttpGet("users/{userId:guid}/available-roles")]
-   [Authorize]
-   [RequirePermission(IamPermission.Roles.Assign)]
-   public async Task<IActionResult> GetAvailableRoles(Guid userId, CancellationToken cancellationToken)
-   {
-      var result = await _roleService.GetAvailableRolesByUserIdAsync(userId, cancellationToken);
       return OkOrNotFound(result);
    }
 }

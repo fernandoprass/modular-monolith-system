@@ -2,9 +2,11 @@ import { useForm } from '@tanstack/react-form'
 import type { SortingState } from '@tanstack/react-table'
 import { Plus } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 import { useToast } from '../../../app/ToastProvider'
 import { useTranslate } from '../../../app/i18n/i18n'
+import { APP_ROUTES } from '../../../app/routes'
 import { useAuth, useNotifyError } from '../../../auth/AuthProvider'
 import { Button } from '../../../components/ui/button'
 import { DataTable } from '../../../components/ui/data-table'
@@ -17,7 +19,6 @@ import { hasPermissionCode } from '../../../shared/permissions'
 import { OrganizationSelect } from '../organizations/OrganizationSelect'
 import { UserSelect } from '../users/UserSelect'
 import { deleteRole, getRoles } from './roleApi'
-import { RoleEditDialog } from './RoleEditDialog'
 import { createRoleTableColumns } from './RoleListPageColumns'
 import type { RoleDto, RoleSearchForm } from './roleTypes'
 
@@ -29,13 +30,12 @@ const EMPTY_ROLE_SEARCH: RoleSearchForm = {
 
 export function RoleListPage() {
   const t = useTranslate()
+  const navigate = useNavigate()
   const notifyError = useNotifyError()
   const { showSuccess } = useToast()
   const { permissions } = useAuth()
   const [roles, setRoles] = useState<RoleDto[]>([])
-  const [selectedRole, setSelectedRole] = useState<RoleDto | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<RoleDto | null>(null)
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [organizationIdFilter, setOrganizationIdFilter] = useState('')
   const [sorting, setSorting] = useState<SortingState>([])
@@ -52,12 +52,9 @@ export function RoleListPage() {
     canDelete,
     canUpdate,
     onDelete: setDeleteTarget,
-    onEdit: (role) => {
-      setSelectedRole(role)
-      setIsDialogOpen(true)
-    },
+    onEdit: (role) => navigate(APP_ROUTES.roleEdit(role.id)),
     t,
-  }), [canDelete, canUpdate, t])
+  }), [canDelete, canUpdate, navigate, t])
 
   const loadRoles = useCallback(async (request: RoleSearchForm = filterForm.state.values) => {
     setIsLoading(true)
@@ -76,18 +73,13 @@ export function RoleListPage() {
   }, [loadRoles])
 
   function handleCreate() {
-    setSelectedRole(null)
-    setIsDialogOpen(true)
+    navigate(APP_ROUTES.roleCreate)
   }
 
   function handleReset() {
     filterForm.reset()
     setOrganizationIdFilter('')
     void loadRoles(EMPTY_ROLE_SEARCH)
-  }
-
-  async function handleSaved() {
-    await loadRoles()
   }
 
   async function handleConfirmDelete() {
@@ -168,14 +160,6 @@ export function RoleListPage() {
         onSortingChange={setSorting}
         sorting={sorting}
       />
-      {isDialogOpen && (
-        <RoleEditDialog
-          isOpen={isDialogOpen}
-          onClose={() => setIsDialogOpen(false)}
-          onSaved={handleSaved}
-          role={selectedRole}
-        />
-      )}
       <ConfirmDialog
         cancelText={t('shared.actions.cancel')}
         backLabel={t('shared.actions.back')}

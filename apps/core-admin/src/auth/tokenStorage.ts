@@ -1,4 +1,4 @@
-import type { PermissionDto } from '../shared/permissions'
+import type { PermissionCode } from '../shared/permissions'
 import { STORAGE_KEYS } from './storageKeys'
 
 export type StoredUser = {
@@ -52,14 +52,14 @@ export const tokenStorage = {
     localStorage.removeItem(STORAGE_KEYS.authUser)
   },
 
-  getPermissions(): PermissionDto[] {
-    return parseStoredValue<PermissionDto[]>(
+  getPermissions(): PermissionCode[] {
+    return parseStoredValue<PermissionCode[]>(
       localStorage.getItem(STORAGE_KEYS.authPermissions),
       () => localStorage.removeItem(STORAGE_KEYS.authPermissions),
     ) ?? []
   },
 
-  setPermissions(permissions: PermissionDto[]): void {
+  setPermissions(permissions: PermissionCode[]): void {
     localStorage.setItem(STORAGE_KEYS.authPermissions, JSON.stringify(permissions))
   },
 

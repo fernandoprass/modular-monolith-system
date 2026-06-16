@@ -49,10 +49,32 @@ public class UserQueryRepository(IamDbContext dbContext, IUserContext userContex
    {
       return await _dbContext.Users
           .AsNoTracking()
-          .Include(u => u.Organization)
-          .Include(u => u.UserRoles.Where(ur => ur.ExpiresAt == null && ur.Role.IsActive))
           .Where(u => u.Email == email)
-          .Select(u => u.ToUserPasswordDto())
+          .Select(u => new UserPasswordDto
+          {
+             Id = u.Id,
+             Name = u.Name,
+             Email = u.Email,
+             PasswordHash = u.PasswordHash,
+             IsActive = u.IsActive,
+             IsSystemAdmin = u.IsSystemAdmin,
+             IsOrganizationAdmin = u.IsOrganizationAdmin,
+             NumFailedLoginAttempts = u.NumFailedLoginAttempts,
+             CreatedAt = u.CreatedAt,
+             EmailVerifiedAt = u.EmailVerifiedAt,
+             LastLoginAt = u.LastLoginAt,
+             Language = u.Language,
+             LockedOutUntil = u.LockedOutUntil,
+
+             OrganizationId = u.OrganizationId,
+             OrganizationName = u.Organization.Name,
+             OrganizationIsActive = u.Organization.IsActive,
+
+             RoleIds = u.UserRoles
+                  .Where(ur => ur.Role.IsActive &&
+                               (ur.ExpiresAt == null || ur.ExpiresAt >= DateTime.UtcNow))
+                  .Select(ur => ur.RoleId)
+          })
           .SingleOrDefaultAsync(cancellationToken);
    }
 

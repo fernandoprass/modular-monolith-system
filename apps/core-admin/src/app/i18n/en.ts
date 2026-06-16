@@ -98,6 +98,10 @@ export const enMessages = {
         },
       },
       roles: {
+        labels: {
+          assignedPermissions: 'Assigned permissions',
+          availablePermissions: 'Available permissions',
+        },
         messages: {
           deleteConfirm: 'Delete this role?',
           empty: 'No roles found.',
@@ -106,6 +110,8 @@ export const enMessages = {
         notifications: {
           created: 'Role created.',
           deleted: 'Role deleted.',
+          permissionsAssigned: 'Permissions assigned.',
+          permissionsUnassigned: 'Permissions removed.',
           updated: 'Role updated.',
         },
         pages: {
@@ -188,6 +194,7 @@ export const enMessages = {
       description: 'Description',
       email: 'Email',
       expiresAt: 'Expires at',
+      info: 'Info',
       isActive: 'Active',
       isDefault: 'Default',
       isOrganizationAdmin: 'Organization admin',

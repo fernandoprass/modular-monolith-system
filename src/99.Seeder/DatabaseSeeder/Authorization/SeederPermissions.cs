@@ -60,8 +60,6 @@ public class SeederPermissions(
       await AddPermissionAsync(IamPermission.Roles.Write, "Edit Roles", "Allows creating, updating, and deleting roles.", cancellationToken);
       await AddPermissionAsync(IamPermission.Roles.Assign, "Assign Roles", "Allows assigning roles to users.", cancellationToken);
 
-      await AddPermissionAsync(IamPermission.Roles.ViewPermissions, "View Role Permissions", "Allows viewing user permissions.", cancellationToken);
-
       await AddPermissionAsync(IamPermission.Users.Read, "Read Users", "Allows reading users.", cancellationToken);
       await AddPermissionAsync(IamPermission.Users.Write, "Edit Users", "Allows creating, updating, and deleting users.", cancellationToken);
       await AddPermissionAsync(IamPermission.Users.UpdateOrganizationAdmin, "Update User Organization Admin", "Allows updating the user organization admin flag.", cancellationToken);
@@ -70,7 +68,6 @@ public class SeederPermissions(
       await AddPermissionAsync(IamPermission.UserProfile.Write, "Update Own Profile", "Allows users to update their own profile.", cancellationToken);
       await AddPermissionAsync(IamPermission.UserProfile.Delete, "Delete Own Profile", "Allows users to delete their own profile.", cancellationToken);
       await AddPermissionAsync(IamPermission.UserProfile.ViewAccess, "View Own Roles and Permissions", "Allows users to view their own roles and permissions.", cancellationToken);
-
    }
 
    private async Task AddCourierPermissions(CancellationToken cancellationToken)
