@@ -77,28 +77,32 @@
     <Project Path="src/99.Seeder/DatabaseSeeder/DatabaseSeeder.csproj" />
   </Folder>
   <Folder Name="/tests/" />
-  <Folder Name="/tests/00.Core/">
-    <Project Path="tests/00.Core/Core.API.EndToEnd.Tests/Core.API.EndToEnd.Tests.csproj" />
-    <Project Path="tests/00.Core/Core.API.Tests/Core.API.Tests.csproj" />
+  <Folder Name="/tests/unit/" />
+  <Folder Name="/tests/e2e/" />
+  <Folder Name="/tests/e2e/Core/">
+    <Project Path="tests/e2e/Core.API.EndToEnd.Tests/Core.API.EndToEnd.Tests.csproj" />
   </Folder>
-  <Folder Name="/tests/01.Shared/">
-    <Project Path="tests/01.Shared/Shared.Application.Tests/Shared.Application.Tests.csproj" />
-    <Project Path="tests/01.Shared/Shared.Domain.Tests/Shared.Domain.Tests.csproj" />
-    <Project Path="tests/01.Shared/Shared.Infrastructure.Tests/Shared.Infrastructure.Tests.csproj" />
+  <Folder Name="/tests/unit/00.Core/">
+    <Project Path="tests/unit/00.Core/Core.API.Tests/Core.API.Tests.csproj" />
   </Folder>
-  <Folder Name="/tests/02.Sentinel/">
-    <Project Path="tests/02.Sentinel/Sentinel.API.Tests/Sentinel.API.Tests.csproj" />
-    <Project Path="tests/02.Sentinel/Sentinel.Application.Tests/Sentinel.Application.Tests.csproj" />
-    <Project Path="tests/02.Sentinel/Sentinel.Infrastructure.Tests/Sentinel.Infrastructure.Tests.csproj" />
+  <Folder Name="/tests/unit/01.Shared/">
+    <Project Path="tests/unit/01.Shared/Shared.Application.Tests/Shared.Application.Tests.csproj" />
+    <Project Path="tests/unit/01.Shared/Shared.Domain.Tests/Shared.Domain.Tests.csproj" />
+    <Project Path="tests/unit/01.Shared/Shared.Infrastructure.Tests/Shared.Infrastructure.Tests.csproj" />
   </Folder>
-  <Folder Name="/tests/03.IAM/">
-    <Project Path="tests/03.IAM/IAM.API.Tests/IAM.API.Tests.csproj" />
-    <Project Path="tests/03.IAM/IAM.Application.Tests/IAM.Application.Tests.csproj" />
-    <Project Path="tests/03.IAM/IAM.Domain.Tests/IAM.Domain.Tests.csproj" />
+  <Folder Name="/tests/unit/02.Sentinel/">
+    <Project Path="tests/unit/02.Sentinel/Sentinel.API.Tests/Sentinel.API.Tests.csproj" />
+    <Project Path="tests/unit/02.Sentinel/Sentinel.Application.Tests/Sentinel.Application.Tests.csproj" />
+    <Project Path="tests/unit/02.Sentinel/Sentinel.Infrastructure.Tests/Sentinel.Infrastructure.Tests.csproj" />
   </Folder>
-  <Folder Name="/tests/04.Courier/">
-    <Project Path="tests/04.Courier/Courier.Application.Tests/Courier.Application.Tests.csproj" />
-    <Project Path="tests/04.Courier/Courier.Domain.Tests/Courier.Domain.Tests.csproj" />
-    <Project Path="tests/04.Courier/Courier.Infrastructure.Tests/Courier.Infrastructure.Tests.csproj" />
+  <Folder Name="/tests/unit/03.IAM/">
+    <Project Path="tests/unit/03.IAM/IAM.API.Tests/IAM.API.Tests.csproj" />
+    <Project Path="tests/unit/03.IAM/IAM.Application.Tests/IAM.Application.Tests.csproj" />
+    <Project Path="tests/unit/03.IAM/IAM.Domain.Tests/IAM.Domain.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tests/unit/04.Courier/">
+    <Project Path="tests/unit/04.Courier/Courier.Application.Tests/Courier.Application.Tests.csproj" />
+    <Project Path="tests/unit/04.Courier/Courier.Domain.Tests/Courier.Domain.Tests.csproj" />
+    <Project Path="tests/unit/04.Courier/Courier.Infrastructure.Tests/Courier.Infrastructure.Tests.csproj" />
   </Folder>
 </Solution>

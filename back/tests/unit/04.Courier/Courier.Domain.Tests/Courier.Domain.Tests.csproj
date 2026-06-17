@@ -22,7 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\src\04.Courier\Courier.Domain\Courier.Domain.csproj" />
+    <ProjectReference Include="..\..\..\..\src\04.Courier\Courier.Domain\Courier.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>
