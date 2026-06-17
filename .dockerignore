@@ -6,7 +6,7 @@
 .agents/
 .github/
 docs/
-tests/
+back/tests/
 *.user
 *.suo
 *.nupkg

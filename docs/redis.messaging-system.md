@@ -122,7 +122,7 @@ The consumer implementation lives in Sentinel.
 ### Shared
 
 ```text
-src/01.Shared/
+back/src/01.Shared/
 ├── Shared.Domain/
 │   ├── Events/
 │   │   ├── AuditLogEvent.cs
@@ -148,7 +148,7 @@ Notes:
 ### Sentinel
 
 ```text
-src/02.Sentinel/
+back/src/02.Sentinel/
 ├── Sentinel.Domain/
 │   ├── Entities/
 │   │   ├── AuditLog.cs
@@ -190,7 +190,7 @@ Notes:
 The publisher contract lives in Shared Domain.
 
 File:
-- `src/01.Shared/Shared.Domain/Interfaces/IEventPublisher.cs`
+- `back/src/01.Shared/Shared.Domain/Interfaces/IEventPublisher.cs`
 
 Methods:
 
@@ -201,7 +201,7 @@ Task PublishNotificationEventAsync(NotificationEvent notification, CancellationT
 ```
 
 Implementation:
-- `src/01.Shared/Shared.Infrastructure/Messaging/RedisEventPublisher.cs`
+- `back/src/01.Shared/Shared.Infrastructure/Messaging/RedisEventPublisher.cs`
 
 The implementation uses:
 - `IConnectionMultiplexer`
@@ -300,9 +300,9 @@ await _eventPublisher.PublishSystemLogEventAsync(new SystemLogEvent
 Consumers live in Sentinel Infrastructure.
 
 Files:
-- `src/02.Sentinel/Sentinel.Infrastructure/BackgroundServices/RedisStreamConsumer.cs`
-- `src/02.Sentinel/Sentinel.Infrastructure/BackgroundServices/AuditLogConsumer.cs`
-- `src/02.Sentinel/Sentinel.Infrastructure/BackgroundServices/SystemLogConsumer.cs`
+- `back/src/02.Sentinel/Sentinel.Infrastructure/BackgroundServices/RedisStreamConsumer.cs`
+- `back/src/02.Sentinel/Sentinel.Infrastructure/BackgroundServices/AuditLogConsumer.cs`
+- `back/src/02.Sentinel/Sentinel.Infrastructure/BackgroundServices/SystemLogConsumer.cs`
 
 `RedisStreamConsumer<TEvent>` contains the generic stream loop.
 
