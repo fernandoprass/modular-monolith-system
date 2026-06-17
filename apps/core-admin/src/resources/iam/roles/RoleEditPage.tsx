@@ -56,10 +56,30 @@ export function RoleEditPage() {
   const [rolePermissionSelection, setRolePermissionSelection] = useState<RowSelectionState>({})
   const [availableSorting, setAvailableSorting] = useState<SortingState>([])
   const [rolePermissionSorting, setRolePermissionSorting] = useState<SortingState>([])
+  const [availablePermissionTitleFilter, setAvailablePermissionTitleFilter] = useState('')
+  const [rolePermissionTitleFilter, setRolePermissionTitleFilter] = useState('')
   const [isPermissionLoading, setIsPermissionLoading] = useState(false)
   const [isPermissionSaving, setIsPermissionSaving] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const isCreate = id === undefined
+  const filteredAvailablePermissions = useMemo(() => {
+    const filter = availablePermissionTitleFilter.trim().toLowerCase()
+
+    if (filter.length === 0) {
+      return availablePermissions
+    }
+
+    return availablePermissions.filter((permission) => permission.title.toLowerCase().includes(filter))
+  }, [availablePermissionTitleFilter, availablePermissions])
+  const filteredRolePermissions = useMemo(() => {
+    const filter = rolePermissionTitleFilter.trim().toLowerCase()
+
+    if (filter.length === 0) {
+      return rolePermissions
+    }
+
+    return rolePermissions.filter((permission) => permission.title.toLowerCase().includes(filter))
+  }, [rolePermissionTitleFilter, rolePermissions])
   const availablePermissionColumns = useMemo<ColumnDef<PermissionDto>[]>(() => [
 
     {
@@ -167,6 +187,8 @@ export function RoleEditPage() {
       setRolePermissions(assigned)
       setAvailableSelection({})
       setRolePermissionSelection({})
+      setAvailablePermissionTitleFilter('')
+      setRolePermissionTitleFilter('')
     } catch (error) {
       notifyError(error, t('shared.errors.generic'))
     } finally {
@@ -321,9 +343,17 @@ export function RoleEditPage() {
             <div className="permission-assignment-grid">
               <div className="permission-table-column">
                 <h2 className="card-title">{t('features.iam.roles.labels.availablePermissions')}</h2>
+                <Field>
+                  <FieldLabel htmlFor="available-permission-title-filter">{t('shared.fields.title')}</FieldLabel>
+                  <Input
+                    id="available-permission-title-filter"
+                    onChange={(event) => setAvailablePermissionTitleFilter(event.currentTarget.value)}
+                    value={availablePermissionTitleFilter}
+                  />
+                </Field>
                 <DataTable
                   columns={availablePermissionColumns}
-                  data={availablePermissions}
+                  data={filteredAvailablePermissions}
                   emptyText={t('features.iam.permissions.messages.empty')}
                   getRowId={(permission) => permission.id}
                   isLoading={isPermissionLoading}
@@ -355,9 +385,17 @@ export function RoleEditPage() {
               </div>
               <div className="permission-table-column">
                 <h2 className="card-title">{t('features.iam.roles.labels.assignedPermissions')}</h2>
+                <Field>
+                  <FieldLabel htmlFor="assigned-permission-title-filter">{t('shared.fields.title')}</FieldLabel>
+                  <Input
+                    id="assigned-permission-title-filter"
+                    onChange={(event) => setRolePermissionTitleFilter(event.currentTarget.value)}
+                    value={rolePermissionTitleFilter}
+                  />
+                </Field>
                 <DataTable
                   columns={assignedPermissionColumns}
-                  data={rolePermissions}
+                  data={filteredRolePermissions}
                   emptyText={t('features.iam.permissions.messages.empty')}
                   getRowId={(permission) => permission.id}
                   isLoading={isPermissionLoading}
