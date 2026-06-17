@@ -1,11 +1,11 @@
 meta {
   name: unassign
   type: http
-  seq: 4
+  seq: 5
 }
 
 delete {
-  url: {{host.iam}}/api/{{version}}/iam/roles/unassign
+  url: {{host.iam}}/api/{{version}}/iam/user-access/roles/unassign
   body: json
   auth: bearer
 }

@@ -8,8 +8,10 @@ import {
   Menu,
   PanelLeftClose,
   PanelLeftOpen,
+  LockKeyhole,
   Settings,
   Shield,
+  ShieldCheck,
   UserCog,
   UserRound,
   Users,
@@ -28,11 +30,12 @@ import {
   DropdownMenuTrigger,
 } from '../components/ui/dropdown-menu'
 import { cn } from '../lib/utils'
-import { IAM_RESOURCES } from '../shared/iamConstants'
-import { hasResourceAccess } from '../shared/permissions'
+import { IAM_PERMISSIONS, IAM_RESOURCES } from '../shared/iamConstants'
+import { hasPermissionCode, hasResourceAccess } from '../shared/permissions'
 import { APP_CONSTANTS } from './appConstants'
 import { useTranslate } from './i18n/i18n'
 import { APP_ROUTES } from './routes'
+import { UserPasswordEditDialog } from '../resources/iam/users/UserPasswordEditDialog'
 
 export function AppLayout() {
   const t = useTranslate()
@@ -42,13 +45,15 @@ export function AppLayout() {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [isAuthorizationOpen, setIsAuthorizationOpen] = useState(true)
   const [isIamOpen, setIsIamOpen] = useState(true)
+  const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false)
   const { isAuthenticated, logout, permissions, user } = useAuth()
   const canOpenOrganizations = hasResourceAccess(permissions, IAM_RESOURCES.organizations)
   const canOpenUsers = hasResourceAccess(permissions, IAM_RESOURCES.users)
   const canOpenParameters = hasResourceAccess(permissions, IAM_RESOURCES.parameters)
   const canOpenRoles = hasResourceAccess(permissions, IAM_RESOURCES.roles)
   const canOpenPermissions = hasResourceAccess(permissions, IAM_RESOURCES.permissions)
-  const canOpenAuthorization = canOpenRoles || canOpenPermissions
+  const canOpenUserAccess = hasPermissionCode(permissions, IAM_PERMISSIONS.roles.assign)
+  const canOpenAuthorization = canOpenRoles || canOpenPermissions || canOpenUserAccess
   const canOpenIam = canOpenOrganizations || canOpenUsers || canOpenParameters || canOpenAuthorization
   const organizationName = user?.organizationName || APP_CONSTANTS.appName
   const canOpenOrganizationProfile = user?.isOrganizationAdmin === true
@@ -167,6 +172,14 @@ export function AppLayout() {
                     to={APP_ROUTES.permissions}
                   />
                 )}
+                {canOpenUserAccess && (
+                  <NavItem
+                    active={location.pathname.startsWith(APP_ROUTES.userAccess)}
+                    icon={<ShieldCheck data-icon="inline-start" />}
+                    label={t('features.iam.userAccess.name')}
+                    to={APP_ROUTES.userAccess}
+                  />
+                )}
                 </NavGroup>
               )}
             </NavGroup>
@@ -214,6 +227,10 @@ export function AppLayout() {
                     <UserRound data-icon="inline-start" />
                     {t('features.iam.users.pages.profile')}
                   </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setIsPasswordDialogOpen(true)}>
+                    <LockKeyhole data-icon="inline-start" />
+                    {t('features.iam.users.pages.changePassword')}
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={handleLogout}>
                     <LogOut data-icon="inline-start" />
                     {t('auth.userMenu.logout')}
@@ -235,6 +252,10 @@ export function AppLayout() {
           type="button"
         />
       )}
+      <UserPasswordEditDialog
+        isOpen={isPasswordDialogOpen}
+        onClose={() => setIsPasswordDialogOpen(false)}
+      />
     </div>
   )
 }

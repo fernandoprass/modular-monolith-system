@@ -44,7 +44,7 @@ public class RoleEndToEndTests(CoreApiTestFixture fixture) : IClassFixture<CoreA
          TestContext.Current.CancellationToken);
 
       var roles = await adminApi.SearchRolesAsync(
-         new RoleSearchRequest(roleUpdateRequest.Name, null, true, organization.Id),
+         new RoleSearchRequest(roleUpdateRequest.Name, null, true),
          TestContext.Current.CancellationToken);
       var userRequest = ScenarioDataFactory.CreateUser(organization.Id);
       var user = await adminApi.CreateUserAsync(userRequest, TestContext.Current.CancellationToken);
@@ -106,7 +106,7 @@ public class RoleEndToEndTests(CoreApiTestFixture fixture) : IClassFixture<CoreA
 
       var user = await adminApi.CreateUserAsync(userRequest, TestContext.Current.CancellationToken);
       await adminApi.AssignRoleAsync(
-         new RoleAssignRequest(user.Id, [new RoleAssignRoleRequest(role.Id, DateTime.UtcNow, null)]),
+         new RoleAssignRequest(user.Id, DateTime.UtcNow, null, [role.Id]),
          TestContext.Current.CancellationToken);
       var userApi = await _fixture.Api.LoginAsync(
          userRequest.Email,

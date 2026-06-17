@@ -1,11 +1,11 @@
 meta {
   name: permissions by users
   type: http
-  seq: 6
+  seq: 2
 }
 
 get {
-  url: {{host.iam}}/api/{{version}}/iam/roles/user/{{userId}}/permissions
+  url: {{host.iam}}/api/{{version}}/iam/user-access/users/{{userId}}/permissions
   body: none
   auth: bearer
 }

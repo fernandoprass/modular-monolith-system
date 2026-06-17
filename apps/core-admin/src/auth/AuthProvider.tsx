@@ -5,7 +5,8 @@ import { useToast } from '../app/ToastProvider'
 import { API_PATHS } from '../data/apiPaths'
 import { getIamJson, postIamJson } from '../data/httpClient'
 import { getApiErrorText, unwrapResult } from '../data/result'
-import type { PermissionDto } from '../shared/permissions'
+import { normalizeLanguageCode } from '../shared/languages'
+import type { PermissionCode } from '../shared/permissions'
 import { tokenStorage, type StoredUser } from './tokenStorage'
 
 type LoginResponse = {
@@ -16,6 +17,7 @@ type LoginResponse = {
     id: string
     isOrganizationAdmin: boolean
     isSystemAdmin: boolean
+    language: string
     name: string
     organizationId: string
     organizationName: string
@@ -31,7 +33,7 @@ type AuthContextValue = {
   isAuthenticated: boolean
   login: (request: LoginRequest) => Promise<void>
   logout: () => void
-  permissions: PermissionDto[]
+  permissions: PermissionCode[]
   user: StoredUser | null
 }
 
@@ -44,6 +46,7 @@ function toStoredUser(response: LoginResponse): StoredUser {
     id: response.user.id,
     isOrganizationAdmin: response.user.isOrganizationAdmin,
     isSystemAdmin: response.user.isSystemAdmin,
+    language: normalizeLanguageCode(response.user.language),
     organizationId: response.user.organizationId,
     organizationName: response.user.organizationName,
   }
@@ -51,7 +54,7 @@ function toStoredUser(response: LoginResponse): StoredUser {
 
 export function AuthProvider({ children }: PropsWithChildren) {
   const [user, setUser] = useState<StoredUser | null>(() => tokenStorage.getUser())
-  const [permissions, setPermissions] = useState<PermissionDto[]>(() => tokenStorage.getPermissions())
+  const [permissions, setPermissions] = useState<PermissionCode[]>(() => tokenStorage.getPermissions())
 
   const logout = useCallback(() => {
     tokenStorage.clearAll()
@@ -62,7 +65,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
   const login = useCallback(async (request: LoginRequest) => {
     try {
       const loginResponse = unwrapResult<LoginResponse>(
-        await postIamJson(API_PATHS.iam.users.login, {
+        await postIamJson(API_PATHS.iam.authentication.login, {
           email: request.email,
           password: request.password,
         }),
@@ -71,8 +74,8 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
       tokenStorage.setToken(loginResponse.token)
 
-      const loadedPermissions = unwrapResult<PermissionDto[]>(
-        await getIamJson(API_PATHS.iam.roles.userPermissions(storedUser.id)),
+      const loadedPermissions = unwrapResult<PermissionCode[]>(
+        await getIamJson(API_PATHS.iam.userAccess.userPermissionCodes(storedUser.id)),
       )
 
       tokenStorage.setUser(storedUser)

@@ -10,7 +10,7 @@ export const LANGUAGE_OPTIONS = [
     value: LANGUAGE_CODES.english,
   },
   {
-    labelKey: 'shared.languages.ptBr',
+    labelKey: 'shared.languages.ptbr',
     value: LANGUAGE_CODES.portugueseBrazil,
   },
   {
@@ -18,3 +18,7 @@ export const LANGUAGE_OPTIONS = [
     value: LANGUAGE_CODES.spanish,
   },
 ] as const
+
+export function normalizeLanguageCode(language: string): string {
+  return language.trim().toLowerCase()
+}

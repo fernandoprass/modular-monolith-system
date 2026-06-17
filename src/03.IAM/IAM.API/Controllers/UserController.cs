@@ -1,11 +1,11 @@
 using Asp.Versioning;
-using Shared.Infrastructure.Authorization;
 using IAM.Application.Contracts;
 using IAM.Domain;
 using IAM.Domain.DTOs.Requests;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Application.Contracts;
+using Shared.Infrastructure.Authorization;
 
 namespace IAM.API.Controllers;
 
@@ -14,13 +14,11 @@ namespace IAM.API.Controllers;
 public class UserController(
    IUserContext userContext,
    IRegisterOrchestrator registerOrchestrator,
-   IUserService userService,
-   IAuthService authService) : BaseController
+   IUserService userService) : BaseController
 {
    private readonly IUserContext _userContext = userContext;
    private readonly IRegisterOrchestrator _registerOrchestrator = registerOrchestrator;
    private readonly IUserService _userService = userService;
-   private readonly IAuthService _authService = authService;
 
    [HttpGet("{id:guid}")]
    [Authorize]
@@ -129,12 +127,5 @@ public class UserController(
       return OkOrNotFound(response);
    }
 
-   [HttpPost("login")]
-   public async Task<IActionResult> Login([FromBody] UserLoginRequest request, CancellationToken cancellationToken)
-   {
-      var response = await _authService.LoginAsync(request, cancellationToken);
-
-      return response.IsSuccess ? OkOrNotFound(response) : Unauthorized(response);
-   }
 }
 

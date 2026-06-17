@@ -5,6 +5,7 @@ import {
   useReactTable,
   type ColumnDef,
   type OnChangeFn,
+  type RowSelectionState,
   type SortingState,
 } from '@tanstack/react-table'
 
@@ -16,9 +17,12 @@ type DataTableProps<TData> = {
   columns: ColumnDef<TData>[]
   data: TData[]
   emptyText: string
+  getRowId?: (row: TData) => string
   isLoading: boolean
   loadingText: string
+  onRowSelectionChange?: OnChangeFn<RowSelectionState>
   onSortingChange: OnChangeFn<SortingState>
+  rowSelection?: RowSelectionState
   sorting: SortingState
 }
 
@@ -26,19 +30,54 @@ export function DataTable<TData>({
   columns,
   data,
   emptyText,
+  getRowId,
   isLoading,
   loadingText,
+  onRowSelectionChange,
   onSortingChange,
+  rowSelection,
   sorting,
 }: DataTableProps<TData>) {
+  const tableColumns: ColumnDef<TData>[] = onRowSelectionChange === undefined
+    ? columns
+    : [
+      {
+        cell: ({ row }) => (
+          <input
+            aria-label="Select row"
+            checked={row.getIsSelected()}
+            className="checkbox"
+            onChange={row.getToggleSelectedHandler()}
+            type="checkbox"
+          />
+        ),
+        enableSorting: false,
+        header: ({ table }) => (
+          <input
+            aria-label="Select all rows"
+            checked={table.getIsAllRowsSelected()}
+            className="checkbox"
+            onChange={table.getToggleAllRowsSelectedHandler()}
+            type="checkbox"
+          />
+        ),
+        id: 'select',
+      },
+      ...columns,
+    ]
+
   const table = useReactTable({
-    columns,
+    columns: tableColumns,
     data,
+    enableRowSelection: onRowSelectionChange !== undefined,
     enableSortingRemoval: true,
     getCoreRowModel: getCoreRowModel(),
+    getRowId,
     getSortedRowModel: getSortedRowModel(),
+    onRowSelectionChange,
     onSortingChange,
     state: {
+      rowSelection,
       sorting,
     },
   })
@@ -53,6 +92,8 @@ export function DataTable<TData>({
                 <th className={header.column.id === 'actions' ? 'actions-column' : undefined} key={header.id}>
                   {header.isPlaceholder
                     ? null
+                    : !header.column.getCanSort()
+                      ? flexRender(header.column.columnDef.header, header.getContext())
                     : (
                       <DataTableSortableButton
                         canSort={header.column.getCanSort()}

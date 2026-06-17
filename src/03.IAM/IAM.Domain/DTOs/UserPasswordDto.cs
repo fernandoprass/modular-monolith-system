@@ -15,11 +15,12 @@ public sealed record UserPasswordDto
    public bool IsActive { get; init; }
    public bool IsSystemAdmin { get; init; } = false;
    public bool IsOrganizationAdmin { get; init; } = false;
-   public int FailedLoginAttempts { get; init; }
+   public int NumFailedLoginAttempts { get; init; }
    public DateTime CreatedAt { get; init; }
    public DateTime? EmailVerifiedAt { get; set; }
    public DateTime? LastLoginAt { get; set; }
    public string Language { get; init; } = LanguageOptions.English;
    public DateTime? LockedOutUntil { get; set; }
-   public IEnumerable<UserRole> UserRoles { get; set; } = [];
+   public IEnumerable<Guid> RoleIds { get; set; } = [];
+
 }

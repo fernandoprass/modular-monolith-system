@@ -111,3 +111,7 @@ export function patchIamJson(path: string, body: unknown): Promise<unknown> {
 export function deleteIamJson(path: string): Promise<unknown> {
   return request(path, { baseUrl: CONFIG.apiBaseUrls.iam, method: 'DELETE' })
 }
+
+export function deleteIamJsonWithBody(path: string, body: unknown): Promise<unknown> {
+  return request(path, { baseUrl: CONFIG.apiBaseUrls.iam, body, method: 'DELETE' })
+}

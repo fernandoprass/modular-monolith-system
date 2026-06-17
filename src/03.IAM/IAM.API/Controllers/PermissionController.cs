@@ -33,22 +33,5 @@ public class PermissionController(IPermissionService permissionService) : BaseCo
       return OkOrNotFound(result);
    }
 
-   [HttpPost("assign")]
-   [Authorize]
-   [RequirePermission(IamPermission.Permissions.Assign)]
-   public async Task<IActionResult> AssignToRole([FromBody] RolePermissionAssignRequest request, CancellationToken cancellationToken)
-   {
-      var result = await _permissionService.AssignToRoleAsync(request, cancellationToken);
-      return OkOrNotFound(result);
-   }
-
-   [HttpDelete("unassign")]
-   [Authorize]
-   [RequirePermission(IamPermission.Permissions.Assign)]
-   public async Task<IActionResult> UnassignFromRole([FromBody] RolePermissionUnassignRequest request, CancellationToken cancellationToken)
-   {
-      var result = await _permissionService.UnassignFromRoleAsync(request, cancellationToken);
-      return OkOrNotFound(result);
-   }
 }
 

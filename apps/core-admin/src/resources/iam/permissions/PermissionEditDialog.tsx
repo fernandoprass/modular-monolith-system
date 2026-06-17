@@ -103,11 +103,7 @@ export function PermissionEditDialog({
               {(field) => (
                 <Field>
                   <FieldLabel>{t('shared.fields.action')}</FieldLabel>
-                  <Select
-                    onValueChange={field.handleChange}
-                    options={toTranslatedOptions(PERMISSION_ACTION_OPTIONS, t)}
-                    value={field.state.value}
-                  />
+                  <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required value={field.state.value} />
                 </Field>
               )}
             </form.Field>

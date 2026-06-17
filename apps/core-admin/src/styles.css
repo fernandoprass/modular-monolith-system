@@ -822,6 +822,42 @@ textarea {
   justify-content: flex-end;
 }
 
+.permission-assignment-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: start;
+}
+
+.permission-action-column {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 44px;
+}
+
+.user-access-action-column {
+  min-width: 190px;
+}
+
+.permission-table-column {
+  display: grid;
+  gap: 8px;
+}
+
+.permission-info {
+  display: inline-grid;
+  width: 20px;
+  height: 20px;
+  place-items: center;
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  color: #475569;
+  cursor: help;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
 .checkbox-row {
   gap: 8px;
   font-size: 0.84rem;
@@ -1111,8 +1147,18 @@ textarea {
   }
 
   .toolbar,
-  .detail-grid {
+  .detail-grid,
+  .permission-assignment-grid {
     grid-template-columns: 1fr;
+  }
+
+  .permission-action-column {
+    flex-direction: row;
+    padding-top: 0;
+  }
+
+  .user-access-action-column {
+    display: grid;
   }
 
   .code-row {

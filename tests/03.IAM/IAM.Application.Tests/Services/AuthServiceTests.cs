@@ -79,11 +79,11 @@ public class AuthServiceTests
       var password = "StrongPassword123!";
       var roleId = Guid.NewGuid();
       var user = CreateValidUser(password, isUserAtive: true, isCustumerActive: true, isLockedUser: false);
-      user.UserRoles = [UserRole.Create(user.Id, roleId, DateTime.UtcNow, null)];
-      var permission = new PermissionDto(Guid.NewGuid(), "iam", "users", "list", IamPermission.Users.Read, "List Users", "Allows listing users", true);
+      user.RoleIds = [roleId];
+      var permissionList = new List<RolePermissionCodeDto> { new(roleId, IamPermission.Users.Read) };
 
       _userServiceMock.GetByEmailWithPasswordAsync(user.Email, Arg.Any<CancellationToken>()).Returns(user);
-      _roleQueryRepositoryMock.GetPermissionsByRoleIdAsync(roleId, Arg.Any<CancellationToken>()).Returns([permission]);
+      _roleQueryRepositoryMock.GetPermissionCodesByRoleIdsAsync(user.RoleIds, Arg.Any<CancellationToken>()).Returns(permissionList);
       var request = new UserLoginRequest(user.Email, password);
 
       var result = await _authService.LoginAsync(request, TestContext.Current.CancellationToken);

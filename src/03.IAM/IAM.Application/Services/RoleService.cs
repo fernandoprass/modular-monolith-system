@@ -124,17 +124,17 @@ public class RoleService(
 
          if (!validation.IsSuccess) return validation;
 
-         foreach (var role in request.Roles)
+         foreach (var roleId in request.RoleIds)
          {
-            var userRole = user.UserRoles.FirstOrDefault(ur => ur.RoleId == role.RoleId);
+            var userRole = user.UserRoles.FirstOrDefault(ur => ur.RoleId == roleId);
 
             if (userRole != null)
             {
-               userRole.UpdateValidity(role.StartsAt, role.ExpiresAt);
+               userRole.UpdateValidity(request.StartsAt, request.ExpiresAt);
             }
             else
             {
-               user.AddRole(role.RoleId, role.StartsAt, role.ExpiresAt);
+               user.AddRole(roleId, request.StartsAt, request.ExpiresAt);
             }
          }
 
@@ -160,7 +160,7 @@ public class RoleService(
    /// </summary>
    private async Task<bool> ValidateRolesAvailability(RoleAssignRequest request, Guid organizationId, CancellationToken cancellationToken)
    {
-      var requestedRoleIds = request.Roles.Select(r => r.RoleId).Distinct().ToList();
+      var requestedRoleIds = request.RoleIds.Distinct().ToList();
       var numberOfRolesToAssign = await _roleQueryRepository.CountRolesByRoleIdsAsync(requestedRoleIds, organizationId, cancellationToken);
 
       var allRequestedRolesExist = requestedRoleIds.Count == numberOfRolesToAssign;
@@ -206,32 +206,19 @@ public class RoleService(
 
    public async Task<Result<IEnumerable<RoleDto>>> GetAsync(RoleSearchRequest request, CancellationToken cancellationToken = default)
    {
-      if (request.UserId.HasValue)
+      var userRoles = await _roleQueryRepository.GetAsync(request, cancellationToken);
+      return Result<IEnumerable<RoleDto>>.Success(userRoles);
+   }
+
+   public async Task<Result<RoleDto>> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+   {
+      var role = await _roleQueryRepository.GetByIdAsync(id, cancellationToken);
+      if (role == null) return Result<RoleDto>.Failure(new NotFoundError(IamConst.Entity.Role));
+      return await ExecuteIfUserOwnsAsync(role.OrganizationId, async (ct) =>
       {
-         var user = await _iamUnitOfWork.Users.GetByIdAsync(request.UserId.Value, cancellationToken);
-
-         if (user == null) return Result<IEnumerable<RoleDto>>.Failure(new NotFoundError(IamConst.Entity.User));
-
-         return await ExecuteIfUserOwnsAsync(user.OrganizationId, async (ct) =>
-         {
-            var userRequest = request with
-            {
-               OrganizationId = _userContext.IsSystemAdmin ? request.OrganizationId ?? user.OrganizationId : _userContext.UserOwnerId
-            };
-
-            var userRoles = await _roleQueryRepository.GetAsync(userRequest, ct);
-            return Result<IEnumerable<RoleDto>>.Success(userRoles);
-         }, cancellationToken);
-      }
-
-      var searchRequest = request with
-      {
-         OrganizationId = _userContext.IsSystemAdmin ? request.OrganizationId : _userContext.UserOwnerId
-      };
-
-      var roles = await _roleQueryRepository.GetAsync(searchRequest, cancellationToken);
-
-      return Result<IEnumerable<RoleDto>>.Success(roles);
+         var roleDto = role.ToRoleDto();
+         return Result<RoleDto>.Success(roleDto);
+      }, cancellationToken);
    }
 
    public async Task<Result<IEnumerable<PermissionDto>>> GetRolePermissionsByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
@@ -253,6 +240,12 @@ public class RoleService(
       return await _roleQueryRepository.GetPermissionsByRoleIdAsync(roleId, cancellationToken);
    }
 
+   public async Task<Result<IEnumerable<string>>> GetPermissionCodesByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
+   {
+      var permissionCodes = await _roleQueryRepository.GetPermissionCodesByUserIdAsync(userId, cancellationToken);
+      return Result<IEnumerable<string>>.Success(permissionCodes);
+   }
+
    public async Task<IEnumerable<Guid>> GetDefaultRolesByOrganizationIdAsync(Guid organizationId, CancellationToken cancellationToken = default)
    {
       return await _roleQueryRepository.GetDefaultRolesByOrganizationIdAsync(organizationId, cancellationToken);
@@ -268,6 +261,19 @@ public class RoleService(
       {
          var roles = await _roleQueryRepository.GetRolesByUserIdAsync(userId, ct);
          return Result<IEnumerable<UserRoleDto>>.Success(roles);
+      }, cancellationToken);
+   }
+
+   public async Task<Result<IEnumerable<RoleDto>>> GetAvailableRolesByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
+   {
+      var user = await _iamUnitOfWork.Users.GetByIdAsync(userId, cancellationToken);
+
+      if (user == null) return Result<IEnumerable<RoleDto>>.Failure(new NotFoundError(IamConst.Entity.User));
+
+      return await ExecuteIfUserOwnsAsync(user.OrganizationId, async (ct) =>
+      {
+         var roles = await _roleQueryRepository.GetAvailableRolesByUserIdAsync(userId, ct);
+         return Result<IEnumerable<RoleDto>>.Success(roles);
       }, cancellationToken);
    }
 }

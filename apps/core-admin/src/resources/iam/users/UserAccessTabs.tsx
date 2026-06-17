@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 
 import { useTranslate } from '../../../app/i18n/i18n'
-import { useNotifyError } from '../../../auth/AuthProvider'
+import { useAuth, useNotifyError } from '../../../auth/AuthProvider'
 import { Badge } from '../../../components/ui/badge'
 import { Empty, EmptyDescription } from '../../../components/ui/empty'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../components/ui/tabs'
@@ -96,6 +96,7 @@ type RoleListProps = {
 
 function RoleList({ isLoading, roles }: RoleListProps) {
   const t = useTranslate()
+  const { user } = useAuth()
 
   if (isLoading) {
     return <p className="page-subtitle">{t('shared.common.loading')}</p>
@@ -127,10 +128,10 @@ function RoleList({ isLoading, roles }: RoleListProps) {
           {roles.map((role) => (
             <tr key={role.id}>
               <td>{role.name}</td>
-              <td>{formatUserDateTime(role.startsAt)}</td>
-              <td>{role.expiresAt ? formatUserDateTime(role.expiresAt) : '-'}</td>
-              <td>{formatUserDateTime(role.assignedBy)}</td>
-              <td>{formatUserDateTime(role.assignedAt)}</td>
+              <td>{formatUserDateTime(role.startsAt, user?.language)}</td>
+              <td>{role.expiresAt ? formatUserDateTime(role.expiresAt, user?.language) : '-'}</td>
+              <td>{formatUserDateTime(role.assignedBy, user?.language)}</td>
+              <td>{formatUserDateTime(role.assignedAt, user?.language)}</td>
               <td>
                 <Badge variant={role.isActive ? 'active' : 'inactive'}>
                   {role.isActive ? t('shared.status.active') : t('shared.status.inactive')}

@@ -10,13 +10,12 @@ import { Field, FieldGroup, FieldLabel } from '../../../components/ui/form'
 import { Input } from '../../../components/ui/input'
 import { Select } from '../../../components/ui/select'
 import { IAM_PERMISSIONS } from '../../../shared/iamConstants'
-import { LANGUAGE_CODES, LANGUAGE_OPTIONS } from '../../../shared/languages'
+import { LANGUAGE_CODES } from '../../../shared/languages'
 import { hasPermissionCode } from '../../../shared/permissions'
 import { OrganizationSelect } from '../organizations/OrganizationSelect'
 import { getCurrentUser, updateCurrentUser } from './userApi'
 import { UserAccessTabs } from './UserAccessTabs'
 import { USER_REQUEST_FIELDS, type UserDto } from './userTypes'
-import { toTranslatedOptions } from './userUi'
 
 type UserProfileForm = {
   language: string
@@ -63,10 +62,8 @@ export function UserProfilePage() {
     try {
       const loaded = await getCurrentUser()
       setUser(loaded)
-      form.reset({
-        language: loaded.language,
-        name: loaded.name,
-      })
+      form.setFieldValue('language', loaded.language)
+      form.setFieldValue('name', loaded.name)
     } catch (error) {
       notifyError(error, t('shared.errors.generic'))
     }
@@ -116,7 +113,11 @@ export function UserProfilePage() {
                       <FieldLabel>{t('shared.fields.language')}</FieldLabel>
                       <Select
                         onValueChange={field.handleChange}
-                        options={toTranslatedOptions(LANGUAGE_OPTIONS, t)}
+                        options={[
+                          { label: t('shared.languages.en'), value: LANGUAGE_CODES.english },
+                          { label: t('shared.languages.ptbr'), value: LANGUAGE_CODES.portugueseBrazil },
+                          { label: t('shared.languages.es'), value: LANGUAGE_CODES.spanish },
+                        ]}
                         value={field.state.value}
                       />
                     </Field>

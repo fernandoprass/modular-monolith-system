@@ -60,11 +60,11 @@ public static class UserMappers
          LastLoginAt = user.LastLoginAt,
          Language = user.Language,
          LockedOutUntil = user.LockedOutUntil,
-         FailedLoginAttempts = user.NumFailedLoginAttempts,
+         NumFailedLoginAttempts = user.NumFailedLoginAttempts,
          OrganizationId = user.OrganizationId,
          OrganizationName = user.Organization?.Name ?? string.Empty,
          OrganizationIsActive = user.Organization?.IsActive ?? false,
-         UserRoles = user.UserRoles
+         RoleIds = user.UserRoles.Select(ur => ur.RoleId)
       };
    }
 }

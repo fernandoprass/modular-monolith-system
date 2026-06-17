@@ -12,6 +12,7 @@ export const IAM_RESOURCES = {
 } as const
 
 export const IAM_ACTIONS = {
+  assign: 'assign',
   read: 'read',
   write: 'write',
 } as const
@@ -39,6 +40,7 @@ export const IAM_PERMISSIONS = {
     write: permission(IAM_RESOURCES.permissions, IAM_ACTIONS.write),
   },
   roles: {
+    assign: permission(IAM_RESOURCES.roles, IAM_ACTIONS.assign),
     read: permission(IAM_RESOURCES.roles, IAM_ACTIONS.read),
     write: permission(IAM_RESOURCES.roles, IAM_ACTIONS.write),
   },

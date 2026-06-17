@@ -1,11 +1,11 @@
 meta {
   name: assign
   type: http
-  seq: 3
+  seq: 4
 }
 
 post {
-  url: {{host.iam}}/api/{{version}}/iam/roles/assign
+  url: {{host.iam}}/api/{{version}}/iam/user-access/roles/assign
   body: json
   auth: bearer
 }

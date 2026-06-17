@@ -1,11 +1,9 @@
 using IAM.Domain.DTOs.Requests;
 using IAM.Domain.DTOs.Responses;
-using IAM.Domain.Entities;
 using IAM.Domain.Mappers;
 using IAM.Domain.QueryRepositories;
 using Microsoft.EntityFrameworkCore;
 using Shared.Application.Contracts;
-using static IAM.Domain.IamPermission;
 
 namespace IAM.Infrastructure.QueryRepositories;
 
@@ -54,6 +52,67 @@ public class PermissionQueryRepository(IamDbContext dbContext, IUserContext user
       return await query
          .Select(p => p.ToPermissionDto())
          .ToListAsync(cancellationToken);
+   }
+
+   public async Task<IEnumerable<PermissionDto>> GetByRoleIdAsync(Guid roleId, CancellationToken cancellationToken = default)
+   {
+      var query = _dbContext.Permissions
+         .AsNoTracking()
+         .Include(p => p.RolePermissions)
+         .Where(p => p.RolePermissions.Any(rp => rp.RoleId == roleId))
+         .OrderBy(p => p.Module)
+         .ThenBy(p => p.Resource)
+         .ThenBy(p => p.Action)
+         .Select(p => p.ToPermissionDto());
+
+      return await query.ToListAsync(cancellationToken);
+   }
+
+   /// <summary>
+   /// Retrieves a list of active permissions available to be assigned to a specific target role.
+   /// </summary>
+   /// <remarks>
+   /// This method filters the global permission catalog based on two strict criteria:
+   /// <list type="bullet">
+   /// <item><description>The current requesting user must currently possess the permission through their active, non-expired roles.</description></item>
+   /// <item><description>The target role (<paramref name="roleId"/>) must not already have this permission associated with it.</description></item>
+   /// </list>
+   /// </remarks>
+   /// <param name="roleId">The unique identifier of the target role receiving the new permission.</param>
+   /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+   /// <returns>A read-only collection of <see cref="PermissionDto"/> objects sorted by module, resource, and action.</returns>
+   public async Task<IEnumerable<PermissionDto>> GetByAvailablePermissionsRoleIdAsync(Guid roleId, CancellationToken cancellationToken = default)
+   {
+      var now = DateTime.UtcNow;
+
+      var existingPermissionIds = _dbContext.RolePermissions
+          .Where(rp => rp.RoleId == roleId)
+          .Select(rp => rp.PermissionId);
+
+      var query = _dbContext.UserRoles
+          .AsNoTracking()
+          .Where(ur => ur.UserId == _userContext.UserId &&
+                       ur.Role.IsActive &&
+                       ur.StartsAt <= now &&
+                       (ur.ExpiresAt == null || ur.ExpiresAt >= now))
+          .SelectMany(ur => ur.Role.RolePermissions.Select(rp => rp.Permission))
+          .Where(p => p.IsActive && !existingPermissionIds.Contains(p.Id))
+          .Distinct()
+          .OrderBy(p => p.Module)
+          .ThenBy(p => p.Resource)
+          .ThenBy(p => p.Action)
+          .Select(p => new PermissionDto(
+              p.Id,
+              p.Module,
+              p.Resource,
+              p.Action,
+              p.Code,
+              p.Title,
+              p.Description,
+              p.IsActive
+          ));
+
+      return await query.ToListAsync(cancellationToken);
    }
 
    public async Task<bool> CodeExistsAsync(string code, CancellationToken cancellationToken = default)

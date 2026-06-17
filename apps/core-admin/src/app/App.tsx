@@ -8,8 +8,9 @@ import { OrganizationProfilePage } from '../resources/iam/organizations/Organiza
 import { OrganizationViewPage } from '../resources/iam/organizations/OrganizationViewPage'
 import { PublicOrganizationCreatePage } from '../resources/iam/organizations/PublicOrganizationCreatePage'
 import { PermissionListPage } from '../resources/iam/permissions/PermissionListPage'
+import { RoleEditPage } from '../resources/iam/roles/RoleEditPage'
 import { RoleListPage } from '../resources/iam/roles/RoleListPage'
-import { UserCreatePage } from '../resources/iam/users/UserCreatePage'
+import { UserAccessPage } from '../resources/iam/user-access/UserAccessPage'
 import { UserEditPage } from '../resources/iam/users/UserEditPage'
 import { UserListPage } from '../resources/iam/users/UserListPage'
 import { UserProfilePage } from '../resources/iam/users/UserProfilePage'
@@ -35,11 +36,14 @@ function App() {
                 <Route path="organizations/:id" element={<OrganizationEditPage />} />
                 <Route path="organizations/:id/show" element={<OrganizationViewPage />} />
                 <Route path={APP_ROUTES.users.slice(1)} element={<UserListPage />} />
-                <Route path="users/create" element={<UserCreatePage />} />
+                <Route path="users/create" element={<UserEditPage />} />
                 <Route path="users/:id" element={<UserEditPage />} />
                 <Route path="users/:id/show" element={<UserViewPage />} />
                 <Route path={APP_ROUTES.userProfile.slice(1)} element={<UserProfilePage />} />
                 <Route path={APP_ROUTES.roles.slice(1)} element={<RoleListPage />} />
+                <Route path="roles/create" element={<RoleEditPage />} />
+                <Route path="roles/:id" element={<RoleEditPage />} />
+                <Route path={APP_ROUTES.userAccess.slice(1)} element={<UserAccessPage />} />
                 <Route path={APP_ROUTES.permissions.slice(1)} element={<PermissionListPage />} />
                 <Route path="*" element={<Navigate to={APP_ROUTES.dashboard} replace />} />
               </Route>

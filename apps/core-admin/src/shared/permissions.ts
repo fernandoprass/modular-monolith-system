@@ -11,18 +11,20 @@ export type PermissionDto = {
   isActive: boolean
 }
 
+export type PermissionCode = string
+
 const RESOURCE_ACCESS_ACTIONS = new Set<string>([
   IAM_ACTIONS.read,
 ])
 
-export function hasPermissionCode(permissions: PermissionDto[], code: string): boolean {
-  return permissions.some((permission) => permission.isActive && permission.code === code)
+export function hasPermissionCode(permissions: PermissionCode[], code: string): boolean {
+  return permissions.includes(code)
 }
 
-export function hasResourceAccess(permissions: PermissionDto[], resource: string): boolean {
-  return permissions.some((permission) =>
-    permission.isActive
-    && permission.resource === resource
-    && RESOURCE_ACCESS_ACTIONS.has(permission.action)
-  )
+export function hasResourceAccess(permissions: PermissionCode[], resource: string): boolean {
+  return permissions.some((permission) => {
+    const [, permissionResource, action] = permission.split('.')
+
+    return permissionResource === resource && action !== undefined && RESOURCE_ACCESS_ACTIONS.has(action)
+  })
 }

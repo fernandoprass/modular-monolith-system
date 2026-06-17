@@ -1,7 +1,7 @@
 meta {
   name: search by param
   type: http
-  seq: 5
+  seq: 3
 }
 
 get {
@@ -14,7 +14,6 @@ params:query {
   ~name: sys
   ~isActive: true
   ~userId: {{userId}}
-  ~organizationId: {{organizationId}}
 }
 
 auth:bearer {

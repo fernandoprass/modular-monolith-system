@@ -13,7 +13,10 @@ public interface IRoleService
    Task<Result> UnassignFromUserAsync(RoleUnassignRequest request, CancellationToken cancellationToken = default);
    Task<IEnumerable<Guid>> GetDefaultRolesByOrganizationIdAsync(Guid organizationId, CancellationToken cancellationToken = default);
    Task<Result<IEnumerable<RoleDto>>> GetAsync(RoleSearchRequest request, CancellationToken cancellationToken = default);
+   Task<Result<RoleDto>> GetByIdAsync(Guid roleId, CancellationToken cancellationToken = default);
    Task<Result<IEnumerable<UserRoleDto>>> GetRolesByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
+   Task<Result<IEnumerable<RoleDto>>> GetAvailableRolesByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
    Task<Result<IEnumerable<PermissionDto>>> GetRolePermissionsByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
+   Task<Result<IEnumerable<string>>> GetPermissionCodesByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
    Task<IEnumerable<PermissionDto>> GetPermissionsByRoleIdAsync(Guid roleId, CancellationToken cancellationToken = default);
 }

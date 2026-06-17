@@ -3,10 +3,12 @@ import {
   deleteIamJson,
   getIamJson,
   getIamJsonWithQuery,
+  patchIamJson,
   postIamJson,
   putIamJson,
 } from '../../../data/httpClient'
 import { ensureResultSuccess, unwrapResult } from '../../../data/result'
+import { normalizeLanguageCode } from '../../../shared/languages'
 import type { PermissionDto } from '../../../shared/permissions'
 import {
   USER_QUERY_PARAMS,
@@ -17,15 +19,16 @@ import {
   type UserDto,
   type UserLiteDto,
   type UserLookupDto,
+  type UserPasswordUpdateRequest,
   type UserRoleDto,
   type UserUpdateRequest,
 } from './userTypes'
 
 export type UserListQuery = {
+  organizationId: string
   email: string
   isActive: string | null
   name: string
-  organizationId: string
   pageNumber: number
   pageSize: number
 }
@@ -33,7 +36,6 @@ export type UserListQuery = {
 export type UserLookupQuery = {
   id: string
   includeInactive: boolean
-  organizationId: string
   search: string
   take: number
 }
@@ -62,11 +64,54 @@ function buildUserLookupQuery(request: UserLookupQuery): URLSearchParams {
 
   appendOptional(query, USER_QUERY_PARAMS.id, request.id)
   appendOptional(query, USER_QUERY_PARAMS.search, request.search)
-  appendOptional(query, USER_QUERY_PARAMS.organizationId, request.organizationId)
   query.set(USER_QUERY_PARAMS.includeInactive, request.includeInactive.toString())
   query.set(USER_QUERY_PARAMS.take, request.take.toString())
 
   return query
+}
+
+function readString(value: Record<string, unknown>, ...keys: string[]): string {
+  for (const key of keys) {
+    const data = value[key]
+
+    if (typeof data === 'string') {
+      return data
+    }
+  }
+
+  return ''
+}
+
+function readBoolean(value: Record<string, unknown>, ...keys: string[]): boolean {
+  for (const key of keys) {
+    const data = value[key]
+
+    if (typeof data === 'boolean') {
+      return data
+    }
+  }
+
+  return false
+}
+
+function normalizeUserDto(value: UserDto): UserDto {
+  const source = value as unknown as Record<string, unknown>
+
+  return {
+    ...value,
+    createdAt: readString(source, 'createdAt', 'CreatedAt'),
+    email: readString(source, 'email', 'Email'),
+    emailVerifiedAt: readString(source, 'emailVerifiedAt', 'EmailVerifiedAt') || null,
+    id: readString(source, 'id', 'Id'),
+    isActive: readBoolean(source, 'isActive', 'IsActive'),
+    isOrganizationAdmin: readBoolean(source, 'isOrganizationAdmin', 'IsOrganizationAdmin'),
+    isSystemAdmin: readBoolean(source, 'isSystemAdmin', 'IsSystemAdmin'),
+    language: normalizeLanguageCode(readString(source, 'language', 'Language')),
+    lastLoginAt: readString(source, 'lastLoginAt', 'LastLoginAt') || null,
+    name: readString(source, 'name', 'Name', 'fullName', 'FullName'),
+    organizationId: readString(source, 'organizationId', 'OrganizationId'),
+    organizationName: readString(source, 'organizationName', 'OrganizationName'),
+  }
 }
 
 export function toUserCreateRequest(data: UserCreateForm): UserCreateRequest {
@@ -100,23 +145,23 @@ export async function getUserLookup(request: UserLookupQuery): Promise<UserLooku
 export async function getUser(id: string): Promise<UserDto> {
   const response = await getIamJson(API_PATHS.iam.users.byId(id))
 
-  return unwrapResult<UserDto>(response)
+  return normalizeUserDto(unwrapResult<UserDto>(response))
 }
 
 export async function getCurrentUser(): Promise<UserDto> {
   const response = await getIamJson(API_PATHS.iam.users.profile)
 
-  return unwrapResult<UserDto>(response)
+  return normalizeUserDto(unwrapResult<UserDto>(response))
 }
 
 export async function getUserRoles(userId: string): Promise<UserRoleDto[]> {
-  const response = await getIamJson(API_PATHS.iam.roles.userRoles(userId))
+  const response = await getIamJson(API_PATHS.iam.userAccess.userRoles(userId))
 
   return unwrapResult<UserRoleDto[]>(response)
 }
 
 export async function getUserPermissions(userId: string): Promise<PermissionDto[]> {
-  const response = await getIamJson(API_PATHS.iam.roles.userPermissions(userId))
+  const response = await getIamJson(API_PATHS.iam.userAccess.userPermissions(userId))
 
   return unwrapResult<PermissionDto[]>(response)
 }
@@ -135,6 +180,12 @@ export async function updateUser(id: string, request: UserUpdateRequest): Promis
 
 export async function updateCurrentUser(request: UserUpdateRequest): Promise<void> {
   const response = await putIamJson(API_PATHS.iam.users.profile, request)
+
+  ensureResultSuccess(response)
+}
+
+export async function updateCurrentUserPassword(request: UserPasswordUpdateRequest): Promise<void> {
+  const response = await patchIamJson(API_PATHS.iam.users.password, request)
 
   ensureResultSuccess(response)
 }

@@ -79,8 +79,10 @@ public class RoleValidatorTests
    public void ValidateAssign_ShouldReturnFailure_WhenRolesAreMissingInSystem()
    {
       var request = new RoleAssignRequest(
-          UserId: Guid.NewGuid(),
-          Roles: [new(RoleId: Guid.NewGuid(), StartsAt: DateTime.UtcNow, ExpiresAt: null)] 
+          UserId: Guid.NewGuid(), 
+          StartsAt: DateTime.UtcNow, 
+          ExpiresAt: null,
+          RoleIds: [Guid.NewGuid()] 
       );
 
       var result = _validator.ValidateAssign(request, userExists: true, allRolesAvailable: false);
@@ -94,11 +96,10 @@ public class RoleValidatorTests
    {
       var roleId = Guid.NewGuid();
       var request = new RoleAssignRequest(
-          UserId: Guid.NewGuid(),
-          Roles: [
-             new(RoleId: roleId, StartsAt: DateTime.UtcNow, ExpiresAt: null), 
-             new(RoleId: roleId, StartsAt: DateTime.UtcNow, ExpiresAt: null)
-             ]
+          UserId: Guid.NewGuid(), 
+          StartsAt: DateTime.UtcNow, 
+          ExpiresAt: null,
+          RoleIds: [roleId, roleId]
       );
 
       var result = _validator.ValidateAssign(request, userExists: true, allRolesAvailable: true);
@@ -111,8 +112,10 @@ public class RoleValidatorTests
    public void ValidateAssign_ShouldReturnFailure_WhenRoleHasPastStartDate()
    {
       var request = new RoleAssignRequest(
-          UserId: Guid.NewGuid(),
-          Roles: [new(RoleId: Guid.NewGuid(), StartsAt: DateTime.UtcNow.AddDays(-1), ExpiresAt: DateTime.UtcNow.AddDays(1))]
+          UserId: Guid.NewGuid(), 
+          StartsAt: DateTime.UtcNow.AddDays(-1), 
+          ExpiresAt: DateTime.UtcNow.AddDays(1),
+          RoleIds: [Guid.NewGuid()]
       );
 
       var result = _validator.ValidateAssign(request, userExists: true, allRolesAvailable: true);
@@ -125,8 +128,10 @@ public class RoleValidatorTests
    public void ValidateAssign_ShouldReturnFailure_WhenRoleHasPastExpirationDate()
    {
       var request = new RoleAssignRequest(
-          UserId: Guid.NewGuid(),
-          Roles: [new(RoleId: Guid.NewGuid(), StartsAt: DateTime.UtcNow, ExpiresAt: DateTime.UtcNow.AddDays(-1))] 
+          UserId: Guid.NewGuid(), 
+          StartsAt: DateTime.UtcNow, ExpiresAt: 
+          DateTime.UtcNow.AddDays(-1),
+          RoleIds: [Guid.NewGuid()] 
       );
 
       var result = _validator.ValidateAssign(request, userExists: true, allRolesAvailable: true);
