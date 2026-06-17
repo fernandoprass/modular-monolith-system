@@ -1,11 +1,11 @@
 # Frontend Development Conventions
 
-This file defines rules for frontend work under `apps/`.
+This file defines rules for frontend work under `front/`.
 
 The current frontend app is:
 
 ```text
-apps/core-admin
+front/apps
 ```
 
 It is the admin UI for the Core API backend.
@@ -86,7 +86,7 @@ Plain CSS owns:
 Before working on API integration, read:
 
 ```text
-apps/backend.md
+front/backend.md
 docs/readme.md
 docs/00.core.e2e-tests.md
 src/00.Core/00.core.md
@@ -108,7 +108,7 @@ Keep frontend code organized by responsibility.
 Recommended structure:
 
 ```text
-apps/core-admin/src
+front/apps/src
 +-- app
 +-- auth
 +-- data
@@ -422,7 +422,7 @@ Keep translation files close to app-level i18n setup.
 Recommended folder:
 
 ```text
-apps/core-admin/src/app/i18n
+front/apps/src/app/i18n
 ```
 
 If a component needs text, it should use the app translation function.
