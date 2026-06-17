@@ -138,11 +138,17 @@ export function RoleEditPage() {
     }
 
     try {
-      setRole(await getRole(id))
+      const loaded = await getRole(id)
+      setRole(loaded)
+      form.setFieldValue('description', loaded.description)
+      form.setFieldValue('isActive', loaded.isActive)
+      form.setFieldValue('isDefault', loaded.isDefault)
+      form.setFieldValue('name', loaded.name)
+      form.setFieldValue('organizationId', loaded.organizationId ?? '')
     } catch (error) {
       notifyError(error, t('shared.errors.generic'))
     }
-  }, [id, isCreate, notifyError, t])
+  }, [form, id, isCreate, notifyError, t])
 
   const loadPermissions = useCallback(async () => {
     if (isCreate || id === undefined) {
@@ -182,18 +188,7 @@ export function RoleEditPage() {
       return
     }
 
-    if (role === null) {
-      return
-    }
-
-    form.reset({
-      description: role.description,
-      isActive: role.isActive,
-      isDefault: role.isDefault,
-      name: role.name,
-      organizationId: role.organizationId ?? '',
-    })
-  }, [form, isCreate, role])
+  }, [form, isCreate])
 
   async function handleAssignPermissions() {
     if (id === undefined) {

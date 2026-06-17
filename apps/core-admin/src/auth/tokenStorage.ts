@@ -7,6 +7,7 @@ export type StoredUser = {
   id: string
   isOrganizationAdmin: boolean
   isSystemAdmin: boolean
+  language: string
   organizationId: string
   organizationName: string
 }

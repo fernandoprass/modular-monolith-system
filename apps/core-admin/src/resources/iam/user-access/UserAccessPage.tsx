@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { useToast } from '../../../app/ToastProvider'
 import { useTranslate } from '../../../app/i18n/i18n'
-import { useNotifyError } from '../../../auth/AuthProvider'
+import { useAuth, useNotifyError } from '../../../auth/AuthProvider'
 import { Badge } from '../../../components/ui/badge'
 import { Button } from '../../../components/ui/button'
 import { Card, CardContent } from '../../../components/ui/card'
@@ -25,13 +25,14 @@ import {
 
 function todayDateTimeLocal(): string {
   const now = new Date()
-  now.setHours(0, 0, 0, 0)
 
   const year = now.getFullYear()
   const month = String(now.getMonth() + 1).padStart(2, '0')
   const day = String(now.getDate()).padStart(2, '0')
+  const hours = String(now.getHours()).padStart(2, '0')
+  const minutes = String(now.getMinutes()).padStart(2, '0')
 
-  return `${year}-${month}-${day}T00:00`
+  return `${year}-${month}-${day}T${hours}:${minutes}`
 }
 
 function dateTimeLocalToUtcIso(value: string): string {
@@ -48,6 +49,7 @@ export function UserAccessPage() {
   const t = useTranslate()
   const notifyError = useNotifyError()
   const { showSuccess } = useToast()
+  const { user } = useAuth()
   const [userId, setUserId] = useState('')
   const [availableRoles, setAvailableRoles] = useState<RoleDto[]>([])
   const [assignedRoles, setAssignedRoles] = useState<UserRoleDto[]>([])
@@ -90,12 +92,12 @@ export function UserAccessPage() {
     },
     {
       accessorKey: 'startsAt',
-      cell: ({ row }) => formatUserDateTime(row.original.startsAt),
+      cell: ({ row }) => formatUserDateTime(row.original.startsAt, user?.language),
       header: t('shared.fields.startsAt'),
     },
     {
       accessorKey: 'expiresAt',
-      cell: ({ row }) => row.original.expiresAt ? formatUserDateTime(row.original.expiresAt) : '-',
+      cell: ({ row }) => row.original.expiresAt ? formatUserDateTime(row.original.expiresAt, user?.language) : '-',
       header: t('shared.fields.expiresAt'),
     },
     {
@@ -107,7 +109,7 @@ export function UserAccessPage() {
       ),
       header: t('shared.fields.isActive'),
     },
-  ], [t])
+  ], [t, user?.language])
 
   const loadUserAccess = useCallback(async () => {
     if (userId.length === 0) {

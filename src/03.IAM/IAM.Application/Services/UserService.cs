@@ -54,11 +54,6 @@ public class UserService(
 
    public async Task<IEnumerable<UserLookupDto>> GetLookupAsync(UserLookupRequest request, CancellationToken cancellationToken = default)
    {
-      if (!_userContext.IsSystemAdmin)
-      {
-         request = request with { OrganizationId = _userContext.UserOwnerId };
-      }
-
       return await _userQueryRepository.GetLookupAsync(request, cancellationToken);
    }
 

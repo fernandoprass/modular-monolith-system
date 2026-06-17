@@ -5,6 +5,7 @@ using IAM.Domain.Mappers;
 using IAM.Domain.QueryRepositories;
 using Microsoft.EntityFrameworkCore;
 using Shared.Application.Contracts;
+using static IAM.Domain.IamPermission;
 
 namespace IAM.Infrastructure.QueryRepositories;
 
@@ -34,18 +35,16 @@ public class RoleQueryRepository(IamDbContext dbContext, IUserContext userContex
 
    public async Task<IEnumerable<RoleDto>> GetAsync(RoleSearchRequest request, CancellationToken cancellationToken = default)
    {
-      var query = request.UserId.HasValue
-         ? CreateUserRoleSearchQuery(request.UserId.Value)
-         : CreateQueryWithSecurityContextFilter();
+      var query = CreateQueryWithSecurityContextFilter();
 
       if (!string.IsNullOrWhiteSpace(request.Name))
       {
          query = query.Where(r => EF.Functions.ILike(r.Name, $"%{request.Name}%"));
       }
 
-      if (request.OrganizationId.HasValue)
+      if (request.UserId.HasValue)
       {
-         query = query.Where(r => r.OrganizationId == request.OrganizationId.Value);
+         query = query.Where(role => role.UserRoles.Any(userRole => userRole.UserId == request.UserId.Value));
       }
 
       if (request.IsActive.HasValue)
@@ -105,10 +104,13 @@ public class RoleQueryRepository(IamDbContext dbContext, IUserContext userContex
           .Where(ur => ur.UserId == userId)
           .Select(ur => ur.RoleId);
 
+
+
       // 2. Query the master Roles table, filtering out the ones they already have
       var query = _dbContext.Roles.AsNoTracking()
           .Where(r => r.IsActive && 
-                      r.OrganizationId == _userContext.UserOwnerId &&
+                      (r.OrganizationId == _userContext.UserOwnerId ||
+                       r.OrganizationId == (_userContext.IsSystemAdmin ? null : _userContext.UserOwnerId)) &&
                       !assignedRoleIds.Contains(r.Id)) // Core logic change
           .OrderBy(r => r.Name)
           .Select(r => new RoleDto(
@@ -205,7 +207,7 @@ public class RoleQueryRepository(IamDbContext dbContext, IUserContext userContex
       // 1. System Admins bypass security filters entirely
       if (_userContext.IsSystemAdmin)
       {
-         return query;
+         return query.Where(r => r.OrganizationId == null || r.OrganizationId == _userContext.UserOwnerId);
       }
 
       // 2. Regular users must be explicitly assigned to the role.
@@ -213,20 +215,5 @@ public class RoleQueryRepository(IamDbContext dbContext, IUserContext userContex
       return query.Where(role =>
           _dbContext.UserRoles.Any(ru => ru.RoleId == role.Id && ru.UserId == _userContext.UserId) ||
           (_userContext.IsOrganizationAdmin && role.OrganizationId == _userContext.UserOwnerId));
-   }
-
-   private IQueryable<Role> CreateUserRoleSearchQuery(Guid userId)
-   {
-      var query = _dbContext.Roles
-         .AsNoTracking()
-         .Where(role => role.UserRoles.Any(userRole => userRole.UserId == userId));
-
-      if (_userContext.IsSystemAdmin)
-      {
-         return query;
-      }
-
-      return query.Where(role =>
-         _dbContext.Users.Any(user => user.Id == userId && user.OrganizationId == _userContext.UserOwnerId));
    }
 }

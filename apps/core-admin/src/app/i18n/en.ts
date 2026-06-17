@@ -239,7 +239,7 @@ export const enMessages = {
     languages: {
       en: 'English',
       es: 'Spanish',
-      ptBr: 'Portuguese - Brazil',
+      ptbr: 'Portuguese - Brazil',
     },
     filters: {
       all: 'All',

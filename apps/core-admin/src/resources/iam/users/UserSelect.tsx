@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 
 import { useTranslate } from '../../../app/i18n/i18n'
-import { useAuth, useNotifyError } from '../../../auth/AuthProvider'
+import { useNotifyError } from '../../../auth/AuthProvider'
 import {
   InputSelect,
   InputSelectTrigger,
@@ -14,7 +14,6 @@ type UserSelectProps = {
   disabled?: boolean
   includeInactive?: boolean
   onValueChange: (value: string) => void
-  organizationId?: string
   value: string
 }
 
@@ -23,21 +22,16 @@ export function UserSelect({
   disabled = false,
   includeInactive = false,
   onValueChange,
-  organizationId = '',
   value,
 }: UserSelectProps) {
   const t = useTranslate()
-  const { user } = useAuth()
   const notifyError = useNotifyError()
   const [search, setSearch] = useState('')
   const [options, setOptions] = useState<SelectOption[]>([])
-  const effectiveOrganizationId = user?.isSystemAdmin === true
-    ? organizationId
-    : user?.organizationId ?? ''
 
   useEffect(() => {
     setSearch('')
-  }, [effectiveOrganizationId])
+  }, [value])
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -49,7 +43,6 @@ export function UserSelect({
         const users = await getUserLookup({
           id: value,
           includeInactive,
-          organizationId: effectiveOrganizationId,
           search,
           take: 25,
         })
@@ -64,7 +57,7 @@ export function UserSelect({
     }
 
     return () => window.clearTimeout(timeoutId)
-  }, [effectiveOrganizationId, includeInactive, notifyError, search, t, value])
+  }, [includeInactive, notifyError, search, t, value])
 
   return (
     <InputSelect

@@ -5,6 +5,7 @@ import { useToast } from '../app/ToastProvider'
 import { API_PATHS } from '../data/apiPaths'
 import { getIamJson, postIamJson } from '../data/httpClient'
 import { getApiErrorText, unwrapResult } from '../data/result'
+import { normalizeLanguageCode } from '../shared/languages'
 import type { PermissionCode } from '../shared/permissions'
 import { tokenStorage, type StoredUser } from './tokenStorage'
 
@@ -16,6 +17,7 @@ type LoginResponse = {
     id: string
     isOrganizationAdmin: boolean
     isSystemAdmin: boolean
+    language: string
     name: string
     organizationId: string
     organizationName: string
@@ -44,6 +46,7 @@ function toStoredUser(response: LoginResponse): StoredUser {
     id: response.user.id,
     isOrganizationAdmin: response.user.isOrganizationAdmin,
     isSystemAdmin: response.user.isSystemAdmin,
+    language: normalizeLanguageCode(response.user.language),
     organizationId: response.user.organizationId,
     organizationName: response.user.organizationName,
   }

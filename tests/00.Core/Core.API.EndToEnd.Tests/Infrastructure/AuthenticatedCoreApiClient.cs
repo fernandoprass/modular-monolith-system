@@ -155,11 +155,6 @@ public sealed class AuthenticatedCoreApiClient
          query.Add($"IsActive={request.IsActive.Value}");
       }
 
-      if (request.OrganizationId.HasValue)
-      {
-         query.Add($"OrganizationId={request.OrganizationId}");
-      }
-
       var uri = "/api/v1/iam/roles";
       if (query.Count > 0)
       {

@@ -110,6 +110,7 @@ public class UserQueryRepository(IamDbContext dbContext, IUserContext userContex
              Id = u.Id,
              Name = u.Name,
              Email = u.Email,
+             Language = u.Language,
              IsActive = u.IsActive
           })
           .ToListAsync(cancellationToken);
@@ -121,7 +122,7 @@ public class UserQueryRepository(IamDbContext dbContext, IUserContext userContex
 
    public async Task<IEnumerable<UserLookupDto>> GetLookupAsync(UserLookupRequest request, CancellationToken cancellationToken = default)
    {
-      var query = CreateQueryWithSecurityContextFilter(request.OrganizationId);
+      var query = CreateQueryWithSecurityContextFilter(_userContext.UserOwnerId);
 
       if (request.Id.HasValue)
       {
@@ -150,19 +151,13 @@ public class UserQueryRepository(IamDbContext dbContext, IUserContext userContex
           .ToListAsync(cancellationToken);
    }
 
-   private IQueryable<User> CreateQueryWithSecurityContextFilter(Guid? organizationId)
+   private IQueryable<User> CreateQueryWithSecurityContextFilter(Guid organizationId)
    {
       var query = _dbContext.Users.AsNoTracking();
 
-      if(!_userContext.IsSystemAdmin)
-      {
-         query = query.Where(u => u.OrganizationId == _userContext.UserOwnerId);
-      }
+      organizationId = _userContext.IsSystemAdmin ? organizationId : _userContext.UserOwnerId;
 
-      if (organizationId.HasValue)
-      {
-         query = query.Where(u => u.OrganizationId == organizationId.Value);
-      }
+      query = query.Where(u => u.OrganizationId == organizationId);
 
       return query;
    }

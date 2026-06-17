@@ -10,7 +10,6 @@ import { PublicOrganizationCreatePage } from '../resources/iam/organizations/Pub
 import { PermissionListPage } from '../resources/iam/permissions/PermissionListPage'
 import { RoleEditPage } from '../resources/iam/roles/RoleEditPage'
 import { RoleListPage } from '../resources/iam/roles/RoleListPage'
-import { UserCreatePage } from '../resources/iam/users/UserCreatePage'
 import { UserAccessPage } from '../resources/iam/user-access/UserAccessPage'
 import { UserEditPage } from '../resources/iam/users/UserEditPage'
 import { UserListPage } from '../resources/iam/users/UserListPage'
@@ -37,7 +36,7 @@ function App() {
                 <Route path="organizations/:id" element={<OrganizationEditPage />} />
                 <Route path="organizations/:id/show" element={<OrganizationViewPage />} />
                 <Route path={APP_ROUTES.users.slice(1)} element={<UserListPage />} />
-                <Route path="users/create" element={<UserCreatePage />} />
+                <Route path="users/create" element={<UserEditPage />} />
                 <Route path="users/:id" element={<UserEditPage />} />
                 <Route path="users/:id/show" element={<UserViewPage />} />
                 <Route path={APP_ROUTES.userProfile.slice(1)} element={<UserProfilePage />} />

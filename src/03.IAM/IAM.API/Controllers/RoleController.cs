@@ -1,10 +1,10 @@
 using Asp.Versioning;
-using Shared.Infrastructure.Authorization;
 using IAM.Application.Contracts;
 using IAM.Domain;
 using IAM.Domain.DTOs.Requests;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Shared.Infrastructure.Authorization;
 
 namespace IAM.API.Controllers;
 

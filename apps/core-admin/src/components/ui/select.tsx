@@ -17,10 +17,12 @@ type SelectProps = {
 }
 
 export function Select({ onValueChange, options, placeholder, value }: SelectProps) {
+  const selectedOption = options.find((option) => option.value === value)
+
   return (
     <SelectPrimitive.Root onValueChange={onValueChange} value={value}>
       <SelectPrimitive.Trigger className="select-trigger">
-        <SelectPrimitive.Value placeholder={placeholder} />
+        <span>{selectedOption?.label ?? placeholder}</span>
         <SelectPrimitive.Icon>
           <ChevronDown />
         </SelectPrimitive.Icon>

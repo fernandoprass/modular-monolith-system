@@ -16,7 +16,6 @@ import { FilterToolbar } from '../../../components/ui/filter-toolbar'
 import { Input } from '../../../components/ui/input'
 import { IAM_PERMISSIONS } from '../../../shared/iamConstants'
 import { hasPermissionCode } from '../../../shared/permissions'
-import { OrganizationSelect } from '../organizations/OrganizationSelect'
 import { UserSelect } from '../users/UserSelect'
 import { deleteRole, getRoles } from './roleApi'
 import { createRoleTableColumns } from './RoleListPageColumns'
@@ -37,7 +36,6 @@ export function RoleListPage() {
   const [roles, setRoles] = useState<RoleDto[]>([])
   const [deleteTarget, setDeleteTarget] = useState<RoleDto | null>(null)
   const [isLoading, setIsLoading] = useState(false)
-  const [organizationIdFilter, setOrganizationIdFilter] = useState('')
   const [sorting, setSorting] = useState<SortingState>([])
   const canCreate = hasPermissionCode(permissions, IAM_PERMISSIONS.roles.write)
   const canUpdate = hasPermissionCode(permissions, IAM_PERMISSIONS.roles.write)
@@ -78,7 +76,6 @@ export function RoleListPage() {
 
   function handleReset() {
     filterForm.reset()
-    setOrganizationIdFilter('')
     void loadRoles(EMPTY_ROLE_SEARCH)
   }
 
@@ -112,31 +109,13 @@ export function RoleListPage() {
         event.preventDefault()
         void filterForm.handleSubmit()
       }}>
-        <filterForm.Field name="organizationId">
-          {(field) => (
-            <Field>
-              <FieldLabel>{t('shared.fields.organization')}</FieldLabel>
-              <OrganizationSelect
-                clearable
-                onValueChange={(value) => {
-                  setOrganizationIdFilter(value)
-                  field.handleChange(value)
-                  filterForm.setFieldValue('userId', '')
-                }}
-                value={field.state.value}
-              />
-            </Field>
-          )}
-        </filterForm.Field>
         <filterForm.Field name="userId">
           {(field) => (
             <Field>
               <FieldLabel>{t('shared.fields.user')}</FieldLabel>
               <UserSelect
                 clearable
-                key={organizationIdFilter}
                 onValueChange={field.handleChange}
-                organizationId={organizationIdFilter}
                 value={field.state.value}
               />
             </Field>

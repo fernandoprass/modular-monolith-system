@@ -19,7 +19,6 @@ import { DataTablePagination } from '../../../components/ui/data-table-paginatio
 import { IAM_PERMISSIONS } from '../../../shared/iamConstants'
 import { DEFAULT_PAGINATION } from '../../../shared/pagination'
 import { hasPermissionCode } from '../../../shared/permissions'
-import { OrganizationSelect } from '../organizations/OrganizationSelect'
 import { createUserTableColumns } from './UserListPageColumns'
 import { deleteUser, getUsers } from './userApi'
 import type { PagedResultDto, UserLiteDto } from './userTypes'
@@ -29,8 +28,7 @@ export function UserListPage() {
   const navigate = useNavigate()
   const notifyError = useNotifyError()
   const { showSuccess } = useToast()
-  const { permissions } = useAuth()
-  const [appliedOrganizationIdFilter, setAppliedOrganizationIdFilter] = useState('')
+  const { permissions, user } = useAuth()
   const [appliedIsActiveFilter, setAppliedIsActiveFilter] = useState<string | null>(null)
   const [appliedNameFilter, setAppliedNameFilter] = useState('')
   const [appliedEmailFilter, setAppliedEmailFilter] = useState('')
@@ -57,11 +55,9 @@ export function UserListPage() {
       email: '',
       isActive: 'all',
       name: '',
-      organizationId: '',
     },
     onSubmit: ({ value }) => {
       setPageNumber(DEFAULT_PAGINATION.pageNumber)
-      setAppliedOrganizationIdFilter(value.organizationId)
       setAppliedIsActiveFilter(value.isActive === 'all' ? null : value.isActive)
       setAppliedNameFilter(value.name)
       setAppliedEmailFilter(value.email)
@@ -75,7 +71,7 @@ export function UserListPage() {
         email: appliedEmailFilter,
         isActive: appliedIsActiveFilter,
         name: appliedNameFilter,
-        organizationId: appliedOrganizationIdFilter,
+        organizationId: user?.organizationId ?? '',
         pageNumber: targetPage,
         pageSize,
       }))
@@ -84,7 +80,7 @@ export function UserListPage() {
     } finally {
       setIsLoading(false)
     }
-  }, [appliedEmailFilter, appliedIsActiveFilter, appliedNameFilter, appliedOrganizationIdFilter, notifyError, pageNumber, pageSize, t])
+  }, [appliedEmailFilter, appliedIsActiveFilter, appliedNameFilter, notifyError, pageNumber, pageSize, t, user?.organizationId])
 
   useEffect(() => {
     void loadUsers(pageNumber)
@@ -92,7 +88,6 @@ export function UserListPage() {
 
   function handleReset() {
     filterForm.reset()
-    setAppliedOrganizationIdFilter('')
     setAppliedIsActiveFilter(null)
     setAppliedNameFilter('')
     setAppliedEmailFilter('')
@@ -136,19 +131,6 @@ export function UserListPage() {
         event.preventDefault()
         void filterForm.handleSubmit()
       }}>
-        <filterForm.Field name="organizationId">
-          {(field) => (
-            <Field>
-              <FieldLabel>{t('resources.iam.organization')}</FieldLabel>
-              <OrganizationSelect
-                clearable
-                onValueChange={field.handleChange}
-                value={field.state.value}
-              />
-            </Field>
-          )}
-        </filterForm.Field>
-
         <filterForm.Field name="name">
           {(field) => (
             <Field>

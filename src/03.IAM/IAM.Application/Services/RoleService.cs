@@ -206,32 +206,8 @@ public class RoleService(
 
    public async Task<Result<IEnumerable<RoleDto>>> GetAsync(RoleSearchRequest request, CancellationToken cancellationToken = default)
    {
-      if (request.UserId.HasValue)
-      {
-         var user = await _iamUnitOfWork.Users.GetByIdAsync(request.UserId.Value, cancellationToken);
-
-         if (user == null) return Result<IEnumerable<RoleDto>>.Failure(new NotFoundError(IamConst.Entity.User));
-
-         return await ExecuteIfUserOwnsAsync(user.OrganizationId, async (ct) =>
-         {
-            var userRequest = request with
-            {
-               OrganizationId = _userContext.IsSystemAdmin ? request.OrganizationId ?? user.OrganizationId : _userContext.UserOwnerId
-            };
-
-            var userRoles = await _roleQueryRepository.GetAsync(userRequest, ct);
-            return Result<IEnumerable<RoleDto>>.Success(userRoles);
-         }, cancellationToken);
-      }
-
-      var searchRequest = request with
-      {
-         OrganizationId = _userContext.IsSystemAdmin ? request.OrganizationId : _userContext.UserOwnerId
-      };
-
-      var roles = await _roleQueryRepository.GetAsync(searchRequest, cancellationToken);
-
-      return Result<IEnumerable<RoleDto>>.Success(roles);
+      var userRoles = await _roleQueryRepository.GetAsync(request, cancellationToken);
+      return Result<IEnumerable<RoleDto>>.Success(userRoles);
    }
 
    public async Task<Result<RoleDto>> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)

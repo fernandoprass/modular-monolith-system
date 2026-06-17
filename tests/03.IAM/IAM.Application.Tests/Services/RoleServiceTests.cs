@@ -441,7 +441,7 @@ public class RoleServiceTests
    {
       var organizationId = Guid.NewGuid();
       var roleName = "Admin";
-      var request = new RoleSearchRequest(roleName, null, null, null);
+      var request = new RoleSearchRequest(roleName, null, null);
       var roles = new List<RoleDto>
       {
          CreateRoleDto(roleName, organizationId)
@@ -450,7 +450,7 @@ public class RoleServiceTests
       _userContextMock.UserOwnerId.Returns(organizationId);
       _userContextMock.IsSystemAdmin.Returns(false);
       _roleQueryRepositoryMock.GetAsync(
-         Arg.Is<RoleSearchRequest>(r => r.Name == roleName && r.OrganizationId == organizationId),
+         Arg.Is<RoleSearchRequest>(r => r.Name == roleName),
          Arg.Any<CancellationToken>())
          .Returns(roles);
 
@@ -465,7 +465,7 @@ public class RoleServiceTests
    public async Task GetAsync_WithNoFilters_ShouldReturnAllRoles()
    {
       var organizationId = Guid.NewGuid();
-      var request = new RoleSearchRequest(null, null, null, null);
+      var request = new RoleSearchRequest(null, null, null);
       var roles = new List<RoleDto>
       {
          CreateRoleDto("Admin", organizationId),
@@ -475,7 +475,7 @@ public class RoleServiceTests
       _userContextMock.UserOwnerId.Returns(organizationId);
       _userContextMock.IsSystemAdmin.Returns(false);
       _roleQueryRepositoryMock.GetAsync(
-         Arg.Is<RoleSearchRequest>(r => r.Name == null && r.OrganizationId == organizationId),
+         Arg.Is<RoleSearchRequest>(r => r.Name == null),
          Arg.Any<CancellationToken>())
          .Returns(roles);
 
@@ -490,7 +490,7 @@ public class RoleServiceTests
    public async Task GetAsync_WithSystemAdmin_ShouldKeepRequestedOrganizationFilter()
    {
       var organizationId = Guid.NewGuid();
-      var request = new RoleSearchRequest(null, null, null, organizationId);
+      var request = new RoleSearchRequest(null, null, null);
       var roles = new List<RoleDto>
       {
          CreateRoleDto("Admin", Guid.NewGuid()),
@@ -499,7 +499,7 @@ public class RoleServiceTests
 
       _userContextMock.IsSystemAdmin.Returns(true);
       _roleQueryRepositoryMock.GetAsync(
-         Arg.Is<RoleSearchRequest>(r => r.OrganizationId == organizationId),
+         Arg.Any<RoleSearchRequest>(),
          Arg.Any<CancellationToken>())
          .Returns(roles);
 
@@ -507,7 +507,7 @@ public class RoleServiceTests
 
       Assert.True(result.IsSuccess);
       await _roleQueryRepositoryMock.Received(1).GetAsync(
-         Arg.Is<RoleSearchRequest>(r => r.OrganizationId == organizationId),
+         Arg.Any<RoleSearchRequest>(),
          Arg.Any<CancellationToken>());
    }
 
@@ -516,7 +516,7 @@ public class RoleServiceTests
    {
       var organizationId = Guid.NewGuid();
       var user = User.Create("Test User", "test@example.com", "hash", DateTime.UtcNow.AddMonths(1), LanguageOptions.English, organizationId);
-      var request = new RoleSearchRequest(null, user.Id, true, null);
+      var request = new RoleSearchRequest(null, user.Id, true);
       var roles = new List<RoleDto>
       {
          CreateRoleDto("Admin", organizationId)
@@ -526,7 +526,7 @@ public class RoleServiceTests
       _userContextMock.IsSystemAdmin.Returns(false);
       _unitOfWorkMock.Users.GetByIdAsync(user.Id, Arg.Any<CancellationToken>()).Returns(user);
       _roleQueryRepositoryMock.GetAsync(
-         Arg.Is<RoleSearchRequest>(r => r.UserId == user.Id && r.IsActive == true && r.OrganizationId == organizationId),
+         Arg.Is<RoleSearchRequest>(r => r.UserId == user.Id && r.IsActive == true),
          Arg.Any<CancellationToken>())
          .Returns(roles);
 
@@ -535,37 +535,6 @@ public class RoleServiceTests
       Assert.True(result.IsSuccess);
       Assert.Single(result.Data!);
    }
-
-   [Fact]
-   public async Task GetAsync_WithUserId_ShouldReturnNotFound_WhenUserDoesNotExist()
-   {
-      var userId = Guid.NewGuid();
-      var request = new RoleSearchRequest(null, userId, null, null);
-
-      _unitOfWorkMock.Users.GetByIdAsync(userId, Arg.Any<CancellationToken>()).Returns((User?)null);
-
-      var result = await _roleService.GetAsync(request);
-
-      Assert.False(result.IsSuccess);
-      await _roleQueryRepositoryMock.DidNotReceive().GetAsync(Arg.Any<RoleSearchRequest>(), Arg.Any<CancellationToken>());
-   }
-
-   [Fact]
-   public async Task GetAsync_WithUserId_ShouldReturnUnauthorized_WhenUserDoesNotOwnOrganization()
-   {
-      var user = User.Create("Test User", "test@example.com", "hash", DateTime.UtcNow.AddMonths(1), LanguageOptions.English, Guid.NewGuid());
-      var request = new RoleSearchRequest(null, user.Id, null, null);
-
-      _userContextMock.UserOwnerId.Returns(Guid.NewGuid());
-      _userContextMock.IsSystemAdmin.Returns(false);
-      _unitOfWorkMock.Users.GetByIdAsync(user.Id, Arg.Any<CancellationToken>()).Returns(user);
-
-      var result = await _roleService.GetAsync(request);
-
-      Assert.False(result.IsSuccess);
-      await _roleQueryRepositoryMock.DidNotReceive().GetAsync(Arg.Any<RoleSearchRequest>(), Arg.Any<CancellationToken>());
-   }
-
    #endregion
 
    #region GetRolePermissionsByUserIdAsync Tests

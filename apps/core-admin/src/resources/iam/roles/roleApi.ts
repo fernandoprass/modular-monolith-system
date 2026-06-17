@@ -87,11 +87,30 @@ function readBoolean(value: Record<string, unknown>, ...keys: string[]): boolean
   return false
 }
 
-function normalizeRoleDto(value: RoleDto): RoleDto {
-  const source = value as unknown as Record<string, unknown>
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null
+}
+
+function unwrapRoleSource(value: unknown): Record<string, unknown> {
+  if (!isRecord(value)) {
+    return {}
+  }
+
+  if (!('id' in value) && !('Id' in value)) {
+    const nested = value.data ?? value.Data
+
+    if (isRecord(nested)) {
+      return unwrapRoleSource(nested)
+    }
+  }
+
+  return value
+}
+
+function normalizeRoleDto(value: unknown): RoleDto {
+  const source = unwrapRoleSource(value)
 
   return {
-    ...value,
     description: readString(source, 'description', 'Description'),
     id: readString(source, 'id', 'Id'),
     isActive: readBoolean(source, 'isActive', 'IsActive'),
