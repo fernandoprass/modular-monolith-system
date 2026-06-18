@@ -81,7 +81,7 @@ public class UserValidator : IUserValidator
       UserUpdateOrganizationAdminRequest request)
    {
       var isAdminUser = userContext.IsSystemAdmin || userContext.IsOrganizationAdmin;
-      var userBelongsToOperatorOrganization = userContext.IsSystemAdmin || user?.OrganizationId == userContext.UserOwnerId;
+      var userBelongsToOperatorOrganization = userContext.IsSystemAdmin || user?.OrganizationId == userContext.OrganizationId;
 
       var validator = new FluentValidator<UserUpdateOrganizationAdminRequest>()
          .RuleForValue(user).IsNotNull(new NotFoundError(IamConst.Entity.User))

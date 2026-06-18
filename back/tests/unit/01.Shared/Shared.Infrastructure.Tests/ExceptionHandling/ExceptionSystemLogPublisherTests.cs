@@ -17,7 +17,7 @@ public class ExceptionSystemLogPublisherTests
       var eventPublisher = Substitute.For<IEventPublisher>();
       var userContext = Substitute.For<IUserContext>();
       userContext.UserId.Returns(Guid.CreateVersion7());
-      userContext.UserOwnerId.Returns(Guid.CreateVersion7());
+      userContext.OrganizationId.Returns(Guid.CreateVersion7());
       var publisher = new ExceptionSystemLogPublisher(eventPublisher, userContext, Substitute.For<ILogger<ExceptionSystemLogPublisher>>());
 
       await publisher.PublishAsync(

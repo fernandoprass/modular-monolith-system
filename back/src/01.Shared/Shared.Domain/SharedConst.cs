@@ -75,7 +75,7 @@ public static partial class SharedConst
    {
       public static class Claim
       {
-         public const string UserOwnerId = "userOwnerId";
+         public const string OrganizationId = "organizationId";
          public const string IsSystemAdmin = "isSystemAdmin";
          public const string IsOrganizationAdmin = "isOrganizationAdmin";
          public const string Issuer = "IAM.API";

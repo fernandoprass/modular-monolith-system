@@ -117,7 +117,7 @@ public class ParameterValidatorTests
    [Fact]
    public void ValidateOwnerUpdate_WhenRegexDoesNotMatch_ShouldHaveError()
    {
-      var parameter = new Parameter { OverrideType = ParameterOverrideType.UserOwnerId, ValidationRegex = "^[0-9]+$", ValidationErrorCustomMessage = "Must be numbers" };
+      var parameter = new Parameter { OverrideType = ParameterOverrideType.OrganizationId, ValidationRegex = "^[0-9]+$", ValidationErrorCustomMessage = "Must be numbers" };
       var request = new ParameterOwnerUpdateRequest("NotANumber");
 
       var result = _validator.ValidateOwnerUpdate(parameter, request);

@@ -27,7 +27,7 @@ public static class ParameterMappers
 
    public static ParameterSearchRequestInternal ToInternal(
      this ParameterSearchRequest publicRequest,
-     Guid userOwnerId,
+     Guid organizationId,
      Guid userId,
      bool isSystemAdmin)
    {
@@ -39,7 +39,7 @@ public static class ParameterMappers
           publicRequest.Title,
           publicRequest.Description,
           userId,
-          userOwnerId,
+          organizationId,
           isSystemAdmin
       );
    }

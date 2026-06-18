@@ -96,7 +96,7 @@ public class SentinelLogQueryRepository(SentinelDbContext dbContext) : ISentinel
       var filters = new List<FilterDefinition<AuditLog>>();
 
       if (!userContext.IsSystemAdmin)
-         filters.Add(builder.Eq(a => a.OrganizationId, userContext.UserOwnerId));
+         filters.Add(builder.Eq(a => a.OrganizationId, userContext.OrganizationId));
       else if (request.OrganizationId.HasValue)
          filters.Add(builder.Eq(a => a.OrganizationId, request.OrganizationId.Value));
 
@@ -133,7 +133,7 @@ public class SentinelLogQueryRepository(SentinelDbContext dbContext) : ISentinel
       var filters = new List<FilterDefinition<SystemLog>>();
 
       if (!userContext.IsSystemAdmin)
-         filters.Add(builder.Eq(s => s.OrganizationId, userContext.UserOwnerId));
+         filters.Add(builder.Eq(s => s.OrganizationId, userContext.OrganizationId));
       else if (request.OrganizationId.HasValue)
          filters.Add(builder.Eq(s => s.OrganizationId, request.OrganizationId.Value));
 
@@ -186,7 +186,7 @@ public class SentinelLogQueryRepository(SentinelDbContext dbContext) : ISentinel
 
       if (!userContext.IsSystemAdmin)
       {
-         filter &= builder.Eq(a => a.OrganizationId, userContext.UserOwnerId);
+         filter &= builder.Eq(a => a.OrganizationId, userContext.OrganizationId);
       }
 
       var auditLog = await _dbContext.AuditLogs
@@ -219,7 +219,7 @@ public class SentinelLogQueryRepository(SentinelDbContext dbContext) : ISentinel
 
       if (!userContext.IsSystemAdmin)
       {
-         filter &= builder.Eq(s => s.OrganizationId, userContext.UserOwnerId);
+         filter &= builder.Eq(s => s.OrganizationId, userContext.OrganizationId);
       }
 
       var systemLog = await _dbContext.SystemLogs

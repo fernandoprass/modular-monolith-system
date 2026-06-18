@@ -10,7 +10,7 @@ public class ParameterRedisCacheRepository(IConnectionMultiplexer redis) : IPara
    private const string DefaultField = "default";
    private readonly IDatabase _database = redis.GetDatabase();
 
-   public async Task<string?> GetAsync(string key, Guid userOwnerId, Guid userId, CancellationToken cancellationToken = default)
+   public async Task<string?> GetAsync(string key, Guid organizationId, Guid userId, CancellationToken cancellationToken = default)
    {
       var redisKey = GetCacheKey(key);
       var keyType = await _database.KeyTypeAsync(redisKey);
@@ -33,7 +33,7 @@ public class ParameterRedisCacheRepository(IConnectionMultiplexer redis) : IPara
 
       var values = await _database.HashGetAsync(
          redisKey,
-         [DefaultField, userOwnerId.ToString(), userId.ToString()]);
+         [DefaultField, organizationId.ToString(), userId.ToString()]);
 
       if (!values[2].IsNull)
       {

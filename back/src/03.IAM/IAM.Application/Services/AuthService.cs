@@ -154,7 +154,7 @@ public class AuthService(
             new (SharedConst.Security.Claim.Language, user.Language),
             new (SharedConst.Security.Claim.IsSystemAdmin, user.IsSystemAdmin.ToString()),
             new (SharedConst.Security.Claim.IsOrganizationAdmin, user.IsOrganizationAdmin.ToString()),
-            new (SharedConst.Security.Claim.UserOwnerId, user.OrganizationId.ToString()),
+            new (SharedConst.Security.Claim.OrganizationId, user.OrganizationId.ToString()),
             new (JwtRegisteredClaimNames.Jti, Guid.CreateVersion7().ToString())
         };
 

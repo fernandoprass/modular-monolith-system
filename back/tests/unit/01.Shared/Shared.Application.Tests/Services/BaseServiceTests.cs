@@ -62,7 +62,7 @@ public class BaseServiceTests
    {
       var myOrganizationId = Guid.NewGuid();
       _userContextMock.IsSystemAdmin.Returns(false);
-      _userContextMock.UserOwnerId.Returns(myOrganizationId);
+      _userContextMock.OrganizationId.Returns(myOrganizationId);
 
       var actionCalled = false;
 
@@ -80,12 +80,12 @@ public class BaseServiceTests
    public async Task ExecuteIfUserOwnsAsync_ShouldFail_WhenUserIsNotOwnerAndNotAdmin()
    {
       _userContextMock.IsSystemAdmin.Returns(false);
-      _userContextMock.UserOwnerId.Returns(Guid.NewGuid());
+      _userContextMock.OrganizationId.Returns(Guid.NewGuid());
 
-      var targetOwnerId = Guid.NewGuid(); // Different id
+      var targetOrganizationId = Guid.NewGuid(); // Different id
       var actionCalled = false;
 
-      var result = await _service.TestExecuteIfUserOwnsAsync(targetOwnerId, (ct) =>
+      var result = await _service.TestExecuteIfUserOwnsAsync(targetOrganizationId, (ct) =>
       {
          actionCalled = true;
          return Task.FromResult(Result.Success());
@@ -100,7 +100,7 @@ public class BaseServiceTests
             auditLog.Feature == SharedConst.Logger.Feature.Security &&
             auditLog.Action == SharedConst.Logger.Action.UnauthorizedResourceAccess &&
             auditLog.PrivacyLevel == AuditPrivacyLevel.High &&
-            auditLog.TargetId == targetOwnerId),
+            auditLog.TargetId == targetOrganizationId),
          Arg.Any<CancellationToken>());
    }
 
@@ -108,7 +108,7 @@ public class BaseServiceTests
    public async Task ExecuteIfUserOwnsAsync_Generic_ShouldReturnCorrectTypeOnFailure()
    {
       _userContextMock.IsSystemAdmin.Returns(false);
-      _userContextMock.UserOwnerId.Returns(Guid.NewGuid());
+      _userContextMock.OrganizationId.Returns(Guid.NewGuid());
 
       var result = await _service.TestExecuteIfUserOwnsAsyncGeneric<Result<string>>(Guid.NewGuid(), (ct) =>
           Task.FromResult(Result<string>.Success("Should not be called")), TestContext.Current.CancellationToken);
@@ -128,7 +128,7 @@ public class BaseServiceTests
    {
       var myOrganizationId = Guid.NewGuid();
       _userContextMock.IsSystemAdmin.Returns(false);
-      _userContextMock.UserOwnerId.Returns(myOrganizationId);
+      _userContextMock.OrganizationId.Returns(myOrganizationId);
       var actionCalled = false;
 
       var result = await _service.TestExecuteIfUserOwnSingleObjectAsync(myOrganizationId, (ct) =>
@@ -145,7 +145,7 @@ public class BaseServiceTests
    public async Task ExecuteIfUserOwnSingleObjectAsync_ShouldReturnDefault_WhenUserDoesNotOwnTheResource()
    {
       _userContextMock.IsSystemAdmin.Returns(false);
-      _userContextMock.UserOwnerId.Returns(Guid.NewGuid());
+      _userContextMock.OrganizationId.Returns(Guid.NewGuid());
       var actionCalled = false;
 
       var result = await _service.TestExecuteIfUserOwnSingleObjectAsync(Guid.NewGuid(), (ct) =>
@@ -168,7 +168,7 @@ public class BaseServiceTests
    {
       var myOrganizationId = Guid.NewGuid();
       _userContextMock.IsSystemAdmin.Returns(false);
-      _userContextMock.UserOwnerId.Returns(myOrganizationId);
+      _userContextMock.OrganizationId.Returns(myOrganizationId);
       var actionCalled = false;
 
       var result = await _service.TestExecuteIfUserOwnsCollectionAsync(myOrganizationId, (ct) =>
@@ -185,7 +185,7 @@ public class BaseServiceTests
    public async Task ExecuteIfUserOwnsCollectionAsync_ShouldReturnEmptyCollection_WhenUserDoesNotOwnTheResource()
    {
       _userContextMock.IsSystemAdmin.Returns(false);
-      _userContextMock.UserOwnerId.Returns(Guid.NewGuid());
+      _userContextMock.OrganizationId.Returns(Guid.NewGuid());
       var actionCalled = false;
 
       var result = await _service.TestExecuteIfUserOwnsCollectionAsync(Guid.NewGuid(), (ct) =>
@@ -208,7 +208,7 @@ public class BaseServiceTests
    {
       var myOrganizationId = Guid.NewGuid();
       _userContextMock.IsSystemAdmin.Returns(false);
-      _userContextMock.UserOwnerId.Returns(myOrganizationId);
+      _userContextMock.OrganizationId.Returns(myOrganizationId);
 
       await _service.TestExecuteIfUserOwnsAsync(myOrganizationId, (ct) => Task.FromResult(Result.Success()), TestContext.Current.CancellationToken);
 

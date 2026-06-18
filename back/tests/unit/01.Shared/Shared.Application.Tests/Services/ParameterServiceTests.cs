@@ -38,7 +38,7 @@ public class ParameterServiceTests
       _eventPublisherMock = Substitute.For<IEventPublisher>();
       _parameterValueCacheMock = Substitute.For<IParameterCacheRespository>();
 
-      _userContextMock.UserOwnerId.Returns(Guid.NewGuid());
+      _userContextMock.OrganizationId.Returns(Guid.NewGuid());
       _userContextMock.UserId.Returns(Guid.NewGuid());
       _userContextMock.IpAddress.Returns("127.0.0.1");
       _userContextMock.UserAgent.Returns("test-agent");
@@ -59,7 +59,7 @@ public class ParameterServiceTests
    [Fact]
    public async Task GetValueAsync_ShouldReturnCachedValue_WhenCacheHit()
    {
-      _parameterValueCacheMock.GetAsync(_keyMock, _userContextMock.UserOwnerId, _userContextMock.UserId, Arg.Any<CancellationToken>())
+      _parameterValueCacheMock.GetAsync(_keyMock, _userContextMock.OrganizationId, _userContextMock.UserId, Arg.Any<CancellationToken>())
          .Returns(Task.FromResult<string?>("cached"));
 
       var result = await _parameterService.GetValueAsync(_keyMock, TestContext.Current.CancellationToken);
@@ -83,7 +83,7 @@ public class ParameterServiceTests
          OverrideType = ParameterOverrideType.None
       };
 
-      _parameterQueryRepositoryMock.GetValueAsync(_keyMock, _userContextMock.UserOwnerId, _userContextMock.UserId, Arg.Any<CancellationToken>())
+      _parameterQueryRepositoryMock.GetValueAsync(_keyMock, _userContextMock.OrganizationId, _userContextMock.UserId, Arg.Any<CancellationToken>())
          .Returns(parameter);
 
       var result = await _parameterService.GetValueAsync(_keyMock, TestContext.Current.CancellationToken);
@@ -105,16 +105,16 @@ public class ParameterServiceTests
          DefaultValue = "Blue",
          CanBeOverride = true,
          IsOverride = true,
-         OverrideType = ParameterOverrideType.UserOwnerId
+         OverrideType = ParameterOverrideType.OrganizationId
       };
 
-      _parameterQueryRepositoryMock.GetValueAsync(_keyMock, _userContextMock.UserOwnerId, _userContextMock.UserId, Arg.Any<CancellationToken>())
+      _parameterQueryRepositoryMock.GetValueAsync(_keyMock, _userContextMock.OrganizationId, _userContextMock.UserId, Arg.Any<CancellationToken>())
          .Returns(parameter);
 
       var result = await _parameterService.GetValueAsync(_keyMock, TestContext.Current.CancellationToken);
 
       result.IsSuccess.Should().BeTrue();
-      await _parameterValueCacheMock.Received(1).SetAsync(parameter, _userContextMock.UserOwnerId, Arg.Any<CancellationToken>());
+      await _parameterValueCacheMock.Received(1).SetAsync(parameter, _userContextMock.OrganizationId, Arg.Any<CancellationToken>());
    }
 
    [Fact]
@@ -130,7 +130,7 @@ public class ParameterServiceTests
          OverrideType = ParameterOverrideType.UserId
       };
 
-      _parameterQueryRepositoryMock.GetValueAsync(_keyMock, _userContextMock.UserOwnerId, _userContextMock.UserId, Arg.Any<CancellationToken>())
+      _parameterQueryRepositoryMock.GetValueAsync(_keyMock, _userContextMock.OrganizationId, _userContextMock.UserId, Arg.Any<CancellationToken>())
          .Returns(parameter);
 
       var result = await _parameterService.GetValueAsync(_keyMock, TestContext.Current.CancellationToken);
@@ -149,10 +149,10 @@ public class ParameterServiceTests
          DefaultValue = "Blue",
          CanBeOverride = true,
          IsOverride = false,
-         OverrideType = ParameterOverrideType.UserOwnerId
+         OverrideType = ParameterOverrideType.OrganizationId
       };
 
-      _parameterQueryRepositoryMock.GetValueAsync(_keyMock, _userContextMock.UserOwnerId, _userContextMock.UserId, Arg.Any<CancellationToken>())
+      _parameterQueryRepositoryMock.GetValueAsync(_keyMock, _userContextMock.OrganizationId, _userContextMock.UserId, Arg.Any<CancellationToken>())
          .Returns(parameter);
 
       var result = await _parameterService.GetValueAsync(_keyMock, TestContext.Current.CancellationToken);
@@ -210,18 +210,18 @@ public class ParameterServiceTests
    {
       var parameterId = Guid.NewGuid();
       var request = new ParameterOwnerUpdateRequest("NewValue");
-      var parameter = Parameter.Create("Module", "Group", "Key", "Title", "Desc", ParameterType.String, "Value", null, null, null, null, ParameterOverrideType.UserOwnerId);
+      var parameter = Parameter.Create("Module", "Group", "Key", "Title", "Desc", ParameterType.String, "Value", null, null, null, null, ParameterOverrideType.OrganizationId);
 
       _parameterRepositoryMock.GetByIdAsync(parameterId, Arg.Any<CancellationToken>()).Returns(parameter);
       _parameterValidatorMock.ValidateOwnerUpdate(parameter, request).Returns(Result.Success());
-      _parameterOverrideRepositoryMock.GetByParameterIdAndOwnerIdAsync(parameterId, _userContextMock.UserOwnerId, Arg.Any<CancellationToken>()).Returns((ParameterOverride)null);
+      _parameterOverrideRepositoryMock.GetByParameterIdAndOwnerIdAsync(parameterId, _userContextMock.OrganizationId, Arg.Any<CancellationToken>()).Returns((ParameterOverride)null);
 
       var result = await _parameterService.SaveOverrideValueAsync(parameterId, request, TestContext.Current.CancellationToken);
 
       result.IsSuccess.Should().BeTrue();
       await _unitOfWorkMock.ParameterOverrides.Received(1).AddAsync(Arg.Any<ParameterOverride>(), Arg.Any<CancellationToken>());
       await _unitOfWorkMock.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
-      await _parameterValueCacheMock.Received(1).RemoveOverrideAsync(parameter.Key, _userContextMock.UserOwnerId, Arg.Any<CancellationToken>());
+      await _parameterValueCacheMock.Received(1).RemoveOverrideAsync(parameter.Key, _userContextMock.OrganizationId, Arg.Any<CancellationToken>());
       await _parameterValueCacheMock.DidNotReceive().RemoveAsync(parameter.Key, Arg.Any<CancellationToken>());
       await _eventPublisherMock.Received(1).PublishAuditLogEventAsync(Arg.Any<AuditLogEvent>(), Arg.Any<CancellationToken>());
    }
@@ -242,9 +242,9 @@ public class ParameterServiceTests
          "Value",
          null,
          null,
-         ParameterOverrideType.UserOwnerId,
+         ParameterOverrideType.OrganizationId,
          true);
-      var parameterOverride = ParameterOverride.Create(parameterId, _userContextMock.UserOwnerId, "Dark");
+      var parameterOverride = ParameterOverride.Create(parameterId, _userContextMock.OrganizationId, "Dark");
 
       _parameterOverrideRepositoryMock.GetByIdAsync(parameterOverride.Id, Arg.Any<CancellationToken>()).Returns(parameterOverride);
       _parameterQueryRepositoryMock.GetByIdAsync(parameterId, Arg.Any<CancellationToken>()).Returns(parameter);
@@ -254,7 +254,7 @@ public class ParameterServiceTests
       result.IsSuccess.Should().BeTrue();
       await _unitOfWorkMock.ParameterOverrides.Received(1).DeleteAsync(parameterOverride.Id, Arg.Any<CancellationToken>());
       await _unitOfWorkMock.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
-      await _parameterValueCacheMock.Received(1).RemoveOverrideAsync(parameter.Key, _userContextMock.UserOwnerId, Arg.Any<CancellationToken>());
+      await _parameterValueCacheMock.Received(1).RemoveOverrideAsync(parameter.Key, _userContextMock.OrganizationId, Arg.Any<CancellationToken>());
       await _parameterValueCacheMock.DidNotReceive().RemoveAsync(parameter.Key, Arg.Any<CancellationToken>());
       await _parameterRepositoryMock.DidNotReceive().GetByIdAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>());
       await _eventPublisherMock.Received(1).PublishAuditLogEventAsync(Arg.Any<AuditLogEvent>(),Arg.Any<CancellationToken>());
@@ -283,7 +283,7 @@ public class ParameterServiceTests
    {
       var valueDto = new ParameterValueDto { Value = value };
 
-      _parameterQueryRepositoryMock.GetValueAsync(_keyMock, _userContextMock.UserOwnerId, _userContextMock.UserId, Arg.Any<CancellationToken>()).Returns(valueDto);
+      _parameterQueryRepositoryMock.GetValueAsync(_keyMock, _userContextMock.OrganizationId, _userContextMock.UserId, Arg.Any<CancellationToken>()).Returns(valueDto);
 
       var result = await _parameterService.GetShortIntAsync(_keyMock, TestContext.Current.CancellationToken);
 
@@ -302,7 +302,7 @@ public class ParameterServiceTests
    {
       var valueDto = new ParameterValueDto { Value = invalidValue };
 
-      _parameterQueryRepositoryMock.GetValueAsync(_keyMock, _userContextMock.UserOwnerId, _userContextMock.UserId, Arg.Any<CancellationToken>()).Returns(valueDto);
+      _parameterQueryRepositoryMock.GetValueAsync(_keyMock, _userContextMock.OrganizationId, _userContextMock.UserId, Arg.Any<CancellationToken>()).Returns(valueDto);
 
       Func<Task> act = async () => await _parameterService.GetShortIntAsync(_keyMock, TestContext.Current.CancellationToken);
 
@@ -320,7 +320,7 @@ public class ParameterServiceTests
    {
       var valueDto = new ParameterValueDto { Value = value };
 
-      _parameterQueryRepositoryMock.GetValueAsync(_keyMock, _userContextMock.UserOwnerId, _userContextMock.UserId, Arg.Any<CancellationToken>())
+      _parameterQueryRepositoryMock.GetValueAsync(_keyMock, _userContextMock.OrganizationId, _userContextMock.UserId, Arg.Any<CancellationToken>())
          .Returns(valueDto);
 
       var result = await _parameterService.GetIntAsync(_keyMock, TestContext.Current.CancellationToken);
@@ -340,7 +340,7 @@ public class ParameterServiceTests
    {
       var valueDto = new ParameterValueDto { Value = invalidValue };
 
-      _parameterQueryRepositoryMock.GetValueAsync(_keyMock, _userContextMock.UserOwnerId, _userContextMock.UserId, Arg.Any<CancellationToken>()).Returns(valueDto);
+      _parameterQueryRepositoryMock.GetValueAsync(_keyMock, _userContextMock.OrganizationId, _userContextMock.UserId, Arg.Any<CancellationToken>()).Returns(valueDto);
 
       Func<Task> act = async () => await _parameterService.GetIntAsync(_keyMock, TestContext.Current.CancellationToken);
 
@@ -358,7 +358,7 @@ public class ParameterServiceTests
    {
       var valueDto = new ParameterValueDto { Value = value };
 
-      _parameterQueryRepositoryMock.GetValueAsync(_keyMock, _userContextMock.UserOwnerId, _userContextMock.UserId, Arg.Any<CancellationToken>()).Returns(valueDto);
+      _parameterQueryRepositoryMock.GetValueAsync(_keyMock, _userContextMock.OrganizationId, _userContextMock.UserId, Arg.Any<CancellationToken>()).Returns(valueDto);
 
       var result = await _parameterService.GetLongIntAsync(_keyMock, TestContext.Current.CancellationToken);
 
@@ -376,7 +376,7 @@ public class ParameterServiceTests
    {
       var valueDto = new ParameterValueDto { Value = invalidValue };
 
-      _parameterQueryRepositoryMock.GetValueAsync(_keyMock, _userContextMock.UserOwnerId, _userContextMock.UserId, Arg.Any<CancellationToken>()).Returns(valueDto);
+      _parameterQueryRepositoryMock.GetValueAsync(_keyMock, _userContextMock.OrganizationId, _userContextMock.UserId, Arg.Any<CancellationToken>()).Returns(valueDto);
 
       Func<Task> act = async () => await _parameterService.GetLongIntAsync(_keyMock, TestContext.Current.CancellationToken);
 
@@ -396,7 +396,7 @@ public class ParameterServiceTests
    {
       var valueDto = new ParameterValueDto { Value = value };
 
-      _parameterQueryRepositoryMock.GetValueAsync(_keyMock, _userContextMock.UserOwnerId, _userContextMock.UserId, Arg.Any<CancellationToken>())
+      _parameterQueryRepositoryMock.GetValueAsync(_keyMock, _userContextMock.OrganizationId, _userContextMock.UserId, Arg.Any<CancellationToken>())
          .Returns(valueDto);
 
       var result = await _parameterService.GetDoubleAsync(_keyMock, TestContext.Current.CancellationToken);
@@ -412,7 +412,7 @@ public class ParameterServiceTests
    {
       var valueDto = new ParameterValueDto { Value = invalidValue };
 
-      _parameterQueryRepositoryMock.GetValueAsync(_keyMock, _userContextMock.UserOwnerId, _userContextMock.UserId, Arg.Any<CancellationToken>()).Returns(valueDto);
+      _parameterQueryRepositoryMock.GetValueAsync(_keyMock, _userContextMock.OrganizationId, _userContextMock.UserId, Arg.Any<CancellationToken>()).Returns(valueDto);
 
       Func<Task> act = async () => await _parameterService.GetDoubleAsync(_keyMock, TestContext.Current.CancellationToken);
 
@@ -429,7 +429,7 @@ public class ParameterServiceTests
    {
       var valueDto = new ParameterValueDto { Value = value };
 
-      _parameterQueryRepositoryMock.GetValueAsync(_keyMock, _userContextMock.UserOwnerId, _userContextMock.UserId, Arg.Any<CancellationToken>())
+      _parameterQueryRepositoryMock.GetValueAsync(_keyMock, _userContextMock.OrganizationId, _userContextMock.UserId, Arg.Any<CancellationToken>())
          .Returns(valueDto);
 
       var result = await _parameterService.GetDecimalAsync(_keyMock, TestContext.Current.CancellationToken);
@@ -446,7 +446,7 @@ public class ParameterServiceTests
    {
       var valueDto = new ParameterValueDto { Value = invalidValue };
 
-      _parameterQueryRepositoryMock.GetValueAsync(_keyMock, _userContextMock.UserOwnerId, _userContextMock.UserId, Arg.Any<CancellationToken>()).Returns(valueDto);
+      _parameterQueryRepositoryMock.GetValueAsync(_keyMock, _userContextMock.OrganizationId, _userContextMock.UserId, Arg.Any<CancellationToken>()).Returns(valueDto);
 
       Func<Task> act = async () => await _parameterService.GetDecimalAsync(_keyMock, TestContext.Current.CancellationToken);
 
@@ -461,7 +461,7 @@ public class ParameterServiceTests
    {
       var valueDto = new ParameterValueDto { Value = value };
 
-      _parameterQueryRepositoryMock.GetValueAsync(_keyMock, _userContextMock.UserOwnerId, _userContextMock.UserId, Arg.Any<CancellationToken>()).Returns(valueDto);
+      _parameterQueryRepositoryMock.GetValueAsync(_keyMock, _userContextMock.OrganizationId, _userContextMock.UserId, Arg.Any<CancellationToken>()).Returns(valueDto);
 
       var result = await _parameterService.GetBoolAsync(_keyMock, TestContext.Current.CancellationToken);
 
@@ -478,7 +478,7 @@ public class ParameterServiceTests
    {
       var valueDto = new ParameterValueDto { Value = value };
 
-      _parameterQueryRepositoryMock.GetValueAsync(_keyMock, _userContextMock.UserOwnerId, _userContextMock.UserId, Arg.Any<CancellationToken>())
+      _parameterQueryRepositoryMock.GetValueAsync(_keyMock, _userContextMock.OrganizationId, _userContextMock.UserId, Arg.Any<CancellationToken>())
          .Returns(valueDto);
 
       var result = await _parameterService.GetDateTimeAsync(_keyMock, TestContext.Current.CancellationToken);
@@ -497,7 +497,7 @@ public class ParameterServiceTests
    {
       var valueDto = new ParameterValueDto { Value = invalidValue };
 
-      _parameterQueryRepositoryMock.GetValueAsync(_keyMock, _userContextMock.UserOwnerId, _userContextMock.UserId, Arg.Any<CancellationToken>()).Returns(valueDto);
+      _parameterQueryRepositoryMock.GetValueAsync(_keyMock, _userContextMock.OrganizationId, _userContextMock.UserId, Arg.Any<CancellationToken>()).Returns(valueDto);
 
       Func<Task> act = async () => await _parameterService.GetDateTimeAsync(_keyMock, TestContext.Current.CancellationToken);
 
@@ -509,7 +509,7 @@ public class ParameterServiceTests
    public async Task GetStringAsync_ShouldReturnEmptyString_WhenValueIsNull()
    {
       var valueDto = new ParameterValueDto { Value = null };
-      _parameterQueryRepositoryMock.GetValueAsync(_keyMock, _userContextMock.UserOwnerId, _userContextMock.UserId, Arg.Any<CancellationToken>()).Returns(valueDto);
+      _parameterQueryRepositoryMock.GetValueAsync(_keyMock, _userContextMock.OrganizationId, _userContextMock.UserId, Arg.Any<CancellationToken>()).Returns(valueDto);
 
       var result = await _parameterService.GetStringAsync(_keyMock, TestContext.Current.CancellationToken);
 

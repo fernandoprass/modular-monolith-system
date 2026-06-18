@@ -122,7 +122,7 @@ public class UserQueryRepository(IamDbContext dbContext, IUserContext userContex
 
    public async Task<IEnumerable<UserLookupDto>> GetLookupAsync(UserLookupRequest request, CancellationToken cancellationToken = default)
    {
-      var query = CreateQueryWithSecurityContextFilter(_userContext.UserOwnerId);
+      var query = CreateQueryWithSecurityContextFilter(_userContext.OrganizationId);
 
       if (request.Id.HasValue)
       {
@@ -155,7 +155,7 @@ public class UserQueryRepository(IamDbContext dbContext, IUserContext userContex
    {
       var query = _dbContext.Users.AsNoTracking();
 
-      organizationId = _userContext.IsSystemAdmin ? organizationId : _userContext.UserOwnerId;
+      organizationId = _userContext.IsSystemAdmin ? organizationId : _userContext.OrganizationId;
 
       query = query.Where(u => u.OrganizationId == organizationId);
 

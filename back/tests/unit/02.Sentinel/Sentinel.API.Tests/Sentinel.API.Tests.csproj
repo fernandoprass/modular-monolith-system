@@ -23,6 +23,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\src\01.Shared\Shared.Application\Shared.Application.csproj" />
+    <ProjectReference Include="..\..\..\..\src\02.Sentinel\Sentinel.API\Sentinel.API.csproj" />
+    <ProjectReference Include="..\..\..\..\src\02.Sentinel\Sentinel.Domain\Sentinel.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Using Include="Xunit" />
   </ItemGroup>
 

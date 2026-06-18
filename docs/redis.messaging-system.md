@@ -244,7 +244,7 @@ await _eventPublisher.PublishAuditLogEventAsync(new AuditLogEvent
    PrivacyLevel = AuditPrivacyLevel.Medium,
    Description = "Updated user",
    UserId = _userContext.UserId,
-   OrganizationId = _userContext.UserOwnerId,
+   OrganizationId = _userContext.OrganizationId,
    TargetId = user.Id,
    IpAddress = _userContext.IpAddress,
    UserAgent = _userContext.UserAgent,
@@ -289,7 +289,7 @@ await _eventPublisher.PublishSystemLogEventAsync(new SystemLogEvent
    StackTrace = exception.StackTrace,
    RequestId = httpContext.TraceIdentifier,
    UserId = _userContext.UserId,
-   OrganizationId = _userContext.UserOwnerId
+   OrganizationId = _userContext.OrganizationId
 }, cancellationToken);
 ```
 

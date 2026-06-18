@@ -294,7 +294,7 @@ Current fields:
 ```csharp
 var values = await _database.HashGetAsync(
    redisKey,
-   [DefaultField, userOwnerId.ToString(), userId.ToString()]);
+   [DefaultField, organizationId.ToString(), userId.ToString()]);
 ```
 
 Current priority:

@@ -25,7 +25,7 @@ internal class ParameterQueryRepository(SharedDbContext dbContext) : IParameterQ
                   join paramOverride in _dbContext.ParameterOverrides on new
                   {
                      ParamId = param.Id,
-                     Owner = param.OverrideType == ParameterOverrideType.UserOwnerId ? request.UserOwnerId : request.UserId
+                     Owner = param.OverrideType == ParameterOverrideType.OrganizationId ? request.OrganizationId : request.UserId
                   }
                   equals new
                   {
@@ -81,7 +81,7 @@ internal class ParameterQueryRepository(SharedDbContext dbContext) : IParameterQ
       return parameter?.ToParameterDto();
    }
 
-   public async Task<ParameterValueDto?> GetValueAsync(string key, Guid userOwnerId, Guid userId, CancellationToken cancellationToken = default)
+   public async Task<ParameterValueDto?> GetValueAsync(string key, Guid organizationId, Guid userId, CancellationToken cancellationToken = default)
    {
       return await _dbContext.Parameters
               .AsNoTracking()
@@ -91,7 +91,7 @@ internal class ParameterQueryRepository(SharedDbContext dbContext) : IParameterQ
                  param = p,
                  paramOverride = _dbContext.ParameterOverrides
                       .Where(o => o.ParameterId == p.Id &&
-                                 o.OwnerId == (p.OverrideType == ParameterOverrideType.UserOwnerId ? userOwnerId : userId))
+                                 o.OwnerId == (p.OverrideType == ParameterOverrideType.OrganizationId ? organizationId : userId))
                       .FirstOrDefault()
               })
               .Select(x => new ParameterValueDto

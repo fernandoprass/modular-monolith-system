@@ -9,6 +9,6 @@ public interface IUserContext
    string? UserAgent { get; }
    string Language { get; }
    Guid UserId { get; }
-   Guid UserOwnerId { get; }
+   Guid OrganizationId { get; }
    IEnumerable<string> Roles { get; }
 }

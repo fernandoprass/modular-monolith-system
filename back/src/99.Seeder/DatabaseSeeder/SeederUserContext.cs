@@ -8,7 +8,7 @@ public class SeederUserContext : IUserContext
    public bool IsSystemAdmin => true;
    public bool IsOrganizationAdmin => false;
    public Guid UserId => Guid.Empty;
-   public Guid UserOwnerId => Guid.Empty;
+   public Guid OrganizationId => Guid.Empty;
    public string? UserName => "DatabaseSeeder";
    public string Language => "en";
    public string? IpAddress => null;

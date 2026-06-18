@@ -6,7 +6,7 @@ namespace Shared.Infrastructure.Repositories;
 // Used when Redis is not configured, so parameter services keep working with database-only reads.
 public class ParameterNullCacheRepository : IParameterCacheRespository
 {
-   public Task<string?> GetAsync(string key, Guid userOwnerId, Guid userId, CancellationToken cancellationToken = default)
+   public Task<string?> GetAsync(string key, Guid organizationId, Guid userId, CancellationToken cancellationToken = default)
    {
       return Task.FromResult<string?>(null);
    }

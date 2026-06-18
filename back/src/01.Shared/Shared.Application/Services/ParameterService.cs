@@ -44,7 +44,7 @@ internal class ParameterService(
 
    public async Task<Result<IEnumerable<ParameterLiteDto>>> GetAsync(ParameterSearchRequest request, CancellationToken cancellationToken = default)
    {
-      var requestInternal = request.ToInternal(_userContext.UserOwnerId, _userContext.UserId, _userContext.IsSystemAdmin);
+      var requestInternal = request.ToInternal(_userContext.OrganizationId, _userContext.UserId, _userContext.IsSystemAdmin);
 
       var parameters = await _parameterQueryRepository.GetAllAsync(requestInternal, cancellationToken);
 
@@ -53,7 +53,7 @@ internal class ParameterService(
 
    public async Task<Result<ParameterValueDto>> GetValueAsync(string key, CancellationToken cancellationToken = default)
    {
-      var cachedValue = await _parameterValueCache.GetAsync(key, _userContext.UserOwnerId, _userContext.UserId, cancellationToken);
+      var cachedValue = await _parameterValueCache.GetAsync(key, _userContext.OrganizationId, _userContext.UserId, cancellationToken);
       if (cachedValue != null)
       {
          return Result<ParameterValueDto>.Success(new ParameterValueDto
@@ -63,7 +63,7 @@ internal class ParameterService(
          });
       }
 
-      var parameter = await _parameterQueryRepository.GetValueAsync(key, _userContext.UserOwnerId, _userContext.UserId, cancellationToken);
+      var parameter = await _parameterQueryRepository.GetValueAsync(key, _userContext.OrganizationId, _userContext.UserId, cancellationToken);
 
       if (parameter == null) return Result<ParameterValueDto>.Failure(new NotFoundError(key));
 
@@ -295,7 +295,7 @@ internal class ParameterService(
    {
       return overrideType switch
       {
-         ParameterOverrideType.UserOwnerId => _userContext.UserOwnerId,
+         ParameterOverrideType.OrganizationId => _userContext.OrganizationId,
          ParameterOverrideType.UserId => _userContext.UserId,
          _ => throw new InvalidOperationException("Invalid override type")
       };
@@ -331,7 +331,7 @@ internal class ParameterService(
          userAgent: userContext.UserAgent,
          userId: userContext.UserId,
          targetId: targetId,
-         organizationId: userContext.UserOwnerId,
+         organizationId: userContext.OrganizationId,
          metadata: JsonSerializer.Serialize(metadata)
       );
 

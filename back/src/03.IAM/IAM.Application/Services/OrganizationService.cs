@@ -64,7 +64,7 @@ public class OrganizationService(
    {
       var searchRequest = request with
       {
-         OrganizationId = _userContext.IsSystemAdmin ? request.OrganizationId : _userContext.UserOwnerId
+         OrganizationId = _userContext.IsSystemAdmin ? request.OrganizationId : _userContext.OrganizationId
       };
 
       var organizations = await _organizationQueryRepository.GetAsync(searchRequest, cancellationToken);
@@ -77,7 +77,7 @@ public class OrganizationService(
    {
       var searchRequest = request with
       {
-         Id = _userContext.IsSystemAdmin ? request.Id : _userContext.UserOwnerId
+         Id = _userContext.IsSystemAdmin ? request.Id : _userContext.OrganizationId
       };
 
       var organizations = await _organizationQueryRepository.GetLookupAsync(searchRequest, cancellationToken);

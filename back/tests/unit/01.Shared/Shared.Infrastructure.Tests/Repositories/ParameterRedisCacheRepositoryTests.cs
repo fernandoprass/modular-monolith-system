@@ -194,7 +194,7 @@ public class ParameterRedisCacheRepositoryTests
          DefaultValue = "Blue",
          CanBeOverride = true,
          IsOverride = false,
-         OverrideType = ParameterOverrideType.UserOwnerId
+         OverrideType = ParameterOverrideType.OrganizationId
       }, ownerId, TestContext.Current.CancellationToken);
 
       await _database.Received(1).HashSetAsync("param:UI.Theme", "default", "Blue", Arg.Any<When>(), Arg.Any<CommandFlags>());
@@ -213,7 +213,7 @@ public class ParameterRedisCacheRepositoryTests
          DefaultValue = "Blue",
          CanBeOverride = true,
          IsOverride = true,
-         OverrideType = ParameterOverrideType.UserOwnerId
+         OverrideType = ParameterOverrideType.OrganizationId
       }, ownerId, TestContext.Current.CancellationToken);
 
       await _database.Received(1).HashSetAsync("param:UI.Theme", "default", "Blue", Arg.Any<When>(), Arg.Any<CommandFlags>());

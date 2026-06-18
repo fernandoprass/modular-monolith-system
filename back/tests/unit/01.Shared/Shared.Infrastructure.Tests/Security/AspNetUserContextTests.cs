@@ -16,11 +16,11 @@ public class AspNetUserContextTests
    public void Properties_WhenUserHasValidClaims_ShouldReturnUserContextValues()
    {
       var userId = Guid.NewGuid();
-      var userOwnerId = Guid.NewGuid();
+      var organizationId = Guid.NewGuid();
       var httpContext = CreateHttpContext(
       [
          new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
-         new Claim(SharedConst.Security.Claim.UserOwnerId, userOwnerId.ToString()),
+         new Claim(SharedConst.Security.Claim.OrganizationId, organizationId.ToString()),
          new Claim(SharedConst.Security.Claim.IsSystemAdmin, "true"),
          new Claim(SharedConst.Security.Claim.IsOrganizationAdmin, "true"),
          new Claim(SharedConst.Security.Claim.Language, "es"),
@@ -34,7 +34,7 @@ public class AspNetUserContextTests
 
       userContext.IsAuthenticated.Should().BeTrue();
       userContext.UserId.Should().Be(userId);
-      userContext.UserOwnerId.Should().Be(userOwnerId);
+      userContext.OrganizationId.Should().Be(organizationId);
       userContext.IsSystemAdmin.Should().BeTrue();
       userContext.IsOrganizationAdmin.Should().BeTrue();
       userContext.Language.Should().Be("es");
@@ -60,7 +60,7 @@ public class AspNetUserContextTests
       var httpContext = CreateHttpContext(
       [
          new Claim(ClaimTypes.NameIdentifier, "invalid-user-id"),
-         new Claim(SharedConst.Security.Claim.UserOwnerId, "invalid-owner-id"),
+         new Claim(SharedConst.Security.Claim.OrganizationId, "invalid-owner-id"),
          new Claim(SharedConst.Security.Claim.IsSystemAdmin, "not-bool"),
          new Claim(SharedConst.Security.Claim.IsOrganizationAdmin, "not-bool")
       ]);
@@ -68,7 +68,7 @@ public class AspNetUserContextTests
       var userContext = CreateUserContext(httpContext);
 
       userContext.UserId.Should().Be(Guid.Empty);
-      userContext.UserOwnerId.Should().Be(Guid.Empty);
+      userContext.OrganizationId.Should().Be(Guid.Empty);
       userContext.IsSystemAdmin.Should().BeFalse();
       userContext.IsOrganizationAdmin.Should().BeFalse();
       userContext.Language.Should().Be(SharedConst.System.DefaultLanguage);
@@ -83,7 +83,7 @@ public class AspNetUserContextTests
 
       userContext.IsAuthenticated.Should().BeFalse();
       userContext.UserId.Should().Be(Guid.Empty);
-      userContext.UserOwnerId.Should().Be(Guid.Empty);
+      userContext.OrganizationId.Should().Be(Guid.Empty);
       userContext.IsSystemAdmin.Should().BeFalse();
       userContext.IsOrganizationAdmin.Should().BeFalse();
       userContext.Language.Should().Be(SharedConst.System.DefaultLanguage);

@@ -15,7 +15,7 @@ public class SeederParametersIam(ISeederData seederData,SharedDbContext dbContex
          "The maximum number of days a password remains valid before the user is required to change it.",
          ParameterType.Integer,
          value: "90",
-         ParameterOverrideType.UserOwnerId,
+         ParameterOverrideType.OrganizationId,
          isVisible: true,
          cancellationToken);
 

@@ -23,6 +23,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\src\01.Shared\Shared.Application\Shared.Application.csproj" />
+    <ProjectReference Include="..\..\..\..\src\04.Courier\Courier.Application\Courier.Application.csproj" />
+    <ProjectReference Include="..\..\..\..\src\04.Courier\Courier.Domain\Courier.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Using Include="Xunit" />
   </ItemGroup>
 

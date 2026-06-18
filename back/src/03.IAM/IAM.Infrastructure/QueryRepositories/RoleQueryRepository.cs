@@ -60,7 +60,7 @@ public class RoleQueryRepository(IamDbContext dbContext, IUserContext userContex
 
    public async Task<IEnumerable<Guid>> GetDefaultRolesByOrganizationIdAsync(Guid organizationId, CancellationToken cancellationToken = default)
    {
-      organizationId = _userContext.IsSystemAdmin ? organizationId : _userContext.UserOwnerId;
+      organizationId = _userContext.IsSystemAdmin ? organizationId : _userContext.OrganizationId;
 
       return await _dbContext.Roles
          .AsNoTracking()
@@ -109,8 +109,8 @@ public class RoleQueryRepository(IamDbContext dbContext, IUserContext userContex
       // 2. Query the master Roles table, filtering out the ones they already have
       var query = _dbContext.Roles.AsNoTracking()
           .Where(r => r.IsActive && 
-                      (r.OrganizationId == _userContext.UserOwnerId ||
-                       r.OrganizationId == (_userContext.IsSystemAdmin ? null : _userContext.UserOwnerId)) &&
+                      (r.OrganizationId == _userContext.OrganizationId ||
+                       r.OrganizationId == (_userContext.IsSystemAdmin ? null : _userContext.OrganizationId)) &&
                       !assignedRoleIds.Contains(r.Id)) // Core logic change
           .OrderBy(r => r.Name)
           .Select(r => new RoleDto(
@@ -207,13 +207,13 @@ public class RoleQueryRepository(IamDbContext dbContext, IUserContext userContex
       // 1. System Admins bypass security filters entirely
       if (_userContext.IsSystemAdmin)
       {
-         return query.Where(r => r.OrganizationId == null || r.OrganizationId == _userContext.UserOwnerId);
+         return query.Where(r => r.OrganizationId == null || r.OrganizationId == _userContext.OrganizationId);
       }
 
       // 2. Regular users must be explicitly assigned to the role.
       //    Organization admins also get roles belonging to their organization.
       return query.Where(role =>
           _dbContext.UserRoles.Any(ru => ru.RoleId == role.Id && ru.UserId == _userContext.UserId) ||
-          (_userContext.IsOrganizationAdmin && role.OrganizationId == _userContext.UserOwnerId));
+          (_userContext.IsOrganizationAdmin && role.OrganizationId == _userContext.OrganizationId));
    }
 }

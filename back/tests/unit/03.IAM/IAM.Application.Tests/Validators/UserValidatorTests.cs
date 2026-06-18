@@ -95,7 +95,7 @@ public class UserValidatorTests
    {
       var user = User.Create("User Test", "test@email.com", "hash", DateTime.UtcNow.AddDays(30), LanguageOptions.English, Guid.NewGuid());
       var request = new UserUpdateOrganizationAdminRequest(true);
-      var userContext = CreateUserContext(isSystemAdmin: true, isOrganizationAdmin: false, userOwnerId: Guid.NewGuid());
+      var userContext = CreateUserContext(isSystemAdmin: true, isOrganizationAdmin: false, organizationId: Guid.NewGuid());
 
       var result = _validator.ValidateUpdateOrganizationAdmin(user, userContext, request);
 
@@ -108,7 +108,7 @@ public class UserValidatorTests
       var organizationId = Guid.NewGuid();
       var user = User.Create("User Test", "test@email.com", "hash", DateTime.UtcNow.AddDays(30), LanguageOptions.English, organizationId);
       var request = new UserUpdateOrganizationAdminRequest(true);
-      var userContext = CreateUserContext(isSystemAdmin: false, isOrganizationAdmin: true, userOwnerId: organizationId);
+      var userContext = CreateUserContext(isSystemAdmin: false, isOrganizationAdmin: true, organizationId: organizationId);
 
       var result = _validator.ValidateUpdateOrganizationAdmin(user, userContext, request);
 
@@ -119,7 +119,7 @@ public class UserValidatorTests
    public void ValidateUpdateOrganizationAdmin_ShouldHaveError_WhenTargetUserNotFound()
    {
       var request = new UserUpdateOrganizationAdminRequest(true);
-      var userContext = CreateUserContext(isSystemAdmin: true, isOrganizationAdmin: false, userOwnerId: Guid.NewGuid());
+      var userContext = CreateUserContext(isSystemAdmin: true, isOrganizationAdmin: false, organizationId: Guid.NewGuid());
 
       var result = _validator.ValidateUpdateOrganizationAdmin(null, userContext, request);
 
@@ -132,7 +132,7 @@ public class UserValidatorTests
    {
       var user = User.Create("User Test", "test@email.com", "hash", DateTime.UtcNow.AddDays(30), LanguageOptions.English, Guid.NewGuid());
       var request = new UserUpdateOrganizationAdminRequest(true);
-      var userContext = CreateUserContext(isSystemAdmin: false, isOrganizationAdmin: false, userOwnerId: user.OrganizationId);
+      var userContext = CreateUserContext(isSystemAdmin: false, isOrganizationAdmin: false, organizationId: user.OrganizationId);
 
       var result = _validator.ValidateUpdateOrganizationAdmin(user, userContext, request);
 
@@ -145,7 +145,7 @@ public class UserValidatorTests
    {
       var user = User.Create("User Test", "test@email.com", "hash", DateTime.UtcNow.AddDays(30), LanguageOptions.English, Guid.NewGuid());
       var request = new UserUpdateOrganizationAdminRequest(true);
-      var userContext = CreateUserContext(isSystemAdmin: false, isOrganizationAdmin: true, userOwnerId: Guid.NewGuid());
+      var userContext = CreateUserContext(isSystemAdmin: false, isOrganizationAdmin: true, organizationId: Guid.NewGuid());
 
       var result = _validator.ValidateUpdateOrganizationAdmin(user, userContext, request);
 
@@ -193,12 +193,12 @@ public class UserValidatorTests
       result.Messages.First().Show().Should().Contain(email);
    }
 
-   private static IUserContext CreateUserContext(bool isSystemAdmin, bool isOrganizationAdmin, Guid userOwnerId)
+   private static IUserContext CreateUserContext(bool isSystemAdmin, bool isOrganizationAdmin, Guid organizationId)
    {
       var userContext = Substitute.For<IUserContext>();
       userContext.IsSystemAdmin.Returns(isSystemAdmin);
       userContext.IsOrganizationAdmin.Returns(isOrganizationAdmin);
-      userContext.UserOwnerId.Returns(userOwnerId);
+      userContext.OrganizationId.Returns(organizationId);
 
       return userContext;
    }

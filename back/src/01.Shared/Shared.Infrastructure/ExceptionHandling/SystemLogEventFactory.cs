@@ -29,7 +29,7 @@ public static class SystemLogEventFactory
          StackTrace = exception.StackTrace,
          RequestId = httpContext.TraceIdentifier,
          UserId = GetOptionalGuid(userContext.UserId),
-         OrganizationId = GetOptionalGuid(userContext.UserOwnerId),
+         OrganizationId = GetOptionalGuid(userContext.OrganizationId),
          Properties = properties
       };
    }

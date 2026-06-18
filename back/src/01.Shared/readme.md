@@ -259,7 +259,7 @@ Use it in Application services before mutations that require tenant ownership.
 
 It provides:
 - `UserId`
-- `UserOwnerId`
+- `OrganizationId`
 - `IsSystemAdmin`
 - `IpAddress`
 - `UserAgent`
@@ -671,7 +671,7 @@ Shared supports multi-tenancy through `IUserContext`.
 
 Important IDs:
 - `UserId`: current user.
-- `UserOwnerId`: organization/tenant owner.
+- `OrganizationId`: organization/tenant owner.
 
 Services use these IDs to:
 - Apply audit fields.

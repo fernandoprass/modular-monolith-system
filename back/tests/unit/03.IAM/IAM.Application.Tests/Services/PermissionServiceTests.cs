@@ -216,7 +216,7 @@ public class PermissionServiceTests
       var role = Role.Create("Admin", "Admin role", false, true, organizationId);
       role.AddPermission(existingPermissionId);
 
-      _userContextMock.UserOwnerId.Returns(organizationId);
+      _userContextMock.OrganizationId.Returns(organizationId);
       _userContextMock.IsSystemAdmin.Returns(false);
       _unitOfWorkMock.Roles.GetByIdAsync(request.RoleId, Arg.Any<CancellationToken>()).Returns(role);
       _unitOfWorkMock.Permissions.CountByIdsAsync(Arg.Any<IReadOnlyCollection<Guid>>(), Arg.Any<CancellationToken>()).Returns(2);
@@ -249,7 +249,7 @@ public class PermissionServiceTests
       var request = new RolePermissionAssignRequest(RoleId: Guid.NewGuid(), PermissionIds: [Guid.NewGuid()]);
       var role = Role.Create("Admin", "Admin role", false, true, organizationId);
 
-      _userContextMock.UserOwnerId.Returns(organizationId);
+      _userContextMock.OrganizationId.Returns(organizationId);
       _userContextMock.IsSystemAdmin.Returns(false);
       _unitOfWorkMock.Roles.GetByIdAsync(request.RoleId, Arg.Any<CancellationToken>()).Returns(role);
       _unitOfWorkMock.Permissions.CountByIdsAsync(Arg.Any<IReadOnlyCollection<Guid>>(), Arg.Any<CancellationToken>()).Returns(0);
@@ -268,7 +268,7 @@ public class PermissionServiceTests
       var request = new RolePermissionAssignRequest(RoleId: Guid.NewGuid(), PermissionIds: [Guid.NewGuid()]);
       var role = Role.Create("Admin", "Admin role", false, true, organizationId: Guid.NewGuid());
 
-      _userContextMock.UserOwnerId.Returns(Guid.NewGuid());
+      _userContextMock.OrganizationId.Returns(Guid.NewGuid());
       _userContextMock.IsSystemAdmin.Returns(false);
       _unitOfWorkMock.Roles.GetByIdAsync(request.RoleId, Arg.Any<CancellationToken>()).Returns(role);
 
@@ -292,7 +292,7 @@ public class PermissionServiceTests
       var role = Role.Create("Admin", "Admin role", false, true, organizationId);
       role.AddPermission(permissionId);
 
-      _userContextMock.UserOwnerId.Returns(organizationId);
+      _userContextMock.OrganizationId.Returns(organizationId);
       _userContextMock.IsSystemAdmin.Returns(false);
       _unitOfWorkMock.Roles.GetByIdAsync(request.RoleId, Arg.Any<CancellationToken>()).Returns(role);
       _permissionValidatorMock.ValidateUnassign(request, true, true).Returns(Result.Success());
@@ -322,7 +322,7 @@ public class PermissionServiceTests
       var request = new RolePermissionUnassignRequest(RoleId: Guid.NewGuid(), PermissionIds: [Guid.NewGuid()]);
       var role = Role.Create("Admin", "Admin role", false, true, organizationId);
 
-      _userContextMock.UserOwnerId.Returns(organizationId);
+      _userContextMock.OrganizationId.Returns(organizationId);
       _userContextMock.IsSystemAdmin.Returns(false);
       _unitOfWorkMock.Roles.GetByIdAsync(request.RoleId, Arg.Any<CancellationToken>()).Returns(role);
       _permissionValidatorMock.ValidateUnassign(request, true, false).Returns(Result.Failure(new PermissionsCannotBeUnassignedError()));
@@ -340,7 +340,7 @@ public class PermissionServiceTests
       var request = new RolePermissionUnassignRequest(RoleId: Guid.NewGuid(), PermissionIds: [Guid.NewGuid()]);
       var role = Role.Create("Admin", "Admin role", false, true, organizationId: Guid.NewGuid());
 
-      _userContextMock.UserOwnerId.Returns(Guid.NewGuid());
+      _userContextMock.OrganizationId.Returns(Guid.NewGuid());
       _userContextMock.IsSystemAdmin.Returns(false);
       _unitOfWorkMock.Roles.GetByIdAsync(request.RoleId, Arg.Any<CancellationToken>()).Returns(role);
 

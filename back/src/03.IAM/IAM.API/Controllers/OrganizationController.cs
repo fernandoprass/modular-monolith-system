@@ -87,7 +87,7 @@ public class OrganizationController(
    [RequirePermission(IamPermission.OrganizationProfile.Read)]
    public async Task<IActionResult> GetById(CancellationToken cancellationToken)
    {
-      var organization = await _organizationService.GetByIdAsync(_userContext.UserOwnerId, cancellationToken);
+      var organization = await _organizationService.GetByIdAsync(_userContext.OrganizationId, cancellationToken);
       return OkOrNotFound(organization);
    }
 
@@ -96,7 +96,7 @@ public class OrganizationController(
    [RequirePermission(IamPermission.OrganizationProfile.Write)]
    public async Task<IActionResult> Update([FromBody] OrganizationUpdateRequest organization, CancellationToken cancellationToken)
    {
-      var result = await _organizationService.UpdateAsync(_userContext.UserOwnerId, organization, cancellationToken);
+      var result = await _organizationService.UpdateAsync(_userContext.OrganizationId, organization, cancellationToken);
       return OkOrNotFound(result);
    }
 
@@ -105,7 +105,7 @@ public class OrganizationController(
    [RequirePermission(IamPermission.OrganizationProfile.Delete)]
    public async Task<IActionResult> Delete(CancellationToken cancellationToken)
    {
-      var result = await _registerOrchestrator.DeleteOrganizationAsync(_userContext.UserOwnerId, cancellationToken);
+      var result = await _registerOrchestrator.DeleteOrganizationAsync(_userContext.OrganizationId, cancellationToken);
       return OkOrNotFound(result);
    }
 }

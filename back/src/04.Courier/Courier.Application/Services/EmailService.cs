@@ -34,7 +34,7 @@ public class EmailService(
 
       var searchRequest = _userContext.IsSystemAdmin
          ? request
-         : request with { OrganizationId = _userContext.UserOwnerId };
+         : request with { OrganizationId = _userContext.OrganizationId };
 
       var emails = await _emailRepository.GetAsync(searchRequest, cancellationToken);
       return Result<PagedResultDto<EmailLiteDto>>.Success(emails);

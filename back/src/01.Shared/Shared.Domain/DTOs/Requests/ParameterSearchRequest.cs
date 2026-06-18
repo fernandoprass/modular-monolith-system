@@ -18,6 +18,6 @@ public record ParameterSearchRequestInternal(
     string? Title,
     string? Description,
     Guid UserId,
-    Guid UserOwnerId,
+    Guid OrganizationId,
     bool IsSystemAdmin
 );

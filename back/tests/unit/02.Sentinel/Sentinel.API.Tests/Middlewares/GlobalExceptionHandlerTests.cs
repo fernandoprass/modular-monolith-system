@@ -137,10 +137,10 @@ public class GlobalExceptionHandlerTests
       }
    }
 
-   private class FakeUserContext(Guid userId, Guid userOwnerId) : IUserContext
+   private class FakeUserContext(Guid userId, Guid organizationId) : IUserContext
    {
       public Guid UserId { get; } = userId;
-      public Guid UserOwnerId { get; } = userOwnerId;
+      public Guid OrganizationId { get; } = organizationId;
       public bool IsSystemAdmin => false;
       public bool IsOrganizationAdmin => false;
       public bool IsAuthenticated => true;

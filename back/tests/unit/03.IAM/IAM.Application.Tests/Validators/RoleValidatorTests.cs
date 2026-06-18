@@ -26,7 +26,7 @@ public class RoleValidatorTests
    public void ValidateCreate_ShouldReturnSuccess_WhenRequestIsValid()
    {
       var request = new RoleCreateRequest(Name: "Admin", Description: "Administrator role", IsDefault: false, IsActive: true, OrganizationId: Guid.NewGuid());
-      _userContextMock.UserOwnerId.Returns(request.OrganizationId.Value);
+      _userContextMock.OrganizationId.Returns(request.OrganizationId.Value);
 
       var result = _validator.ValidateCreate(request, nameAlreadyExists: false);
 
@@ -45,10 +45,10 @@ public class RoleValidatorTests
    }
 
    [Fact]
-   public void ValidateCreate_ShouldReturnFailure_WhenOrgIdDoesNotMatchUserOwnerId()
+   public void ValidateCreate_ShouldReturnFailure_WhenOrgIdDoesNotMatchOrganizationId()
    {
       var request = new RoleCreateRequest(Name: "Admin", Description: "Administrator role", IsDefault: false, IsActive: true, OrganizationId: Guid.NewGuid());
-      _userContextMock.UserOwnerId.Returns(Guid.NewGuid()); // Different ID
+      _userContextMock.OrganizationId.Returns(Guid.NewGuid()); // Different ID
 
       var result = _validator.ValidateCreate(request, nameAlreadyExists: false);
 

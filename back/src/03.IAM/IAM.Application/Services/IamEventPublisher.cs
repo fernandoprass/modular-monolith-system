@@ -37,7 +37,7 @@ public class IamEventPublisher(
          userAgent: _userContext.UserAgent,
          userId: _userContext.UserId,
          targetId: targetId ?? Guid.Empty,
-         organizationId: _userContext.UserOwnerId,
+         organizationId: _userContext.OrganizationId,
          metadata: JsonSerializer.Serialize(metadata ?? new { })
       );
 

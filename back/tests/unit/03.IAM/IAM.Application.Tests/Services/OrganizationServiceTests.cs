@@ -79,7 +79,7 @@ public class OrganizationServiceTests
       var id = Guid.NewGuid();
       var expected = new OrganizationDto(Id: id, Type: OrganizationType.Company, Code: "ABC", Name: "Test", Description: null, LanguageOptions.English, IsActive: true);
 
-      _userContext.UserOwnerId.Returns(id);
+      _userContext.OrganizationId.Returns(id);
       _organizationQueryRepository.GetByIdAsync(id, Arg.Any<CancellationToken>()).Returns(expected);
 
       var result = await _service.GetByIdAsync(id, TestContext.Current.CancellationToken);
@@ -120,16 +120,16 @@ public class OrganizationServiceTests
    }
 
    [Fact]
-   public async Task GetAsync_WhenUserIsNotSystemAdmin_ShouldForceUserOwnerId()
+   public async Task GetAsync_WhenUserIsNotSystemAdmin_ShouldForceOrganizationId()
    {
-      var userOwnerId = Guid.NewGuid();
+      var organizationId = Guid.NewGuid();
       var requestedOrganizationId = Guid.NewGuid();
       var request = new OrganizationSearchRequest(Code: "ABC", Name: "SearchName", OrganizationId: requestedOrganizationId);
-      var expectedRequest = request with { OrganizationId = userOwnerId };
+      var expectedRequest = request with { OrganizationId = organizationId };
       var expected = new PagedResultDto<OrganizationDto>([], 1, 25, 0, 0);
 
       _userContext.IsSystemAdmin.Returns(false);
-      _userContext.UserOwnerId.Returns(userOwnerId);
+      _userContext.OrganizationId.Returns(organizationId);
       _organizationQueryRepository.GetAsync(expectedRequest, Arg.Any<CancellationToken>()).Returns(expected);
 
       var result = await _service.GetAsync(request, TestContext.Current.CancellationToken);
@@ -147,7 +147,7 @@ public class OrganizationServiceTests
 
       var organization = Organization.Create(OrganizationType.Company, "OriginalCode", "Original Name", "description", LanguageOptions.English);
 
-      _userContext.UserOwnerId.Returns(id);
+      _userContext.OrganizationId.Returns(id);
       _organizationRepository.GetByIdAsync(id, Arg.Any<CancellationToken>()).Returns(organization);
       _organizationValidator.ValidateUpdate(request, true).Returns(Result.Success());
 
@@ -174,7 +174,7 @@ public class OrganizationServiceTests
       var request = GetOrganizationUpdateRequest(string.Empty, "description", true);
       var organization = Organization.Create(OrganizationType.Company, "OriginalCode", "Original Name", "description", LanguageOptions.English);
 
-      _userContext.UserOwnerId.Returns(id);
+      _userContext.OrganizationId.Returns(id);
       _organizationRepository.GetByIdAsync(id, Arg.Any<CancellationToken>()).Returns(organization);
       _organizationValidator.ValidateUpdate(request, true).Returns(Result.Failure(new NotFoundError()));
 
@@ -190,7 +190,7 @@ public class OrganizationServiceTests
       var request = new OrganizationUpdateCodeRequest("NEWCODE");
       var organization = Organization.Create(OrganizationType.Company, "OriginalCode", "Original Name", "description", LanguageOptions.English);
 
-      _userContext.UserOwnerId.Returns(id);
+      _userContext.OrganizationId.Returns(id);
       _organizationRepository.GetByCodeAsync(request.Code, Arg.Any<CancellationToken>()).Returns((Organization)null);
       _organizationValidator.ValidateUpdateCode(request, false).Returns(Result.Success());
       _organizationRepository.GetByIdAsync(id, Arg.Any<CancellationToken>()).Returns(organization);
@@ -217,7 +217,7 @@ public class OrganizationServiceTests
       var request = new OrganizationUpdateCodeRequest("EXISTING");
       var existingOrganization = Organization.Create(OrganizationType.Company, "EXISTING", "Original Name", "description", LanguageOptions.English);
 
-      _userContext.UserOwnerId.Returns(id);
+      _userContext.OrganizationId.Returns(id);
       _organizationRepository.GetByCodeAsync(request.Code, Arg.Any<CancellationToken>()).Returns(existingOrganization);
       _organizationValidator.ValidateUpdateCode(request, true).Returns(Result.Failure(new OrganizationDuplicateCodeError(request.Code)));
 

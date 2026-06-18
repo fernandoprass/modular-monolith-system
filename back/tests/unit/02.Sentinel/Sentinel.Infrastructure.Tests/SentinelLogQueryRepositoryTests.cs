@@ -28,9 +28,9 @@ public class SentinelLogQueryRepositoryTests
    [Fact]
    public void BuildAuditLogFilter_ShouldForceUserOwnerOrganization_WhenUserIsNotSystemAdmin()
    {
-      var userOwnerId = Guid.NewGuid();
+      var organizationId = Guid.NewGuid();
       var requestedOrganizationId = Guid.NewGuid();
-      var userContext = CreateUserContext(isSystemAdmin: false, userOwnerId);
+      var userContext = CreateUserContext(isSystemAdmin: false, organizationId);
       var request = new AuditLogSearchRequest(
          requestedOrganizationId,
          null,
@@ -47,7 +47,7 @@ public class SentinelLogQueryRepositoryTests
       var json = document.ToJson();
 
       Assert.Contains("OrganizationId", json);
-      Assert.True(ContainsGuidValue(document, userOwnerId));
+      Assert.True(ContainsGuidValue(document, organizationId));
       Assert.False(ContainsGuidValue(document, requestedOrganizationId));
       Assert.Contains("Module", json);
    }
@@ -80,9 +80,9 @@ public class SentinelLogQueryRepositoryTests
    [Fact]
    public void BuildSystemLogFilter_ShouldForceUserOwnerOrganization_WhenUserIsNotSystemAdmin()
    {
-      var userOwnerId = Guid.NewGuid();
+      var organizationId = Guid.NewGuid();
       var requestedOrganizationId = Guid.NewGuid();
-      var userContext = CreateUserContext(isSystemAdmin: false, userOwnerId);
+      var userContext = CreateUserContext(isSystemAdmin: false, organizationId);
       var request = new SystemLogSearchRequest(
          requestedOrganizationId,
          null,
@@ -98,7 +98,7 @@ public class SentinelLogQueryRepositoryTests
       var json = document.ToJson();
 
       Assert.Contains("OrganizationId", json);
-      Assert.True(ContainsGuidValue(document, userOwnerId));
+      Assert.True(ContainsGuidValue(document, organizationId));
       Assert.False(ContainsGuidValue(document, requestedOrganizationId));
       Assert.Contains("Level", json);
       Assert.Contains("Status", json);
@@ -124,11 +124,11 @@ public class SentinelLogQueryRepositoryTests
       Assert.Equal(expectedPageSize, result.PageSize);
    }
 
-   private static IUserContext CreateUserContext(bool isSystemAdmin, Guid userOwnerId)
+   private static IUserContext CreateUserContext(bool isSystemAdmin, Guid organizationId)
    {
       var userContext = Substitute.For<IUserContext>();
       userContext.IsSystemAdmin.Returns(isSystemAdmin);
-      userContext.UserOwnerId.Returns(userOwnerId);
+      userContext.OrganizationId.Returns(organizationId);
 
       return userContext;
    }

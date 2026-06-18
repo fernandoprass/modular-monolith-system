@@ -49,14 +49,14 @@ public class EmailServiceTests
    public async Task GetAsync_ShouldUseUserOwnerOrganization_WhenUserIsNotSystemAdmin()
    {
       var requestedOrganizationId = Guid.NewGuid();
-      var userOwnerId = Guid.NewGuid();
+      var organizationId = Guid.NewGuid();
       var request = CreateSearchRequest(requestedOrganizationId);
       var page = new PagedResultDto<EmailLiteDto>([], 1, 25, 0, 0);
       _userContext.IsSystemAdmin.Returns(false);
-      _userContext.UserOwnerId.Returns(userOwnerId);
+      _userContext.OrganizationId.Returns(organizationId);
       _emailValidator.ValidateSearch(request).Returns(Result.Success());
       _emailRepository.GetAsync(
-         Arg.Is<EmailSearchRequest>(r => r.OrganizationId == userOwnerId),
+         Arg.Is<EmailSearchRequest>(r => r.OrganizationId == organizationId),
          Arg.Any<CancellationToken>()).Returns(page);
 
       var result = await _service.GetAsync(request, TestContext.Current.CancellationToken);
@@ -83,7 +83,7 @@ public class EmailServiceTests
       var organizationId = Guid.NewGuid();
       var email = CreateEmail(organizationId);
       _userContext.IsSystemAdmin.Returns(false);
-      _userContext.UserOwnerId.Returns(organizationId);
+      _userContext.OrganizationId.Returns(organizationId);
       _emailRepository.GetByIdAsync(email.Id, Arg.Any<CancellationToken>()).Returns(email);
 
       var result = await _service.GetByIdAsync(email.Id, TestContext.Current.CancellationToken);
@@ -97,7 +97,7 @@ public class EmailServiceTests
    {
       var email = CreateEmail(Guid.NewGuid());
       _userContext.IsSystemAdmin.Returns(false);
-      _userContext.UserOwnerId.Returns(Guid.NewGuid());
+      _userContext.OrganizationId.Returns(Guid.NewGuid());
       _emailRepository.GetByIdAsync(email.Id, Arg.Any<CancellationToken>()).Returns(email);
 
       var result = await _service.GetByIdAsync(email.Id, TestContext.Current.CancellationToken);

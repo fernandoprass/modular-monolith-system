@@ -122,7 +122,7 @@ public class RoleServiceTests
       var roleWithId = role;
       roleWithId.GetType().GetProperty("Id")?.SetValue(roleWithId, roleId);
 
-      _userContextMock.UserOwnerId.Returns(organizationId);
+      _userContextMock.OrganizationId.Returns(organizationId);
       _userContextMock.IsSystemAdmin.Returns(false);
       _unitOfWorkMock.Roles.GetByIdAsync(roleId, Arg.Any<CancellationToken>()).Returns(roleWithId);
       _roleValidatorMock.ValidateUpdate(request, true).Returns(Result.Success());
@@ -166,7 +166,7 @@ public class RoleServiceTests
 
       var role = Role.Create("Admin", "Old description", false, true, organizationId : Guid.NewGuid());
 
-      _userContextMock.UserOwnerId.Returns(Guid.NewGuid());
+      _userContextMock.OrganizationId.Returns(Guid.NewGuid());
       _userContextMock.IsSystemAdmin.Returns(false);
       _unitOfWorkMock.Roles.GetByIdAsync(roleId, Arg.Any<CancellationToken>()).Returns(role);
 
@@ -199,7 +199,7 @@ public class RoleServiceTests
 
       var user = User.Create("Test User", "test@example.com", "hash", expiresAt, LanguageOptions.English, organizationId);
 
-      _userContextMock.UserOwnerId.Returns(organizationId);
+      _userContextMock.OrganizationId.Returns(organizationId);
       _userContextMock.IsSystemAdmin.Returns(false);
       _unitOfWorkMock.Users.GetByIdWithRolesAsync(request.UserId, Arg.Any<CancellationToken>()).Returns(user);
       _roleQueryRepositoryMock.CountRolesByRoleIdsAsync(Arg.Any<IEnumerable<Guid>>(), organizationId, Arg.Any<CancellationToken>()).Returns(1);
@@ -248,7 +248,7 @@ public class RoleServiceTests
 
       var user = User.Create("Test User", "test@example.com", "hash", DateTime.UtcNow.AddMonths(1), LanguageOptions.English, organizationId);
 
-      _userContextMock.UserOwnerId.Returns(organizationId);
+      _userContextMock.OrganizationId.Returns(organizationId);
       _userContextMock.IsSystemAdmin.Returns(false);
       _unitOfWorkMock.Users.GetByIdWithRolesAsync(request.UserId, Arg.Any<CancellationToken>()).Returns(user);
       _roleValidatorMock.ValidateAssign(request, true, false).Returns(Result.Failure(new RolesInvalidExpirationError()));
@@ -268,7 +268,7 @@ public class RoleServiceTests
 
       var user = User.Create("Test User", "test@example.com", "hash", DateTime.UtcNow.AddMonths(1), LanguageOptions.English, organizationId);
 
-      _userContextMock.UserOwnerId.Returns(organizationId);
+      _userContextMock.OrganizationId.Returns(organizationId);
       _userContextMock.IsSystemAdmin.Returns(false);
       _unitOfWorkMock.Users.GetByIdWithRolesAsync(request.UserId, Arg.Any<CancellationToken>()).Returns(user);
       _roleQueryRepositoryMock.CountRolesByRoleIdsAsync(Arg.Any<IEnumerable<Guid>>(), organizationId, Arg.Any<CancellationToken>()).Returns(0);
@@ -287,7 +287,7 @@ public class RoleServiceTests
 
       var user = User.Create("Test User", "test@example.com", "hash", DateTime.UtcNow.AddMonths(1), LanguageOptions.English, organizationId: Guid.NewGuid());
 
-      _userContextMock.UserOwnerId.Returns(Guid.NewGuid());
+      _userContextMock.OrganizationId.Returns(Guid.NewGuid());
       _userContextMock.IsSystemAdmin.Returns(false);
       _unitOfWorkMock.Users.GetByIdWithRolesAsync(request.UserId, Arg.Any<CancellationToken>()).Returns(user);
 
@@ -322,7 +322,7 @@ public class RoleServiceTests
 
       var user = User.Create("Test User", "test@example.com", "hash", DateTime.UtcNow.AddMonths(1), LanguageOptions.English, organizationId);
 
-      _userContextMock.UserOwnerId.Returns(organizationId);
+      _userContextMock.OrganizationId.Returns(organizationId);
       _userContextMock.IsSystemAdmin.Returns(false);
       _unitOfWorkMock.Users.GetByIdWithRolesAsync(request.UserId, Arg.Any<CancellationToken>()).Returns(user);
       _roleQueryRepositoryMock.CountRolesByRoleIdsAsync(
@@ -354,7 +354,7 @@ public class RoleServiceTests
       var user = User.Create("Test User", "test@example.com", "hash", DateTime.UtcNow.AddMonths(1), LanguageOptions.English, organizationId);
       user.AddRole(roleId, DateTime.UtcNow, null);
 
-      _userContextMock.UserOwnerId.Returns(organizationId);
+      _userContextMock.OrganizationId.Returns(organizationId);
       _userContextMock.IsSystemAdmin.Returns(false);
 
       _unitOfWorkMock.Users.GetByIdWithRolesAsync(request.UserId, Arg.Any<CancellationToken>())
@@ -401,7 +401,7 @@ public class RoleServiceTests
       var user = User.Create("Test User", "test@example.com", "hash", DateTime.UtcNow.AddMonths(1), LanguageOptions.English, organizationId);
       // User doesn't have this role
 
-      _userContextMock.UserOwnerId.Returns(organizationId);
+      _userContextMock.OrganizationId.Returns(organizationId);
       _userContextMock.IsSystemAdmin.Returns(false);
       _unitOfWorkMock.Users.GetByIdWithRolesAsync(request.UserId, Arg.Any<CancellationToken>()).Returns(user);
       _roleValidatorMock.ValidateUnassign(request, true, false).Returns(Result.Failure(new RolesCannotBeUnassignedError()));
@@ -422,7 +422,7 @@ public class RoleServiceTests
       var user = User.Create("Test User", "test@example.com", "hash", DateTime.UtcNow.AddMonths(1), LanguageOptions.English, organizationId:Guid.NewGuid());
       user.AddRole(roleId, DateTime.UtcNow, null);
 
-      _userContextMock.UserOwnerId.Returns(Guid.NewGuid());
+      _userContextMock.OrganizationId.Returns(Guid.NewGuid());
       _userContextMock.IsSystemAdmin.Returns(false);
       _unitOfWorkMock.Users.GetByIdWithRolesAsync(request.UserId, Arg.Any<CancellationToken>()).Returns(user);
 
@@ -447,7 +447,7 @@ public class RoleServiceTests
          CreateRoleDto(roleName, organizationId)
       };
 
-      _userContextMock.UserOwnerId.Returns(organizationId);
+      _userContextMock.OrganizationId.Returns(organizationId);
       _userContextMock.IsSystemAdmin.Returns(false);
       _roleQueryRepositoryMock.GetAsync(
          Arg.Is<RoleSearchRequest>(r => r.Name == roleName),
@@ -472,7 +472,7 @@ public class RoleServiceTests
          CreateRoleDto("User", organizationId)
       };
 
-      _userContextMock.UserOwnerId.Returns(organizationId);
+      _userContextMock.OrganizationId.Returns(organizationId);
       _userContextMock.IsSystemAdmin.Returns(false);
       _roleQueryRepositoryMock.GetAsync(
          Arg.Is<RoleSearchRequest>(r => r.Name == null),
@@ -522,7 +522,7 @@ public class RoleServiceTests
          CreateRoleDto("Admin", organizationId)
       };
 
-      _userContextMock.UserOwnerId.Returns(organizationId);
+      _userContextMock.OrganizationId.Returns(organizationId);
       _userContextMock.IsSystemAdmin.Returns(false);
       _unitOfWorkMock.Users.GetByIdAsync(user.Id, Arg.Any<CancellationToken>()).Returns(user);
       _roleQueryRepositoryMock.GetAsync(
@@ -552,7 +552,7 @@ public class RoleServiceTests
 
       var user = User.Create("Test User", "test@example.com", "hash", DateTime.UtcNow.AddMonths(1), LanguageOptions.English, organizationId);
 
-      _userContextMock.UserOwnerId.Returns(organizationId);
+      _userContextMock.OrganizationId.Returns(organizationId);
       _userContextMock.IsSystemAdmin.Returns(false);
       _unitOfWorkMock.Users.GetByIdAsync(userId, Arg.Any<CancellationToken>()).Returns(user);
       _roleQueryRepositoryMock.GetRolePermissionsByUserIdAsync(userId, Arg.Any<CancellationToken>()).Returns(permissions);
@@ -582,7 +582,7 @@ public class RoleServiceTests
    {
       var user = User.Create("Test User", "test@example.com", "hash", DateTime.UtcNow.AddMonths(1), LanguageOptions.English, organizationId: Guid.NewGuid());
 
-      _userContextMock.UserOwnerId.Returns(Guid.NewGuid());
+      _userContextMock.OrganizationId.Returns(Guid.NewGuid());
       _userContextMock.IsSystemAdmin.Returns(false);
       _unitOfWorkMock.Users.GetByIdAsync(user.Id, Arg.Any<CancellationToken>()).Returns(user);
 
@@ -663,7 +663,7 @@ public class RoleServiceTests
 
       var role = Role.Create("Admin", "Old description", false, true, organizationId: Guid.NewGuid());
 
-      _userContextMock.UserOwnerId.Returns(Guid.NewGuid());
+      _userContextMock.OrganizationId.Returns(Guid.NewGuid());
       _userContextMock.IsSystemAdmin.Returns(true);
       _unitOfWorkMock.Roles.GetByIdAsync(roleId, Arg.Any<CancellationToken>()).Returns(role);
       _roleValidatorMock.ValidateUpdate(request, true).Returns(Result.Success());

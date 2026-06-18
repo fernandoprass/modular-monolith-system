@@ -187,7 +187,7 @@ public class RegisterOrchestratorTests
    public async Task DeleteOrganizationAsync_ShouldReturnNotFound_WhenOrganizationDoesNotExist()
    {
       var organizationId = Guid.NewGuid();
-      _userContext.UserOwnerId.Returns(organizationId);
+      _userContext.OrganizationId.Returns(organizationId);
       _organizationRepository.GetByIdAsync(organizationId, Arg.Any<CancellationToken>())
          .Returns((Organization?)null);
 
@@ -211,7 +211,7 @@ public class RegisterOrchestratorTests
       var firstUser = User.Create("First User", "first@test.com", "hash", DateTime.UtcNow, LanguageOptions.English, organization.Id);
       var secondUser = User.Create("Second User", "second@test.com", "hash", DateTime.UtcNow, LanguageOptions.English, organization.Id);
 
-      _userContext.UserOwnerId.Returns(organization.Id);
+      _userContext.OrganizationId.Returns(organization.Id);
       _organizationRepository.GetByIdAsync(organization.Id, Arg.Any<CancellationToken>())
          .Returns(organization);
       _userRepository.GetByOrganizationIdAsync(organization.Id, Arg.Any<CancellationToken>())

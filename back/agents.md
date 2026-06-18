@@ -98,8 +98,7 @@ public void UpdateFailedLogin(DateTime? lockedOutUntil)
 ### Multi-Tenancy
 
 - **Enforcement**: `BaseService.ExecuteIfUserOwnsAsync()` validates ownership via `IUserContext`
-- **Isolation**: Every mutation checks `UserOwnerId` matches entity's `OrganizationId`
-- **JWT Claims**: Include `UserOwnerId` for tenant identification
+- **JWT Claims**: Include `OrganizationId` for tenant identification
 
 ---
 
@@ -213,7 +212,7 @@ var isValid = Argon2.Verify(user.PasswordHash, request.Password);
 new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
 new Claim(JwtRegisteredClaimNames.Email, user.Email),
 new Claim(IamConst.Security.Claim.IsSystemAdmin, user.IsSystemAdmin.ToString()),
-new Claim(IamConst.Security.Claim.UserOwnerId, user.OrganizationId.ToString()),
+new Claim(IamConst.Security.Claim.OrganizationId, user.OrganizationId.ToString()),
 new Claim(IamConst.Security.Claim.Role, roleId.ToString()) // Multiple role claims
 ```
 
