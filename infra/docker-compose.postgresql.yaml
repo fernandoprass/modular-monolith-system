@@ -15,7 +15,7 @@ services:
         limits:
           memory: 8gb
           cpus: '4.0'
-    # Tuned for a host with ~16 GB RAM — adjust shared_buffers to 25% of RAM
+    # Tuned for a host with ~16 GB RAM. Adjust shared_buffers to 25% of RAM
     # and effective_cache_size to 75% of RAM if your host differs.
     command: >
       postgres
@@ -45,7 +45,7 @@ services:
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
-      # Desktop mode — disables the login page when running locally
+      # Desktop mode. Disables the login page when running locally
       PGADMIN_CONFIG_SERVER_MODE: 'False'
     ports:
       - "${PGADMIN_PORT}:80"

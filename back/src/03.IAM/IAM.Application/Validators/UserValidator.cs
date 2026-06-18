@@ -80,12 +80,30 @@ public class UserValidator : IUserValidator
       IUserContext userContext,
       UserUpdateOrganizationAdminRequest request)
    {
-      var isAdminUser = userContext.IsSystemAdmin || userContext.IsOrganizationAdmin;
+      var isAuthorizedUser = userContext.IsSystemAdmin || userContext.IsOrganizationAdmin;
       var userBelongsToOperatorOrganization = userContext.IsSystemAdmin || user?.OrganizationId == userContext.OrganizationId;
 
       var validator = new FluentValidator<UserUpdateOrganizationAdminRequest>()
          .RuleForValue(user).IsNotNull(new NotFoundError(IamConst.Entity.User))
-         .RuleForValue(isAdminUser).IsTrue(new Domain.Messages.UnauthorizedAccessError())
+         .RuleForValue(isAuthorizedUser).IsTrue(new Domain.Messages.UnauthorizedAccessError())
+         .RuleForValue(userBelongsToOperatorOrganization).IsTrue(new Domain.Messages.UnauthorizedAccessError());
+
+      var isValid = validator.Validate(request);
+
+      return isValid ? Result.Success() : Result.Failure(validator.Messages);
+   }
+
+   public Result ValidateUpdateSupportUser(
+   User? user,
+   IUserContext userContext,
+   UserUpdateSupportUserRequest request)
+   {
+      var isAuthorizedUser = userContext.IsSystemAdmin || userContext.IsSupportUser;
+      var userBelongsToOperatorOrganization = user?.OrganizationId == userContext.OrganizationId;
+
+      var validator = new FluentValidator<UserUpdateSupportUserRequest>()
+         .RuleForValue(user).IsNotNull(new NotFoundError(IamConst.Entity.User))
+         .RuleForValue(isAuthorizedUser).IsTrue(new Domain.Messages.UnauthorizedAccessError())
          .RuleForValue(userBelongsToOperatorOrganization).IsTrue(new Domain.Messages.UnauthorizedAccessError());
 
       var isValid = validator.Validate(request);

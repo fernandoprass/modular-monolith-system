@@ -63,6 +63,8 @@ public class SeederPermissions(
       await AddPermissionAsync(IamPermission.Users.Read, "Read Users", "Allows reading users.", cancellationToken);
       await AddPermissionAsync(IamPermission.Users.Write, "Edit Users", "Allows creating, updating, and deleting users.", cancellationToken);
       await AddPermissionAsync(IamPermission.Users.UpdateOrganizationAdmin, "Update User Organization Admin", "Allows updating the user organization admin flag.", cancellationToken);
+      await AddPermissionAsync(IamPermission.Users.UpdateSupportUser, "Update Support User", "Allows updating the support user flag.", cancellationToken);
+
 
       await AddPermissionAsync(IamPermission.UserProfile.Read, "View Own Profile", "Allows users to view their own profile.", cancellationToken);
       await AddPermissionAsync(IamPermission.UserProfile.Write, "Update Own Profile", "Allows users to update their own profile.", cancellationToken);

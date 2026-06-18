@@ -9,6 +9,7 @@ public class User : EntityAudited
    public string PasswordHash { get; set; } = string.Empty;
    public bool IsActive { get; set; } = true;
    public bool IsSystemAdmin { get; set; } = false;
+   public bool IsSupportUser { get; set; } = false;
    public bool IsOrganizationAdmin { get; set; } = false;
    public int NumFailedLoginAttempts { get; set; } = 0;
    public DateTime? EmailVerifiedAt { get; set; }
@@ -68,6 +69,11 @@ public class User : EntityAudited
    public void UpdateOrganizationAdmin(bool isOrganizationAdmin)
    {
       IsOrganizationAdmin = isOrganizationAdmin;
+   }
+
+   public void UpdateSupportUser(bool isSupportUser)
+   {
+      IsSupportUser = isSupportUser;
    }
 
    public void RegisterLastSuccessfullyLogin()

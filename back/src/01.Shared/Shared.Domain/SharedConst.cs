@@ -77,6 +77,7 @@ public static partial class SharedConst
       {
          public const string OrganizationId = "organizationId";
          public const string IsSystemAdmin = "isSystemAdmin";
+         public const string IsSupportUser = "isSupportUser";
          public const string IsOrganizationAdmin = "isOrganizationAdmin";
          public const string Issuer = "IAM.API";
          public const string Audience = "IAM.Client";

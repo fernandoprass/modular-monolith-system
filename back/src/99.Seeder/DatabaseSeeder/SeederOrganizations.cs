@@ -52,12 +52,12 @@ public class SeederOrganizations(
 
       var superUser = User.Create("System Root", "admin@saas.com", passwordHash, DateTime.UtcNow.AddDays(30), LanguageOptions.English, organization.Id);
       superUser.IsSystemAdmin = true;
-      superUser.IsOrganizationAdmin = true;
 
       superUser.AddRole(seederData.SysAdminRoleId, DateTime.UtcNow, null);
       organization.CreatedBy = superUser.Id;
 
       var supportUser = User.Create("Internal Support", "support@saas.com", passwordHash, DateTime.UtcNow.AddDays(30), LanguageOptions.English, organization.Id);
+      superUser.IsSupportUser = true;
       supportUser.AddRole(seederData.SysAdminRoleId, DateTime.UtcNow, null);
 
       Console.WriteLine($"Adding organization: {organization.Name}");

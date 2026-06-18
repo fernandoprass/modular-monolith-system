@@ -142,6 +142,7 @@ public class GlobalExceptionHandlerTests
       public Guid UserId { get; } = userId;
       public Guid OrganizationId { get; } = organizationId;
       public bool IsSystemAdmin => false;
+      public bool IsSupportUser => false;
       public bool IsOrganizationAdmin => false;
       public bool IsAuthenticated => true;
       public string? Language => "en";

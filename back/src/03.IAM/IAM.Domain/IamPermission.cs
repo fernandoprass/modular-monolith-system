@@ -49,6 +49,7 @@ public static class IamPermission
       public const string Read = $"{Module}.{Resource}.read";
       public const string Write = $"{Module}.{Resource}.write";
       public const string ViewAccess = $"{Module}.{Resource}.viewaccess";
+      public const string UpdateSupportUser = $"{Module}.{Resource}.updatesupportuser";
       public const string UpdateOrganizationAdmin = $"{Module}.{Resource}.updateorganizationadmin";
    }
 

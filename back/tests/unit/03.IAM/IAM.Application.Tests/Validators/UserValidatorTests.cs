@@ -10,7 +10,6 @@ using Shared.Application.Contracts;
 using Shared.Domain;
 using Shared.Domain.Messages;
 
-
 namespace IAM.Application.Tests.Validators;
 
 public class UserValidatorTests
@@ -22,6 +21,7 @@ public class UserValidatorTests
       _validator = new UserValidator();
    }
 
+   #region CreateUser
    [Fact]
    public void ValidateCreate_ShouldBeSuccess_WhenAllDataIsValid()
    {
@@ -53,6 +53,49 @@ public class UserValidatorTests
       Assert.False(result.IsSuccess);
       Assert.Contains(result.Messages, m => m is NotFoundError && m.Show().Contains(IamConst.Entity.Organization));
    }
+
+   [Theory]
+   [InlineData("Valid User", "test@domain.com", "Pass123!", false, true)]      // Case 1: Everything is valid and email is unique 
+   [InlineData("Valid User", "duplicate@domain.com", "Pass123!", true, false)] // Case 2: Data is valid but email ALREADY exists in the database
+   [InlineData("Ab", "test@domain.com", "Pass123!", false, false)]             // Case 3: Email is unique but Title fails template validation (too short)
+   [InlineData("Valid User", "test@domain.com", "Password!", false, false)]    // Case 4: Email is unique but Password fails template validation (no digit)
+   public void ValidateCreateForNewOrganization_ShouldHandleValidationFlow(
+        string name,
+        string email,
+        string password,
+        bool emailAlreadyExists,
+        bool expectedSuccess)
+   {
+      var request = new OrganizationUserCreateRequest(name, email, password);
+
+      var result = _validator.ValidateCreateForNewOrganization(request, emailAlreadyExists);
+
+      result.IsSuccess.Should().Be(expectedSuccess);
+
+      if (!expectedSuccess && emailAlreadyExists)
+      {
+         // Verify if the specific "Already Exists" error is returned
+         result.Messages.Should().Contain(m => m is EmailAlreadyExistError);
+      }
+   }
+
+   [Fact]
+   public void ValidateCreateForNewOrganization_ShouldIncludeEmailInDuplicateError()
+   {
+      var email = "existing@domain.com";
+      var request = new OrganizationUserCreateRequest("Valid Name", email, "Pass123!");
+
+      var result = _validator.ValidateCreateForNewOrganization(request, emailAlreadyExists: true);
+
+      result.IsSuccess.Should().BeFalse();
+      var error = result.Messages.OfType<EmailAlreadyExistError>().FirstOrDefault();
+      error.Should().NotBeNull();
+      // Ensuring the error message contains the specific email passed in the request
+      result.Messages.First().Show().Should().Contain(email);
+   }
+   #endregion
+
+   #region Updates
 
    [Fact]
    public void ValidateUpdate_ShouldHaveError_WhenIdIsNull()
@@ -95,7 +138,7 @@ public class UserValidatorTests
    {
       var user = User.Create("User Test", "test@email.com", "hash", DateTime.UtcNow.AddDays(30), LanguageOptions.English, Guid.NewGuid());
       var request = new UserUpdateOrganizationAdminRequest(true);
-      var userContext = CreateUserContext(isSystemAdmin: true, isOrganizationAdmin: false, organizationId: Guid.NewGuid());
+      var userContext = CreateUserContext(isSystemAdmin: true, isSupportUser: false, isOrganizationAdmin: false, organizationId: Guid.NewGuid());
 
       var result = _validator.ValidateUpdateOrganizationAdmin(user, userContext, request);
 
@@ -108,7 +151,7 @@ public class UserValidatorTests
       var organizationId = Guid.NewGuid();
       var user = User.Create("User Test", "test@email.com", "hash", DateTime.UtcNow.AddDays(30), LanguageOptions.English, organizationId);
       var request = new UserUpdateOrganizationAdminRequest(true);
-      var userContext = CreateUserContext(isSystemAdmin: false, isOrganizationAdmin: true, organizationId: organizationId);
+      var userContext = CreateUserContext(isSystemAdmin: false, isOrganizationAdmin: true, isSupportUser: false, organizationId: organizationId);
 
       var result = _validator.ValidateUpdateOrganizationAdmin(user, userContext, request);
 
@@ -119,7 +162,7 @@ public class UserValidatorTests
    public void ValidateUpdateOrganizationAdmin_ShouldHaveError_WhenTargetUserNotFound()
    {
       var request = new UserUpdateOrganizationAdminRequest(true);
-      var userContext = CreateUserContext(isSystemAdmin: true, isOrganizationAdmin: false, organizationId: Guid.NewGuid());
+      var userContext = CreateUserContext(isSystemAdmin: true, isOrganizationAdmin: false, isSupportUser: false, organizationId: Guid.NewGuid());
 
       var result = _validator.ValidateUpdateOrganizationAdmin(null, userContext, request);
 
@@ -132,7 +175,7 @@ public class UserValidatorTests
    {
       var user = User.Create("User Test", "test@email.com", "hash", DateTime.UtcNow.AddDays(30), LanguageOptions.English, Guid.NewGuid());
       var request = new UserUpdateOrganizationAdminRequest(true);
-      var userContext = CreateUserContext(isSystemAdmin: false, isOrganizationAdmin: false, organizationId: user.OrganizationId);
+      var userContext = CreateUserContext(isSystemAdmin: false, isOrganizationAdmin: false, isSupportUser: false, organizationId: user.OrganizationId);
 
       var result = _validator.ValidateUpdateOrganizationAdmin(user, userContext, request);
 
@@ -145,7 +188,7 @@ public class UserValidatorTests
    {
       var user = User.Create("User Test", "test@email.com", "hash", DateTime.UtcNow.AddDays(30), LanguageOptions.English, Guid.NewGuid());
       var request = new UserUpdateOrganizationAdminRequest(true);
-      var userContext = CreateUserContext(isSystemAdmin: false, isOrganizationAdmin: true, organizationId: Guid.NewGuid());
+      var userContext = CreateUserContext(isSystemAdmin: false, isOrganizationAdmin: true, isSupportUser: false, organizationId: Guid.NewGuid());
 
       var result = _validator.ValidateUpdateOrganizationAdmin(user, userContext, request);
 
@@ -153,50 +196,76 @@ public class UserValidatorTests
       result.Messages.Should().Contain(m => m is Domain.Messages.UnauthorizedAccessError);
    }
 
-   [Theory]
-   [InlineData("Valid User", "test@domain.com", "Pass123!", false, true)]      // Case 1: Everything is valid and email is unique 
-   [InlineData("Valid User", "duplicate@domain.com", "Pass123!", true, false)] // Case 2: Data is valid but email ALREADY exists in the database
-   [InlineData("Ab", "test@domain.com", "Pass123!", false, false)]             // Case 3: Email is unique but Title fails template validation (too short)
-   [InlineData("Valid User", "test@domain.com", "Password!", false, false)]    // Case 4: Email is unique but Password fails template validation (no digit)
-   public void ValidateCreateForNewOrganization_ShouldHandleValidationFlow(
-        string name,
-        string email,
-        string password,
-        bool emailAlreadyExists,
-        bool expectedSuccess)
+   [Fact]
+   public void ValidateUpdateSupportUser_ShouldBeSuccess_WhenUserIsSystemAdmin()
    {
-      var request = new OrganizationUserCreateRequest(name, email, password);
+     Guid organizationId = Guid.NewGuid();
+      var user = User.Create("User Test", "test@email.com", "hash", DateTime.UtcNow.AddDays(30), LanguageOptions.English, organizationId);
+      var request = new UserUpdateSupportUserRequest(true);
+      var userContext = CreateUserContext(isSystemAdmin: true, isSupportUser: false, isOrganizationAdmin: false, organizationId: organizationId);
 
-      var result = _validator.ValidateCreateForNewOrganization(request, emailAlreadyExists);
+      var result = _validator.ValidateUpdateSupportUser(user, userContext, request);
 
-      result.IsSuccess.Should().Be(expectedSuccess);
-
-      if (!expectedSuccess && emailAlreadyExists)
-      {
-         // Verify if the specific "Already Exists" error is returned
-         result.Messages.Should().Contain(m => m is EmailAlreadyExistError);
-      }
+      result.IsSuccess.Should().BeTrue();
    }
 
    [Fact]
-   public void ValidateCreateForNewOrganization_ShouldIncludeEmailInDuplicateError()
+   public void ValidateUpdateSupportUser_ShouldBeSuccess_WhenUserIsSupportUserForSameOrganization()
    {
-      var email = "existing@domain.com";
-      var request = new OrganizationUserCreateRequest("Valid Name", email, "Pass123!");
+      var organizationId = Guid.NewGuid();
+      var user = User.Create("User Test", "test@email.com", "hash", DateTime.UtcNow.AddDays(30), LanguageOptions.English, organizationId);
+      var request = new UserUpdateSupportUserRequest(true);
+      var userContext = CreateUserContext(isSystemAdmin: false, isSupportUser: true, isOrganizationAdmin: false, organizationId: organizationId);
 
-      var result = _validator.ValidateCreateForNewOrganization(request, emailAlreadyExists: true);
+      var result = _validator.ValidateUpdateSupportUser(user, userContext, request);
 
-      result.IsSuccess.Should().BeFalse();
-      var error = result.Messages.OfType<EmailAlreadyExistError>().FirstOrDefault();
-      error.Should().NotBeNull();
-      // Ensuring the error message contains the specific email passed in the request
-      result.Messages.First().Show().Should().Contain(email);
+      result.IsSuccess.Should().BeTrue();
    }
 
-   private static IUserContext CreateUserContext(bool isSystemAdmin, bool isOrganizationAdmin, Guid organizationId)
+   [Fact]
+   public void ValidateUpdateSupportUser_ShouldHaveError_WhenTargetUserNotFound()
+   {
+      var request = new UserUpdateSupportUserRequest(true);
+      var userContext = CreateUserContext(isSystemAdmin: true, isSupportUser: false, isOrganizationAdmin: false, organizationId: Guid.NewGuid());
+
+      var result = _validator.ValidateUpdateSupportUser(null, userContext, request);
+
+      result.IsSuccess.Should().BeFalse();
+      result.Messages.Should().Contain(m => m is NotFoundError);
+   }
+
+   [Fact]
+   public void ValidateUpdateSupportUser_ShouldHaveError_WhenCurrentUserIsNotSupportOrSystemAdmin()
+   {
+      var user = User.Create("User Test", "test@email.com", "hash", DateTime.UtcNow.AddDays(30), LanguageOptions.English, Guid.NewGuid());
+      var request = new UserUpdateSupportUserRequest(true);
+      var userContext = CreateUserContext(isSystemAdmin: false, isSupportUser: false, isOrganizationAdmin: true, organizationId: user.OrganizationId);
+
+      var result = _validator.ValidateUpdateSupportUser(user, userContext, request);
+
+      result.IsSuccess.Should().BeFalse();
+      result.Messages.Should().Contain(m => m is Domain.Messages.UnauthorizedAccessError);
+   }
+
+   [Fact]
+   public void ValidateUpdateSupportUser_ShouldHaveError_WhenSupportUserUpdatesAnotherOrganization()
+   {
+      var user = User.Create("User Test", "test@email.com", "hash", DateTime.UtcNow.AddDays(30), LanguageOptions.English, Guid.NewGuid());
+      var request = new UserUpdateSupportUserRequest(true);
+      var userContext = CreateUserContext(isSystemAdmin: false, isSupportUser: true, isOrganizationAdmin: false, organizationId: Guid.NewGuid());
+
+      var result = _validator.ValidateUpdateSupportUser(user, userContext, request);
+
+      result.IsSuccess.Should().BeFalse();
+      result.Messages.Should().Contain(m => m is Domain.Messages.UnauthorizedAccessError);
+   }
+   #endregion
+
+   private static IUserContext CreateUserContext(bool isSystemAdmin, bool isSupportUser, bool isOrganizationAdmin, Guid organizationId)
    {
       var userContext = Substitute.For<IUserContext>();
       userContext.IsSystemAdmin.Returns(isSystemAdmin);
+      userContext.IsSupportUser.Returns(isSupportUser);
       userContext.IsOrganizationAdmin.Returns(isOrganizationAdmin);
       userContext.OrganizationId.Returns(organizationId);
 

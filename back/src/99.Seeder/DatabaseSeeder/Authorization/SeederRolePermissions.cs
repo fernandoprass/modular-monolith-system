@@ -124,7 +124,8 @@ public class SeederRolePermissions(
          IamPermission.Organizations.Read,
          IamPermission.Organizations.Write,
          IamPermission.Parameters.Write,
-         IamPermission.Permissions.Write
+         IamPermission.Permissions.Write,
+         IamPermission.Users.UpdateSupportUser,
       ];
 
       sysAdminPermissions.AddRange(GetIamOrganizationAdminPermissions());

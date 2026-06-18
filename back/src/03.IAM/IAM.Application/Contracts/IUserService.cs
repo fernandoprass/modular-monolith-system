@@ -21,5 +21,6 @@ public interface IUserService
    Task<Result> UpdatePasswordAsync(UserUpdatePasswordRequest request, CancellationToken cancellationToken = default);
    Task<Result> UpdateLastLoginAsync(Guid id, CancellationToken cancellationToken = default);
    Task<Result> UpdateFailedLoginAsync(Guid id, CancellationToken cancellationToken = default);
+   Task<Result> UpdateSupportUserAsync(Guid id, UserUpdateSupportUserRequest request, CancellationToken cancellationToken = default);
    Task<Result> ValidateUserForNewOrganizationAsync(OrganizationUserCreateRequest request, CancellationToken cancellationToken = default);
 }

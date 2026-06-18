@@ -221,6 +221,36 @@ public class UserService(
       return result;
    }
 
+   public async Task<Result> UpdateSupportUserAsync(Guid id, UserUpdateSupportUserRequest request, CancellationToken cancellationToken = default)
+   {
+      var user = await _iamUnitOfWork.Users.GetByIdAsync(id, cancellationToken);
+
+      var validator = _userValidator.ValidateUpdateSupportUser(user, _userContext, request);
+      if (validator.HasError)
+      {
+         return Result.Failure(validator.Messages);
+      }
+
+      user!.UpdateSupportUser(request.IsSupportUser);
+
+      var result = await CommitUpdateAsync(user, cancellationToken);
+
+      if (result.IsSuccess)
+      {
+         await _eventPublisher.NotifyAuditLogAsync(
+            IamConst.Logger.Feature.Users,
+            IamConst.Logger.Action.UpdateSupportUser,
+            AuditPrivacyLevel.High,
+            RetentionPolicy.Compliance,
+            description: $"Updated user {user.Name} support user flag",
+            targetId: user.Id,
+            metadata: new { user.Id, user.Email, request.IsSupportUser },
+            cancellationToken);
+      }
+
+      return result;
+   }
+
    private async Task<DateTime> GetPasswordExpiresAt(CancellationToken cancellationToken)
    {
       short numberOfDay = await _parameterService.GetShortIntAsync(IamParam.Security.MaxPasswordAgeInDays, cancellationToken);
@@ -312,6 +342,8 @@ public class UserService(
 
       return result;
    }
+
+
 
    public async Task<Result> ValidateUserForNewOrganizationAsync(OrganizationUserCreateRequest request, CancellationToken cancellationToken = default)
    {

@@ -34,6 +34,7 @@ public static class UserMappers
          Email = user.Email,
          IsActive = user.IsActive,
          IsSystemAdmin = user.IsSystemAdmin,
+         IsSupportUser = user.IsSupportUser,
          IsOrganizationAdmin = user.IsOrganizationAdmin,
          CreatedAt = user.CreatedAt,
          EmailVerifiedAt = user.EmailVerifiedAt,

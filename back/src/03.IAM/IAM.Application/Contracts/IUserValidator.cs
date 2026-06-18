@@ -16,4 +16,7 @@ public interface IUserValidator
    Result ValidateUpdatePassword(User? user, UserUpdatePasswordRequest request);
 
    Result ValidateUpdateOrganizationAdmin(User? user, IUserContext userContext, UserUpdateOrganizationAdminRequest request);
+
+   Result ValidateUpdateSupportUser(User? user, IUserContext userContext, UserUpdateSupportUserRequest request);
+
 }

@@ -14,6 +14,7 @@ public sealed record UserPasswordDto
    public string PasswordHash { get; init; } = string.Empty;
    public bool IsActive { get; init; }
    public bool IsSystemAdmin { get; init; } = false;
+   public bool IsSupportUser { get; init; } = false;
    public bool IsOrganizationAdmin { get; init; } = false;
    public int NumFailedLoginAttempts { get; init; }
    public DateTime CreatedAt { get; init; }

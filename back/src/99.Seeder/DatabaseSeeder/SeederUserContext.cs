@@ -6,6 +6,7 @@ public class SeederUserContext : IUserContext
 {
    public bool IsAuthenticated => true;
    public bool IsSystemAdmin => true;
+   public bool IsSupportUser => false;
    public bool IsOrganizationAdmin => false;
    public Guid UserId => Guid.Empty;
    public Guid OrganizationId => Guid.Empty;

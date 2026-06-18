@@ -58,6 +58,7 @@ public class UserQueryRepository(IamDbContext dbContext, IUserContext userContex
              PasswordHash = u.PasswordHash,
              IsActive = u.IsActive,
              IsSystemAdmin = u.IsSystemAdmin,
+             IsSupportUser = u.IsSupportUser,
              IsOrganizationAdmin = u.IsOrganizationAdmin,
              NumFailedLoginAttempts = u.NumFailedLoginAttempts,
              CreatedAt = u.CreatedAt,

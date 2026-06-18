@@ -35,13 +35,17 @@ public static partial class IamConst
       public static class Action
       {
          public const string Create = "create";
+         public const string Delete = "delete";
          public const string Update = "update";
+
          public const string UpdateCode = "update-code";
          public const string UpdatePassword = "update-password";
          public const string UpdateOrganizationAdmin = "update-organization-admin";
-         public const string Delete = "delete";
+         public const string UpdateSupportUser = "update-support-user";
+
          public const string LoginSuccess = "login-success";
          public const string LoginFail = "login-fail";
+
          public const string Assign = "assign";
          public const string Unassign = "unassign";
       }

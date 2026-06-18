@@ -1,1 +1,3 @@
-docker compose --env-file .env -f docker-compose.modules.yaml up --build
+$InfraPath = $PSScriptRoot
+
+docker compose --env-file (Join-Path $InfraPath ".env") -f (Join-Path $InfraPath "docker-compose.modules.yaml") up --build

@@ -78,6 +78,16 @@ public class UserController(
       return OkOrNotFound(result);
    }
 
+   [HttpPatch("{id:guid}/support-user")]
+   [Authorize]
+   [RequirePermission(IamPermission.Users.UpdateSupportUser)]
+   public async Task<IActionResult> UpdateSupportUser(Guid id, [FromBody] UserUpdateSupportUserRequest request, CancellationToken cancellationToken)
+   {
+      var result = await _userService.UpdateSupportUserAsync(id, request, cancellationToken);
+
+      return OkOrNotFound(result);
+   }
+
    [HttpDelete("{id:guid}")]
    [Authorize]
    [RequirePermission(IamPermission.Users.Write)]

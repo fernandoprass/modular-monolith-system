@@ -9,6 +9,7 @@ public sealed record UserDto
    public string Email { get; init; } = string.Empty;
    public bool IsActive { get; init; }
    public bool IsSystemAdmin { get; init; }
+   public bool IsSupportUser { get; init; }
    public bool IsOrganizationAdmin { get; init; }
    public DateTime CreatedAt { get; init; }
    public DateTime? EmailVerifiedAt { get; set; }
