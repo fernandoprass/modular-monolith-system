@@ -1,0 +1,15 @@
+meta {
+  name: my org
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{host.iam}}/api/{{version}}/iam/parameters/my-organization
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}

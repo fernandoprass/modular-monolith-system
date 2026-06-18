@@ -1,0 +1,15 @@
+meta {
+  name: delete
+  type: http
+  seq: 7
+}
+
+delete {
+  url: {{host.iam}}/api/{{version}}/iam/users/{{userId}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}

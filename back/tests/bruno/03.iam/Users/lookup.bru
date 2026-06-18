@@ -1,0 +1,22 @@
+meta {
+  name: lookup
+  type: http
+  seq: 11
+}
+
+get {
+  url: {{host.iam}}/api/{{version}}/iam/users/lookup?includeInactive=true
+  body: none
+  auth: bearer
+}
+
+params:query {
+  includeInactive: true
+  ~search: sh
+  ~take: 25
+  ~organizationId: {{organizationId}}
+}
+
+auth:bearer {
+  token: {{token}}
+}

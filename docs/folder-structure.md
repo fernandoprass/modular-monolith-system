@@ -41,22 +41,26 @@ Infrastructure talks to external systems
 ## 2. Root Structure
 
 ```text
-src/
+back/src/
   00.Core/
   01.Shared/
   02.Sentinel/
   03.IAM/
   04.Courier/
   99.Seeder/
-tests/
+back/tests/unit/
+back/tests/e2e/
+back/tests/bruno/
 docs/
 infra/
 ```
 
 | Folder | Purpose |
 | :--- | :--- |
-| `src` | Application source code. |
-| `tests` | Automated tests. |
+| `back/src` | Backend source code. |
+| `back/tests/unit` | Backend unit and focused integration tests. |
+| `back/tests/e2e` | Backend end-to-end API tests. |
+| `back/tests/bruno` | Bruno API collection. |
 | `docs` | Project documentation. |
 | `infra` | Docker, scripts, and local infrastructure files. |
 
@@ -86,7 +90,7 @@ Core API is the main modular monolith host.
 It lives in:
 
 ```text
-src/00.Core/
+back/src/00.Core/
   Core.API/
 ```
 
@@ -126,7 +130,7 @@ Module.Infrastructure/
 IAM example:
 
 ```text
-src/03.IAM/
+back/src/03.IAM/
   IAM.API/
   IAM.Application/
   IAM.Domain/
@@ -136,7 +140,7 @@ src/03.IAM/
 Sentinel example:
 
 ```text
-src/02.Sentinel/
+back/src/02.Sentinel/
   Sentinel.API/
   Sentinel.Application/
   Sentinel.Domain/
@@ -386,7 +390,7 @@ Shared contains reusable code used by more than one module.
 Example:
 
 ```text
-src/01.Shared/
+back/src/01.Shared/
   Shared.API/
   Shared.Application/
   Shared.Domain/
@@ -438,7 +442,7 @@ The seeder is separate from IAM.
 Location:
 
 ```text
-src/99.Seeder/DatabaseSeeder
+back/src/99.Seeder/DatabaseSeeder
 ```
 
 Purpose:
@@ -465,7 +469,7 @@ Tests mirror the source structure.
 Example:
 
 ```text
-tests/03.IAM/
+back/tests/unit/03.IAM/
   IAM.API.Tests/
   IAM.Application.Tests/
 ```
@@ -473,7 +477,7 @@ tests/03.IAM/
 Core API tests live in:
 
 ```text
-tests/00.Core/Core.API.Tests
+back/tests/unit/00.Core/Core.API.Tests
 ```
 
 Common ownership:

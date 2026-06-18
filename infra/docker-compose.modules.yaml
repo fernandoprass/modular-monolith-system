@@ -2,7 +2,7 @@ services:
   iam-api:
     build:
       context: ..
-      dockerfile: src/03.IAM/IAM.API/Dockerfile
+      dockerfile: back/src/03.IAM/IAM.API/Dockerfile
     container_name: ${IAM_API_CONTAINER_NAME}
     restart: on-failure
     ports:
@@ -30,7 +30,7 @@ services:
   sentinel-api:
     build:
       context: ..
-      dockerfile: src/02.Sentinel/Sentinel.API/Dockerfile
+      dockerfile: back/src/02.Sentinel/Sentinel.API/Dockerfile
     container_name: ${SENTINEL_API_CONTAINER_NAME}
     restart: on-failure
     ports:
@@ -62,7 +62,7 @@ services:
   courier-api:
     build:
       context: ..
-      dockerfile: src/04.Courier/Courier.API/Dockerfile
+      dockerfile: back/src/04.Courier/Courier.API/Dockerfile
     container_name: ${COURIER_API_CONTAINER_NAME}
     restart: on-failure
     ports:

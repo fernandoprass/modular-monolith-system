@@ -1,62 +1,67 @@
 # --- Configuration ---
-$CONTAINER_NAME = "postgres_db"  # Must match your docker-compose container_name
+$InfraPath = $PSScriptRoot
+$EnvPath = Join-Path $InfraPath ".env"
 $BACKUP_DIR = "C:\backup"
 $DATE = Get-Date -Format "yyyy-MM-dd_HHmm"
-$FILENAME = "IAM_backup_$DATE.sql.gz"
+$FILENAME = "IAM_backup_$DATE.dump"
 $FULL_PATH = Join-Path $BACKUP_DIR $FILENAME
 
-# Load .env to get credentials
-if (Test-Path ".env") {
-    Get-Content ".env" | Where-Object { $_ -match "=" } | ForEach-Object {
+if (Test-Path $EnvPath) {
+    Get-Content $EnvPath | Where-Object { $_ -match "=" } | ForEach-Object {
         $name, $value = $_.Split('=', 2)
-        Set-Variable -Name "ENV_$name" -Value $value -Scope Script
+        Set-Variable -Name "ENV_$name" -Value $value.Trim() -Scope Script
     }
 }
+
+$CONTAINER_NAME = if ($ENV_POSTGRES_SERVICE_NAME) { $ENV_POSTGRES_SERVICE_NAME } else { "postgres_db" }
+$DATABASE_NAME = if ($ENV_POSTGRES_DB) { $ENV_POSTGRES_DB } else { "iam" }
+$DATABASE_USER = if ($ENV_POSTGRES_USER) { $ENV_POSTGRES_USER } else { "admin" }
+$CONTAINER_BACKUP_PATH = "/tmp/$FILENAME"
 
 Write-Host "==========================================" -ForegroundColor Cyan
 Write-Host "PostgreSQL Docker Backup Routine"
 Write-Host "==========================================" -ForegroundColor Cyan
 
-# 1. Create backup directory if it doesn't exist
 if (-not (Test-Path $BACKUP_DIR)) {
     New-Item -ItemType Directory -Path $BACKUP_DIR | Out-Null
     Write-Host "[INFO] Created directory $BACKUP_DIR" -ForegroundColor Gray
 }
 
-# 2. Verify Container is running
 $containerStatus = docker inspect -f '{{.State.Running}}' $CONTAINER_NAME 2>$null
 if ($containerStatus -ne "true") {
     Write-Host "[ERROR] Container $CONTAINER_NAME is not running. Cannot backup." -ForegroundColor Red
-    exit
+    exit 1
 }
 
-# 3. Execute pg_dump and compress
-Write-Host "[INFO] Starting backup of database: $($ENV_POSTGRES_DB)..." -ForegroundColor Cyan
+Write-Host "[INFO] Starting backup of database: $DATABASE_NAME..." -ForegroundColor Cyan
 
-# We use 'docker exec' to run pg_dump inside, and redirect output to a file on Windows
-# -Fc = Custom format (compressed and flexible for restores)
-& docker exec -t $CONTAINER_NAME pg_dump -U $ENV_POSTGRES_USER -Fc $ENV_POSTGRES_DB > $FULL_PATH
+docker exec $CONTAINER_NAME pg_dump -U $DATABASE_USER -Fc -f $CONTAINER_BACKUP_PATH $DATABASE_NAME
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "[ERROR] Backup failed during pg_dump." -ForegroundColor Red
+    exit 1
+}
 
-if ($LASTEXITCODE -eq 0) {
+docker cp "${CONTAINER_NAME}:$CONTAINER_BACKUP_PATH" $FULL_PATH
+$copyExitCode = $LASTEXITCODE
+docker exec $CONTAINER_NAME rm $CONTAINER_BACKUP_PATH | Out-Null
+
+if ($copyExitCode -eq 0) {
     $size = (Get-Item $FULL_PATH).Length / 1MB
     Write-Host "[SUCCESS] Backup saved to: $FULL_PATH" -ForegroundColor Green
     Write-Host "[INFO] Backup size: $([math]::Round($size, 2)) MB" -ForegroundColor Gray
 } else {
-    Write-Host "[ERROR] Backup failed!" -ForegroundColor Red
-    exit
+    Write-Host "[ERROR] Backup copy failed." -ForegroundColor Red
+    exit 1
 }
 
-# 4. Cleanup (Optional: Keep only last 7 days of backups)
 Write-Host "[INFO] Cleaning up backups older than 7 days..." -ForegroundColor Gray
-Get-ChildItem $BACKUP_DIR -Filter "backup_*.sql.gz" | 
-    Where-Object { $_.CreationTime -lt (Get-Date).AddDays(-7) } | 
+Get-ChildItem $BACKUP_DIR -Filter "IAM_backup_*.dump" |
+    Where-Object { $_.CreationTime -lt (Get-Date).AddDays(-7) } |
     Remove-Item
 
 Write-Host "Done." -ForegroundColor Cyan
 
-
 ####################################################################
 ########################## How to Restore ##########################
-# To restore one of these backups to the Docker container, use this command in your terminal:
-# Syntax: cat <backup_file> | docker exec -i <container_name> pg_restore -U <user> -d <db_name> -c
-# cat C:\backup\backup_your_file.sql.gz | docker exec -i postgres_db pg_restore -U admin -d IAM -c --clean
+# docker cp C:\backup\IAM_backup_yyyy-MM-dd_HHmm.dump postgres_db:/tmp/IAM_backup.dump
+# docker exec -i postgres_db pg_restore -U admin -d iam -c --clean /tmp/IAM_backup.dump

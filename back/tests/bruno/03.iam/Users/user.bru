@@ -1,0 +1,15 @@
+meta {
+  name: user
+  type: http
+  seq: 9
+}
+
+get {
+  url: {{host.iam}}/api/{{version}}/iam/users/{{userId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}

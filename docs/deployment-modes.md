@@ -15,7 +15,7 @@ Modular monolith mode runs all module APIs from Core API.
 Host project:
 
 ```text
-src/00.Core/Core.API
+back/src/00.Core/Core.API
 ```
 
 Core API loads module controllers with Application Parts.
@@ -68,9 +68,9 @@ Standalone mode runs each module API separately.
 Host projects:
 
 ```text
-src/03.IAM/IAM.API
-src/02.Sentinel/Sentinel.API
-src/04.Courier/Courier.API
+back/src/03.IAM/IAM.API
+back/src/02.Sentinel/Sentinel.API
+back/src/04.Courier/Courier.API
 ```
 
 Each API keeps its own:
