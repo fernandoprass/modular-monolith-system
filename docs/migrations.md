@@ -2,6 +2,8 @@
 
 This guide outlines the steps to manage database migrations for the IAM.API project using Entity Framework Core.
 
+Commands below assume you are in the `back` solution directory and have the .NET SDK installed.
+
 ## 1. Verify connection string
 Ensure `src/03.IAM/IAM.API/appsettings.json` or `appsettings.Development.json` contains the connection under `ConnectionStrings:IamDb`.
 `{

@@ -2,14 +2,15 @@
 $DOTNET_VERSION    = "net10.0"               # Target framework
 $FOLDER_NAME       = "02.Sentinel"           # Physical folder (e.g., 02.Sentinel)
 $MODULE_NAME       = "Sentinel"              # Project prefix (e.g., Sentinel)
-$EXISTING_SLN_NAME = "CoreModularSystem.slnx" # Global solution file in Root
+$EXISTING_SLN_NAME = "CoreModularSystem.slnx" # Global solution file in back
 
 # 1. Path Calculation
 $INFRA_PATH = $PSScriptRoot
 $ROOT_PATH  = Resolve-Path (Join-Path $INFRA_PATH "..")
-$SRC_PATH   = Join-Path $ROOT_PATH "src"
-$TESTS_PATH = Join-Path $ROOT_PATH "tests"
-$SLN_PATH   = Join-Path $ROOT_PATH $EXISTING_SLN_NAME
+$BACK_PATH  = Join-Path $ROOT_PATH "back"
+$SRC_PATH   = Join-Path $BACK_PATH "src"
+$TESTS_PATH = Join-Path $BACK_PATH "tests\unit"
+$SLN_PATH   = Join-Path $BACK_PATH $EXISTING_SLN_NAME
 
 # 2. Pre-flight Checks
 if (-not (Test-Path $SLN_PATH)) { 
@@ -42,7 +43,7 @@ function Add-Project {
     return $ProjectPath
 }
 
-# --- 1. Create Projects in src/$FOLDER_NAME ---
+# --- 1. Create Projects in back/src/$FOLDER_NAME ---
 Set-Location $MODULE_SRC_ROOT
 
 # Domain
@@ -66,7 +67,7 @@ $InfraPath = Add-Project "Infrastructure" "classlib" $MODULE_SRC_ROOT -Reference
 # API
 Add-Project "API" "webapi" $MODULE_SRC_ROOT -References @("Domain", "Application", "Infrastructure") | Out-Null
 
-# --- 2. Create Test Project in tests/$FOLDER_NAME ---
+# --- 2. Create Test Project in back/tests/unit/$FOLDER_NAME ---
 # Project Name: Sentinel.Application.Tests
 $FullTestName = "$MODULE_NAME.Application.Tests"
 $PROJECT_TEST_PATH = Join-Path $MODULE_TEST_ROOT $FullTestName
@@ -75,7 +76,7 @@ Write-Host "--> Creating $FullTestName..." -ForegroundColor Green
 dotnet new xunit -n $FullTestName -o $PROJECT_TEST_PATH -f $DOTNET_VERSION | Out-Null
 dotnet sln $SLN_PATH add $PROJECT_TEST_PATH | Out-Null
 
-# Reference to src/$FOLDER_NAME/Sentinel.Application
+# Reference to back/src/$FOLDER_NAME/Sentinel.Application
 dotnet add $PROJECT_TEST_PATH reference (Join-Path $MODULE_SRC_ROOT "$MODULE_NAME.Application") | Out-Null
 
 # --- 3. Cleanup & Finish ---
@@ -83,5 +84,5 @@ Get-ChildItem -Path $MODULE_SRC_ROOT, $MODULE_TEST_ROOT -Recurse -Include "Class
 Set-Location $INFRA_PATH
 
 Write-Host "`nSuccessfully created $MODULE_NAME" -ForegroundColor Cyan
-Write-Host "Source: src/$FOLDER_NAME/" -ForegroundColor Gray
-Write-Host "Tests:  tests/$FOLDER_NAME/" -ForegroundColor Gray
+Write-Host "Source: back/src/$FOLDER_NAME/" -ForegroundColor Gray
+Write-Host "Tests:  back/tests/unit/$FOLDER_NAME/" -ForegroundColor Gray

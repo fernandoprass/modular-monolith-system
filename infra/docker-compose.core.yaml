@@ -2,7 +2,7 @@ services:
   core-api:
     build:
       context: ..
-      dockerfile: src/00.Core/Core.API/Dockerfile
+      dockerfile: back/src/00.Core/Core.API/Dockerfile
     container_name: ${CORE_API_CONTAINER_NAME:-core_api}
     restart: on-failure
     ports:

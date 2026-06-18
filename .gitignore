@@ -8,3 +8,4 @@
 artifacts/
 publish/
 nuget-packages/
+TestResults/

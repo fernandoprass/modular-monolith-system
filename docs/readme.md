@@ -39,7 +39,7 @@ The files are grouped by prefix:
 
 Module overview:
 
-- `src/01.Shared/readme.md`
+- `back/src/01.Shared/readme.md`
 
 Read it when you need the big picture for Shared services, contracts, repositories, parameters, Redis cache, Redis messaging, authorization, and exception handling.
 
@@ -53,7 +53,7 @@ Read it when you need the big picture for Shared services, contracts, repositori
 
 Module overview:
 
-- `src/02.Sentinel/readme.md`
+- `back/src/02.Sentinel/readme.md`
 
 ---
 
@@ -64,4 +64,4 @@ Module overview:
 | `03.iam.entities.md` | Explains IAM entities such as organizations, users, roles, permissions, user roles, and role permissions. |
 
 Module overview:
-- `src/03.IAM/readme.md`
+- `back/src/03.IAM/readme.md`

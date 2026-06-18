@@ -68,7 +68,7 @@ This matters when the system runs more than one container or server.
 Shared Infrastructure configures Redis cache.
 
 File:
-- `src/01.Shared/Shared.Infrastructure/SharedDependencyInjection.cs`
+- `back/src/01.Shared/Shared.Infrastructure/SharedDependencyInjection.cs`
 
 It uses:
 - `AddStackExchangeRedisCache`
@@ -86,7 +86,7 @@ Class:
 - `DistributedRolePermissionCache`
 
 Location:
-- `src/01.Shared/Shared.Infrastructure/Authorization`
+- `back/src/01.Shared/Shared.Infrastructure/Authorization`
 
 Contracts:
 - `IRolePermissionCache`
@@ -173,7 +173,7 @@ Contract:
 - `IParameterCacheRespository`
 
 Location:
-- `src/01.Shared/Shared.Infrastructure/Repositories`
+- `back/src/01.Shared/Shared.Infrastructure/Repositories`
 
 Purpose:
 - Cache resolved parameter values.
@@ -294,7 +294,7 @@ Current fields:
 ```csharp
 var values = await _database.HashGetAsync(
    redisKey,
-   [DefaultField, userOwnerId.ToString(), userId.ToString()]);
+   [DefaultField, organizationId.ToString(), userId.ToString()]);
 ```
 
 Current priority:

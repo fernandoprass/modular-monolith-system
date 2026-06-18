@@ -1,0 +1,21 @@
+meta {
+  name: update support user
+  type: http
+  seq: 5
+}
+
+patch {
+  url: {{host.iam}}/api/{{version}}/iam/users/{{userId}}/support-user
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "isSupportUser": true
+  }
+}

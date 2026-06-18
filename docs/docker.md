@@ -77,10 +77,10 @@ Application Dockerfiles:
 
 | File | Purpose |
 | :--- | :--- |
-| `src/00.Core/Core.API/Dockerfile` | Builds Core API image. |
-| `src/03.IAM/IAM.API/Dockerfile` | Builds IAM API image. |
-| `src/02.Sentinel/Sentinel.API/Dockerfile` | Builds Sentinel API image. |
-| `src/04.Courier/Courier.API/Dockerfile` | Builds Courier API image. |
+| `back/src/00.Core/Core.API/Dockerfile` | Builds Core API image. |
+| `back/src/03.IAM/IAM.API/Dockerfile` | Builds IAM API image. |
+| `back/src/02.Sentinel/Sentinel.API/Dockerfile` | Builds Sentinel API image. |
+| `back/src/04.Courier/Courier.API/Dockerfile` | Builds Courier API image. |
 
 ---
 
