@@ -23,25 +23,28 @@ import {
 } from './permissionTypes'
 import { toTranslatedOptions } from './permissionUi'
 
+const EMPTY_PERMISSION_SEARCH: PermissionSearchForm = {
+  action: '',
+  isActive: PERMISSION_FILTER_VALUES.all,
+  module: PERMISSION_FILTER_VALUES.all,
+  resource: PERMISSION_FILTER_VALUES.all,
+  title: '',
+}
+
 export function PermissionListPage() {
   const t = useTranslate()
   const notifyError = useNotifyError()
   const { permissions: userPermissions } = useAuth()
   const [permissions, setPermissions] = useState<PermissionDto[]>([])
   const [selectedPermission, setSelectedPermission] = useState<PermissionDto | null>(null)
+  const [appliedFilters, setAppliedFilters] = useState<PermissionSearchForm>(EMPTY_PERMISSION_SEARCH)
   const [isLoading, setIsLoading] = useState(false)
   const [sorting, setSorting] = useState<SortingState>([])
   const canUpdate = hasPermissionCode(userPermissions, IAM_PERMISSIONS.permissions.write)
   const filterForm = useForm({
-    defaultValues: {
-      action: '',
-      isActive: PERMISSION_FILTER_VALUES.all,
-      module: PERMISSION_FILTER_VALUES.all,
-      resource: PERMISSION_FILTER_VALUES.all,
-      title: '',
-    } as PermissionSearchForm,
-    onSubmit: async ({ value }) => {
-      await loadPermissions(value)
+    defaultValues: EMPTY_PERMISSION_SEARCH,
+    onSubmit: ({ value }) => {
+      setAppliedFilters({ ...value })
     },
   })
   const columns = useMemo(() => createPermissionTableColumns({
@@ -50,17 +53,17 @@ export function PermissionListPage() {
     t,
   }), [canUpdate, t])
 
-  const loadPermissions = useCallback(async (request: PermissionSearchForm = filterForm.state.values) => {
+  const loadPermissions = useCallback(async () => {
     setIsLoading(true)
 
     try {
-      setPermissions(await getPermissions(request))
+      setPermissions(await getPermissions(appliedFilters))
     } catch (error) {
       notifyError(error, t('shared.errors.generic'))
     } finally {
       setIsLoading(false)
     }
-  }, [filterForm.state.values, notifyError, t])
+  }, [appliedFilters, notifyError, t])
 
   useEffect(() => {
     void loadPermissions()
@@ -68,13 +71,7 @@ export function PermissionListPage() {
 
   function handleReset() {
     filterForm.reset()
-    void loadPermissions({
-      action: '',
-      isActive: PERMISSION_FILTER_VALUES.all,
-      module: PERMISSION_FILTER_VALUES.all,
-      resource: PERMISSION_FILTER_VALUES.all,
-      title: '',
-    })
+    setAppliedFilters(EMPTY_PERMISSION_SEARCH)
   }
 
   async function handleSaved() {
@@ -83,7 +80,9 @@ export function PermissionListPage() {
 
   return (
     <main className="page">
-      <h1 className="page-title">{t('features.iam.permissions.pages.list')}</h1>
+      <div className="page-header">
+        <h1 className="page-title">{t('features.iam.permissions.pages.list')}</h1>
+      </div>
       <FilterToolbar onReset={handleReset} onSubmit={(event) => {
         event.preventDefault()
         void filterForm.handleSubmit()

@@ -6,21 +6,20 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslate, type Translate } from '../../../app/i18n/i18n'
 import { APP_ROUTES } from '../../../app/routes'
 import { useAuth, useNotifyError } from '../../../auth/AuthProvider'
-import { DataTablePagination } from '../../../components/ui/data-table-pagination'
 import { DataTable } from '../../../components/ui/data-table'
+import { DataTablePagination } from '../../../components/ui/data-table-pagination'
 import { Field, FieldLabel } from '../../../components/ui/form'
 import { FilterToolbar } from '../../../components/ui/filter-toolbar'
 import { Input } from '../../../components/ui/input'
 import { Select } from '../../../components/ui/select'
 import { IAM_PERMISSIONS } from '../../../shared/iamConstants'
-import { DEFAULT_PAGINATION } from '../../../shared/pagination'
+import { DEFAULT_PAGINATION, type PagedResultDto } from '../../../shared/pagination'
 import { hasPermissionCode } from '../../../shared/permissions'
 import { getParameters } from './parameterApi'
 import { createParameterTableColumns } from './ParameterListPageColumns'
 import {
   PARAMETER_FILTER_VALUES,
   PARAMETER_MODULE_OPTIONS,
-  type PagedResultDto,
   type ParameterLiteDto,
   type ParameterSearchForm,
 } from './parameterTypes'
@@ -49,10 +48,7 @@ export function ParameterListPage() {
   const navigate = useNavigate()
   const notifyError = useNotifyError()
   const { permissions } = useAuth()
-  const [appliedGroupFilter, setAppliedGroupFilter] = useState('')
-  const [appliedModuleFilter, setAppliedModuleFilter] = useState<string>(PARAMETER_FILTER_VALUES.all)
-  const [appliedNameFilter, setAppliedNameFilter] = useState('')
-  const [appliedTitleFilter, setAppliedTitleFilter] = useState('')
+  const [appliedFilters, setAppliedFilters] = useState<ParameterSearchForm>(EMPTY_PARAMETER_SEARCH)
   const [pageNumber, setPageNumber] = useState<number>(DEFAULT_PAGINATION.pageNumber)
   const [pageSize, setPageSize] = useState<number>(DEFAULT_PAGINATION.pageSize)
   const [result, setResult] = useState<PagedResultDto<ParameterLiteDto> | null>(null)
@@ -63,10 +59,7 @@ export function ParameterListPage() {
     defaultValues: EMPTY_PARAMETER_SEARCH,
     onSubmit: ({ value }) => {
       setPageNumber(DEFAULT_PAGINATION.pageNumber)
-      setAppliedGroupFilter(value.group)
-      setAppliedModuleFilter(value.module)
-      setAppliedNameFilter(value.name)
-      setAppliedTitleFilter(value.title)
+      setAppliedFilters({ ...value })
     },
   })
   const columns = useMemo(() => createParameterTableColumns({
@@ -75,24 +68,24 @@ export function ParameterListPage() {
     t,
   }), [canUpdate, navigate, t])
 
-  const loadParameters = useCallback(async (targetPage = pageNumber) => {
+  const loadParameters = useCallback(async (targetPage: number) => {
     setIsLoading(true)
 
     try {
       setResult(await getParameters({
-        group: appliedGroupFilter,
-        module: appliedModuleFilter,
-        name: appliedNameFilter,
+        group: appliedFilters.group,
+        module: appliedFilters.module,
+        name: appliedFilters.name,
         pageNumber: targetPage,
         pageSize,
-        title: appliedTitleFilter,
+        title: appliedFilters.title,
       }))
     } catch (error) {
       notifyError(error, t('shared.errors.generic'))
     } finally {
       setIsLoading(false)
     }
-  }, [appliedGroupFilter, appliedModuleFilter, appliedNameFilter, appliedTitleFilter, notifyError, pageNumber, pageSize, t])
+  }, [appliedFilters, notifyError, pageSize, t])
 
   useEffect(() => {
     void loadParameters(pageNumber)
@@ -100,10 +93,7 @@ export function ParameterListPage() {
 
   function handleReset() {
     filterForm.reset()
-    setAppliedGroupFilter('')
-    setAppliedModuleFilter(PARAMETER_FILTER_VALUES.all)
-    setAppliedNameFilter('')
-    setAppliedTitleFilter('')
+    setAppliedFilters(EMPTY_PARAMETER_SEARCH)
     setPageNumber(DEFAULT_PAGINATION.pageNumber)
   }
 
@@ -112,11 +102,13 @@ export function ParameterListPage() {
     setPageNumber(DEFAULT_PAGINATION.pageNumber)
   }
 
-  const totalPages = result?.totalPages ?? 1
+  const totalPages = result?.totalPages ?? DEFAULT_PAGINATION.pageNumber
 
   return (
     <main className="page">
-      <h1 className="page-title">{t('features.iam.parameters.pages.list')}</h1>
+      <div className="page-header">
+        <h1 className="page-title">{t('features.iam.parameters.pages.list')}</h1>
+      </div>
       <FilterToolbar onReset={handleReset} onSubmit={(event) => {
         event.preventDefault()
         void filterForm.handleSubmit()

@@ -104,14 +104,6 @@ export type ParameterListQuery = ParameterSearchForm & {
   pageSize: number
 }
 
-export type PagedResultDto<TItem> = {
-  items: TItem[]
-  pageNumber: number
-  pageSize: number
-  totalCount: number
-  totalPages: number
-}
-
 export type ParameterForm = {
   description: string
   externalListEndpoint: string

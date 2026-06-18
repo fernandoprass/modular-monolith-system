@@ -1,11 +1,11 @@
 import { API_PATHS } from '../../../data/apiPaths'
 import { getIamJson, getIamJsonWithQuery, putIamJson } from '../../../data/httpClient'
 import { ensureResultSuccess, unwrapResult } from '../../../data/result'
+import type { PagedResultDto } from '../../../shared/pagination'
 import {
   PARAMETER_FILTER_VALUES,
   PARAMETER_QUERY_PARAMS,
   PARAMETER_REQUEST_FIELDS,
-  type PagedResultDto,
   type ParameterDto,
   type ParameterForm,
   type ParameterLiteDto,
@@ -51,6 +51,10 @@ function readBoolean(value: Record<string, unknown>, ...keys: string[]): boolean
     if (typeof data === 'boolean') {
       return data
     }
+
+    if (typeof data === 'string') {
+      return data.toLowerCase() === 'true'
+    }
   }
 
   return false
@@ -63,6 +67,14 @@ function readNumber(value: Record<string, unknown>, ...keys: string[]): number {
     if (typeof data === 'number') {
       return data
     }
+
+    if (typeof data === 'string') {
+      const parsed = Number(data)
+
+      if (Number.isFinite(parsed)) {
+        return parsed
+      }
+    }
   }
 
   return 0
@@ -74,11 +86,30 @@ function readNullableString(value: Record<string, unknown>, ...keys: string[]): 
   return data.length === 0 ? null : data
 }
 
-function normalizeParameterLiteDto(value: ParameterLiteDto): ParameterLiteDto {
-  const source = value as unknown as Record<string, unknown>
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null
+}
+
+function unwrapParameterSource(value: unknown): Record<string, unknown> {
+  if (!isRecord(value)) {
+    return {}
+  }
+
+  if (!('id' in value) && !('Id' in value)) {
+    const nested = value.data ?? value.Data
+
+    if (isRecord(nested)) {
+      return unwrapParameterSource(nested)
+    }
+  }
+
+  return value
+}
+
+function normalizeParameterLiteDto(value: unknown): ParameterLiteDto {
+  const source = unwrapParameterSource(value)
 
   return {
-    ...value,
     group: readString(source, 'group', 'Group'),
     id: readString(source, 'id', 'Id'),
     isOverridden: readBoolean(source, 'isOverridden', 'IsOverridden'),
@@ -92,11 +123,11 @@ function normalizeParameterLiteDto(value: ParameterLiteDto): ParameterLiteDto {
   }
 }
 
-function normalizeParameterDto(value: ParameterDto): ParameterDto {
-  const source = value as unknown as Record<string, unknown>
+function normalizeParameterDto(value: unknown): ParameterDto {
+  const source = unwrapParameterSource(value)
 
   return {
-    ...normalizeParameterLiteDto(value),
+    ...normalizeParameterLiteDto(source),
     description: readString(source, 'description', 'Description'),
     externalListEndpoint: readNullableString(source, 'externalListEndpoint', 'ExternalListEndpoint'),
     isVisible: readBoolean(source, 'isVisible', 'IsVisible'),
@@ -127,13 +158,13 @@ export async function getParameters(request: ParameterListQuery): Promise<PagedR
 export async function getOrganizationSettingsParameters(): Promise<ParameterLiteDto[]> {
   const response = await getIamJson(API_PATHS.iam.parameters.myOrganization)
 
-  return unwrapResult<ParameterLiteDto[]>(response).map(normalizeParameterLiteDto)
+  return unwrapResult<unknown[]>(response).map(normalizeParameterLiteDto)
 }
 
 export async function getUserSettingsParameters(): Promise<ParameterLiteDto[]> {
   const response = await getIamJson(API_PATHS.iam.parameters.me)
 
-  return unwrapResult<ParameterLiteDto[]>(response).map(normalizeParameterLiteDto)
+  return unwrapResult<unknown[]>(response).map(normalizeParameterLiteDto)
 }
 
 function toOptionalValue(value: string): string | null {
@@ -163,7 +194,7 @@ function toParameterUpdateRequest(data: ParameterForm): ParameterUpdateRequest {
 export async function getParameter(id: string): Promise<ParameterDto> {
   const response = await getIamJson(API_PATHS.iam.parameters.byId(id))
 
-  return normalizeParameterDto(unwrapResult<ParameterDto>(response))
+  return normalizeParameterDto(unwrapResult<unknown>(response))
 }
 
 export async function updateParameter(id: string, request: ParameterForm): Promise<void> {

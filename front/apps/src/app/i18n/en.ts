@@ -128,6 +128,8 @@ export const enMessages = {
           updated: 'Role updated.',
         },
         pages: {
+          create: 'Create role',
+          edit: 'Edit role',
           list: 'Roles',
         },
       },
@@ -186,6 +188,7 @@ export const enMessages = {
   },
   shared: {
     actions: {
+      add: 'Add',
       back: 'Back',
       cancel: 'Cancel',
       clear: 'Clear',
@@ -201,6 +204,7 @@ export const enMessages = {
       nextPage: '>',
       previousPage: '<',
       read: 'Read',
+      remove: 'Remove',
       reset: 'Reset',
       save: 'Save',
       saveOverride: 'Save override',

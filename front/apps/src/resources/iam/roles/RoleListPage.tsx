@@ -35,6 +35,7 @@ export function RoleListPage() {
   const { permissions } = useAuth()
   const [roles, setRoles] = useState<RoleDto[]>([])
   const [deleteTarget, setDeleteTarget] = useState<RoleDto | null>(null)
+  const [appliedFilters, setAppliedFilters] = useState<RoleSearchForm>(EMPTY_ROLE_SEARCH)
   const [isLoading, setIsLoading] = useState(false)
   const [sorting, setSorting] = useState<SortingState>([])
   const canCreate = hasPermissionCode(permissions, IAM_PERMISSIONS.roles.write)
@@ -42,8 +43,8 @@ export function RoleListPage() {
   const canDelete = hasPermissionCode(permissions, IAM_PERMISSIONS.roles.write)
   const filterForm = useForm({
     defaultValues: EMPTY_ROLE_SEARCH,
-    onSubmit: async ({ value }) => {
-      await loadRoles(value)
+    onSubmit: ({ value }) => {
+      setAppliedFilters({ ...value })
     },
   })
   const columns = useMemo(() => createRoleTableColumns({
@@ -54,17 +55,17 @@ export function RoleListPage() {
     t,
   }), [canDelete, canUpdate, navigate, t])
 
-  const loadRoles = useCallback(async (request: RoleSearchForm = filterForm.state.values) => {
+  const loadRoles = useCallback(async () => {
     setIsLoading(true)
 
     try {
-      setRoles(await getRoles(request))
+      setRoles(await getRoles(appliedFilters))
     } catch (error) {
       notifyError(error, t('shared.errors.generic'))
     } finally {
       setIsLoading(false)
     }
-  }, [filterForm.state.values, notifyError, t])
+  }, [appliedFilters, notifyError, t])
 
   useEffect(() => {
     void loadRoles()
@@ -76,7 +77,7 @@ export function RoleListPage() {
 
   function handleReset() {
     filterForm.reset()
-    void loadRoles(EMPTY_ROLE_SEARCH)
+    setAppliedFilters(EMPTY_ROLE_SEARCH)
   }
 
   async function handleConfirmDelete() {

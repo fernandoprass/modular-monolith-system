@@ -1,8 +1,8 @@
 import { useForm } from '@tanstack/react-form'
+import type { SortingState } from '@tanstack/react-table'
 import { Plus } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import type { SortingState } from '@tanstack/react-table'
 
 import { useToast } from '../../../app/ToastProvider'
 import { useTranslate } from '../../../app/i18n/i18n'
@@ -10,18 +10,34 @@ import { APP_ROUTES } from '../../../app/routes'
 import { useAuth, useNotifyError } from '../../../auth/AuthProvider'
 import { Button } from '../../../components/ui/button'
 import { DataTable } from '../../../components/ui/data-table'
+import { DataTablePagination } from '../../../components/ui/data-table-pagination'
 import { ConfirmDialog } from '../../../components/ui/dialog-confirm'
 import { Field, FieldLabel } from '../../../components/ui/form'
 import { FilterToolbar } from '../../../components/ui/filter-toolbar'
 import { Input } from '../../../components/ui/input'
 import { Select } from '../../../components/ui/select'
-import { DataTablePagination } from '../../../components/ui/data-table-pagination'
 import { IAM_PERMISSIONS } from '../../../shared/iamConstants'
-import { DEFAULT_PAGINATION } from '../../../shared/pagination'
+import { DEFAULT_PAGINATION, type PagedResultDto } from '../../../shared/pagination'
 import { hasPermissionCode } from '../../../shared/permissions'
 import { createUserTableColumns } from './UserListPageColumns'
 import { deleteUser, getUsers } from './userApi'
-import type { PagedResultDto, UserLiteDto } from './userTypes'
+import type { UserLiteDto } from './userTypes'
+
+const USER_FILTER_VALUES = {
+  all: 'all',
+} as const
+
+type UserSearchForm = {
+  email: string
+  isActive: string
+  name: string
+}
+
+const EMPTY_USER_SEARCH: UserSearchForm = {
+  email: '',
+  isActive: USER_FILTER_VALUES.all,
+  name: '',
+}
 
 export function UserListPage() {
   const t = useTranslate()
@@ -29,9 +45,8 @@ export function UserListPage() {
   const notifyError = useNotifyError()
   const { showSuccess } = useToast()
   const { permissions, user } = useAuth()
-  const [appliedIsActiveFilter, setAppliedIsActiveFilter] = useState<string | null>(null)
-  const [appliedNameFilter, setAppliedNameFilter] = useState('')
-  const [appliedEmailFilter, setAppliedEmailFilter] = useState('')
+  const organizationId = user?.organizationId ?? ''
+  const [appliedFilters, setAppliedFilters] = useState<UserSearchForm>(EMPTY_USER_SEARCH)
   const [pageNumber, setPageNumber] = useState<number>(DEFAULT_PAGINATION.pageNumber)
   const [pageSize, setPageSize] = useState<number>(DEFAULT_PAGINATION.pageSize)
   const [result, setResult] = useState<PagedResultDto<UserLiteDto> | null>(null)
@@ -51,27 +66,21 @@ export function UserListPage() {
     t,
   }), [canDelete, canUpdate, canView, navigate, t])
   const filterForm = useForm({
-    defaultValues: {
-      email: '',
-      isActive: 'all',
-      name: '',
-    },
+    defaultValues: EMPTY_USER_SEARCH,
     onSubmit: ({ value }) => {
       setPageNumber(DEFAULT_PAGINATION.pageNumber)
-      setAppliedIsActiveFilter(value.isActive === 'all' ? null : value.isActive)
-      setAppliedNameFilter(value.name)
-      setAppliedEmailFilter(value.email)
+      setAppliedFilters({ ...value })
     },
   })
-  const loadUsers = useCallback(async (targetPage = pageNumber) => {
+  const loadUsers = useCallback(async (targetPage: number) => {
     setIsLoading(true)
 
     try {
       setResult(await getUsers({
-        email: appliedEmailFilter,
-        isActive: appliedIsActiveFilter,
-        name: appliedNameFilter,
-        organizationId: user?.organizationId ?? '',
+        email: appliedFilters.email,
+        isActive: appliedFilters.isActive === USER_FILTER_VALUES.all ? null : appliedFilters.isActive,
+        name: appliedFilters.name,
+        organizationId,
         pageNumber: targetPage,
         pageSize,
       }))
@@ -80,7 +89,7 @@ export function UserListPage() {
     } finally {
       setIsLoading(false)
     }
-  }, [appliedEmailFilter, appliedIsActiveFilter, appliedNameFilter, notifyError, pageNumber, pageSize, t, user?.organizationId])
+  }, [appliedFilters, notifyError, organizationId, pageSize, t])
 
   useEffect(() => {
     void loadUsers(pageNumber)
@@ -88,9 +97,7 @@ export function UserListPage() {
 
   function handleReset() {
     filterForm.reset()
-    setAppliedIsActiveFilter(null)
-    setAppliedNameFilter('')
-    setAppliedEmailFilter('')
+    setAppliedFilters(EMPTY_USER_SEARCH)
     setPageNumber(DEFAULT_PAGINATION.pageNumber)
   }
 
@@ -114,7 +121,7 @@ export function UserListPage() {
     }
   }
 
-  const totalPages = result?.totalPages ?? 1
+  const totalPages = result?.totalPages ?? DEFAULT_PAGINATION.pageNumber
 
   return (
     <main className="page">
@@ -147,14 +154,14 @@ export function UserListPage() {
             </Field>
           )}
         </filterForm.Field>
-                <filterForm.Field name="isActive">
+        <filterForm.Field name="isActive">
           {(field) => (
             <Field>
               <FieldLabel>{t('shared.fields.isActive')}</FieldLabel>
               <Select
                 onValueChange={field.handleChange}
                 options={[
-                  { label: t('shared.filters.all'), value: 'all' },
+                  { label: t('shared.filters.all'), value: USER_FILTER_VALUES.all },
                   { label: t('shared.status.active'), value: 'true' },
                   { label: t('shared.status.inactive'), value: 'false' },
                 ]}

@@ -48,6 +48,7 @@ export function createParameterTableColumns({
           ]}
         />
       ),
+      enableHiding: false,
       enableSorting: false,
       header: t('shared.fields.actions'),
       id: 'actions',

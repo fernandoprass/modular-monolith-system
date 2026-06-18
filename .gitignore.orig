@@ -1,0 +1,14 @@
+[Bb]in/
+[Oo]bj/
+.vs/
+.vscode/
+*.user
+*.suo
+*.env
+artifacts/
+publish/
+nuget-packages/
+front/apps/.vite
+front/apps/dist
+front/apps/node_modules
+

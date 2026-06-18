@@ -9,11 +9,11 @@ import {
 } from '../../../data/httpClient'
 import { ensureResultSuccess, unwrapResult } from '../../../data/result'
 import { normalizeLanguageCode } from '../../../shared/languages'
+import type { PagedResultDto } from '../../../shared/pagination'
 import type { PermissionDto } from '../../../shared/permissions'
 import {
   USER_QUERY_PARAMS,
   USER_REQUEST_FIELDS,
-  type PagedResultDto,
   type UserCreateForm,
   type UserCreateRequest,
   type UserDto,

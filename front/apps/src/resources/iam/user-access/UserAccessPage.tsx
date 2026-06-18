@@ -13,8 +13,8 @@ import { Empty, EmptyDescription } from '../../../components/ui/empty'
 import { Field, FieldLabel } from '../../../components/ui/form'
 import { Input } from '../../../components/ui/input'
 import { formatUserDateTime } from '../../../shared/dateFormat'
-import { UserSelect } from '../users/UserSelect'
 import type { RoleDto } from '../roles/roleTypes'
+import { UserSelect } from '../users/UserSelect'
 import type { UserRoleDto } from '../users/userTypes'
 import {
   assignUserRoles,
@@ -50,6 +50,7 @@ export function UserAccessPage() {
   const notifyError = useNotifyError()
   const { showSuccess } = useToast()
   const { user } = useAuth()
+  const userLanguage = user?.language
   const [userId, setUserId] = useState('')
   const [availableRoles, setAvailableRoles] = useState<RoleDto[]>([])
   const [assignedRoles, setAssignedRoles] = useState<UserRoleDto[]>([])
@@ -92,12 +93,12 @@ export function UserAccessPage() {
     },
     {
       accessorKey: 'startsAt',
-      cell: ({ row }) => formatUserDateTime(row.original.startsAt, user?.language),
+      cell: ({ row }) => formatUserDateTime(row.original.startsAt, userLanguage),
       header: t('shared.fields.startsAt'),
     },
     {
       accessorKey: 'expiresAt',
-      cell: ({ row }) => row.original.expiresAt ? formatUserDateTime(row.original.expiresAt, user?.language) : '-',
+      cell: ({ row }) => row.original.expiresAt ? formatUserDateTime(row.original.expiresAt, userLanguage) : '-',
       header: t('shared.fields.expiresAt'),
     },
     {
@@ -109,7 +110,7 @@ export function UserAccessPage() {
       ),
       header: t('shared.fields.isActive'),
     },
-  ], [t, user?.language])
+  ], [t, userLanguage])
 
   const loadUserAccess = useCallback(async () => {
     if (userId.length === 0) {
@@ -241,7 +242,7 @@ export function UserAccessPage() {
                   type="button"
                 >
                   <Plus data-icon="inline-start" />
-                  Add
+                  {t('shared.actions.add')}
                 </Button>
                 <Button
                   disabled={isSaving || getSelectedIds(assignedSelection).length === 0}
@@ -250,7 +251,7 @@ export function UserAccessPage() {
                   variant="outline"
                 >
                   <Minus data-icon="inline-start" />
-                  Remove
+                  {t('shared.actions.remove')}
                 </Button>
               </div>
               <div className="permission-table-column">

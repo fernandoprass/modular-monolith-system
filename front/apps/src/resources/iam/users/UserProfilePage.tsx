@@ -22,6 +22,18 @@ type UserProfileForm = {
   name: string
 }
 
+const EMPTY_USER_PROFILE_FORM: UserProfileForm = {
+  language: LANGUAGE_CODES.english,
+  name: '',
+}
+
+function toForm(user: UserDto): UserProfileForm {
+  return {
+    language: user.language,
+    name: user.name,
+  }
+}
+
 export function UserProfilePage() {
   const t = useTranslate()
   const notifyError = useNotifyError()
@@ -31,10 +43,7 @@ export function UserProfilePage() {
   const [isSaving, setIsSaving] = useState(false)
   const canViewAccess = hasPermissionCode(permissions, IAM_PERMISSIONS.userProfile.viewAccess)
   const form = useForm({
-    defaultValues: {
-      language: LANGUAGE_CODES.english,
-      name: '',
-    } as UserProfileForm,
+    defaultValues: EMPTY_USER_PROFILE_FORM,
     onSubmit: async ({ value }) => {
       if (user === null) {
         return
@@ -62,20 +71,28 @@ export function UserProfilePage() {
     try {
       const loaded = await getCurrentUser()
       setUser(loaded)
-      form.setFieldValue('language', loaded.language)
-      form.setFieldValue('name', loaded.name)
     } catch (error) {
       notifyError(error, t('shared.errors.generic'))
     }
-  }, [form, notifyError, t])
+  }, [notifyError, t])
 
   useEffect(() => {
     void loadUser()
   }, [loadUser])
 
+  useEffect(() => {
+    if (user === null) {
+      return
+    }
+
+    form.reset(toForm(user))
+  }, [form, user])
+
   return (
     <main className="page">
-      <h1 className="page-title">{t('features.iam.users.pages.profile')}</h1>
+      <div className="page-header">
+        <h1 className="page-title">{t('features.iam.users.pages.profile')}</h1>
+      </div>
       <Card>
         <CardContent>
           {user === null ? (
@@ -103,7 +120,7 @@ export function UserProfilePage() {
                   {(field) => (
                     <Field>
                       <FieldLabel htmlFor={field.name}>{t('shared.fields.name')}</FieldLabel>
-                      <Input onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required value={field.state.value} />
+                      <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required value={field.state.value} />
                     </Field>
                   )}
                 </form.Field>

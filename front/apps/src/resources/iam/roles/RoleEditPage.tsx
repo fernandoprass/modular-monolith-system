@@ -1,5 +1,5 @@
 import { useForm } from '@tanstack/react-form'
-import type { RowSelectionState, SortingState, ColumnDef } from '@tanstack/react-table'
+import type { ColumnDef, RowSelectionState, SortingState } from '@tanstack/react-table'
 import { ArrowLeft, Minus, Plus } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -37,6 +37,16 @@ const EMPTY_ROLE_FORM: RoleForm = {
   organizationId: '',
 }
 
+function toForm(role: RoleDto): RoleForm {
+  return {
+    description: role.description,
+    isActive: role.isActive,
+    isDefault: role.isDefault,
+    name: role.name,
+    organizationId: role.organizationId ?? '',
+  }
+}
+
 function getSelectedIds(selection: RowSelectionState): string[] {
   return Object.entries(selection)
     .filter(([, selected]) => selected)
@@ -62,6 +72,7 @@ export function RoleEditPage() {
   const [isPermissionSaving, setIsPermissionSaving] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const isCreate = id === undefined
+  const pageTitle = isCreate ? t('features.iam.roles.pages.create') : t('features.iam.roles.pages.edit')
   const filteredAvailablePermissions = useMemo(() => {
     const filter = availablePermissionTitleFilter.trim().toLowerCase()
 
@@ -81,7 +92,6 @@ export function RoleEditPage() {
     return rolePermissions.filter((permission) => permission.title.toLowerCase().includes(filter))
   }, [rolePermissionTitleFilter, rolePermissions])
   const availablePermissionColumns = useMemo<ColumnDef<PermissionDto>[]>(() => [
-
     {
       accessorKey: 'module',
       header: t('shared.fields.module'),
@@ -94,7 +104,7 @@ export function RoleEditPage() {
       accessorKey: 'title',
       header: t('shared.fields.title'),
     },
-        {
+    {
       cell: ({ row }) => (
         <span className="permission-info" title={row.original.description}>
           ?
@@ -160,15 +170,10 @@ export function RoleEditPage() {
     try {
       const loaded = await getRole(id)
       setRole(loaded)
-      form.setFieldValue('description', loaded.description)
-      form.setFieldValue('isActive', loaded.isActive)
-      form.setFieldValue('isDefault', loaded.isDefault)
-      form.setFieldValue('name', loaded.name)
-      form.setFieldValue('organizationId', loaded.organizationId ?? '')
     } catch (error) {
       notifyError(error, t('shared.errors.generic'))
     }
-  }, [form, id, isCreate, notifyError, t])
+  }, [id, isCreate, notifyError, t])
 
   const loadPermissions = useCallback(async () => {
     if (isCreate || id === undefined) {
@@ -207,10 +212,16 @@ export function RoleEditPage() {
   useEffect(() => {
     if (isCreate) {
       form.reset(EMPTY_ROLE_FORM)
+    }
+  }, [form, isCreate])
+
+  useEffect(() => {
+    if (isCreate || role === null) {
       return
     }
 
-  }, [form, isCreate])
+    form.reset(toForm(role))
+  }, [form, isCreate, role])
 
   async function handleAssignPermissions() {
     if (id === undefined) {
@@ -263,7 +274,7 @@ export function RoleEditPage() {
   return (
     <main className="page">
       <div className="page-header">
-        <h1 className="page-title">{isCreate ? t('shared.actions.create') : t('shared.actions.edit')}</h1>
+        <h1 className="page-title">{pageTitle}</h1>
         <Button onClick={() => navigate(APP_ROUTES.roles)} type="button" variant="outline">
           <ArrowLeft data-icon="inline-start" />
           {t('shared.actions.back')}
@@ -371,7 +382,7 @@ export function RoleEditPage() {
                   type="button"
                 >
                   <Plus data-icon="inline-start" />
-                  Add
+                  {t('shared.actions.add')}
                 </Button>
                 <Button
                   disabled={isPermissionSaving || getSelectedIds(rolePermissionSelection).length === 0}
@@ -380,7 +391,7 @@ export function RoleEditPage() {
                   variant="outline"
                 >
                   <Minus data-icon="inline-start" />
-                  Remove
+                  {t('shared.actions.remove')}
                 </Button>
               </div>
               <div className="permission-table-column">

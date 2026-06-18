@@ -37,7 +37,9 @@ Prefer shadcn MCP examples before guessing component usage.
 
 ## SKILLS
 
-Read .agent/skill folder
+Read `.agent/skill` if it exists.
+
+If it does not exist, say so briefly and continue.
 
 ---
 
@@ -89,8 +91,8 @@ Before working on API integration, read:
 front/backend.md
 docs/readme.md
 docs/00.core.e2e-tests.md
-src/00.Core/00.core.md
-src/03.IAM/readme.md
+back/src/00.Core/00.core.md
+back/src/03.IAM/readme.md
 ```
 
 Use backend docs for endpoint ownership and domain rules.
@@ -170,6 +172,199 @@ Avoid mixed prefixes for the same component family.
 
 ---
 
+## Listing Page Rules
+
+Keep resource listing pages as similar as possible.
+
+Use this standard shape:
+- constants and local types first
+- hooks
+- permission booleans
+- form setup
+- column setup
+- loader callback
+- effects
+- handlers
+- derived render values
+- JSX
+
+For search forms, create an empty search constant.
+
+Good:
+
+```ts
+const EMPTY_USER_SEARCH = {
+  email: '',
+  isActive: 'all',
+  name: '',
+}
+```
+
+Use applied filter state for loading data.
+
+Do not load from `filterForm.state.values` inside loader callbacks.
+
+Good:
+
+```ts
+const [appliedFilters, setAppliedFilters] = useState(EMPTY_USER_SEARCH)
+
+const filterForm = useForm({
+  defaultValues: EMPTY_USER_SEARCH,
+  onSubmit: ({ value }) => {
+    setPageNumber(DEFAULT_PAGINATION.pageNumber)
+    setAppliedFilters({ ...value })
+  },
+})
+```
+
+Reset should reset both the form and applied filters.
+
+For paged list endpoints:
+- keep `pageNumber` and `pageSize` state in the page
+- reset `pageNumber` to `DEFAULT_PAGINATION.pageNumber` when filters or page size change
+- use `PagedResultDto<T>` from `front/apps/src/shared/pagination.ts`
+- do not duplicate `PagedResultDto<T>` in resource type files
+
+For array-backed list endpoints, still use `appliedFilters`.
+
+This keeps reload-after-save and reload-after-delete behavior predictable.
+
+When using values from objects in memoized callbacks, derive primitive values first.
+
+Good:
+
+```ts
+const organizationId = user?.organizationId ?? ''
+```
+
+Prefer depending on `organizationId` instead of `user?.organizationId` in callback dependency arrays.
+
+---
+
+## Edit Page Rules
+
+Keep edit and profile pages as similar as possible.
+
+Use this standard shape:
+- `EMPTY_*_FORM`
+- `toForm(dto)`
+- request-mapping helper when the backend request shape differs from form shape
+- load callback
+- reset effect
+- submit handler
+
+Good:
+
+```ts
+const EMPTY_ROLE_FORM = {
+  description: '',
+  isActive: true,
+  isDefault: false,
+  name: '',
+  organizationId: '',
+}
+
+function toForm(role: RoleDto): RoleForm {
+  return {
+    description: role.description,
+    isActive: role.isActive,
+    isDefault: role.isDefault,
+    name: role.name,
+    organizationId: role.organizationId ?? '',
+  }
+}
+```
+
+For edit pages, load the entity into state.
+
+Then reset the form from the loaded entity in an effect.
+
+Good:
+
+```ts
+const [role, setRole] = useState<RoleDto | null>(null)
+
+const loadRole = useCallback(async () => {
+  const loaded = await getRole(id)
+  setRole(loaded)
+}, [id])
+
+useEffect(() => {
+  if (role === null) {
+    return
+  }
+
+  form.reset(toForm(role))
+}, [form, role])
+```
+
+Avoid long `form.setFieldValue` sequences after loading an entity.
+
+For create/edit pages, derive `isCreate` once.
+
+Good:
+
+```ts
+const isCreate = id === undefined
+```
+
+For create mode, reset the form from the empty-form helper when context defaults change.
+
+For DTO normalization, normalize unknown API data at the API boundary.
+
+If a backend can return nested `data` wrappers, unwrap them in the API helper before the page sees the DTO.
+
+Do not patch empty form fields inside pages when the real issue is response normalization.
+
+---
+
+## Data Table Rules
+
+Use TanStack Table through the shared data table components.
+
+Current shared data table files:
+
+```text
+components/ui/data-table.tsx
+components/ui/data-table-pagination.tsx
+components/ui/data-table-row-actions.tsx
+components/ui/data-table-sortable-button.tsx
+```
+
+Action columns should be consistent.
+
+Use:
+
+```ts
+{
+  id: 'actions',
+  enableHiding: false,
+  enableSorting: false,
+}
+```
+
+Use `DataTableRowActions` for row buttons.
+
+Use icon buttons for common row actions such as view, edit, and delete.
+
+For paged tables, use `DataTablePagination`.
+
+Pagination must handle empty backend results.
+
+The backend can return:
+
+```json
+{
+  "totalCount": 0,
+  "totalPages": 0
+}
+```
+
+In that case the UI should show a zero range and disable navigation.
+
+---
+
 ## No Magic Strings
 
 Avoid magic strings.
@@ -186,6 +381,7 @@ Create constants for:
 - query parameter names
 - field names used in filters more than once
 - enum display labels
+- action labels such as Add and Remove
 - notification messages reused across files
 
 Good:
@@ -215,6 +411,20 @@ Prefer:
 
 ```ts
 localStorage.getItem(STORAGE_KEYS.authToken);
+```
+
+User-facing action labels must use translation keys.
+
+Good:
+
+```tsx
+{t('shared.actions.add')}
+```
+
+Avoid:
+
+```tsx
+Add
 ```
 
 ---
@@ -445,6 +655,18 @@ Use React and TanStack Table behavior before adding another state library.
 
 Do not add Redux unless explicitly approved.
 
+Avoid callback dependencies that confuse React Compiler memoization.
+
+Derive primitive values outside callbacks when reading optional object properties.
+
+Good:
+
+```ts
+const userLanguage = user?.language
+```
+
+Then use `userLanguage` inside `useMemo` or `useCallback`.
+
 ---
 
 ## Error Handling
@@ -516,9 +738,11 @@ Do not write docs only for agents.
 ## Before Finishing
 
 For frontend code changes:
-- run TypeScript build if available
 - run tests if available
-- run lint if available
+- run lint if available: `npm.cmd run lint`
+- run TypeScript build if available: `npm.cmd run build`
 - start dev server if the user asked to try the app
 
 If a command cannot run, say why.
+
+If Vite reports only a large chunk warning and the build succeeds, report it as a warning, not a failure.

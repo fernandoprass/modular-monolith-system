@@ -2,6 +2,7 @@ import { useForm } from '@tanstack/react-form'
 import { ArrowLeft } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+
 import { useToast } from '../../../app/ToastProvider'
 import { useTranslate } from '../../../app/i18n/i18n'
 import { APP_ROUTES } from '../../../app/routes'
@@ -27,6 +28,28 @@ type UserEditForm = {
   password: string
 }
 
+function getEmptyUserEditForm(organizationId: string): UserEditForm {
+  return {
+    email: '',
+    isActive: true,
+    language: LANGUAGE_CODES.english,
+    name: '',
+    organizationId,
+    password: '',
+  }
+}
+
+function toForm(user: UserDto): UserEditForm {
+  return {
+    email: user.email,
+    isActive: user.isActive,
+    language: user.language,
+    name: user.name,
+    organizationId: user.organizationId,
+    password: '',
+  }
+}
+
 export function UserEditPage() {
   const t = useTranslate()
   const navigate = useNavigate()
@@ -37,15 +60,9 @@ export function UserEditPage() {
   const [user, setUser] = useState<UserDto | null>(null)
   const [isSaving, setIsSaving] = useState(false)
   const isCreate = id === undefined
+  const loggedOrganizationId = loggedUser?.organizationId ?? ''
   const form = useForm({
-    defaultValues: {
-      email: '',
-      isActive: true,
-      language: LANGUAGE_CODES.english,
-      name: '',
-      organizationId: loggedUser?.organizationId ?? '',
-      password: '',
-    } as UserEditForm,
+    defaultValues: getEmptyUserEditForm(loggedOrganizationId),
     onSubmit: async ({ value }) => {
       if (value.organizationId.trim().length === 0) {
         showError(t('features.iam.users.messages.organizationRequired'))
@@ -84,16 +101,10 @@ export function UserEditPage() {
     try {
       const loaded = await getUser(id)
       setUser(loaded)
-      form.setFieldValue('email', loaded.email)
-      form.setFieldValue('isActive', loaded.isActive)
-      form.setFieldValue('language', loaded.language)
-      form.setFieldValue('name', loaded.name)
-      form.setFieldValue('organizationId', loaded.organizationId)
-      form.setFieldValue('password', '')
     } catch (error) {
       notifyError(error, t('shared.errors.generic'))
     }
-  }, [form, id, isCreate, notifyError, t])
+  }, [id, isCreate, notifyError, t])
 
   useEffect(() => {
     void loadUser()
@@ -101,18 +112,17 @@ export function UserEditPage() {
 
   useEffect(() => {
     if (isCreate) {
-      form.reset({
-        email: '',
-        isActive: true,
-        language: LANGUAGE_CODES.english,
-        name: '',
-        organizationId: loggedUser?.organizationId ?? '',
-        password: '',
-      })
+      form.reset(getEmptyUserEditForm(loggedOrganizationId))
+    }
+  }, [form, isCreate, loggedOrganizationId])
+
+  useEffect(() => {
+    if (isCreate || user === null) {
       return
     }
 
-  }, [form, isCreate, loggedUser?.organizationId])
+    form.reset(toForm(user))
+  }, [form, isCreate, user])
 
   return (
     <main className="page">
@@ -129,82 +139,82 @@ export function UserEditPage() {
             <p className="page-subtitle">{t('shared.common.loading')}</p>
           ) : (
             <div className="detail-stack">
-                <form className="edit-form" onSubmit={(event) => {
-                  event.preventDefault()
-                  void form.handleSubmit()
-                }}>
-                  <FieldGroup>
-                    <form.Field name="organizationId">
-                      {(field) => (
-                        <Field data-disabled>
-                          <FieldLabel>{t('shared.fields.organizationId')}</FieldLabel>
-                          <OrganizationSelect
-                            disabled
-                            includeInactive
-                            onValueChange={field.handleChange}
-                            value={field.state.value}
-                          />
-                        </Field>
-                      )}
-                    </form.Field>
-                    <form.Field name="name">
-                      {(field) => (
-                        <Field>
-                          <FieldLabel htmlFor={field.name}>{t('shared.fields.name')}</FieldLabel>
-                          <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required value={field.state.value} />
-                        </Field>
-                      )}
-                    </form.Field>
-                    <form.Field name="email">
-                      {(field) => (
-                        <Field data-disabled={!isCreate}>
-                          <FieldLabel htmlFor={field.name}>{t('shared.fields.email')}</FieldLabel>
-                          <Input disabled={!isCreate} id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required type="email" value={field.state.value} />
-                        </Field>
-                      )}
-                    </form.Field>
-                    {isCreate && (
-                      <form.Field name="password">
-                        {(field) => (
-                          <Field>
-                            <FieldLabel htmlFor={field.name}>{t('shared.fields.password')}</FieldLabel>
-                            <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required type="password" value={field.state.value} />
-                          </Field>
-                        )}
-                      </form.Field>
-                    )}
-                    <form.Field name="language">
-                      {(field) => (
-                        <Field>
-                          <FieldLabel>{t('shared.fields.language')}</FieldLabel>
-                          <Select
-                            onValueChange={field.handleChange}
-                            options={[
-                              { label: t('shared.languages.en'), value: LANGUAGE_CODES.english },
-                              { label: t('shared.languages.ptbr'), value: LANGUAGE_CODES.portugueseBrazil },
-                              { label: t('shared.languages.es'), value: LANGUAGE_CODES.spanish },
-                            ]}
-                            value={field.state.value}
-                          />
-                        </Field>
-                      )}
-                    </form.Field>
-                    <form.Field name="isActive">
-                      {(field) => (
-                        <Checkbox
-                          checked={field.state.value}
-                          label={t('shared.fields.isActive')}
-                          onCheckedChange={(checked) => field.handleChange(checked === true)}
+              <form className="edit-form" onSubmit={(event) => {
+                event.preventDefault()
+                void form.handleSubmit()
+              }}>
+                <FieldGroup>
+                  <form.Field name="organizationId">
+                    {(field) => (
+                      <Field data-disabled>
+                        <FieldLabel>{t('shared.fields.organizationId')}</FieldLabel>
+                        <OrganizationSelect
+                          disabled
+                          includeInactive
+                          onValueChange={field.handleChange}
+                          value={field.state.value}
                         />
+                      </Field>
+                    )}
+                  </form.Field>
+                  <form.Field name="name">
+                    {(field) => (
+                      <Field>
+                        <FieldLabel htmlFor={field.name}>{t('shared.fields.name')}</FieldLabel>
+                        <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required value={field.state.value} />
+                      </Field>
+                    )}
+                  </form.Field>
+                  <form.Field name="email">
+                    {(field) => (
+                      <Field data-disabled={!isCreate}>
+                        <FieldLabel htmlFor={field.name}>{t('shared.fields.email')}</FieldLabel>
+                        <Input disabled={!isCreate} id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required type="email" value={field.state.value} />
+                      </Field>
+                    )}
+                  </form.Field>
+                  {isCreate && (
+                    <form.Field name="password">
+                      {(field) => (
+                        <Field>
+                          <FieldLabel htmlFor={field.name}>{t('shared.fields.password')}</FieldLabel>
+                          <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required type="password" value={field.state.value} />
+                        </Field>
                       )}
                     </form.Field>
-                  </FieldGroup>
-                  <div className="form-actions">
-                    <Button disabled={isSaving} type="submit">
-                      {isCreate ? t('shared.actions.create') : t('shared.actions.save')}
-                    </Button>
-                  </div>
-                </form>
+                  )}
+                  <form.Field name="language">
+                    {(field) => (
+                      <Field>
+                        <FieldLabel>{t('shared.fields.language')}</FieldLabel>
+                        <Select
+                          onValueChange={field.handleChange}
+                          options={[
+                            { label: t('shared.languages.en'), value: LANGUAGE_CODES.english },
+                            { label: t('shared.languages.ptbr'), value: LANGUAGE_CODES.portugueseBrazil },
+                            { label: t('shared.languages.es'), value: LANGUAGE_CODES.spanish },
+                          ]}
+                          value={field.state.value}
+                        />
+                      </Field>
+                    )}
+                  </form.Field>
+                  <form.Field name="isActive">
+                    {(field) => (
+                      <Checkbox
+                        checked={field.state.value}
+                        label={t('shared.fields.isActive')}
+                        onCheckedChange={(checked) => field.handleChange(checked === true)}
+                      />
+                    )}
+                  </form.Field>
+                </FieldGroup>
+                <div className="form-actions">
+                  <Button disabled={isSaving} type="submit">
+                    {isCreate ? t('shared.actions.create') : t('shared.actions.save')}
+                  </Button>
+                </div>
+              </form>
               {!isCreate && user !== null && <UserAccessTabs userId={user.id} />}
             </div>
           )}

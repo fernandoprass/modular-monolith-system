@@ -27,6 +27,22 @@ type OrganizationEditForm = {
   name: string
 }
 
+const EMPTY_ORGANIZATION_EDIT_FORM: OrganizationEditForm = {
+  defaultLanguage: LANGUAGE_CODES.english,
+  description: '',
+  isActive: true,
+  name: '',
+}
+
+function toForm(organization: OrganizationDto): OrganizationEditForm {
+  return {
+    defaultLanguage: organization.defaultLanguage,
+    description: organization.description ?? '',
+    isActive: organization.isActive,
+    name: organization.name,
+  }
+}
+
 export function OrganizationEditPage() {
   const t = useTranslate()
   const navigate = useNavigate()
@@ -37,12 +53,7 @@ export function OrganizationEditPage() {
   const [isSaving, setIsSaving] = useState(false)
   const [isCodeDialogOpen, setIsCodeDialogOpen] = useState(false)
   const form = useForm({
-    defaultValues: {
-      defaultLanguage: LANGUAGE_CODES.english,
-      description: '',
-      isActive: true,
-      name: '',
-    } as OrganizationEditForm,
+    defaultValues: EMPTY_ORGANIZATION_EDIT_FORM,
     onSubmit: async ({ value }) => {
       if (id === undefined) {
         return
@@ -89,12 +100,7 @@ export function OrganizationEditPage() {
       return
     }
 
-    form.reset({
-      defaultLanguage: organization.defaultLanguage,
-      description: organization.description ?? '',
-      isActive: organization.isActive,
-      name: organization.name,
-    })
+    form.reset(toForm(organization))
   }, [form, organization])
 
   return (

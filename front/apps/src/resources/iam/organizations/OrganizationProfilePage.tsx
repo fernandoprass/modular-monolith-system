@@ -22,6 +22,22 @@ type OrganizationProfileForm = {
   name: string
 }
 
+const EMPTY_ORGANIZATION_PROFILE_FORM: OrganizationProfileForm = {
+  defaultLanguage: LANGUAGE_CODES.english,
+  description: '',
+  isActive: true,
+  name: '',
+}
+
+function toForm(organization: OrganizationDto): OrganizationProfileForm {
+  return {
+    defaultLanguage: organization.defaultLanguage,
+    description: organization.description ?? '',
+    isActive: organization.isActive,
+    name: organization.name,
+  }
+}
+
 export function OrganizationProfilePage() {
   const t = useTranslate()
   const notifyError = useNotifyError()
@@ -29,12 +45,7 @@ export function OrganizationProfilePage() {
   const [organization, setOrganization] = useState<OrganizationDto | null>(null)
   const [isSaving, setIsSaving] = useState(false)
   const form = useForm({
-    defaultValues: {
-      defaultLanguage: LANGUAGE_CODES.english,
-      description: '',
-      isActive: true,
-      name: '',
-    } as OrganizationProfileForm,
+    defaultValues: EMPTY_ORGANIZATION_PROFILE_FORM,
     onSubmit: async ({ value }) => {
       setIsSaving(true)
 
@@ -73,12 +84,7 @@ export function OrganizationProfilePage() {
       return
     }
 
-    form.reset({
-      defaultLanguage: organization.defaultLanguage,
-      description: organization.description ?? '',
-      isActive: organization.isActive,
-      name: organization.name,
-    })
+    form.reset(toForm(organization))
   }, [form, organization])
 
   return (
