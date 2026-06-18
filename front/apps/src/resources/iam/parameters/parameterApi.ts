@@ -6,12 +6,35 @@ import {
   PARAMETER_FILTER_VALUES,
   PARAMETER_QUERY_PARAMS,
   PARAMETER_REQUEST_FIELDS,
+  PARAMETER_TYPE_VALUES,
   type ParameterDto,
   type ParameterForm,
   type ParameterLiteDto,
   type ParameterListQuery,
   type ParameterUpdateRequest,
 } from './parameterTypes'
+
+const PARAMETER_TYPE_BY_NAME: Record<string, number> = {
+  boolean: Number(PARAMETER_TYPE_VALUES.boolean),
+  character: Number(PARAMETER_TYPE_VALUES.character),
+  date: Number(PARAMETER_TYPE_VALUES.date),
+  datetime: Number(PARAMETER_TYPE_VALUES.dateTime),
+  decimal: Number(PARAMETER_TYPE_VALUES.decimal),
+  integer: Number(PARAMETER_TYPE_VALUES.integer),
+  list: Number(PARAMETER_TYPE_VALUES.list),
+  referenceid: Number(PARAMETER_TYPE_VALUES.referenceId),
+  richtext: Number(PARAMETER_TYPE_VALUES.richText),
+  string: Number(PARAMETER_TYPE_VALUES.string),
+  text: Number(PARAMETER_TYPE_VALUES.text),
+  time: Number(PARAMETER_TYPE_VALUES.time),
+  uuid: Number(PARAMETER_TYPE_VALUES.uuid),
+}
+
+const PARAMETER_OVERRIDE_TYPE_BY_NAME: Record<string, number> = {
+  none: 0,
+  organization: 1,
+  user: 2,
+}
 
 function appendOptional(query: URLSearchParams, key: string, value: string): void {
   if (value !== PARAMETER_FILTER_VALUES.all && value.trim().length > 0) {
@@ -80,6 +103,36 @@ function readNumber(value: Record<string, unknown>, ...keys: string[]): number {
   return 0
 }
 
+function readMappedNumber(
+  value: Record<string, unknown>,
+  mappedValues: Record<string, number>,
+  ...keys: string[]
+): number {
+  for (const key of keys) {
+    const data = value[key]
+
+    if (typeof data === 'number') {
+      return data
+    }
+
+    if (typeof data === 'string') {
+      const parsed = Number(data)
+
+      if (Number.isFinite(parsed)) {
+        return parsed
+      }
+
+      const mapped = mappedValues[data.toLowerCase()]
+
+      if (mapped !== undefined) {
+        return mapped
+      }
+    }
+  }
+
+  return 0
+}
+
 function readNullableString(value: Record<string, unknown>, ...keys: string[]): string | null {
   const data = readString(value, ...keys)
 
@@ -115,10 +168,10 @@ function normalizeParameterLiteDto(value: unknown): ParameterLiteDto {
     isOverridden: readBoolean(source, 'isOverridden', 'IsOverridden'),
     module: readString(source, 'module', 'Module'),
     name: readString(source, 'name', 'Name'),
-    overrideType: readNumber(source, 'overrideType', 'OverrideType'),
+    overrideType: readMappedNumber(source, PARAMETER_OVERRIDE_TYPE_BY_NAME, 'overrideType', 'OverrideType'),
     parameterOverrideId: readNullableString(source, 'parameterOverrideId', 'ParameterOverrideId'),
     title: readString(source, 'title', 'Title'),
-    type: readNumber(source, 'type', 'Type'),
+    type: readMappedNumber(source, PARAMETER_TYPE_BY_NAME, 'type', 'Type'),
     value: readString(source, 'value', 'Value'),
   }
 }
@@ -133,16 +186,22 @@ function normalizeParameterDto(value: unknown): ParameterDto {
     isVisible: readBoolean(source, 'isVisible', 'IsVisible'),
     key: readString(source, 'key', 'Key'),
     listItems: readNullableString(source, 'listItems', 'ListItems'),
-    overrideType: readNumber(source, 'overrideType', 'OverrideType'),
-    type: readNumber(source, 'type', 'Type'),
+    overrideType: readMappedNumber(source, PARAMETER_OVERRIDE_TYPE_BY_NAME, 'overrideType', 'OverrideType'),
+    type: readMappedNumber(source, PARAMETER_TYPE_BY_NAME, 'type', 'Type'),
     value: readString(source, 'value', 'Value'),
   }
 }
 
-function normalizePagedParameters(result: PagedResultDto<ParameterLiteDto>): PagedResultDto<ParameterLiteDto> {
+function normalizePagedParameters(value: unknown): PagedResultDto<ParameterLiteDto> {
+  const result = isRecord(value) ? value : {}
+  const items = result.items ?? result.Items
+
   return {
-    ...result,
-    items: result.items.map(normalizeParameterLiteDto),
+    items: Array.isArray(items) ? items.map(normalizeParameterLiteDto) : [],
+    pageNumber: readNumber(result, 'pageNumber', 'PageNumber'),
+    pageSize: readNumber(result, 'pageSize', 'PageSize'),
+    totalCount: readNumber(result, 'totalCount', 'TotalCount'),
+    totalPages: readNumber(result, 'totalPages', 'TotalPages'),
   }
 }
 
@@ -152,7 +211,7 @@ export async function getParameters(request: ParameterListQuery): Promise<PagedR
     toParameterQuery(request),
   )
 
-  return normalizePagedParameters(unwrapResult<PagedResultDto<ParameterLiteDto>>(response))
+  return normalizePagedParameters(unwrapResult<unknown>(response))
 }
 
 export async function getOrganizationSettingsParameters(): Promise<ParameterLiteDto[]> {

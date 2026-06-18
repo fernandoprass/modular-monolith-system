@@ -7,7 +7,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useToast } from '../../../app/ToastProvider'
 import { useTranslate } from '../../../app/i18n/i18n'
 import { APP_ROUTES } from '../../../app/routes'
-import { useNotifyError } from '../../../auth/AuthProvider'
+import { useAuth, useNotifyError } from '../../../auth/AuthProvider'
 import { Badge } from '../../../components/ui/badge'
 import { Button } from '../../../components/ui/button'
 import { Card, CardContent } from '../../../components/ui/card'
@@ -16,7 +16,9 @@ import { DataTable } from '../../../components/ui/data-table'
 import { Field, FieldGroup, FieldLabel } from '../../../components/ui/form'
 import { Input } from '../../../components/ui/input'
 import { Textarea } from '../../../components/ui/textarea'
+import { IAM_PERMISSIONS } from '../../../shared/iamConstants'
 import type { PermissionDto } from '../../../shared/permissions'
+import { hasPermissionCode } from '../../../shared/permissions'
 import { OrganizationSelect } from '../organizations/OrganizationSelect'
 import {
   assignRolePermissions,
@@ -35,6 +37,13 @@ const EMPTY_ROLE_FORM: RoleForm = {
   isDefault: false,
   name: '',
   organizationId: '',
+}
+
+type RoleEditFormProps = {
+  isCreate: boolean
+  onCreated: (role: RoleDto) => void
+  onSaved: () => Promise<void>
+  role: RoleDto | null
 }
 
 function toForm(role: RoleDto): RoleForm {
@@ -58,6 +67,7 @@ export function RoleEditPage() {
   const navigate = useNavigate()
   const notifyError = useNotifyError()
   const { showSuccess } = useToast()
+  const { permissions } = useAuth()
   const { id } = useParams()
   const [role, setRole] = useState<RoleDto | null>(null)
   const [availablePermissions, setAvailablePermissions] = useState<PermissionDto[]>([])
@@ -70,8 +80,8 @@ export function RoleEditPage() {
   const [rolePermissionTitleFilter, setRolePermissionTitleFilter] = useState('')
   const [isPermissionLoading, setIsPermissionLoading] = useState(false)
   const [isPermissionSaving, setIsPermissionSaving] = useState(false)
-  const [isSaving, setIsSaving] = useState(false)
   const isCreate = id === undefined
+  const canAssignPermissions = hasPermissionCode(permissions, IAM_PERMISSIONS.permissions.assign)
   const pageTitle = isCreate ? t('features.iam.roles.pages.create') : t('features.iam.roles.pages.edit')
   const filteredAvailablePermissions = useMemo(() => {
     const filter = availablePermissionTitleFilter.trim().toLowerCase()
@@ -138,30 +148,6 @@ export function RoleEditPage() {
       header: t('shared.fields.isActive'),
     },
   ], [t])
-  const form = useForm({
-    defaultValues: EMPTY_ROLE_FORM,
-    onSubmit: async ({ value }) => {
-      setIsSaving(true)
-
-      try {
-        if (isCreate) {
-          const created = await createRole(value)
-          setRole(created)
-          showSuccess(t('features.iam.roles.notifications.created'))
-          navigate(APP_ROUTES.roleEdit(created.id), { replace: true })
-        } else {
-          await updateRole(id, value)
-          showSuccess(t('features.iam.roles.notifications.updated'))
-          await loadRole()
-        }
-      } catch (error) {
-        notifyError(error, t('shared.errors.generic'))
-      } finally {
-        setIsSaving(false)
-      }
-    },
-  })
-
   const loadRole = useCallback(async () => {
     if (isCreate) {
       return
@@ -176,7 +162,7 @@ export function RoleEditPage() {
   }, [id, isCreate, notifyError, t])
 
   const loadPermissions = useCallback(async () => {
-    if (isCreate || id === undefined) {
+    if (isCreate || id === undefined || !canAssignPermissions) {
       return
     }
 
@@ -199,32 +185,22 @@ export function RoleEditPage() {
     } finally {
       setIsPermissionLoading(false)
     }
-  }, [id, isCreate, notifyError, t])
+  }, [canAssignPermissions, id, isCreate, notifyError, t])
 
   useEffect(() => {
     void loadRole()
   }, [loadRole])
 
   useEffect(() => {
+    setRole(null)
+  }, [id])
+
+  useEffect(() => {
     void loadPermissions()
   }, [loadPermissions])
 
-  useEffect(() => {
-    if (isCreate) {
-      form.reset(EMPTY_ROLE_FORM)
-    }
-  }, [form, isCreate])
-
-  useEffect(() => {
-    if (isCreate || role === null) {
-      return
-    }
-
-    form.reset(toForm(role))
-  }, [form, isCreate, role])
-
   async function handleAssignPermissions() {
-    if (id === undefined) {
+    if (id === undefined || !canAssignPermissions) {
       return
     }
 
@@ -248,7 +224,7 @@ export function RoleEditPage() {
   }
 
   async function handleUnassignPermissions() {
-    if (id === undefined) {
+    if (id === undefined || !canAssignPermissions) {
       return
     }
 
@@ -285,70 +261,20 @@ export function RoleEditPage() {
           {!isCreate && role === null ? (
             <p className="page-subtitle">{t('shared.common.loading')}</p>
           ) : (
-            <form className="edit-form" onSubmit={(event) => {
-              event.preventDefault()
-              void form.handleSubmit()
-            }}>
-              <FieldGroup>
-                <form.Field name="organizationId">
-                  {(field) => (
-                    <Field data-disabled={!isCreate}>
-                      <FieldLabel>{t('shared.fields.organization')}</FieldLabel>
-                      <OrganizationSelect
-                        clearable
-                        disabled={!isCreate}
-                        includeInactive
-                        onValueChange={field.handleChange}
-                        value={field.state.value}
-                      />
-                    </Field>
-                  )}
-                </form.Field>
-                <form.Field name="name">
-                  {(field) => (
-                    <Field>
-                      <FieldLabel htmlFor={field.name}>{t('shared.fields.name')}</FieldLabel>
-                      <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required value={field.state.value} />
-                    </Field>
-                  )}
-                </form.Field>
-                <form.Field name="description">
-                  {(field) => (
-                    <Field>
-                      <FieldLabel htmlFor={field.name}>{t('shared.fields.description')}</FieldLabel>
-                      <Textarea id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required value={field.state.value} />
-                    </Field>
-                  )}
-                </form.Field>
-                <form.Field name="isActive">
-                  {(field) => (
-                    <Checkbox
-                      checked={field.state.value}
-                      label={t('shared.fields.isActive')}
-                      onCheckedChange={(checked) => field.handleChange(checked === true)}
-                    />
-                  )}
-                </form.Field>
-                <form.Field name="isDefault">
-                  {(field) => (
-                    <Checkbox
-                      checked={field.state.value}
-                      label={t('shared.fields.isDefault')}
-                      onCheckedChange={(checked) => field.handleChange(checked === true)}
-                    />
-                  )}
-                </form.Field>
-              </FieldGroup>
-              <div className="form-actions">
-                <Button disabled={isSaving} type="submit">
-                  {isCreate ? t('shared.actions.create') : t('shared.actions.save')}
-                </Button>
-              </div>
-            </form>
+            <RoleEditForm
+              key={role?.id ?? 'create'}
+              isCreate={isCreate}
+              onCreated={(created) => {
+                setRole(created)
+                navigate(APP_ROUTES.roleEdit(created.id), { replace: true })
+              }}
+              onSaved={loadRole}
+              role={role}
+            />
           )}
         </CardContent>
       </Card>
-      {!isCreate && (
+      {!isCreate && canAssignPermissions && (
         <Card>
           <CardContent>
             <div className="permission-assignment-grid">
@@ -422,5 +348,102 @@ export function RoleEditPage() {
         </Card>
       )}
     </main>
+  )
+}
+
+function RoleEditForm({
+  isCreate,
+  onCreated,
+  onSaved,
+  role,
+}: RoleEditFormProps) {
+  const t = useTranslate()
+  const notifyError = useNotifyError()
+  const { showSuccess } = useToast()
+  const [isSaving, setIsSaving] = useState(false)
+  const form = useForm({
+    defaultValues: role === null ? EMPTY_ROLE_FORM : toForm(role),
+    onSubmit: async ({ value }) => {
+      setIsSaving(true)
+
+      try {
+        if (isCreate) {
+          const created = await createRole(value)
+          showSuccess(t('features.iam.roles.notifications.created'))
+          onCreated(created)
+        } else if (role !== null) {
+          await updateRole(role.id, value)
+          showSuccess(t('features.iam.roles.notifications.updated'))
+          await onSaved()
+        }
+      } catch (error) {
+        notifyError(error, t('shared.errors.generic'))
+      } finally {
+        setIsSaving(false)
+      }
+    },
+  })
+
+  return (
+    <form className="edit-form" onSubmit={(event) => {
+      event.preventDefault()
+      void form.handleSubmit()
+    }}>
+      <FieldGroup>
+        <form.Field name="organizationId">
+          {(field) => (
+            <Field data-disabled={!isCreate}>
+              <FieldLabel>{t('shared.fields.organization')}</FieldLabel>
+              <OrganizationSelect
+                clearable
+                disabled={!isCreate}
+                includeInactive
+                onValueChange={field.handleChange}
+                value={field.state.value}
+              />
+            </Field>
+          )}
+        </form.Field>
+        <form.Field name="name">
+          {(field) => (
+            <Field>
+              <FieldLabel htmlFor={field.name}>{t('shared.fields.name')}</FieldLabel>
+              <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required value={field.state.value} />
+            </Field>
+          )}
+        </form.Field>
+        <form.Field name="description">
+          {(field) => (
+            <Field>
+              <FieldLabel htmlFor={field.name}>{t('shared.fields.description')}</FieldLabel>
+              <Textarea id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required value={field.state.value} />
+            </Field>
+          )}
+        </form.Field>
+        <form.Field name="isActive">
+          {(field) => (
+            <Checkbox
+              checked={field.state.value}
+              label={t('shared.fields.isActive')}
+              onCheckedChange={(checked) => field.handleChange(checked === true)}
+            />
+          )}
+        </form.Field>
+        <form.Field name="isDefault">
+          {(field) => (
+            <Checkbox
+              checked={field.state.value}
+              label={t('shared.fields.isDefault')}
+              onCheckedChange={(checked) => field.handleChange(checked === true)}
+            />
+          )}
+        </form.Field>
+      </FieldGroup>
+      <div className="form-actions">
+        <Button disabled={isSaving} type="submit">
+          {isCreate ? t('shared.actions.create') : t('shared.actions.save')}
+        </Button>
+      </div>
+    </form>
   )
 }

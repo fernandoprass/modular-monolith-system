@@ -82,6 +82,10 @@ function readBoolean(value: Record<string, unknown>, ...keys: string[]): boolean
     if (typeof data === 'boolean') {
       return data
     }
+
+    if (typeof data === 'string') {
+      return data.toLowerCase() === 'true'
+    }
   }
 
   return false
@@ -120,6 +124,21 @@ function normalizeRoleDto(value: unknown): RoleDto {
   }
 }
 
+function normalizePermissionDto(value: unknown): PermissionDto {
+  const source = unwrapRoleSource(value)
+
+  return {
+    action: readString(source, 'action', 'Action'),
+    code: readString(source, 'code', 'Code'),
+    description: readString(source, 'description', 'Description'),
+    id: readString(source, 'id', 'Id'),
+    isActive: readBoolean(source, 'isActive', 'IsActive'),
+    module: readString(source, 'module', 'Module'),
+    resource: readString(source, 'resource', 'Resource'),
+    title: readString(source, 'title', 'Title'),
+  }
+}
+
 export async function getRoles(request: RoleSearchForm): Promise<RoleDto[]> {
   const response = await getIamJsonWithQuery(API_PATHS.iam.roles.list, toRoleQuery(request))
 
@@ -129,7 +148,7 @@ export async function getRoles(request: RoleSearchForm): Promise<RoleDto[]> {
 export async function getRole(id: string): Promise<RoleDto> {
   const response = await getIamJson(API_PATHS.iam.roles.byId(id))
 
-  return normalizeRoleDto(unwrapResult<RoleDto>(response))
+  return normalizeRoleDto(unwrapResult<unknown>(response))
 }
 
 export async function createRole(request: RoleForm): Promise<RoleDto> {
@@ -153,13 +172,13 @@ export async function deleteRole(id: string): Promise<void> {
 export async function getRolePermissions(roleId: string): Promise<PermissionDto[]> {
   const response = await postIamJson(API_PATHS.iam.roles.permissions(roleId), {})
 
-  return unwrapResult<PermissionDto[]>(response)
+  return unwrapResult<unknown[]>(response).map(normalizePermissionDto)
 }
 
 export async function getAvailableRolePermissions(roleId: string): Promise<PermissionDto[]> {
   const response = await postIamJson(API_PATHS.iam.roles.availablePermissions(roleId), {})
 
-  return unwrapResult<PermissionDto[]>(response)
+  return unwrapResult<unknown[]>(response).map(normalizePermissionDto)
 }
 
 export async function assignRolePermissions(roleId: string, permissionIds: string[]): Promise<void> {

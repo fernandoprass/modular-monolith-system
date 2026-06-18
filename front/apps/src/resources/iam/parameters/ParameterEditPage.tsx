@@ -25,23 +25,14 @@ import {
 } from './parameterTypes'
 import { ParameterValueInput } from './ParameterValueInput'
 
-const EMPTY_PARAMETER_FORM: ParameterForm = {
-  description: '',
-  externalListEndpoint: '',
-  group: '',
-  isVisible: true,
-  listItems: '',
-  module: '',
-  name: '',
-  overrideType: '0',
-  title: '',
-  type: '8',
-  value: '',
-}
-
 type ParameterOption = {
   labelKey: string
   value: string
+}
+
+type ParameterEditFormProps = {
+  onSaved: () => Promise<void>
+  parameter: ParameterDto
 }
 
 function toTranslatedOptions(options: readonly ParameterOption[], t: Translate) {
@@ -79,30 +70,8 @@ export function ParameterEditPage() {
   const t = useTranslate()
   const navigate = useNavigate()
   const notifyError = useNotifyError()
-  const { showSuccess } = useToast()
   const { id } = useParams()
   const [parameter, setParameter] = useState<ParameterDto | null>(null)
-  const [isSaving, setIsSaving] = useState(false)
-  const form = useForm({
-    defaultValues: EMPTY_PARAMETER_FORM,
-    onSubmit: async ({ value }) => {
-      if (id === undefined) {
-        return
-      }
-
-      setIsSaving(true)
-
-      try {
-        await updateParameter(id, toSubmitForm(value))
-        showSuccess(t('features.iam.parameters.notifications.updated'))
-        await loadParameter()
-      } catch (error) {
-        notifyError(error, t('shared.errors.generic'))
-      } finally {
-        setIsSaving(false)
-      }
-    },
-  })
 
   const loadParameter = useCallback(async () => {
     if (id === undefined) {
@@ -122,16 +91,8 @@ export function ParameterEditPage() {
   }, [loadParameter])
 
   useEffect(() => {
-    if (parameter === null) {
-      return
-    }
-
-    form.reset(toForm(parameter))
-  }, [form, parameter])
-
-  const selectedType = useStore(form.store, (state) => state.values.type)
-  const showListItems = selectedType === PARAMETER_TYPE_VALUES.list
-  const showExternalListEndpoint = selectedType === PARAMETER_TYPE_VALUES.referenceId
+    setParameter(null)
+  }, [id])
 
   return (
     <main className="page">
@@ -147,140 +108,170 @@ export function ParameterEditPage() {
           {parameter === null ? (
             <p className="page-subtitle">{t('shared.common.loading')}</p>
           ) : (
-            <form className="edit-form" onSubmit={(event) => {
-              event.preventDefault()
-              void form.handleSubmit()
-            }}>
-              <FieldGroup>
-                <Field>
-                  <FieldLabel htmlFor="parameter-key">{t('shared.fields.key')}</FieldLabel>
-                  <Input disabled id="parameter-key" value={parameter.key} />
-                </Field>
-                <div className="form-row-two">
-                  <form.Field name="module">
-                    {(field) => (
-                      <Field>
-                        <FieldLabel>{t('shared.fields.module')}</FieldLabel>
-                        <Select
-                          onValueChange={field.handleChange}
-                          options={toTranslatedOptions(PARAMETER_MODULE_OPTIONS, t)}
-                          value={field.state.value}
-                        />
-                      </Field>
-                    )}
-                  </form.Field>
-                  <form.Field name="group">
-                    {(field) => (
-                      <Field>
-                        <FieldLabel htmlFor={field.name}>{t('shared.fields.group')}</FieldLabel>
-                        <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required value={field.state.value} />
-                      </Field>
-                    )}
-                  </form.Field>
-                </div>
-                <form.Field name="name">
-                  {(field) => (
-                    <Field>
-                      <FieldLabel htmlFor={field.name}>{t('shared.fields.name')}</FieldLabel>
-                      <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required value={field.state.value} />
-                    </Field>
-                  )}
-                </form.Field>
-                <form.Field name="title">
-                  {(field) => (
-                    <Field>
-                      <FieldLabel htmlFor={field.name}>{t('shared.fields.title')}</FieldLabel>
-                      <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required value={field.state.value} />
-                    </Field>
-                  )}
-                </form.Field>
-                <form.Field name="description">
-                  {(field) => (
-                    <Field>
-                      <FieldLabel htmlFor={field.name}>{t('shared.fields.description')}</FieldLabel>
-                      <Textarea id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required value={field.state.value} />
-                    </Field>
-                  )}
-                </form.Field>
-                <div className="form-row-two">
-                  <form.Field name="overrideType">
-                    {(field) => (
-                      <Field>
-                        <FieldLabel>{t('shared.fields.overrideType')}</FieldLabel>
-                        <Select
-                          onValueChange={field.handleChange}
-                          options={toTranslatedOptions(PARAMETER_OVERRIDE_TYPE_OPTIONS, t)}
-                          value={field.state.value}
-                        />
-                      </Field>
-                    )}
-                  </form.Field>
-                  <form.Field name="type">
-                    {(field) => (
-                      <Field>
-                        <FieldLabel>{t('shared.fields.type')}</FieldLabel>
-                        <Select
-                          onValueChange={field.handleChange}
-                          options={toTranslatedOptions(PARAMETER_TYPE_OPTIONS, t)}
-                          value={field.state.value}
-                        />
-                      </Field>
-                    )}
-                  </form.Field>
-                </div>
-                <form.Field name="value">
-                  {(field) => (
-                    <Field>
-                      <FieldLabel htmlFor={field.name}>{t('shared.fields.value')}</FieldLabel>
-                      <ParameterValueInput
-                        id={field.name}
-                        onBlur={field.handleBlur}
-                        onChange={field.handleChange}
-                        type={selectedType}
-                        value={field.state.value}
-                      />
-                    </Field>
-                  )}
-                </form.Field>
-                {showListItems && (
-                  <form.Field name="listItems">
-                    {(field) => (
-                      <Field>
-                        <FieldLabel htmlFor={field.name}>{t('shared.fields.listItems')}</FieldLabel>
-                        <Textarea id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required value={field.state.value} />
-                      </Field>
-                    )}
-                  </form.Field>
-                )}
-                {showExternalListEndpoint && (
-                  <form.Field name="externalListEndpoint">
-                    {(field) => (
-                      <Field>
-                        <FieldLabel htmlFor={field.name}>{t('shared.fields.externalListEndpoint')}</FieldLabel>
-                        <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required value={field.state.value} />
-                      </Field>
-                    )}
-                  </form.Field>
-                )}
-                <form.Field name="isVisible">
-                  {(field) => (
-                    <Checkbox
-                      checked={field.state.value}
-                      label={t('shared.fields.isVisible')}
-                      onCheckedChange={(checked) => field.handleChange(checked === true)}
-                    />
-                  )}
-                </form.Field>
-              </FieldGroup>
-              <div className="form-actions">
-                <Button disabled={isSaving} type="submit">
-                  {t('shared.actions.save')}
-                </Button>
-              </div>
-            </form>
+            <ParameterEditForm key={parameter.id} onSaved={loadParameter} parameter={parameter} />
           )}
         </CardContent>
       </Card>
     </main>
+  )
+}
+
+function ParameterEditForm({ onSaved, parameter }: ParameterEditFormProps) {
+  const t = useTranslate()
+  const notifyError = useNotifyError()
+  const { showSuccess } = useToast()
+  const [isSaving, setIsSaving] = useState(false)
+  const form = useForm({
+    defaultValues: toForm(parameter),
+    onSubmit: async ({ value }) => {
+      setIsSaving(true)
+
+      try {
+        await updateParameter(parameter.id, toSubmitForm(value))
+        showSuccess(t('features.iam.parameters.notifications.updated'))
+        await onSaved()
+      } catch (error) {
+        notifyError(error, t('shared.errors.generic'))
+      } finally {
+        setIsSaving(false)
+      }
+    },
+  })
+  const selectedType = useStore(form.store, (state) => state.values.type)
+  const showListItems = selectedType === PARAMETER_TYPE_VALUES.list
+  const showExternalListEndpoint = selectedType === PARAMETER_TYPE_VALUES.referenceId
+
+  return (
+    <form className="edit-form" onSubmit={(event) => {
+      event.preventDefault()
+      void form.handleSubmit()
+    }}>
+      <FieldGroup>
+        <Field>
+          <FieldLabel htmlFor="parameter-key">{t('shared.fields.key')}</FieldLabel>
+          <Input disabled id="parameter-key" value={parameter.key} />
+        </Field>
+        <div className="form-row-two">
+          <form.Field name="module">
+            {(field) => (
+              <Field>
+                <FieldLabel>{t('shared.fields.module')}</FieldLabel>
+                <Select
+                  onValueChange={field.handleChange}
+                  options={toTranslatedOptions(PARAMETER_MODULE_OPTIONS, t)}
+                  value={field.state.value}
+                />
+              </Field>
+            )}
+          </form.Field>
+          <form.Field name="group">
+            {(field) => (
+              <Field>
+                <FieldLabel htmlFor={field.name}>{t('shared.fields.group')}</FieldLabel>
+                <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required value={field.state.value} />
+              </Field>
+            )}
+          </form.Field>
+        </div>
+        <form.Field name="name">
+          {(field) => (
+            <Field>
+              <FieldLabel htmlFor={field.name}>{t('shared.fields.name')}</FieldLabel>
+              <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required value={field.state.value} />
+            </Field>
+          )}
+        </form.Field>
+        <form.Field name="title">
+          {(field) => (
+            <Field>
+              <FieldLabel htmlFor={field.name}>{t('shared.fields.title')}</FieldLabel>
+              <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required value={field.state.value} />
+            </Field>
+          )}
+        </form.Field>
+        <form.Field name="description">
+          {(field) => (
+            <Field>
+              <FieldLabel htmlFor={field.name}>{t('shared.fields.description')}</FieldLabel>
+              <Textarea id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required value={field.state.value} />
+            </Field>
+          )}
+        </form.Field>
+        <div className="form-row-two">
+          <form.Field name="overrideType">
+            {(field) => (
+              <Field>
+                <FieldLabel>{t('shared.fields.overrideType')}</FieldLabel>
+                <Select
+                  onValueChange={field.handleChange}
+                  options={toTranslatedOptions(PARAMETER_OVERRIDE_TYPE_OPTIONS, t)}
+                  value={field.state.value}
+                />
+              </Field>
+            )}
+          </form.Field>
+          <form.Field name="type">
+            {(field) => (
+              <Field>
+                <FieldLabel>{t('shared.fields.type')}</FieldLabel>
+                <Select
+                  onValueChange={field.handleChange}
+                  options={toTranslatedOptions(PARAMETER_TYPE_OPTIONS, t)}
+                  value={field.state.value}
+                />
+              </Field>
+            )}
+          </form.Field>
+        </div>
+        <form.Field name="value">
+          {(field) => (
+            <Field>
+              <FieldLabel htmlFor={field.name}>{t('shared.fields.value')}</FieldLabel>
+              <ParameterValueInput
+                id={field.name}
+                onBlur={field.handleBlur}
+                onChange={field.handleChange}
+                type={selectedType}
+                value={field.state.value}
+              />
+            </Field>
+          )}
+        </form.Field>
+        {showListItems && (
+          <form.Field name="listItems">
+            {(field) => (
+              <Field>
+                <FieldLabel htmlFor={field.name}>{t('shared.fields.listItems')}</FieldLabel>
+                <Textarea id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required value={field.state.value} />
+              </Field>
+            )}
+          </form.Field>
+        )}
+        {showExternalListEndpoint && (
+          <form.Field name="externalListEndpoint">
+            {(field) => (
+              <Field>
+                <FieldLabel htmlFor={field.name}>{t('shared.fields.externalListEndpoint')}</FieldLabel>
+                <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required value={field.state.value} />
+              </Field>
+            )}
+          </form.Field>
+        )}
+        <form.Field name="isVisible">
+          {(field) => (
+            <Checkbox
+              checked={field.state.value}
+              label={t('shared.fields.isVisible')}
+              onCheckedChange={(checked) => field.handleChange(checked === true)}
+            />
+          )}
+        </form.Field>
+      </FieldGroup>
+      <div className="form-actions">
+        <Button disabled={isSaving} type="submit">
+          {t('shared.actions.save')}
+        </Button>
+      </div>
+    </form>
   )
 }

@@ -251,7 +251,7 @@ Use this standard shape:
 - `toForm(dto)`
 - request-mapping helper when the backend request shape differs from form shape
 - load callback
-- reset effect
+- keyed form component rendered after the DTO is loaded
 - submit handler
 
 Good:
@@ -278,7 +278,7 @@ function toForm(role: RoleDto): RoleForm {
 
 For edit pages, load the entity into state.
 
-Then reset the form from the loaded entity in an effect.
+Then render a keyed child form component after the entity is loaded.
 
 Good:
 
@@ -291,15 +291,32 @@ const loadRole = useCallback(async () => {
 }, [id])
 
 useEffect(() => {
-  if (role === null) {
-    return
-  }
+  void loadRole()
+}, [loadRole])
 
-  form.reset(toForm(role))
-}, [form, role])
+return role === null
+  ? <p>{t('shared.common.loading')}</p>
+  : <RoleEditForm key={role.id} role={role} />
+```
+
+The child form should initialize TanStack Form from props.
+
+Good:
+
+```ts
+function RoleEditForm({ role }: RoleEditFormProps) {
+  const form = useForm({
+    defaultValues: toForm(role),
+    onSubmit: async ({ value }) => {
+      await updateRole(role.id, value)
+    },
+  })
+}
 ```
 
 Avoid long `form.setFieldValue` sequences after loading an entity.
+
+Avoid `form.reset(toForm(dto))` as the main edit-page hydration strategy.
 
 For create/edit pages, derive `isCreate` once.
 
