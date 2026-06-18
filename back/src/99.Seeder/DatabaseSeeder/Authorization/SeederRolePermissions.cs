@@ -123,8 +123,10 @@ public class SeederRolePermissions(
       List<string> sysAdminPermissions = [
          IamPermission.Organizations.Read,
          IamPermission.Organizations.Write,
+
          IamPermission.Parameters.Write,
          IamPermission.Permissions.Write,
+
          IamPermission.Users.UpdateSupportUser,
       ];
 
@@ -141,13 +143,17 @@ public class SeederRolePermissions(
          IamPermission.OrganizationProfile.Read,
          IamPermission.OrganizationProfile.Write,
          IamPermission.OrganizationProfile.Delete,
+         IamPermission.OrganizationProfile.Parameters,
+
          IamPermission.Roles.Read,
          IamPermission.Roles.Write,
          IamPermission.Roles.Assign,
+
          IamPermission.Parameters.Read,
          IamPermission.Parameters.Override,
          IamPermission.Permissions.Read,
          IamPermission.Permissions.Assign,
+
          IamPermission.Users.Read,
          IamPermission.Users.Write,
          IamPermission.Users.UpdateOrganizationAdmin
@@ -165,7 +171,8 @@ public class SeederRolePermissions(
          IamPermission.UserProfile.Read,
          IamPermission.UserProfile.Write,
          IamPermission.UserProfile.Delete,
-         IamPermission.UserProfile.ViewAccess
+         IamPermission.UserProfile.ViewAccess,
+         IamPermission.UserProfile.Parameters,
       ];
    }
    #endregion

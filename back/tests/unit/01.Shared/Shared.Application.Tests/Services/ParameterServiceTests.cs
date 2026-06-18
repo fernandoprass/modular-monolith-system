@@ -105,7 +105,7 @@ public class ParameterServiceTests
          DefaultValue = "Blue",
          CanBeOverride = true,
          IsOverride = true,
-         OverrideType = ParameterOverrideType.OrganizationId
+         OverrideType = ParameterOverrideType.Organization
       };
 
       _parameterQueryRepositoryMock.GetValueAsync(_keyMock, _userContextMock.OrganizationId, _userContextMock.UserId, Arg.Any<CancellationToken>())
@@ -127,7 +127,7 @@ public class ParameterServiceTests
          DefaultValue = "Blue",
          CanBeOverride = true,
          IsOverride = true,
-         OverrideType = ParameterOverrideType.UserId
+         OverrideType = ParameterOverrideType.User
       };
 
       _parameterQueryRepositoryMock.GetValueAsync(_keyMock, _userContextMock.OrganizationId, _userContextMock.UserId, Arg.Any<CancellationToken>())
@@ -149,7 +149,7 @@ public class ParameterServiceTests
          DefaultValue = "Blue",
          CanBeOverride = true,
          IsOverride = false,
-         OverrideType = ParameterOverrideType.OrganizationId
+         OverrideType = ParameterOverrideType.Organization
       };
 
       _parameterQueryRepositoryMock.GetValueAsync(_keyMock, _userContextMock.OrganizationId, _userContextMock.UserId, Arg.Any<CancellationToken>())
@@ -210,7 +210,7 @@ public class ParameterServiceTests
    {
       var parameterId = Guid.NewGuid();
       var request = new ParameterOwnerUpdateRequest("NewValue");
-      var parameter = Parameter.Create("Module", "Group", "Key", "Title", "Desc", ParameterType.String, "Value", null, null, null, null, ParameterOverrideType.OrganizationId);
+      var parameter = Parameter.Create("Module", "Group", "Key", "Title", "Desc", ParameterType.String, "Value", null, null, null, null, ParameterOverrideType.Organization);
 
       _parameterRepositoryMock.GetByIdAsync(parameterId, Arg.Any<CancellationToken>()).Returns(parameter);
       _parameterValidatorMock.ValidateOwnerUpdate(parameter, request).Returns(Result.Success());
@@ -242,7 +242,7 @@ public class ParameterServiceTests
          "Value",
          null,
          null,
-         ParameterOverrideType.OrganizationId,
+         ParameterOverrideType.Organization,
          true);
       var parameterOverride = ParameterOverride.Create(parameterId, _userContextMock.OrganizationId, "Dark");
 

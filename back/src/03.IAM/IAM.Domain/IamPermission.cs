@@ -17,6 +17,7 @@ public static class IamPermission
       public const string Read = $"{Module}.{Resource}.read";
       public const string Write = $"{Module}.{Resource}.write";
       public const string Delete = $"{Module}.{Resource}.delete";
+      public const string Parameters = $"{Module}.{Resource}.parameters";
    }
 
    public static class Parameters
@@ -60,5 +61,6 @@ public static class IamPermission
       public const string Write = $"{Module}.{Resource}.write";
       public const string Delete = $"{Module}.{Resource}.delete";
       public const string ViewAccess = $"{Module}.{Resource}.viewaccess";
+      public const string Parameters = $"{Module}.{Resource}.parameters";
    }
 }

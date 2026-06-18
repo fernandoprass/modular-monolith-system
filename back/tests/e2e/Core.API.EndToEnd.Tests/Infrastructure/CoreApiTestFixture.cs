@@ -124,7 +124,7 @@ public sealed class CoreApiTestFixture : WebApplicationFactory<CoreApi::Program>
       await iamDbContext.SaveChangesAsync();
 
       sharedDbContext.Parameters.AddRange(
-         CreateParameter(IamParam.Security.MaxPasswordAgeInDays, ParameterType.Integer, "90", ParameterOverrideType.OrganizationId),
+         CreateParameter(IamParam.Security.MaxPasswordAgeInDays, ParameterType.Integer, "90", ParameterOverrideType.Organization),
          CreateParameter(IamParam.Security.LockoutDurationInMins, ParameterType.Integer, "60", ParameterOverrideType.None),
          CreateParameter(IamParam.Security.MaxFailedLoginAttempts, ParameterType.Integer, "3", ParameterOverrideType.None),
          CreateParameter(IamParam.Security.JwtExpirationInHours, ParameterType.Integer, "24", ParameterOverrideType.None),

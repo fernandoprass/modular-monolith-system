@@ -13,6 +13,7 @@ export const IAM_RESOURCES = {
 
 export const IAM_ACTIONS = {
   assign: 'assign',
+  parameters: 'parameters',
   read: 'read',
   write: 'write',
 } as const
@@ -28,6 +29,7 @@ export const IAM_PERMISSIONS = {
   },
   organizationProfile: {
     delete: permission(IAM_RESOURCES.organizationprofile, 'delete'),
+    parameters: permission(IAM_RESOURCES.organizationprofile, IAM_ACTIONS.parameters),
     read: permission(IAM_RESOURCES.organizationprofile, IAM_ACTIONS.read),
     write: permission(IAM_RESOURCES.organizationprofile, IAM_ACTIONS.write),
   },
@@ -50,6 +52,7 @@ export const IAM_PERMISSIONS = {
   },
   userProfile: {
     delete: permission(IAM_RESOURCES.userprofile, 'delete'),
+    parameters: permission(IAM_RESOURCES.userprofile, IAM_ACTIONS.parameters),
     read: permission(IAM_RESOURCES.userprofile, IAM_ACTIONS.read),
     viewAccess: permission(IAM_RESOURCES.userprofile, 'viewaccess'),
     write: permission(IAM_RESOURCES.userprofile, IAM_ACTIONS.write),

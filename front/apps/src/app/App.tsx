@@ -7,6 +7,9 @@ import { OrganizationListPage } from '../resources/iam/organizations/Organizatio
 import { OrganizationProfilePage } from '../resources/iam/organizations/OrganizationProfilePage'
 import { OrganizationViewPage } from '../resources/iam/organizations/OrganizationViewPage'
 import { PublicOrganizationCreatePage } from '../resources/iam/organizations/PublicOrganizationCreatePage'
+import { ParameterEditPage } from '../resources/iam/parameters/ParameterEditPage'
+import { ParameterListPage } from '../resources/iam/parameters/ParameterListPage'
+import { ParameterSettingsPage } from '../resources/iam/parameters/ParameterSettingsPage'
 import { PermissionListPage } from '../resources/iam/permissions/PermissionListPage'
 import { RoleEditPage } from '../resources/iam/roles/RoleEditPage'
 import { RoleListPage } from '../resources/iam/roles/RoleListPage'
@@ -32,6 +35,7 @@ function App() {
               <Route element={<AppLayout />}>
                 <Route index element={<DashboardPage />} />
                 <Route path={APP_ROUTES.organizationProfile.slice(1)} element={<OrganizationProfilePage />} />
+                <Route path={APP_ROUTES.organizationSettings.slice(1)} element={<ParameterSettingsPage owner="organization" />} />
                 <Route path={APP_ROUTES.organizations.slice(1)} element={<OrganizationListPage />} />
                 <Route path="organizations/:id" element={<OrganizationEditPage />} />
                 <Route path="organizations/:id/show" element={<OrganizationViewPage />} />
@@ -40,10 +44,13 @@ function App() {
                 <Route path="users/:id" element={<UserEditPage />} />
                 <Route path="users/:id/show" element={<UserViewPage />} />
                 <Route path={APP_ROUTES.userProfile.slice(1)} element={<UserProfilePage />} />
+                <Route path={APP_ROUTES.userSettings.slice(1)} element={<ParameterSettingsPage owner="user" />} />
                 <Route path={APP_ROUTES.roles.slice(1)} element={<RoleListPage />} />
                 <Route path="roles/create" element={<RoleEditPage />} />
                 <Route path="roles/:id" element={<RoleEditPage />} />
                 <Route path={APP_ROUTES.userAccess.slice(1)} element={<UserAccessPage />} />
+                <Route path={APP_ROUTES.parameters.slice(1)} element={<ParameterListPage />} />
+                <Route path="parameters/:id" element={<ParameterEditPage />} />
                 <Route path={APP_ROUTES.permissions.slice(1)} element={<PermissionListPage />} />
                 <Route path="*" element={<Navigate to={APP_ROUTES.dashboard} replace />} />
               </Route>

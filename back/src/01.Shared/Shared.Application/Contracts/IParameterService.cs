@@ -1,6 +1,7 @@
 using Myce.Response;
 using Shared.Domain.DTOs.Requests;
 using Shared.Domain.DTOs.Responses;
+using Shared.Domain.Enums;
 
 namespace Shared.Application.Contracts
 {
@@ -9,7 +10,8 @@ namespace Shared.Application.Contracts
       //Method to be used in the UI for management of parameters, not intended for use in code
       //to get parameter values, for that use the GetByKeyAsync and GetValueAsync methods
       Task<Result<ParameterDto>> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
-      Task<Result<IEnumerable<ParameterLiteDto>>> GetAsync(ParameterSearchRequest request, CancellationToken cancellationToken = default);
+      Task<PagedResultDto<ParameterLiteDto>> GetAsync(ParameterSearchRequest request, CancellationToken cancellationToken = default);
+      Task<Result<IEnumerable<ParameterLiteDto>>> GetOwnerIdAsync(ParameterOverrideType overrideType, CancellationToken cancellationToken = default);
       Task<Result<ParameterValueDto>> GetValueAsync(string key, CancellationToken cancellationToken = default);
       Task<Result> SaveOverrideValueAsync(Guid parameterId, ParameterOwnerUpdateRequest request, CancellationToken cancellationToken = default);
       Task<Result> DeleteOverrideValueAsync(Guid parameterOverrideId, CancellationToken cancellationToken = default);

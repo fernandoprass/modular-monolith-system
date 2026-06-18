@@ -14,7 +14,6 @@ import { Textarea } from '../../../components/ui/textarea'
 import type { PermissionDto } from '../../../shared/permissions'
 import { updatePermission } from './permissionApi'
 import {
-  PERMISSION_ACTION_OPTIONS,
   PERMISSION_MODULE_OPTIONS,
   PERMISSION_RESOURCE_OPTIONS,
   type PermissionUpdateForm,

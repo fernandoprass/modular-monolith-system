@@ -42,11 +42,14 @@ internal class ParameterService(
       return Result<ParameterDto>.Success(parameter);
    }
 
-   public async Task<Result<IEnumerable<ParameterLiteDto>>> GetAsync(ParameterSearchRequest request, CancellationToken cancellationToken = default)
+   public async Task<PagedResultDto<ParameterLiteDto>> GetAsync(ParameterSearchRequest request, CancellationToken cancellationToken = default)
    {
-      var requestInternal = request.ToInternal(_userContext.OrganizationId, _userContext.UserId, _userContext.IsSystemAdmin);
+      return await _parameterQueryRepository.GetAsync(request, cancellationToken);
+   }
 
-      var parameters = await _parameterQueryRepository.GetAllAsync(requestInternal, cancellationToken);
+   public async Task<Result<IEnumerable<ParameterLiteDto>>> GetOwnerIdAsync(ParameterOverrideType overrideType, CancellationToken cancellationToken = default)
+   {
+      var parameters = await _parameterQueryRepository.GetOwnerByAsync(overrideType, cancellationToken);
 
       return Result<IEnumerable<ParameterLiteDto>>.Success(parameters);
    }
@@ -295,8 +298,8 @@ internal class ParameterService(
    {
       return overrideType switch
       {
-         ParameterOverrideType.OrganizationId => _userContext.OrganizationId,
-         ParameterOverrideType.UserId => _userContext.UserId,
+         ParameterOverrideType.Organization => _userContext.OrganizationId,
+         ParameterOverrideType.User => _userContext.UserId,
          _ => throw new InvalidOperationException("Invalid override type")
       };
    }

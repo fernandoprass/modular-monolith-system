@@ -10,6 +10,12 @@ export const API_PATHS = {
       lookup: '/api/v1/iam/organizations/lookup',
       profile: '/api/v1/iam/organizations/profile',
     },
+    parameters: {
+      byId: (id: string | number) => `/api/v1/iam/parameters/${id}`,
+      list: '/api/v1/iam/parameters',
+      me: '/api/v1/iam/parameters/me',
+      myOrganization: '/api/v1/iam/parameters/my-organization',
+    },
     permissions: {
       byId: (id: string | number) => `/api/v1/iam/permissions/${id}`,
       list: '/api/v1/iam/permissions',

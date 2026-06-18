@@ -398,6 +398,12 @@ textarea {
   gap: 5px;
 }
 
+.form-row-two {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .field[data-invalid='true'] .input,
 .field[data-invalid='true'] .textarea,
 .field[data-invalid='true'] .select-trigger {
@@ -858,6 +864,35 @@ textarea {
   font-weight: 700;
 }
 
+.settings-stack,
+.settings-module,
+.settings-parameter-list {
+  display: grid;
+  gap: 12px;
+}
+
+.settings-stack {
+  margin-top: 12px;
+}
+
+.settings-module-title {
+  margin: 4px 0 0;
+  color: #334155;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.settings-group-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.settings-parameter-row {
+  grid-template-columns: minmax(160px, 1fr) minmax(180px, 1.2fr);
+  align-items: center;
+}
+
 .checkbox-row {
   gap: 8px;
   font-size: 0.84rem;
@@ -1148,7 +1183,12 @@ textarea {
 
   .toolbar,
   .detail-grid,
+  .settings-group-grid,
   .permission-assignment-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-parameter-row {
     grid-template-columns: 1fr;
   }
 
@@ -1164,5 +1204,9 @@ textarea {
   .code-row {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .form-row-two {
+    grid-template-columns: 1fr;
   }
 }

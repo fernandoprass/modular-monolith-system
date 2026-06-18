@@ -24,24 +24,4 @@ public static class ParameterMappers
          parameter.IsVisible
       );
    }
-
-   public static ParameterSearchRequestInternal ToInternal(
-     this ParameterSearchRequest publicRequest,
-     Guid organizationId,
-     Guid userId,
-     bool isSystemAdmin)
-   {
-      return new ParameterSearchRequestInternal(
-          publicRequest.Module,
-          publicRequest.Group,
-          publicRequest.Name,
-          publicRequest.Key,
-          publicRequest.Title,
-          publicRequest.Description,
-          userId,
-          organizationId,
-          isSystemAdmin
-      );
-   }
-
 }

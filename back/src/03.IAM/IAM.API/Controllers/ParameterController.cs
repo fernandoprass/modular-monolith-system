@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Application.Contracts;
 using Shared.Domain.DTOs.Requests;
+using Shared.Domain.Enums;
 using Shared.Infrastructure.Authorization;
 
 namespace IAM.API.Controllers;
@@ -29,6 +30,24 @@ public class ParameterController(IParameterService parameterService) : BaseContr
    public async Task<IActionResult> GetByParams([FromQuery] ParameterSearchRequest request, CancellationToken cancellationToken)
    {
       var parameters = await _parameterService.GetAsync(request, cancellationToken);
+      return OkOrNotFound(parameters);
+   }
+
+   [HttpGet("my-organization")]
+   [Authorize]
+   [RequirePermission(IamPermission.OrganizationProfile.Parameters)]
+   public async Task<IActionResult> GetOrganizationParameters(CancellationToken cancellationToken)
+   {
+      var parameters = await _parameterService.GetOwnerIdAsync(ParameterOverrideType.Organization, cancellationToken);
+      return OkOrNotFound(parameters);
+   }
+
+   [HttpGet("me")]
+   [Authorize]
+   [RequirePermission(IamPermission.UserProfile.Parameters)]
+   public async Task<IActionResult> GetUserParameters(ParameterOverrideType overrideType, CancellationToken cancellationToken)
+   {
+      var parameters = await _parameterService.GetOwnerIdAsync(ParameterOverrideType.User, cancellationToken);
       return OkOrNotFound(parameters);
    }
 

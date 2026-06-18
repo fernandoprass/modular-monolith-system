@@ -47,6 +47,7 @@ public class SeederPermissions(
       await AddPermissionAsync(IamPermission.OrganizationProfile.Read, "Read Own Organization Profile", "Allows viewing own organization profile.", cancellationToken);
       await AddPermissionAsync(IamPermission.OrganizationProfile.Write, "Update Own Organization Profile", "Allows updating own organization profile.", cancellationToken);
       await AddPermissionAsync(IamPermission.OrganizationProfile.Delete, "Delete Own Organization Profile", "Allows deleting own organization profile.", cancellationToken);
+      await AddPermissionAsync(IamPermission.OrganizationProfile.Parameters, "Organization Settings", "Allows viewing and updating own organization settings.", cancellationToken);
 
       await AddPermissionAsync(IamPermission.Parameters.Read, "Read Parameters", "Allows reading parameters.", cancellationToken);
       await AddPermissionAsync(IamPermission.Parameters.Write, "Edit Parameters", "Allows updating parameters.", cancellationToken);
@@ -70,6 +71,7 @@ public class SeederPermissions(
       await AddPermissionAsync(IamPermission.UserProfile.Write, "Update Own Profile", "Allows users to update their own profile.", cancellationToken);
       await AddPermissionAsync(IamPermission.UserProfile.Delete, "Delete Own Profile", "Allows users to delete their own profile.", cancellationToken);
       await AddPermissionAsync(IamPermission.UserProfile.ViewAccess, "View Own Roles and Permissions", "Allows users to view their own roles and permissions.", cancellationToken);
+      await AddPermissionAsync(IamPermission.UserProfile.Parameters, "User Settings", "Allows users to view and update their own settings.", cancellationToken);
    }
 
    private async Task AddCourierPermissions(CancellationToken cancellationToken)

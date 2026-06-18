@@ -24,7 +24,7 @@ public class ParameterEndToEndTests(CoreApiTestFixture fixture) : IClassFixture<
          TestContext.Current.CancellationToken);
 
       var parameters = await authenticatedApi.SearchParametersAsync(
-         new ParameterSearchRequest(null, null, null, IamParam.Security.MaxPasswordAgeInDays, null, null),
+         new ParameterSearchRequest(null, null, null, IamParam.Security.MaxPasswordAgeInDays, null),
          TestContext.Current.CancellationToken);
       var parameter = parameters.Single(parameter => parameter.Key == IamParam.Security.MaxPasswordAgeInDays);
 

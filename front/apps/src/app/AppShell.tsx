@@ -53,10 +53,13 @@ export function AppLayout() {
   const canOpenRoles = hasResourceAccess(permissions, IAM_RESOURCES.roles)
   const canOpenPermissions = hasResourceAccess(permissions, IAM_RESOURCES.permissions)
   const canOpenUserAccess = hasPermissionCode(permissions, IAM_PERMISSIONS.roles.assign)
+  const canOpenOrganizationSettings = hasPermissionCode(permissions, IAM_PERMISSIONS.organizationProfile.parameters)
+  const canOpenUserSettings = hasPermissionCode(permissions, IAM_PERMISSIONS.userProfile.parameters)
   const canOpenAuthorization = canOpenRoles || canOpenPermissions || canOpenUserAccess
   const canOpenIam = canOpenOrganizations || canOpenUsers || canOpenParameters || canOpenAuthorization
   const organizationName = user?.organizationName || APP_CONSTANTS.appName
   const canOpenOrganizationProfile = user?.isOrganizationAdmin === true
+  const canOpenOrganizationMenu = canOpenOrganizationProfile || canOpenOrganizationSettings
 
   if (!isAuthenticated) {
     return <Navigate to={APP_ROUTES.login} replace />
@@ -71,15 +74,23 @@ export function AppLayout() {
     navigate(APP_ROUTES.organizationProfile)
   }
 
+  function handleOrganizationSettings() {
+    navigate(APP_ROUTES.organizationSettings)
+  }
+
   function handleUserProfile() {
     navigate(APP_ROUTES.userProfile)
+  }
+
+  function handleUserSettings() {
+    navigate(APP_ROUTES.userSettings)
   }
 
   return (
     <div className={cn('shell', isCollapsed && 'shell-collapsed')}>
       <aside className={cn('sidebar', isMobileOpen && 'sidebar-open')}>
         <div className="sidebar-header">
-          {canOpenOrganizationProfile ? (
+          {canOpenOrganizationMenu ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button className="sidebar-organization-button" variant="ghost">
@@ -93,10 +104,18 @@ export function AppLayout() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start">
                 <DropdownMenuGroup>
-                  <DropdownMenuItem onClick={handleOrganizationProfile}>
-                    <UserRound data-icon="inline-start" />
-                    {t('navigation.profile')}
-                  </DropdownMenuItem>
+                  {canOpenOrganizationProfile && (
+                    <DropdownMenuItem onClick={handleOrganizationProfile}>
+                      <UserRound data-icon="inline-start" />
+                      {t('navigation.profile')}
+                    </DropdownMenuItem>
+                  )}
+                  {canOpenOrganizationSettings && (
+                    <DropdownMenuItem onClick={handleOrganizationSettings}>
+                      <Settings data-icon="inline-start" />
+                      {t('navigation.settings')}
+                    </DropdownMenuItem>
+                  )}
                 </DropdownMenuGroup>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -231,6 +250,12 @@ export function AppLayout() {
                     <LockKeyhole data-icon="inline-start" />
                     {t('features.iam.users.pages.changePassword')}
                   </DropdownMenuItem>
+                  {canOpenUserSettings && (
+                    <DropdownMenuItem onClick={handleUserSettings}>
+                      <Settings data-icon="inline-start" />
+                      {t('navigation.settings')}
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem onClick={handleLogout}>
                     <LogOut data-icon="inline-start" />
                     {t('auth.userMenu.logout')}

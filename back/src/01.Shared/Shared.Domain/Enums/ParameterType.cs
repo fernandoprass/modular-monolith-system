@@ -11,7 +11,8 @@ public enum ParameterType : byte
    Character = 7,
    String = 8,
    Text = 9,
-   UUID = 10,
-   List = 11,
-   ReferenceId = 12
+   RichText = 10,
+   UUID = 11,
+   List = 12,
+   ReferenceId = 13
 }

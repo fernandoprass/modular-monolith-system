@@ -83,7 +83,7 @@ public class ParameterValidatorTests
    [Fact]
    public void ValidateOwnerUpdate_WhenAllDataIsValid_ShouldBeSuccess()
    {
-      var parameter = new Parameter { OverrideType = ParameterOverrideType.UserId, ValidationRegex = null };
+      var parameter = new Parameter { OverrideType = ParameterOverrideType.User, ValidationRegex = null };
       var request = new ParameterOwnerUpdateRequest("NewValidValue");
 
       var result = _validator.ValidateOwnerUpdate(parameter, request);
@@ -117,7 +117,7 @@ public class ParameterValidatorTests
    [Fact]
    public void ValidateOwnerUpdate_WhenRegexDoesNotMatch_ShouldHaveError()
    {
-      var parameter = new Parameter { OverrideType = ParameterOverrideType.OrganizationId, ValidationRegex = "^[0-9]+$", ValidationErrorCustomMessage = "Must be numbers" };
+      var parameter = new Parameter { OverrideType = ParameterOverrideType.Organization, ValidationRegex = "^[0-9]+$", ValidationErrorCustomMessage = "Must be numbers" };
       var request = new ParameterOwnerUpdateRequest("NotANumber");
 
       var result = _validator.ValidateOwnerUpdate(parameter, request);

@@ -15,7 +15,7 @@ public class SeederParametersIam(ISeederData seederData,SharedDbContext dbContex
          "The maximum number of days a password remains valid before the user is required to change it.",
          ParameterType.Integer,
          value: "90",
-         ParameterOverrideType.OrganizationId,
+         ParameterOverrideType.Organization,
          isVisible: true,
          cancellationToken);
 
@@ -56,7 +56,7 @@ public class SeederParametersIam(ISeederData seederData,SharedDbContext dbContex
          ParameterType.UUID,
          value: seederData.OrganizationAdminRoleId.ToString(),
          ParameterOverrideType.None,
-         isVisible: false,
+         isVisible: true,
          cancellationToken);
 
       await AddParameterAsync(
@@ -66,7 +66,7 @@ public class SeederParametersIam(ISeederData seederData,SharedDbContext dbContex
          ParameterType.UUID,
          value: seederData.UserRoleId.ToString(),
          ParameterOverrideType.None,
-         isVisible: false,
+         isVisible: true,
          cancellationToken);
    }
 }

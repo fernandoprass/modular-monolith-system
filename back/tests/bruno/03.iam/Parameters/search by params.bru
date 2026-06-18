@@ -5,13 +5,13 @@ meta {
 }
 
 get {
-  url: {{host.iam}}/api/{{version}}/iam/parameters?name=MaxPasswordAgeInDays
+  url: {{host.iam}}/api/{{version}}/iam/parameters
   body: none
   auth: bearer
 }
 
 params:query {
-  name: MaxPasswordAgeInDays
+  ~name: MaxPasswordAgeInDays
   ~module: IAM
   ~group: Security
   ~key: max
