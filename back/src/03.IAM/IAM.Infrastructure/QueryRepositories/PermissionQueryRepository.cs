@@ -4,6 +4,8 @@ using IAM.Domain.Mappers;
 using IAM.Domain.QueryRepositories;
 using Microsoft.EntityFrameworkCore;
 using Shared.Application.Contracts;
+using Shared.Domain;
+using Shared.Domain.DTOs.Responses;
 
 namespace IAM.Infrastructure.QueryRepositories;
 
@@ -21,7 +23,7 @@ public class PermissionQueryRepository(IamDbContext dbContext, IUserContext user
       return permission?.ToPermissionDto();
    }
 
-   public async Task<IEnumerable<PermissionDto>> GetByParams(PermissionSearchRequest request, CancellationToken cancellationToken = default)
+   public async Task<PagedResultDto<PermissionDto>> GetByParams(PermissionSearchRequest request, CancellationToken cancellationToken = default)
    {
       var query = _dbContext.Permissions.AsNoTracking();
 
@@ -49,9 +51,20 @@ public class PermissionQueryRepository(IamDbContext dbContext, IUserContext user
       if (!request.IncludeInactive)
          query = query.Where(p => p.IsActive);
 
-      return await query
+      var pageNumber = request.PageNumber < 1 ? SharedConst.Pagination.DefaultPageNumber : request.PageNumber;
+      var pageSize = request.PageSize < 1 ? SharedConst.Pagination.DefaultPageSize : Math.Min(request.PageSize, SharedConst.Pagination.MaxPageSize);
+      var totalCount = await query.LongCountAsync(cancellationToken);
+
+      var items = await query
+         .OrderBy(p => p.Module)
+         .ThenBy(p => p.Resource)
+         .ThenBy(p => p.Action)
          .Select(p => p.ToPermissionDto())
          .ToListAsync(cancellationToken);
+
+      var totalPages = totalCount == 0 ? 0 : (int)Math.Ceiling(totalCount / (double)pageSize);
+
+      return new PagedResultDto<PermissionDto>(items, pageNumber, pageSize, totalCount, totalPages);
    }
 
    public async Task<IEnumerable<PermissionDto>> GetByRoleIdAsync(Guid roleId, CancellationToken cancellationToken = default)

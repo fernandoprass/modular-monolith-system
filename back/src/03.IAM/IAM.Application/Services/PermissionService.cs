@@ -9,6 +9,7 @@ using IAM.Domain.QueryRepositories;
 using Myce.Response;
 using Shared.Application.Contracts;
 using Shared.Application.Services;
+using Shared.Domain.DTOs.Responses;
 using Shared.Domain.Enums;
 using Shared.Domain.Interfaces;
 using Shared.Domain.Messages;
@@ -74,10 +75,9 @@ public class PermissionService(
       return Result.Success(new SuccessInfo());
    }
 
-   public async Task<Result<IEnumerable<PermissionDto>>> GetByParams(PermissionSearchRequest request, CancellationToken cancellationToken = default)
+   public async Task<PagedResultDto<PermissionDto>> GetByParams(PermissionSearchRequest request, CancellationToken cancellationToken = default)
    {
-      var permissions = await _permissionQueryRepository.GetByParams(request, cancellationToken);
-      return Result<IEnumerable<PermissionDto>>.Success(permissions);
+      return await _permissionQueryRepository.GetByParams(request, cancellationToken);
    }
 
    public async Task<Result<IEnumerable<PermissionDto>>> GetByRoleId(Guid roleId, CancellationToken cancellationToken = default)
