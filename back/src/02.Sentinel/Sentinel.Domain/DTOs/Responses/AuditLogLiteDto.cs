@@ -9,7 +9,4 @@ public record AuditLogLiteDto(
    string Action,
    AuditPrivacyLevel PrivacyLevel,
    string Description,
-   DateTime CreatedAt,
-   DateTime ExpiresAt,
-   Guid UserId,
-   Guid TargetId);
+   DateTime CreatedAt);

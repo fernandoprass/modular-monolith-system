@@ -44,4 +44,14 @@ export const API_PATHS = {
       profile: '/api/v1/iam/users/profile',
     },
   },
+  sentinel: {
+    auditLogs: {
+      byId: (id: string | number) => `/api/v1/sentinel/logs/audit/${id}`,
+      list: '/api/v1/sentinel/logs/audit',
+    },
+    systemLogs: {
+      byId: (id: string | number) => `/api/v1/sentinel/logs/system/${id}`,
+      list: '/api/v1/sentinel/logs/system',
+    },
+  },
 } as const

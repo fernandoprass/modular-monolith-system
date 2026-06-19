@@ -5,22 +5,21 @@ meta {
 }
 
 get {
-  url: {{host.sentinel}}/api/{{version}}/sentinel/logs/system
+  url: {{host.sentinel}}/api/{{version}}/sentinel/logs/system?pageNumber=1&pageSize=50
   body: none
   auth: bearer
 }
 
 params:query {
-  ~organizationId: {{organizationId}}
-  ~userId: {{userId}}
-  ~level:
-  ~status:
-  ~source:
-  ~requestId:
-  ~from:
-  ~to:
   pageNumber: 1
   pageSize: 50
+  ~organizationId: {{organizationId}}
+  ~userId: {{userId}}
+  ~level: 
+  ~status: 
+  ~requestId: 
+  ~from: 
+  ~to: 
 }
 
 auth:bearer {

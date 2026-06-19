@@ -8,8 +8,4 @@ public record SystemLogLiteDto(
    SystemLogStatus Status,
    string Module,
    string Message,
-   DateTime CreatedAt,
-   DateTime ExpiresAt,
-   string? RequestId,
-   Guid? UserId,
-   Guid? OrganizationId);
+   DateTime CreatedAt);

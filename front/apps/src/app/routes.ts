@@ -1,5 +1,7 @@
 export const APP_ROUTES = {
   dashboard: '/',
+  auditLogView: (id: string) => `/audit-logs/${id}/show`,
+  auditLogs: '/audit-logs',
   login: '/login',
   organizationEdit: (id: string) => `/organizations/${id}`,
   organizationProfile: '/organization-profile',
@@ -13,6 +15,8 @@ export const APP_ROUTES = {
   roleCreate: '/roles/create',
   roleEdit: (id: string) => `/roles/${id}`,
   roles: '/roles',
+  systemLogView: (id: string) => `/system-logs/${id}/show`,
+  systemLogs: '/system-logs',
   userCreate: '/users/create',
   userAccess: '/user-access',
   userEdit: (id: string) => `/users/${id}`,

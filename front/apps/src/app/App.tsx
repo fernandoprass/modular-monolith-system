@@ -2,6 +2,10 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 
 import { AuthProvider } from '../auth/AuthProvider'
 import { LoginPage } from '../auth/LoginPage'
+import { AuditLogListPage } from '../resources/sentinel/audit-logs/AuditLogListPage'
+import { AuditLogViewPage } from '../resources/sentinel/audit-logs/AuditLogViewPage'
+import { SystemLogListPage } from '../resources/sentinel/system-logs/SystemLogListPage'
+import { SystemLogViewPage } from '../resources/sentinel/system-logs/SystemLogViewPage'
 import { OrganizationEditPage } from '../resources/iam/organizations/OrganizationEditPage'
 import { OrganizationListPage } from '../resources/iam/organizations/OrganizationListPage'
 import { OrganizationProfilePage } from '../resources/iam/organizations/OrganizationProfilePage'
@@ -45,6 +49,10 @@ function App() {
                 <Route path="users/:id/show" element={<UserViewPage />} />
                 <Route path={APP_ROUTES.userProfile.slice(1)} element={<UserProfilePage />} />
                 <Route path={APP_ROUTES.userSettings.slice(1)} element={<ParameterSettingsPage owner="user" />} />
+                <Route path={APP_ROUTES.auditLogs.slice(1)} element={<AuditLogListPage />} />
+                <Route path="audit-logs/:id/show" element={<AuditLogViewPage />} />
+                <Route path={APP_ROUTES.systemLogs.slice(1)} element={<SystemLogListPage />} />
+                <Route path="system-logs/:id/show" element={<SystemLogViewPage />} />
                 <Route path={APP_ROUTES.roles.slice(1)} element={<RoleListPage />} />
                 <Route path="roles/create" element={<RoleEditPage />} />
                 <Route path="roles/:id" element={<RoleEditPage />} />

@@ -115,3 +115,11 @@ export function deleteIamJson(path: string): Promise<unknown> {
 export function deleteIamJsonWithBody(path: string, body: unknown): Promise<unknown> {
   return request(path, { baseUrl: CONFIG.apiBaseUrls.iam, body, method: 'DELETE' })
 }
+
+export function getSentinelJson(path: string): Promise<unknown> {
+  return request(path, { baseUrl: CONFIG.apiBaseUrls.sentinel, method: 'GET' })
+}
+
+export function getSentinelJsonWithQuery(path: string, query: URLSearchParams): Promise<unknown> {
+  return request(path, { baseUrl: CONFIG.apiBaseUrls.sentinel, method: 'GET', query })
+}

@@ -54,7 +54,7 @@ export function UserViewPage() {
             <p className="page-subtitle">{t('shared.common.loading')}</p>
           ) : (
             <div className="detail-stack">
-                <div className="detail-grid">
+                <div className="detail-grid-two-columns">
                   <Field label={t('shared.fields.organization')}>{user.organizationName}</Field>
                   <Field label={t('shared.fields.language')}>{getLanguageLabel(user.language, t)}</Field>
                   <Field label={t('shared.fields.name')}>{user.name}</Field>

@@ -52,7 +52,7 @@ export function OrganizationViewPage() {
           {organization === null ? (
             <p className="page-subtitle">{t('shared.common.loading')}</p>
           ) : (
-            <div className="detail-grid">
+            <div className="detail-grid-two-columns">
               <Field label={t('shared.fields.type')}>
                 {getOrganizationTypeLabel(organization.type, t)}
               </Field>

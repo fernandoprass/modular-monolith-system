@@ -9,6 +9,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   LockKeyhole,
+  ScrollText,
   Settings,
   Shield,
   ShieldCheck,
@@ -32,6 +33,7 @@ import {
 import { cn } from '../lib/utils'
 import { IAM_PERMISSIONS, IAM_RESOURCES } from '../shared/iamConstants'
 import { hasPermissionCode, hasResourceAccess } from '../shared/permissions'
+import { SENTINEL_PERMISSIONS } from '../shared/sentinelConstants'
 import { APP_CONSTANTS } from './appConstants'
 import { useTranslate } from './i18n/i18n'
 import { APP_ROUTES } from './routes'
@@ -45,6 +47,7 @@ export function AppLayout() {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [isAuthorizationOpen, setIsAuthorizationOpen] = useState(true)
   const [isIamOpen, setIsIamOpen] = useState(true)
+  const [isSentinelOpen, setIsSentinelOpen] = useState(true)
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false)
   const { isAuthenticated, logout, permissions, user } = useAuth()
   const canOpenOrganizations = hasResourceAccess(permissions, IAM_RESOURCES.organizations)
@@ -55,8 +58,11 @@ export function AppLayout() {
   const canOpenUserAccess = hasPermissionCode(permissions, IAM_PERMISSIONS.roles.assign)
   const canOpenOrganizationSettings = hasPermissionCode(permissions, IAM_PERMISSIONS.organizationProfile.parameters)
   const canOpenUserSettings = hasPermissionCode(permissions, IAM_PERMISSIONS.userProfile.parameters)
+  const canOpenAuditLogs = hasPermissionCode(permissions, SENTINEL_PERMISSIONS.auditLogs.read)
+  const canOpenSystemLogs = hasPermissionCode(permissions, SENTINEL_PERMISSIONS.systemLogs.read)
   const canOpenAuthorization = canOpenRoles || canOpenPermissions || canOpenUserAccess
   const canOpenIam = canOpenOrganizations || canOpenUsers || canOpenParameters || canOpenAuthorization
+  const canOpenSentinel = canOpenAuditLogs || canOpenSystemLogs
   const organizationName = user?.organizationName || APP_CONSTANTS.appName
   const canOpenOrganizationProfile = user?.isOrganizationAdmin === true
   const canOpenOrganizationMenu = canOpenOrganizationProfile || canOpenOrganizationSettings
@@ -200,6 +206,31 @@ export function AppLayout() {
                   />
                 )}
                 </NavGroup>
+              )}
+            </NavGroup>
+          )}
+          {canOpenSentinel && (
+            <NavGroup
+              icon={<ScrollText data-icon="inline-start" />}
+              isOpen={isSentinelOpen}
+              label={t('navigation.groups.sentinel')}
+              onToggle={() => setIsSentinelOpen((current) => !current)}
+            >
+              {canOpenAuditLogs && (
+                <NavItem
+                  active={location.pathname.startsWith(APP_ROUTES.auditLogs)}
+                  icon={<ScrollText data-icon="inline-start" />}
+                  label={t('features.sentinel.auditLogs.name')}
+                  to={APP_ROUTES.auditLogs}
+                />
+              )}
+              {canOpenSystemLogs && (
+                <NavItem
+                  active={location.pathname.startsWith(APP_ROUTES.systemLogs)}
+                  icon={<ScrollText data-icon="inline-start" />}
+                  label={t('features.sentinel.systemLogs.name')}
+                  to={APP_ROUTES.systemLogs}
+                />
               )}
             </NavGroup>
           )}
