@@ -51,6 +51,8 @@ Use:
 - Vite
 - shadcn/ui style components
 - Radix UI primitives when useful
+- React Hook Form for create/edit/profile/modal forms
+- Zod with `@hookform/resolvers` for form validation
 - TanStack Table for reusable data tables
 
 Do not use React-admin unless the user asks.
@@ -73,6 +75,17 @@ shadcn/ui style components own:
 - dropdowns
 - checkboxes
 - reusable UI primitives
+
+React Hook Form owns:
+- local create/edit/profile form state
+- modal form state
+- form submission handling
+- field registration
+
+Zod owns:
+- client-side form schemas
+- required field validation
+- request-shape validation when useful
 
 Plain CSS owns:
 - app shell layout
@@ -242,6 +255,61 @@ Prefer depending on `organizationId` instead of `user?.organizationId` in callba
 
 ---
 
+## Form Rules
+
+Use React Hook Form plus Zod for create, edit, profile, and modal forms.
+
+Use TanStack Form only in legacy pages that have not been migrated yet.
+
+Use `Controller` for controlled shadcn/Radix/custom inputs:
+- `Select`
+- `Checkbox`
+- lookup selects such as `OrganizationSelect` and `UserSelect`
+- date/time pickers
+
+Use `register` for plain inputs and textareas.
+
+Good:
+
+```tsx
+const form = useForm<UserForm>({
+  defaultValues: EMPTY_USER_FORM,
+  resolver: zodResolver(userSchema),
+})
+
+<Input id="name" required {...form.register('name')} />
+
+<Controller
+  control={form.control}
+  name="language"
+  render={({ field }) => (
+    <Select
+      onValueChange={field.onChange}
+      options={toTranslatedOptions(LANGUAGE_OPTIONS, t)}
+      value={field.value}
+    />
+  )}
+/>
+```
+
+Normalize DTO data before it reaches the form whenever possible.
+
+For fixed option values, the form value must exactly match the option value.
+
+Example:
+
+```ts
+export const LANGUAGE_CODES = {
+  english: 'en',
+  portugueseBrazil: 'pt-br',
+  spanish: 'es',
+} as const
+```
+
+Do not paper over a bad read by falling back to a default in edit mode. Fix the API boundary or form initialization instead.
+
+---
+
 ## Edit Page Rules
 
 Keep edit and profile pages as similar as possible.
@@ -249,9 +317,10 @@ Keep edit and profile pages as similar as possible.
 Use this standard shape:
 - `EMPTY_*_FORM`
 - `toForm(dto)`
+- Zod schema
 - request-mapping helper when the backend request shape differs from form shape
 - load callback
-- keyed form component rendered after the DTO is loaded
+- keyed child form component rendered after the DTO is loaded
 - submit handler
 
 Good:
@@ -280,6 +349,8 @@ For edit pages, load the entity into state.
 
 Then render a keyed child form component after the entity is loaded.
 
+The child form should initialize React Hook Form from final props.
+
 Good:
 
 ```ts
@@ -299,24 +370,30 @@ return role === null
   : <RoleEditForm key={role.id} role={role} />
 ```
 
-The child form should initialize TanStack Form from props.
-
 Good:
 
 ```ts
 function RoleEditForm({ role }: RoleEditFormProps) {
-  const form = useForm({
+  const form = useForm<RoleForm>({
     defaultValues: toForm(role),
-    onSubmit: async ({ value }) => {
-      await updateRole(role.id, value)
-    },
+    resolver: zodResolver(roleSchema),
   })
+
+  async function handleSave(value: RoleForm) {
+    await updateRole(role.id, value)
+  }
+
+  return <form onSubmit={form.handleSubmit(handleSave)}>...</form>
 }
 ```
 
 Avoid long `form.setFieldValue` sequences after loading an entity.
 
 Avoid `form.reset(toForm(dto))` as the main edit-page hydration strategy.
+
+For edit mode, prefer mounting the child form after the DTO is loaded so the form is born with final `defaultValues`.
+
+This matters for controlled Radix components such as `Select`, where async value changes can be easy to get wrong.
 
 For create/edit pages, derive `isCreate` once.
 
@@ -327,6 +404,22 @@ const isCreate = id === undefined
 ```
 
 For create mode, reset the form from the empty-form helper when context defaults change.
+
+For modal forms, each modal should own its own React Hook Form instance.
+
+When a modal opens or receives a different DTO, call `reset(...)` inside an effect.
+
+Good:
+
+```ts
+useEffect(() => {
+  if (!isOpen) {
+    return
+  }
+
+  form.reset(item === null ? EMPTY_FORM : toForm(item))
+}, [form, isOpen, item])
+```
 
 For DTO normalization, normalize unknown API data at the API boundary.
 
