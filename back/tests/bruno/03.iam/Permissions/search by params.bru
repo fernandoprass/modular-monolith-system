@@ -5,7 +5,7 @@ meta {
 }
 
 get {
-  url: {{host.iam}}/api/{{version}}/iam/permissions?includeInactive=true&title
+  url: {{host.iam}}/api/{{version}}/iam/permissions?includeInactive=true&title&pageNumber=1&pageSize=25
   body: none
   auth: bearer
 }
@@ -13,6 +13,8 @@ get {
 params:query {
   includeInactive: true
   title: 
+  pageNumber: 1
+  pageSize: 25
   ~roleId: {{roleId}}
   ~module: iam
   ~resource: users

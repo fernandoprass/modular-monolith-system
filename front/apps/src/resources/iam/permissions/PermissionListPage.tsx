@@ -1,15 +1,17 @@
-import { useForm } from '@tanstack/react-form'
 import type { SortingState } from '@tanstack/react-table'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Controller, useForm } from 'react-hook-form'
 
 import { useTranslate } from '../../../app/i18n/i18n'
 import { useAuth, useNotifyError } from '../../../auth/AuthProvider'
 import { DataTable } from '../../../components/ui/data-table'
+import { DataTablePagination } from '../../../components/ui/data-table-pagination'
 import { Field, FieldLabel } from '../../../components/ui/form'
 import { FilterToolbar } from '../../../components/ui/filter-toolbar'
 import { Input } from '../../../components/ui/input'
 import { Select } from '../../../components/ui/select'
 import { IAM_PERMISSIONS } from '../../../shared/iamConstants'
+import { DEFAULT_PAGINATION, type PagedResultDto } from '../../../shared/pagination'
 import type { PermissionDto } from '../../../shared/permissions'
 import { hasPermissionCode } from '../../../shared/permissions'
 import { getPermissions } from './permissionApi'
@@ -35,17 +37,16 @@ export function PermissionListPage() {
   const t = useTranslate()
   const notifyError = useNotifyError()
   const { permissions: userPermissions } = useAuth()
-  const [permissions, setPermissions] = useState<PermissionDto[]>([])
+  const [result, setResult] = useState<PagedResultDto<PermissionDto> | null>(null)
   const [selectedPermission, setSelectedPermission] = useState<PermissionDto | null>(null)
   const [appliedFilters, setAppliedFilters] = useState<PermissionSearchForm>(EMPTY_PERMISSION_SEARCH)
+  const [pageNumber, setPageNumber] = useState<number>(DEFAULT_PAGINATION.pageNumber)
+  const [pageSize, setPageSize] = useState<number>(DEFAULT_PAGINATION.pageSize)
   const [isLoading, setIsLoading] = useState(false)
   const [sorting, setSorting] = useState<SortingState>([])
   const canUpdate = hasPermissionCode(userPermissions, IAM_PERMISSIONS.permissions.write)
-  const filterForm = useForm({
+  const { control, handleSubmit, register, reset } = useForm<PermissionSearchForm>({
     defaultValues: EMPTY_PERMISSION_SEARCH,
-    onSubmit: ({ value }) => {
-      setAppliedFilters({ ...value })
-    },
   })
   const columns = useMemo(() => createPermissionTableColumns({
     canUpdate,
@@ -53,89 +54,107 @@ export function PermissionListPage() {
     t,
   }), [canUpdate, t])
 
-  const loadPermissions = useCallback(async () => {
+  const loadPermissions = useCallback(async (targetPage: number) => {
     setIsLoading(true)
 
     try {
-      setPermissions(await getPermissions(appliedFilters))
+      setResult(await getPermissions({
+        ...appliedFilters,
+        pageNumber: targetPage,
+        pageSize,
+      }))
     } catch (error) {
       notifyError(error, t('shared.errors.generic'))
     } finally {
       setIsLoading(false)
     }
-  }, [appliedFilters, notifyError, t])
+  }, [appliedFilters, notifyError, pageSize, t])
 
   useEffect(() => {
-    void loadPermissions()
-  }, [loadPermissions])
+    void loadPermissions(pageNumber)
+  }, [loadPermissions, pageNumber])
 
   function handleReset() {
-    filterForm.reset()
+    reset(EMPTY_PERMISSION_SEARCH)
     setAppliedFilters(EMPTY_PERMISSION_SEARCH)
+    setPageNumber(DEFAULT_PAGINATION.pageNumber)
+  }
+
+  function handleSearch(value: PermissionSearchForm) {
+    setPageNumber(DEFAULT_PAGINATION.pageNumber)
+    setAppliedFilters({ ...value })
+  }
+
+  function handlePageSizeChange(nextPageSize: number) {
+    setPageSize(nextPageSize)
+    setPageNumber(DEFAULT_PAGINATION.pageNumber)
   }
 
   async function handleSaved() {
-    await loadPermissions()
+    await loadPermissions(pageNumber)
   }
+
+  const totalPages = result?.totalPages ?? DEFAULT_PAGINATION.pageNumber
 
   return (
     <main className="page">
       <div className="page-header">
         <h1 className="page-title">{t('features.iam.permissions.pages.list')}</h1>
       </div>
-      <FilterToolbar onReset={handleReset} onSubmit={(event) => {
-        event.preventDefault()
-        void filterForm.handleSubmit()
-      }}>
-        <filterForm.Field name="module">
-          {(field) => (
+      <FilterToolbar onReset={handleReset} onSubmit={handleSubmit(handleSearch)}>
+        <Controller
+          control={control}
+          name="module"
+          render={({ field }) => (
             <Field>
               <FieldLabel>{t('shared.fields.module')}</FieldLabel>
               <Select
-                onValueChange={field.handleChange}
+                onValueChange={field.onChange}
                 options={[{ label: t('shared.filters.all'), value: PERMISSION_FILTER_VALUES.all }, ...toTranslatedOptions(PERMISSION_MODULE_OPTIONS, t)]}
-                value={field.state.value}
+                value={field.value}
               />
             </Field>
           )}
-        </filterForm.Field>
-        <filterForm.Field name="resource">
-          {(field) => (
+        />
+        <Controller
+          control={control}
+          name="resource"
+          render={({ field }) => (
             <Field>
               <FieldLabel>{t('shared.fields.resource')}</FieldLabel>
               <Select
-                onValueChange={field.handleChange}
+                onValueChange={field.onChange}
                 options={[{ label: t('shared.filters.all'), value: PERMISSION_FILTER_VALUES.all }, ...toTranslatedOptions(PERMISSION_RESOURCE_OPTIONS, t)]}
-                value={field.state.value}
+                value={field.value}
               />
             </Field>
           )}
-        </filterForm.Field>
-        <filterForm.Field name="action">
-          {(field) => (
-            <Field>
-              <FieldLabel htmlFor={field.name}>{t('shared.fields.action')}</FieldLabel>
-              <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} value={field.state.value} />
-            </Field>
-          )}
-        </filterForm.Field>
-        <filterForm.Field name="title">
-          {(field) => (
-            <Field>
-              <FieldLabel htmlFor={field.name}>{t('shared.fields.title')}</FieldLabel>
-              <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} value={field.state.value} />
-            </Field>
-          )}
-        </filterForm.Field>
+        />
+        <Field>
+          <FieldLabel htmlFor="action">{t('shared.fields.action')}</FieldLabel>
+          <Input id="action" {...register('action')} />
+        </Field>
+        <Field>
+          <FieldLabel htmlFor="title">{t('shared.fields.title')}</FieldLabel>
+          <Input id="title" {...register('title')} />
+        </Field>
       </FilterToolbar>
       <DataTable
         columns={columns}
-        data={permissions}
+        data={result?.items ?? []}
         emptyText={t('features.iam.permissions.messages.empty')}
         isLoading={isLoading}
         loadingText={t('shared.common.loading')}
         onSortingChange={setSorting}
         sorting={sorting}
+      />
+      <DataTablePagination
+        onPageChange={setPageNumber}
+        onPageSizeChange={handlePageSizeChange}
+        pageNumber={result?.pageNumber ?? pageNumber}
+        pageSize={pageSize}
+        totalCount={result?.totalCount ?? 0}
+        totalPages={totalPages}
       />
       {selectedPermission !== null && (
         <PermissionEditDialog

@@ -10,6 +10,7 @@ using IAM.Domain.QueryRepositories;
 using Myce.Response;
 using NSubstitute;
 using Shared.Application.Contracts;
+using Shared.Domain.DTOs.Responses;
 using Shared.Domain.Enums;
 using Shared.Domain.Messages;
 
@@ -193,13 +194,20 @@ public class PermissionServiceTests
          CreatePermissionDto("update")
       };
 
-      _permissionQueryRepositoryMock.GetByParams(request, Arg.Any<CancellationToken>()).Returns(permissions);
+      var pagedResult = new PagedResultDto<PermissionDto>(
+         Items: permissions,
+         PageNumber: 1,
+         PageSize: 10,
+         TotalCount: 2,
+         TotalPages: 1
+      );
+
+      _permissionQueryRepositoryMock.GetByParams(request, Arg.Any<CancellationToken>()).Returns(pagedResult);
 
       var result = await _permissionService.GetByParams(request);
 
-      Assert.True(result.IsSuccess);
-      Assert.NotNull(result.Data);
-      Assert.Equal(2, result.Data.Count());
+      Assert.Equal(1, result.TotalPages);
+      Assert.Equal(2, result.TotalCount);
    }
 
    #endregion

@@ -296,11 +296,6 @@ public sealed class AuthenticatedCoreApiClient
          query.Add($"Title={Uri.EscapeDataString(request.Title)}");
       }
 
-      if (!string.IsNullOrWhiteSpace(request.Description))
-      {
-         query.Add($"Description={Uri.EscapeDataString(request.Description)}");
-      }
-
       var uri = "/api/v1/iam/parameters";
       if (query.Count > 0)
       {

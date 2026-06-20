@@ -1,6 +1,6 @@
-import { useForm } from '@tanstack/react-form'
 import type { SortingState } from '@tanstack/react-table'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Controller, useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 
 import { useTranslate, type Translate } from '../../../app/i18n/i18n'
@@ -55,12 +55,8 @@ export function ParameterListPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [sorting, setSorting] = useState<SortingState>([])
   const canUpdate = hasPermissionCode(permissions, IAM_PERMISSIONS.parameters.write)
-  const filterForm = useForm({
+  const { control, handleSubmit, register, reset } = useForm<ParameterSearchForm>({
     defaultValues: EMPTY_PARAMETER_SEARCH,
-    onSubmit: ({ value }) => {
-      setPageNumber(DEFAULT_PAGINATION.pageNumber)
-      setAppliedFilters({ ...value })
-    },
   })
   const columns = useMemo(() => createParameterTableColumns({
     canUpdate,
@@ -92,9 +88,14 @@ export function ParameterListPage() {
   }, [loadParameters, pageNumber])
 
   function handleReset() {
-    filterForm.reset()
+    reset(EMPTY_PARAMETER_SEARCH)
     setAppliedFilters(EMPTY_PARAMETER_SEARCH)
     setPageNumber(DEFAULT_PAGINATION.pageNumber)
+  }
+
+  function handleSearch(value: ParameterSearchForm) {
+    setPageNumber(DEFAULT_PAGINATION.pageNumber)
+    setAppliedFilters({ ...value })
   }
 
   function handlePageSizeChange(nextPageSize: number) {
@@ -109,46 +110,33 @@ export function ParameterListPage() {
       <div className="page-header">
         <h1 className="page-title">{t('features.iam.parameters.pages.list')}</h1>
       </div>
-      <FilterToolbar onReset={handleReset} onSubmit={(event) => {
-        event.preventDefault()
-        void filterForm.handleSubmit()
-      }}>
-        <filterForm.Field name="module">
-          {(field) => (
+      <FilterToolbar onReset={handleReset} onSubmit={handleSubmit(handleSearch)}>
+        <Controller
+          control={control}
+          name="module"
+          render={({ field }) => (
             <Field>
               <FieldLabel>{t('shared.fields.module')}</FieldLabel>
               <Select
-                onValueChange={field.handleChange}
+                onValueChange={field.onChange}
                 options={[{ label: t('shared.filters.all'), value: PARAMETER_FILTER_VALUES.all }, ...toTranslatedOptions(PARAMETER_MODULE_OPTIONS, t)]}
-                value={field.state.value}
+                value={field.value}
               />
             </Field>
           )}
-        </filterForm.Field>
-        <filterForm.Field name="group">
-          {(field) => (
-            <Field>
-              <FieldLabel htmlFor={field.name}>{t('shared.fields.group')}</FieldLabel>
-              <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} value={field.state.value} />
-            </Field>
-          )}
-        </filterForm.Field>
-        <filterForm.Field name="name">
-          {(field) => (
-            <Field>
-              <FieldLabel htmlFor={field.name}>{t('shared.fields.name')}</FieldLabel>
-              <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} value={field.state.value} />
-            </Field>
-          )}
-        </filterForm.Field>
-        <filterForm.Field name="title">
-          {(field) => (
-            <Field>
-              <FieldLabel htmlFor={field.name}>{t('shared.fields.title')}</FieldLabel>
-              <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} value={field.state.value} />
-            </Field>
-          )}
-        </filterForm.Field>
+        />
+        <Field>
+          <FieldLabel htmlFor="group">{t('shared.fields.group')}</FieldLabel>
+          <Input id="group" {...register('group')} />
+        </Field>
+        <Field>
+          <FieldLabel htmlFor="name">{t('shared.fields.name')}</FieldLabel>
+          <Input id="name" {...register('name')} />
+        </Field>
+        <Field>
+          <FieldLabel htmlFor="title">{t('shared.fields.title')}</FieldLabel>
+          <Input id="title" {...register('title')} />
+        </Field>
       </FilterToolbar>
       <DataTable
         columns={columns}

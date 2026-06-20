@@ -1,6 +1,6 @@
-import { useForm } from '@tanstack/react-form'
 import type { SortingState } from '@tanstack/react-table'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Controller, useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 
 import { useTranslate, type Translate } from '../../../app/i18n/i18n'
@@ -72,12 +72,8 @@ export function AuditLogListPage() {
   const [result, setResult] = useState<PagedResultDto<AuditLogLiteDto> | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [sorting, setSorting] = useState<SortingState>([])
-  const filterForm = useForm({
+  const { control, handleSubmit, register, reset } = useForm<AuditLogSearchForm>({
     defaultValues: appliedFilters,
-    onSubmit: ({ value }) => {
-      setPageNumber(DEFAULT_PAGINATION.pageNumber)
-      setAppliedFilters({ ...value })
-    },
   })
   const columns = useMemo(() => createAuditLogTableColumns({
     onView: (auditLog) => navigate(APP_ROUTES.auditLogView(auditLog.id)),
@@ -108,9 +104,14 @@ export function AuditLogListPage() {
   function handleReset() {
     const emptySearch = getDefaultAuditLogSearch()
 
-    filterForm.reset(emptySearch)
+    reset(emptySearch)
     setAppliedFilters(emptySearch)
     setPageNumber(DEFAULT_PAGINATION.pageNumber)
+  }
+
+  function handleSearch(value: AuditLogSearchForm) {
+    setPageNumber(DEFAULT_PAGINATION.pageNumber)
+    setAppliedFilters({ ...value })
   }
 
   function handlePageSizeChange(nextPageSize: number) {
@@ -125,79 +126,66 @@ export function AuditLogListPage() {
       <div className="page-header">
         <h1 className="page-title">{t('features.sentinel.auditLogs.pages.list')}</h1>
       </div>
-      <FilterToolbar onReset={handleReset} onSubmit={(event) => {
-        event.preventDefault()
-        void filterForm.handleSubmit()
-      }}>
-        <filterForm.Field name="module">
-          {(field) => (
+      <FilterToolbar onReset={handleReset} onSubmit={handleSubmit(handleSearch)}>
+        <Controller
+          control={control}
+          name="module"
+          render={({ field }) => (
             <Field>
               <FieldLabel>{t('shared.fields.module')}</FieldLabel>
               <Select
-                onValueChange={field.handleChange}
+                onValueChange={field.onChange}
                 options={[{ label: t('shared.filters.all'), value: AUDIT_LOG_FILTER_VALUES.all }, ...toTranslatedOptions(AUDIT_LOG_MODULE_OPTIONS, t)]}
-                value={field.state.value}
+                value={field.value}
               />
             </Field>
           )}
-        </filterForm.Field>
-        <filterForm.Field name="feature">
-          {(field) => (
+        />
+        <Controller
+          control={control}
+          name="feature"
+          render={({ field }) => (
             <Field>
               <FieldLabel>{t('shared.fields.feature')}</FieldLabel>
               <Select
-                onValueChange={field.handleChange}
+                onValueChange={field.onChange}
                 options={[{ label: t('shared.filters.all'), value: AUDIT_LOG_FILTER_VALUES.all }, ...toTranslatedOptions(AUDIT_LOG_FEATURE_OPTIONS, t)]}
-                value={field.state.value}
+                value={field.value}
               />
             </Field>
           )}
-        </filterForm.Field>
-        <filterForm.Field name="action">
-          {(field) => (
-            <Field>
-              <FieldLabel htmlFor={field.name}>{t('shared.fields.action')}</FieldLabel>
-              <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} value={field.state.value} />
-            </Field>
-          )}
-        </filterForm.Field>
-        <filterForm.Field name="userId">
-          {(field) => (
+        />
+        <Field>
+          <FieldLabel htmlFor="action">{t('shared.fields.action')}</FieldLabel>
+          <Input id="action" {...register('action')} />
+        </Field>
+        <Controller
+          control={control}
+          name="userId"
+          render={({ field }) => (
             <Field>
               <FieldLabel>{t('shared.fields.user')}</FieldLabel>
               <UserSelect
                 clearable
                 includeInactive
-                onValueChange={field.handleChange}
-                value={field.state.value}
+                onValueChange={field.onChange}
+                value={field.value}
               />
             </Field>
           )}
-        </filterForm.Field>
-        <filterForm.Field name="targetId">
-          {(field) => (
-            <Field>
-              <FieldLabel htmlFor={field.name}>{t('shared.fields.targetId')}</FieldLabel>
-              <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} value={field.state.value} />
-            </Field>
-          )}
-        </filterForm.Field>
-        <filterForm.Field name="from">
-          {(field) => (
-            <Field>
-              <FieldLabel htmlFor={field.name}>{t('shared.fields.from')}</FieldLabel>
-              <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required type="datetime-local" value={field.state.value} />
-            </Field>
-          )}
-        </filterForm.Field>
-        <filterForm.Field name="to">
-          {(field) => (
-            <Field>
-              <FieldLabel htmlFor={field.name}>{t('shared.fields.to')}</FieldLabel>
-              <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required type="datetime-local" value={field.state.value} />
-            </Field>
-          )}
-        </filterForm.Field>
+        />
+        <Field>
+          <FieldLabel htmlFor="targetId">{t('shared.fields.targetId')}</FieldLabel>
+          <Input id="targetId" {...register('targetId')} />
+        </Field>
+        <Field>
+          <FieldLabel htmlFor="from">{t('shared.fields.from')}</FieldLabel>
+          <Input id="from" required type="datetime-local" {...register('from')} />
+        </Field>
+        <Field>
+          <FieldLabel htmlFor="to">{t('shared.fields.to')}</FieldLabel>
+          <Input id="to" required type="datetime-local" {...register('to')} />
+        </Field>
       </FilterToolbar>
       <DataTable
         columns={columns}

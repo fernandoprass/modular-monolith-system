@@ -215,20 +215,25 @@ const EMPTY_USER_SEARCH = {
 
 Use applied filter state for loading data.
 
-Do not load from `filterForm.state.values` inside loader callbacks.
+Do not load from current form values inside loader callbacks.
 
 Good:
 
-```ts
+```tsx
 const [appliedFilters, setAppliedFilters] = useState(EMPTY_USER_SEARCH)
 
-const filterForm = useForm({
+const { handleSubmit, register, reset } = useForm<UserSearchForm>({
   defaultValues: EMPTY_USER_SEARCH,
-  onSubmit: ({ value }) => {
-    setPageNumber(DEFAULT_PAGINATION.pageNumber)
-    setAppliedFilters({ ...value })
-  },
 })
+
+function handleSearch(value: UserSearchForm) {
+  setPageNumber(DEFAULT_PAGINATION.pageNumber)
+  setAppliedFilters({ ...value })
+}
+
+<FilterToolbar onReset={handleReset} onSubmit={handleSubmit(handleSearch)}>
+  <Input id="name" {...register('name')} />
+</FilterToolbar>
 ```
 
 Reset should reset both the form and applied filters.
@@ -258,8 +263,6 @@ Prefer depending on `organizationId` instead of `user?.organizationId` in callba
 ## Form Rules
 
 Use React Hook Form plus Zod for create, edit, profile, and modal forms.
-
-Use TanStack Form only in legacy pages that have not been migrated yet.
 
 Use `Controller` for controlled shadcn/Radix/custom inputs:
 - `Select`

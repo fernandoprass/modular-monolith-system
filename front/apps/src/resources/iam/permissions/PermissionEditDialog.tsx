@@ -1,5 +1,7 @@
-import { useForm } from '@tanstack/react-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect, useState } from 'react'
+import { Controller, useForm } from 'react-hook-form'
+import { z } from 'zod'
 
 import { useToast } from '../../../app/ToastProvider'
 import { useTranslate } from '../../../app/i18n/i18n'
@@ -27,6 +29,15 @@ type PermissionEditDialogProps = {
   permission: PermissionDto
 }
 
+const permissionEditSchema = z.object({
+  action: z.string().trim().min(1),
+  description: z.string().trim().min(1),
+  isActive: z.boolean(),
+  module: z.string().trim().min(1),
+  resource: z.string().trim().min(1),
+  title: z.string().trim().min(1),
+})
+
 export function PermissionEditDialog({
   isOpen,
   onClose,
@@ -37,29 +48,36 @@ export function PermissionEditDialog({
   const notifyError = useNotifyError()
   const { showSuccess } = useToast()
   const [isSaving, setIsSaving] = useState(false)
-  const form = useForm({
+  const {
+    control,
+    handleSubmit,
+    register,
+    reset,
+  } = useForm<PermissionUpdateForm>({
     defaultValues: toForm(permission),
-    onSubmit: async ({ value }) => {
-      setIsSaving(true)
-
-      try {
-        await updatePermission(permission.id, value)
-        showSuccess(t('features.iam.permissions.notifications.updated'))
-        await onSaved()
-        onClose()
-      } catch (error) {
-        notifyError(error, t('shared.errors.generic'))
-      } finally {
-        setIsSaving(false)
-      }
-    },
+    resolver: zodResolver(permissionEditSchema),
   })
 
   useEffect(() => {
     if (isOpen) {
-      form.reset(toForm(permission))
+      reset(toForm(permission))
     }
-  }, [form, isOpen, permission])
+  }, [isOpen, permission, reset])
+
+  async function handleSave(value: PermissionUpdateForm) {
+    setIsSaving(true)
+
+    try {
+      await updatePermission(permission.id, value)
+      showSuccess(t('features.iam.permissions.notifications.updated'))
+      await onSaved()
+      onClose()
+    } catch (error) {
+      notifyError(error, t('shared.errors.generic'))
+    } finally {
+      setIsSaving(false)
+    }
+  }
 
   return (
     <Dialog
@@ -68,69 +86,60 @@ export function PermissionEditDialog({
       open={isOpen}
       title={t('shared.actions.edit')}
     >
-      <form onSubmit={(event) => {
-        event.preventDefault()
-        void form.handleSubmit()
-      }}>
+      <form onSubmit={handleSubmit(handleSave)}>
         <div className="dialog-body">
           <FieldGroup>
-            <form.Field name="module">
-              {(field) => (
+            <Controller
+              control={control}
+              name="module"
+              render={({ field }) => (
                 <Field>
                   <FieldLabel>{t('shared.fields.module')}</FieldLabel>
                   <Select
-                    onValueChange={field.handleChange}
+                    onValueChange={field.onChange}
                     options={toTranslatedOptions(PERMISSION_MODULE_OPTIONS, t)}
-                    value={field.state.value}
+                    value={field.value}
                   />
                 </Field>
               )}
-            </form.Field>
-            <form.Field name="resource">
-              {(field) => (
+            />
+            <Controller
+              control={control}
+              name="resource"
+              render={({ field }) => (
                 <Field>
                   <FieldLabel>{t('shared.fields.resource')}</FieldLabel>
                   <Select
-                    onValueChange={field.handleChange}
+                    onValueChange={field.onChange}
                     options={toTranslatedOptions(PERMISSION_RESOURCE_OPTIONS, t)}
-                    value={field.state.value}
+                    value={field.value}
                   />
                 </Field>
               )}
-            </form.Field>
-            <form.Field name="action">
-              {(field) => (
-                <Field>
-                  <FieldLabel>{t('shared.fields.action')}</FieldLabel>
-                  <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required value={field.state.value} />
-                </Field>
-              )}
-            </form.Field>
-            <form.Field name="title">
-              {(field) => (
-                <Field>
-                  <FieldLabel htmlFor={field.name}>{t('shared.fields.title')}</FieldLabel>
-                  <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required value={field.state.value} />
-                </Field>
-              )}
-            </form.Field>
-            <form.Field name="description">
-              {(field) => (
-                <Field>
-                  <FieldLabel htmlFor={field.name}>{t('shared.fields.description')}</FieldLabel>
-                  <Textarea id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required value={field.state.value} />
-                </Field>
-              )}
-            </form.Field>
-            <form.Field name="isActive">
-              {(field) => (
+            />
+            <Field>
+              <FieldLabel htmlFor="action">{t('shared.fields.action')}</FieldLabel>
+              <Input id="action" required {...register('action')} />
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="title">{t('shared.fields.title')}</FieldLabel>
+              <Input id="title" required {...register('title')} />
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="description">{t('shared.fields.description')}</FieldLabel>
+              <Textarea id="description" required {...register('description')} />
+            </Field>
+            <Controller
+              control={control}
+              name="isActive"
+              render={({ field }) => (
                 <Checkbox
-                  checked={field.state.value}
+                  checked={field.value}
                   label={t('shared.fields.isActive')}
-                  onCheckedChange={(checked) => field.handleChange(checked === true)}
+                  onCheckedChange={field.onChange}
                 />
               )}
-            </form.Field>
+            />
           </FieldGroup>
         </div>
         <div className="dialog-actions">

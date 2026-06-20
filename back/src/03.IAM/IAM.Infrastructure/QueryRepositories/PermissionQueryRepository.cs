@@ -59,6 +59,8 @@ public class PermissionQueryRepository(IamDbContext dbContext, IUserContext user
          .OrderBy(p => p.Module)
          .ThenBy(p => p.Resource)
          .ThenBy(p => p.Action)
+         .Skip((pageNumber - 1) * pageSize)
+         .Take(pageSize)
          .Select(p => p.ToPermissionDto())
          .ToListAsync(cancellationToken);
 

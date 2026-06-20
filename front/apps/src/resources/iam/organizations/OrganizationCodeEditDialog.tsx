@@ -1,5 +1,7 @@
-import { useForm } from '@tanstack/react-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect, useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
 
 import { useToast } from '../../../app/ToastProvider'
 import { useTranslate } from '../../../app/i18n/i18n'
@@ -18,6 +20,14 @@ type OrganizationCodeEditDialogProps = {
   organization: OrganizationDto
 }
 
+type OrganizationCodeForm = {
+  code: string
+}
+
+const organizationCodeSchema = z.object({
+  code: z.string().trim().min(1),
+})
+
 export function OrganizationCodeEditDialog({
   isOpen,
   onClose,
@@ -28,33 +38,39 @@ export function OrganizationCodeEditDialog({
   const notifyError = useNotifyError()
   const { showSuccess } = useToast()
   const [isSaving, setIsSaving] = useState(false)
-  const form = useForm({
+  const {
+    handleSubmit,
+    register,
+    reset,
+  } = useForm<OrganizationCodeForm>({
     defaultValues: {
       code: organization.code,
     },
-    onSubmit: async ({ value }) => {
-      setIsSaving(true)
-
-      try {
-        await updateOrganizationCode(organization.id, {
-          [ORGANIZATION_REQUEST_FIELDS.code]: value.code,
-        })
-        showSuccess(t('features.iam.organizations.notifications.codeUpdated'))
-        await onSaved()
-        onClose()
-      } catch (error) {
-        notifyError(error, t('shared.errors.generic'))
-      } finally {
-        setIsSaving(false)
-      }
-    },
+    resolver: zodResolver(organizationCodeSchema),
   })
 
   useEffect(() => {
     if (isOpen) {
-      form.reset({ code: organization.code })
+      reset({ code: organization.code })
     }
-  }, [form, isOpen, organization.code])
+  }, [isOpen, organization.code, reset])
+
+  async function handleSave(value: OrganizationCodeForm) {
+    setIsSaving(true)
+
+    try {
+      await updateOrganizationCode(organization.id, {
+        [ORGANIZATION_REQUEST_FIELDS.code]: value.code,
+      })
+      showSuccess(t('features.iam.organizations.notifications.codeUpdated'))
+      await onSaved()
+      onClose()
+    } catch (error) {
+      notifyError(error, t('shared.errors.generic'))
+    } finally {
+      setIsSaving(false)
+    }
+  }
 
   return (
     <Dialog
@@ -63,20 +79,13 @@ export function OrganizationCodeEditDialog({
       open={isOpen}
       title={t('shared.actions.editCode')}
     >
-      <form onSubmit={(event) => {
-        event.preventDefault()
-        void form.handleSubmit()
-      }}>
+      <form onSubmit={handleSubmit(handleSave)}>
         <div className="dialog-body">
           <FieldGroup>
-            <form.Field name="code">
-              {(field) => (
-                <Field>
-                  <FieldLabel htmlFor={field.name}>{t('shared.fields.code')}</FieldLabel>
-                  <Input autoFocus id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required value={field.state.value} />
-                </Field>
-              )}
-            </form.Field>
+            <Field>
+              <FieldLabel htmlFor="code">{t('shared.fields.code')}</FieldLabel>
+              <Input autoFocus id="code" required {...register('code')} />
+            </Field>
           </FieldGroup>
         </div>
         <div className="dialog-actions">

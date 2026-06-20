@@ -1,6 +1,6 @@
-import { useForm } from '@tanstack/react-form'
 import type { SortingState } from '@tanstack/react-table'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Controller, useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 
 import { useToast } from '../../../app/ToastProvider'
@@ -55,6 +55,9 @@ export function OrganizationListPage() {
   const canView = hasPermissionCode(permissions, IAM_PERMISSIONS.organizations.read)
   const canUpdate = hasPermissionCode(permissions, IAM_PERMISSIONS.organizations.write)
   const canDelete = hasPermissionCode(permissions, IAM_PERMISSIONS.organizations.write)
+  const { control, handleSubmit, register, reset } = useForm<OrganizationSearchForm>({
+    defaultValues: EMPTY_ORGANIZATION_SEARCH,
+  })
   const columns = useMemo(() => createOrganizationTableColumns({
     canDelete,
     canUpdate,
@@ -63,13 +66,6 @@ export function OrganizationListPage() {
     setDeleteTarget,
     t,
   }), [canDelete, canUpdate, canView, navigate, t])
-  const filterForm = useForm({
-    defaultValues: EMPTY_ORGANIZATION_SEARCH,
-    onSubmit: ({ value }) => {
-      setPageNumber(DEFAULT_PAGINATION.pageNumber)
-      setAppliedFilters({ ...value })
-    },
-  })
   const loadOrganizations = useCallback(async (targetPage: number) => {
     setIsLoading(true)
 
@@ -94,9 +90,14 @@ export function OrganizationListPage() {
   }, [loadOrganizations, pageNumber])
 
   function handleReset() {
-    filterForm.reset()
+    reset(EMPTY_ORGANIZATION_SEARCH)
     setAppliedFilters(EMPTY_ORGANIZATION_SEARCH)
     setPageNumber(DEFAULT_PAGINATION.pageNumber)
+  }
+
+  function handleSearch(value: OrganizationSearchForm) {
+    setPageNumber(DEFAULT_PAGINATION.pageNumber)
+    setAppliedFilters({ ...value })
   }
 
   function handlePageSizeChange(nextPageSize: number) {
@@ -126,54 +127,47 @@ export function OrganizationListPage() {
       <div className="page-header">
         <h1 className="page-title">{t('features.iam.organizations.pages.list')}</h1>
       </div>
-      <FilterToolbar onReset={handleReset} onSubmit={(event) => {
-        event.preventDefault()
-        void filterForm.handleSubmit()
-      }}>
-        <filterForm.Field name="type">
-          {(field) => (
+      <FilterToolbar onReset={handleReset} onSubmit={handleSubmit(handleSearch)}>
+        <Controller
+          control={control}
+          name="type"
+          render={({ field }) => (
             <Field>
               <FieldLabel>{t('shared.fields.type')}</FieldLabel>
               <Select
-                onValueChange={field.handleChange}
+                onValueChange={field.onChange}
                 options={[{ label: t('shared.filters.all'), value: ORGANIZATION_FILTER_VALUES.all }, ...toTranslatedOptions(ORGANIZATION_TYPE_OPTIONS, t)]}
-                value={field.state.value}
+                value={field.value}
               />
             </Field>
           )}
-        </filterForm.Field>
-        <filterForm.Field name="code">
-          {(field) => (
-            <Field>
-              <FieldLabel htmlFor={field.name}>{t('shared.fields.code')}</FieldLabel>
-              <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} value={field.state.value} />
-            </Field>
-          )}
-        </filterForm.Field>
-        <filterForm.Field name="name">
-          {(field) => (
-            <Field>
-              <FieldLabel htmlFor={field.name}>{t('shared.fields.name')}</FieldLabel>
-              <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} value={field.state.value} />
-            </Field>
-          )}
-        </filterForm.Field>
-        <filterForm.Field name="isActive">
-          {(field) => (
+        />
+        <Field>
+          <FieldLabel htmlFor="code">{t('shared.fields.code')}</FieldLabel>
+          <Input id="code" {...register('code')} />
+        </Field>
+        <Field>
+          <FieldLabel htmlFor="name">{t('shared.fields.name')}</FieldLabel>
+          <Input id="name" {...register('name')} />
+        </Field>
+        <Controller
+          control={control}
+          name="isActive"
+          render={({ field }) => (
             <Field>
               <FieldLabel>{t('shared.fields.isActive')}</FieldLabel>
               <Select
-                onValueChange={field.handleChange}
+                onValueChange={field.onChange}
                 options={[
                   { label: t('shared.filters.all'), value: ORGANIZATION_FILTER_VALUES.all },
                   { label: t('shared.status.active'), value: 'true' },
                   { label: t('shared.status.inactive'), value: 'false' },
                 ]}
-                value={field.state.value}
+                value={field.value}
               />
             </Field>
           )}
-        </filterForm.Field>
+        />
       </FilterToolbar>
 
       <DataTable

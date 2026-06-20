@@ -1,8 +1,10 @@
-import { useForm } from '@tanstack/react-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import type { ColumnDef, RowSelectionState, SortingState } from '@tanstack/react-table'
 import { ArrowLeft, Minus, Plus } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Controller, useForm } from 'react-hook-form'
 import { useNavigate, useParams } from 'react-router-dom'
+import { z } from 'zod'
 
 import { useToast } from '../../../app/ToastProvider'
 import { useTranslate } from '../../../app/i18n/i18n'
@@ -38,6 +40,14 @@ const EMPTY_ROLE_FORM: RoleForm = {
   name: '',
   organizationId: '',
 }
+
+const roleEditSchema = z.object({
+  description: z.string().trim().min(1),
+  isActive: z.boolean(),
+  isDefault: z.boolean(),
+  name: z.string().trim().min(1),
+  organizationId: z.string(),
+})
 
 type RoleEditFormProps = {
   isCreate: boolean
@@ -361,83 +371,84 @@ function RoleEditForm({
   const notifyError = useNotifyError()
   const { showSuccess } = useToast()
   const [isSaving, setIsSaving] = useState(false)
-  const form = useForm({
+  const {
+    control,
+    handleSubmit,
+    register,
+  } = useForm<RoleForm>({
     defaultValues: role === null ? EMPTY_ROLE_FORM : toForm(role),
-    onSubmit: async ({ value }) => {
-      setIsSaving(true)
-
-      try {
-        if (isCreate) {
-          const created = await createRole(value)
-          showSuccess(t('features.iam.roles.notifications.created'))
-          onCreated(created)
-        } else if (role !== null) {
-          await updateRole(role.id, value)
-          showSuccess(t('features.iam.roles.notifications.updated'))
-          await onSaved()
-        }
-      } catch (error) {
-        notifyError(error, t('shared.errors.generic'))
-      } finally {
-        setIsSaving(false)
-      }
-    },
+    resolver: zodResolver(roleEditSchema),
   })
 
+  async function handleSave(value: RoleForm) {
+    setIsSaving(true)
+
+    try {
+      if (isCreate) {
+        const created = await createRole(value)
+        showSuccess(t('features.iam.roles.notifications.created'))
+        onCreated(created)
+      } else if (role !== null) {
+        await updateRole(role.id, value)
+        showSuccess(t('features.iam.roles.notifications.updated'))
+        await onSaved()
+      }
+    } catch (error) {
+      notifyError(error, t('shared.errors.generic'))
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
   return (
-    <form className="edit-form" onSubmit={(event) => {
-      event.preventDefault()
-      void form.handleSubmit()
-    }}>
+    <form className="edit-form" onSubmit={handleSubmit(handleSave)}>
       <FieldGroup>
-        <form.Field name="organizationId">
-          {(field) => (
+        <Controller
+          control={control}
+          name="organizationId"
+          render={({ field }) => (
             <Field data-disabled={!isCreate}>
               <FieldLabel>{t('shared.fields.organization')}</FieldLabel>
               <OrganizationSelect
                 clearable
                 disabled={!isCreate}
                 includeInactive
-                onValueChange={field.handleChange}
-                value={field.state.value}
+                onValueChange={field.onChange}
+                value={field.value}
               />
             </Field>
           )}
-        </form.Field>
-        <form.Field name="name">
-          {(field) => (
-            <Field>
-              <FieldLabel htmlFor={field.name}>{t('shared.fields.name')}</FieldLabel>
-              <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required value={field.state.value} />
-            </Field>
-          )}
-        </form.Field>
-        <form.Field name="description">
-          {(field) => (
-            <Field>
-              <FieldLabel htmlFor={field.name}>{t('shared.fields.description')}</FieldLabel>
-              <Textarea id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required value={field.state.value} />
-            </Field>
-          )}
-        </form.Field>
-        <form.Field name="isActive">
-          {(field) => (
+        />
+        <Field>
+          <FieldLabel htmlFor="name">{t('shared.fields.name')}</FieldLabel>
+          <Input id="name" required {...register('name')} />
+        </Field>
+        <Field>
+          <FieldLabel htmlFor="description">{t('shared.fields.description')}</FieldLabel>
+          <Textarea id="description" required {...register('description')} />
+        </Field>
+        <Controller
+          control={control}
+          name="isActive"
+          render={({ field }) => (
             <Checkbox
-              checked={field.state.value}
+              checked={field.value}
               label={t('shared.fields.isActive')}
-              onCheckedChange={(checked) => field.handleChange(checked === true)}
+              onCheckedChange={field.onChange}
             />
           )}
-        </form.Field>
-        <form.Field name="isDefault">
-          {(field) => (
+        />
+        <Controller
+          control={control}
+          name="isDefault"
+          render={({ field }) => (
             <Checkbox
-              checked={field.state.value}
+              checked={field.value}
               label={t('shared.fields.isDefault')}
-              onCheckedChange={(checked) => field.handleChange(checked === true)}
+              onCheckedChange={field.onChange}
             />
           )}
-        </form.Field>
+        />
       </FieldGroup>
       <div className="form-actions">
         <Button disabled={isSaving} type="submit">

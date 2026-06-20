@@ -1,5 +1,7 @@
-import { useForm } from '@tanstack/react-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useCallback, useEffect, useState } from 'react'
+import { Controller, useForm } from 'react-hook-form'
+import { z } from 'zod'
 
 import { useToast } from '../../../app/ToastProvider'
 import { useTranslate } from '../../../app/i18n/i18n'
@@ -10,22 +12,23 @@ import { Field, FieldGroup, FieldLabel } from '../../../components/ui/form'
 import { Input } from '../../../components/ui/input'
 import { Select } from '../../../components/ui/select'
 import { IAM_PERMISSIONS } from '../../../shared/iamConstants'
-import { LANGUAGE_CODES } from '../../../shared/languages'
+import { LANGUAGE_OPTIONS } from '../../../shared/languages'
 import { hasPermissionCode } from '../../../shared/permissions'
 import { OrganizationSelect } from '../organizations/OrganizationSelect'
 import { getCurrentUser, updateCurrentUser } from './userApi'
 import { UserAccessTabs } from './UserAccessTabs'
 import { USER_REQUEST_FIELDS, type UserDto } from './userTypes'
+import { toTranslatedOptions } from './userUi'
 
 type UserProfileForm = {
   language: string
   name: string
 }
 
-const EMPTY_USER_PROFILE_FORM: UserProfileForm = {
-  language: LANGUAGE_CODES.english,
-  name: '',
-}
+const userProfileSchema = z.object({
+  language: z.string().trim().min(1),
+  name: z.string().trim().min(1),
+})
 
 function toForm(user: UserDto): UserProfileForm {
   return {
@@ -37,35 +40,9 @@ function toForm(user: UserDto): UserProfileForm {
 export function UserProfilePage() {
   const t = useTranslate()
   const notifyError = useNotifyError()
-  const { showSuccess } = useToast()
   const { permissions } = useAuth()
   const [user, setUser] = useState<UserDto | null>(null)
-  const [isSaving, setIsSaving] = useState(false)
   const canViewAccess = hasPermissionCode(permissions, IAM_PERMISSIONS.userProfile.viewAccess)
-  const form = useForm({
-    defaultValues: EMPTY_USER_PROFILE_FORM,
-    onSubmit: async ({ value }) => {
-      if (user === null) {
-        return
-      }
-
-      setIsSaving(true)
-
-      try {
-        await updateCurrentUser({
-          [USER_REQUEST_FIELDS.name]: value.name,
-          [USER_REQUEST_FIELDS.isActive]: user.isActive,
-          [USER_REQUEST_FIELDS.language]: value.language,
-        })
-        showSuccess(t('features.iam.users.notifications.profileUpdated'))
-        await loadUser()
-      } catch (error) {
-        notifyError(error, t('shared.errors.generic'))
-      } finally {
-        setIsSaving(false)
-      }
-    },
-  })
 
   const loadUser = useCallback(async () => {
     try {
@@ -80,14 +57,6 @@ export function UserProfilePage() {
     void loadUser()
   }, [loadUser])
 
-  useEffect(() => {
-    if (user === null) {
-      return
-    }
-
-    form.reset(toForm(user))
-  }, [form, user])
-
   return (
     <main className="page">
       <div className="page-header">
@@ -98,57 +67,90 @@ export function UserProfilePage() {
           {user === null ? (
             <p className="page-subtitle">{t('shared.common.loading')}</p>
           ) : (
-            <form className="edit-form" onSubmit={(event) => {
-              event.preventDefault()
-              void form.handleSubmit()
-            }}>
-              <FieldGroup>
-                <Field data-disabled>
-                  <FieldLabel>{t('shared.fields.organizationId')}</FieldLabel>
-                  <OrganizationSelect
-                    disabled
-                    includeInactive
-                    onValueChange={() => undefined}
-                    value={user.organizationId}
-                  />
-                </Field>
-                <Field data-disabled>
-                  <FieldLabel>{t('shared.fields.email')}</FieldLabel>
-                  <Input disabled value={user.email} />
-                </Field>
-                <form.Field name="name">
-                  {(field) => (
-                    <Field>
-                      <FieldLabel htmlFor={field.name}>{t('shared.fields.name')}</FieldLabel>
-                      <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required value={field.state.value} />
-                    </Field>
-                  )}
-                </form.Field>
-                <form.Field name="language">
-                  {(field) => (
-                    <Field>
-                      <FieldLabel>{t('shared.fields.language')}</FieldLabel>
-                      <Select
-                        onValueChange={field.handleChange}
-                        options={[
-                          { label: t('shared.languages.en'), value: LANGUAGE_CODES.english },
-                          { label: t('shared.languages.ptbr'), value: LANGUAGE_CODES.portugueseBrazil },
-                          { label: t('shared.languages.es'), value: LANGUAGE_CODES.spanish },
-                        ]}
-                        value={field.state.value}
-                      />
-                    </Field>
-                  )}
-                </form.Field>
-              </FieldGroup>
-              <div className="form-actions">
-                <Button disabled={isSaving} type="submit">{t('shared.actions.save')}</Button>
-              </div>
-            </form>
+            <UserProfileFormPanel key={user.id} onSaved={loadUser} user={user} />
           )}
         </CardContent>
       </Card>
       {user !== null && canViewAccess && <UserAccessTabs userId={user.id} />}
     </main>
+  )
+}
+
+type UserProfileFormPanelProps = {
+  onSaved: () => Promise<void>
+  user: UserDto
+}
+
+function UserProfileFormPanel({ onSaved, user }: UserProfileFormPanelProps) {
+  const t = useTranslate()
+  const notifyError = useNotifyError()
+  const { showSuccess } = useToast()
+  const [isSaving, setIsSaving] = useState(false)
+  const {
+    control,
+    handleSubmit,
+    register,
+  } = useForm<UserProfileForm>({
+    defaultValues: toForm(user),
+    resolver: zodResolver(userProfileSchema),
+  })
+
+  async function handleSave(value: UserProfileForm) {
+    setIsSaving(true)
+
+    try {
+      await updateCurrentUser({
+        [USER_REQUEST_FIELDS.name]: value.name,
+        [USER_REQUEST_FIELDS.isActive]: user.isActive,
+        [USER_REQUEST_FIELDS.language]: value.language,
+      })
+      showSuccess(t('features.iam.users.notifications.profileUpdated'))
+      await onSaved()
+    } catch (error) {
+      notifyError(error, t('shared.errors.generic'))
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  return (
+    <form className="edit-form" onSubmit={handleSubmit(handleSave)}>
+      <FieldGroup>
+        <Field data-disabled>
+          <FieldLabel>{t('shared.fields.organizationId')}</FieldLabel>
+          <OrganizationSelect
+            disabled
+            includeInactive
+            onValueChange={() => undefined}
+            value={user.organizationId}
+          />
+        </Field>
+        <Field data-disabled>
+          <FieldLabel>{t('shared.fields.email')}</FieldLabel>
+          <Input disabled value={user.email} />
+        </Field>
+        <Field>
+          <FieldLabel htmlFor="name">{t('shared.fields.name')}</FieldLabel>
+          <Input id="name" required {...register('name')} />
+        </Field>
+        <Controller
+          control={control}
+          name="language"
+          render={({ field }) => (
+            <Field>
+              <FieldLabel>{t('shared.fields.language')}</FieldLabel>
+              <Select
+                onValueChange={field.onChange}
+                options={toTranslatedOptions(LANGUAGE_OPTIONS, t)}
+                value={field.value}
+              />
+            </Field>
+          )}
+        />
+      </FieldGroup>
+      <div className="form-actions">
+        <Button disabled={isSaving} type="submit">{t('shared.actions.save')}</Button>
+      </div>
+    </form>
   )
 }

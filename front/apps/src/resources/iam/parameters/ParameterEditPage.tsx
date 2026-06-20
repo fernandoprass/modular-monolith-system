@@ -1,7 +1,9 @@
-import { useForm, useStore } from '@tanstack/react-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowLeft } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
+import { Controller, useForm } from 'react-hook-form'
 import { useNavigate, useParams } from 'react-router-dom'
+import { z } from 'zod'
 
 import { useToast } from '../../../app/ToastProvider'
 import { useTranslate, type Translate } from '../../../app/i18n/i18n'
@@ -41,6 +43,20 @@ function toTranslatedOptions(options: readonly ParameterOption[], t: Translate) 
     value: option.value,
   }))
 }
+
+const parameterEditSchema = z.object({
+  description: z.string().trim().min(1),
+  externalListEndpoint: z.string(),
+  group: z.string().trim().min(1),
+  isVisible: z.boolean(),
+  listItems: z.string(),
+  module: z.string().trim().min(1),
+  name: z.string().trim().min(1),
+  overrideType: z.string().trim().min(1),
+  title: z.string().trim().min(1),
+  type: z.string().trim().min(1),
+  value: z.string(),
+})
 
 function toForm(parameter: ParameterDto): ParameterForm {
   return {
@@ -121,151 +137,141 @@ function ParameterEditForm({ onSaved, parameter }: ParameterEditFormProps) {
   const notifyError = useNotifyError()
   const { showSuccess } = useToast()
   const [isSaving, setIsSaving] = useState(false)
-  const form = useForm({
+  const {
+    control,
+    handleSubmit,
+    register,
+    watch,
+  } = useForm<ParameterForm>({
     defaultValues: toForm(parameter),
-    onSubmit: async ({ value }) => {
-      setIsSaving(true)
-
-      try {
-        await updateParameter(parameter.id, toSubmitForm(value))
-        showSuccess(t('features.iam.parameters.notifications.updated'))
-        await onSaved()
-      } catch (error) {
-        notifyError(error, t('shared.errors.generic'))
-      } finally {
-        setIsSaving(false)
-      }
-    },
+    resolver: zodResolver(parameterEditSchema),
   })
-  const selectedType = useStore(form.store, (state) => state.values.type)
+  const selectedType = watch('type')
   const showListItems = selectedType === PARAMETER_TYPE_VALUES.list
   const showExternalListEndpoint = selectedType === PARAMETER_TYPE_VALUES.referenceId
 
+  async function handleSave(value: ParameterForm) {
+    setIsSaving(true)
+
+    try {
+      await updateParameter(parameter.id, toSubmitForm(value))
+      showSuccess(t('features.iam.parameters.notifications.updated'))
+      await onSaved()
+    } catch (error) {
+      notifyError(error, t('shared.errors.generic'))
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
   return (
-    <form className="edit-form" onSubmit={(event) => {
-      event.preventDefault()
-      void form.handleSubmit()
-    }}>
+    <form className="edit-form" onSubmit={handleSubmit(handleSave)}>
       <FieldGroup>
         <Field>
           <FieldLabel htmlFor="parameter-key">{t('shared.fields.key')}</FieldLabel>
           <Input disabled id="parameter-key" value={parameter.key} />
         </Field>
         <div className="form-row-two">
-          <form.Field name="module">
-            {(field) => (
+          <Controller
+            control={control}
+            name="module"
+            render={({ field }) => (
               <Field>
                 <FieldLabel>{t('shared.fields.module')}</FieldLabel>
                 <Select
-                  onValueChange={field.handleChange}
+                  onValueChange={field.onChange}
                   options={toTranslatedOptions(PARAMETER_MODULE_OPTIONS, t)}
-                  value={field.state.value}
+                  value={field.value}
                 />
               </Field>
             )}
-          </form.Field>
-          <form.Field name="group">
-            {(field) => (
-              <Field>
-                <FieldLabel htmlFor={field.name}>{t('shared.fields.group')}</FieldLabel>
-                <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required value={field.state.value} />
-              </Field>
-            )}
-          </form.Field>
+          />
+          <Field>
+            <FieldLabel htmlFor="group">{t('shared.fields.group')}</FieldLabel>
+            <Input id="group" required {...register('group')} />
+          </Field>
         </div>
-        <form.Field name="name">
-          {(field) => (
-            <Field>
-              <FieldLabel htmlFor={field.name}>{t('shared.fields.name')}</FieldLabel>
-              <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required value={field.state.value} />
-            </Field>
-          )}
-        </form.Field>
-        <form.Field name="title">
-          {(field) => (
-            <Field>
-              <FieldLabel htmlFor={field.name}>{t('shared.fields.title')}</FieldLabel>
-              <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required value={field.state.value} />
-            </Field>
-          )}
-        </form.Field>
-        <form.Field name="description">
-          {(field) => (
-            <Field>
-              <FieldLabel htmlFor={field.name}>{t('shared.fields.description')}</FieldLabel>
-              <Textarea id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required value={field.state.value} />
-            </Field>
-          )}
-        </form.Field>
+        <Field>
+          <FieldLabel htmlFor="name">{t('shared.fields.name')}</FieldLabel>
+          <Input id="name" required {...register('name')} />
+        </Field>
+        <Field>
+          <FieldLabel htmlFor="title">{t('shared.fields.title')}</FieldLabel>
+          <Input id="title" required {...register('title')} />
+        </Field>
+        <Field>
+          <FieldLabel htmlFor="description">{t('shared.fields.description')}</FieldLabel>
+          <Textarea id="description" required {...register('description')} />
+        </Field>
         <div className="form-row-two">
-          <form.Field name="overrideType">
-            {(field) => (
+          <Controller
+            control={control}
+            name="overrideType"
+            render={({ field }) => (
               <Field>
                 <FieldLabel>{t('shared.fields.overrideType')}</FieldLabel>
                 <Select
-                  onValueChange={field.handleChange}
+                  onValueChange={field.onChange}
                   options={toTranslatedOptions(PARAMETER_OVERRIDE_TYPE_OPTIONS, t)}
-                  value={field.state.value}
+                  value={field.value}
                 />
               </Field>
             )}
-          </form.Field>
-          <form.Field name="type">
-            {(field) => (
+          />
+          <Controller
+            control={control}
+            name="type"
+            render={({ field }) => (
               <Field>
                 <FieldLabel>{t('shared.fields.type')}</FieldLabel>
                 <Select
-                  onValueChange={field.handleChange}
+                  onValueChange={field.onChange}
                   options={toTranslatedOptions(PARAMETER_TYPE_OPTIONS, t)}
-                  value={field.state.value}
+                  value={field.value}
                 />
               </Field>
             )}
-          </form.Field>
+          />
         </div>
-        <form.Field name="value">
-          {(field) => (
+        <Controller
+          control={control}
+          name="value"
+          render={({ field }) => (
             <Field>
-              <FieldLabel htmlFor={field.name}>{t('shared.fields.value')}</FieldLabel>
+              <FieldLabel htmlFor="value">{t('shared.fields.value')}</FieldLabel>
               <ParameterValueInput
-                id={field.name}
-                onBlur={field.handleBlur}
-                onChange={field.handleChange}
+                id="value"
+                onBlur={field.onBlur}
+                onChange={field.onChange}
                 type={selectedType}
-                value={field.state.value}
+                value={field.value}
               />
             </Field>
           )}
-        </form.Field>
+        />
         {showListItems && (
-          <form.Field name="listItems">
-            {(field) => (
-              <Field>
-                <FieldLabel htmlFor={field.name}>{t('shared.fields.listItems')}</FieldLabel>
-                <Textarea id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required value={field.state.value} />
-              </Field>
-            )}
-          </form.Field>
+          <Field>
+            <FieldLabel htmlFor="listItems">{t('shared.fields.listItems')}</FieldLabel>
+            <Textarea id="listItems" required {...register('listItems')} />
+          </Field>
         )}
         {showExternalListEndpoint && (
-          <form.Field name="externalListEndpoint">
-            {(field) => (
-              <Field>
-                <FieldLabel htmlFor={field.name}>{t('shared.fields.externalListEndpoint')}</FieldLabel>
-                <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required value={field.state.value} />
-              </Field>
-            )}
-          </form.Field>
+          <Field>
+            <FieldLabel htmlFor="externalListEndpoint">{t('shared.fields.externalListEndpoint')}</FieldLabel>
+            <Input id="externalListEndpoint" required {...register('externalListEndpoint')} />
+          </Field>
         )}
-        <form.Field name="isVisible">
-          {(field) => (
+        <Controller
+          control={control}
+          name="isVisible"
+          render={({ field }) => (
             <Checkbox
-              checked={field.state.value}
+              checked={field.value}
               label={t('shared.fields.isVisible')}
-              onCheckedChange={(checked) => field.handleChange(checked === true)}
+              onCheckedChange={field.onChange}
             />
           )}
-        </form.Field>
+        />
       </FieldGroup>
       <div className="form-actions">
         <Button disabled={isSaving} type="submit">

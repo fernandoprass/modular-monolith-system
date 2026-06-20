@@ -1,7 +1,7 @@
-import { useForm } from '@tanstack/react-form'
 import type { SortingState } from '@tanstack/react-table'
 import { Plus } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Controller, useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 
 import { useToast } from '../../../app/ToastProvider'
@@ -41,11 +41,8 @@ export function RoleListPage() {
   const canCreate = hasPermissionCode(permissions, IAM_PERMISSIONS.roles.write)
   const canUpdate = hasPermissionCode(permissions, IAM_PERMISSIONS.roles.write)
   const canDelete = hasPermissionCode(permissions, IAM_PERMISSIONS.roles.write)
-  const filterForm = useForm({
+  const { control, handleSubmit, register, reset } = useForm<RoleSearchForm>({
     defaultValues: EMPTY_ROLE_SEARCH,
-    onSubmit: ({ value }) => {
-      setAppliedFilters({ ...value })
-    },
   })
   const columns = useMemo(() => createRoleTableColumns({
     canDelete,
@@ -76,8 +73,12 @@ export function RoleListPage() {
   }
 
   function handleReset() {
-    filterForm.reset()
+    reset(EMPTY_ROLE_SEARCH)
     setAppliedFilters(EMPTY_ROLE_SEARCH)
+  }
+
+  function handleSearch(value: RoleSearchForm) {
+    setAppliedFilters({ ...value })
   }
 
   async function handleConfirmDelete() {
@@ -106,30 +107,25 @@ export function RoleListPage() {
           </Button>
         )}
       </div>
-      <FilterToolbar onReset={handleReset} onSubmit={(event) => {
-        event.preventDefault()
-        void filterForm.handleSubmit()
-      }}>
-        <filterForm.Field name="userId">
-          {(field) => (
+      <FilterToolbar onReset={handleReset} onSubmit={handleSubmit(handleSearch)}>
+        <Controller
+          control={control}
+          name="userId"
+          render={({ field }) => (
             <Field>
               <FieldLabel>{t('shared.fields.user')}</FieldLabel>
               <UserSelect
                 clearable
-                onValueChange={field.handleChange}
-                value={field.state.value}
+                onValueChange={field.onChange}
+                value={field.value}
               />
             </Field>
           )}
-        </filterForm.Field>
-        <filterForm.Field name="name">
-          {(field) => (
-            <Field>
-              <FieldLabel htmlFor={field.name}>{t('shared.fields.name')}</FieldLabel>
-              <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} value={field.state.value} />
-            </Field>
-          )}
-        </filterForm.Field>
+        />
+        <Field>
+          <FieldLabel htmlFor="name">{t('shared.fields.name')}</FieldLabel>
+          <Input id="name" {...register('name')} />
+        </Field>
       </FilterToolbar>
       <DataTable
         columns={columns}

@@ -1,7 +1,7 @@
-import { useForm } from '@tanstack/react-form'
 import type { SortingState } from '@tanstack/react-table'
 import { Plus } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Controller, useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 
 import { useToast } from '../../../app/ToastProvider'
@@ -57,6 +57,9 @@ export function UserListPage() {
   const canView = hasPermissionCode(permissions, IAM_PERMISSIONS.users.read)
   const canUpdate = hasPermissionCode(permissions, IAM_PERMISSIONS.users.write)
   const canDelete = hasPermissionCode(permissions, IAM_PERMISSIONS.users.write)
+  const { control, handleSubmit, register, reset } = useForm<UserSearchForm>({
+    defaultValues: EMPTY_USER_SEARCH,
+  })
   const columns = useMemo(() => createUserTableColumns({
     canDelete,
     canUpdate,
@@ -65,13 +68,6 @@ export function UserListPage() {
     setDeleteTarget,
     t,
   }), [canDelete, canUpdate, canView, navigate, t])
-  const filterForm = useForm({
-    defaultValues: EMPTY_USER_SEARCH,
-    onSubmit: ({ value }) => {
-      setPageNumber(DEFAULT_PAGINATION.pageNumber)
-      setAppliedFilters({ ...value })
-    },
-  })
   const loadUsers = useCallback(async (targetPage: number) => {
     setIsLoading(true)
 
@@ -96,9 +92,14 @@ export function UserListPage() {
   }, [loadUsers, pageNumber])
 
   function handleReset() {
-    filterForm.reset()
+    reset(EMPTY_USER_SEARCH)
     setAppliedFilters(EMPTY_USER_SEARCH)
     setPageNumber(DEFAULT_PAGINATION.pageNumber)
+  }
+
+  function handleSearch(value: UserSearchForm) {
+    setPageNumber(DEFAULT_PAGINATION.pageNumber)
+    setAppliedFilters({ ...value })
   }
 
   function handlePageSizeChange(nextPageSize: number) {
@@ -134,42 +135,33 @@ export function UserListPage() {
           </Button>
         )}
       </div>
-      <FilterToolbar onReset={handleReset} onSubmit={(event) => {
-        event.preventDefault()
-        void filterForm.handleSubmit()
-      }}>
-        <filterForm.Field name="name">
-          {(field) => (
-            <Field>
-              <FieldLabel htmlFor={field.name}>{t('shared.fields.name')}</FieldLabel>
-              <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} value={field.state.value} />
-            </Field>
-          )}
-        </filterForm.Field>
-        <filterForm.Field name="email">
-          {(field) => (
-            <Field>
-              <FieldLabel htmlFor={field.name}>{t('shared.fields.email')}</FieldLabel>
-              <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} value={field.state.value} />
-            </Field>
-          )}
-        </filterForm.Field>
-        <filterForm.Field name="isActive">
-          {(field) => (
+      <FilterToolbar onReset={handleReset} onSubmit={handleSubmit(handleSearch)}>
+        <Field>
+          <FieldLabel htmlFor="name">{t('shared.fields.name')}</FieldLabel>
+          <Input id="name" {...register('name')} />
+        </Field>
+        <Field>
+          <FieldLabel htmlFor="email">{t('shared.fields.email')}</FieldLabel>
+          <Input id="email" {...register('email')} />
+        </Field>
+        <Controller
+          control={control}
+          name="isActive"
+          render={({ field }) => (
             <Field>
               <FieldLabel>{t('shared.fields.isActive')}</FieldLabel>
               <Select
-                onValueChange={field.handleChange}
+                onValueChange={field.onChange}
                 options={[
                   { label: t('shared.filters.all'), value: USER_FILTER_VALUES.all },
                   { label: t('shared.status.active'), value: 'true' },
                   { label: t('shared.status.inactive'), value: 'false' },
                 ]}
-                value={field.state.value}
+                value={field.value}
               />
             </Field>
           )}
-        </filterForm.Field>
+        />
       </FilterToolbar>
 
       <DataTable

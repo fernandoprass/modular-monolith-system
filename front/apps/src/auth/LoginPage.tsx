@@ -1,6 +1,8 @@
-import { useForm } from '@tanstack/react-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
+import { useForm } from 'react-hook-form'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { z } from 'zod'
 
 import { APP_CONSTANTS } from '../app/appConstants'
 import { useTranslate } from '../app/i18n/i18n'
@@ -11,30 +13,45 @@ import { Field, FieldGroup, FieldLabel } from '../components/ui/form'
 import { Input } from '../components/ui/input'
 import { useAuth, useNotifyError } from './AuthProvider'
 
+type LoginForm = {
+  email: string
+  password: string
+}
+
+const loginSchema = z.object({
+  email: z.string().trim().email(),
+  password: z.string().min(1),
+})
+
 export function LoginPage() {
   const t = useTranslate()
   const navigate = useNavigate()
   const notifyError = useNotifyError()
   const { isAuthenticated, login } = useAuth()
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const form = useForm({
+  const {
+    handleSubmit,
+    register,
+  } = useForm<LoginForm>({
     defaultValues: {
       email: 'admin@saas.com',
       password: 'Password123!',
     },
-    onSubmit: async ({ value }) => {
-      setIsSubmitting(true)
-
-      try {
-        await login(value)
-        navigate(APP_ROUTES.dashboard)
-      } catch (error) {
-        notifyError(error, t('shared.errors.generic'))
-      } finally {
-        setIsSubmitting(false)
-      }
-    },
+    resolver: zodResolver(loginSchema),
   })
+
+  async function handleLogin(value: LoginForm) {
+    setIsSubmitting(true)
+
+    try {
+      await login(value)
+      navigate(APP_ROUTES.dashboard)
+    } catch (error) {
+      notifyError(error, t('shared.errors.generic'))
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
   if (isAuthenticated) {
     return <Navigate to={APP_ROUTES.dashboard} replace />
@@ -48,45 +65,28 @@ export function LoginPage() {
           <CardDescription>{t('auth.login.title')}</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={(event) => {
-            event.preventDefault()
-            void form.handleSubmit()
-          }}>
+          <form onSubmit={handleSubmit(handleLogin)}>
             <FieldGroup>
-              <form.Field name="email">
-                {(field) => (
-                  <Field>
-                    <FieldLabel htmlFor={field.name}>{t('auth.login.email')}</FieldLabel>
-                    <Input
-                      autoComplete="email"
-                      id={field.name}
-                      name={field.name}
-                      onBlur={field.handleBlur}
-                      onChange={(event) => field.handleChange(event.currentTarget.value)}
-                      required
-                      type="email"
-                      value={field.state.value}
-                    />
-                  </Field>
-                )}
-              </form.Field>
-              <form.Field name="password">
-                {(field) => (
-                  <Field>
-                    <FieldLabel htmlFor={field.name}>{t('auth.login.password')}</FieldLabel>
-                    <Input
-                      autoComplete="current-password"
-                      id={field.name}
-                      name={field.name}
-                      onBlur={field.handleBlur}
-                      onChange={(event) => field.handleChange(event.currentTarget.value)}
-                      required
-                      type="password"
-                      value={field.state.value}
-                    />
-                  </Field>
-                )}
-              </form.Field>
+              <Field>
+                <FieldLabel htmlFor="email">{t('auth.login.email')}</FieldLabel>
+                <Input
+                  autoComplete="email"
+                  id="email"
+                  required
+                  type="email"
+                  {...register('email')}
+                />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="password">{t('auth.login.password')}</FieldLabel>
+                <Input
+                  autoComplete="current-password"
+                  id="password"
+                  required
+                  type="password"
+                  {...register('password')}
+                />
+              </Field>
               <Button disabled={isSubmitting} type="submit">
                 {t('auth.login.submit')}
               </Button>
