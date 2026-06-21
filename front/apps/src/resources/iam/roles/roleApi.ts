@@ -2,6 +2,7 @@ import { API_PATHS } from '../../../data/apiPaths'
 import { deleteIamJson, deleteIamJsonWithBody, getIamJson, getIamJsonWithQuery, postIamJson, putIamJson } from '../../../data/httpClient'
 import { ensureResultSuccess, unwrapResult } from '../../../data/result'
 import type { PermissionDto } from '../../../shared/permissions'
+import { PERMISSION_FILTER_VALUES } from '../permissions/permissionTypes'
 import {
   ROLE_QUERY_PARAMS,
   ROLE_REQUEST_FIELDS,
@@ -24,6 +25,16 @@ function toRoleQuery(request: RoleSearchForm): URLSearchParams {
   appendOptional(query, ROLE_QUERY_PARAMS.organizationId, request.organizationId)
   appendOptional(query, ROLE_QUERY_PARAMS.userId, request.userId)
   appendOptional(query, ROLE_QUERY_PARAMS.name, request.name)
+
+  return query
+}
+
+function toRolePermissionQuery(module: string): URLSearchParams {
+  const query = new URLSearchParams()
+
+  if (module !== PERMISSION_FILTER_VALUES.all) {
+    appendOptional(query, ROLE_QUERY_PARAMS.module, module)
+  }
 
   return query
 }
@@ -169,14 +180,20 @@ export async function deleteRole(id: string): Promise<void> {
   ensureResultSuccess(response)
 }
 
-export async function getRolePermissions(roleId: string): Promise<PermissionDto[]> {
-  const response = await postIamJson(API_PATHS.iam.roles.permissions(roleId), {})
+export async function getRolePermissions(roleId: string, module: string): Promise<PermissionDto[]> {
+  const response = await getIamJsonWithQuery(
+    API_PATHS.iam.roles.permissions(roleId),
+    toRolePermissionQuery(module),
+  )
 
   return unwrapResult<unknown[]>(response).map(normalizePermissionDto)
 }
 
-export async function getAvailableRolePermissions(roleId: string): Promise<PermissionDto[]> {
-  const response = await postIamJson(API_PATHS.iam.roles.availablePermissions(roleId), {})
+export async function getAvailableRolePermissions(roleId: string, module: string): Promise<PermissionDto[]> {
+  const response = await getIamJsonWithQuery(
+    API_PATHS.iam.roles.availablePermissions(roleId),
+    toRolePermissionQuery(module),
+  )
 
   return unwrapResult<unknown[]>(response).map(normalizePermissionDto)
 }

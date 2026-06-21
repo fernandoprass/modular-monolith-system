@@ -1,11 +1,11 @@
 meta {
-  name: unassign
+  name: assign permissions
   type: http
-  seq: 6
+  seq: 8
 }
 
-delete {
-  url: {{host.iam}}/api/{{version}}/iam/roles/permissions/unassign
+post {
+  url: {{host.iam}}/api/{{version}}/iam/roles/permissions/assign
   body: json
   auth: bearer
 }
@@ -16,7 +16,7 @@ auth:bearer {
 
 body:json {
   {
-    "roleId": "019db57d-5204-754d-917a-3070a6e01348",
+    "roleId": "019dd543-5991-7071-b717-943cf0aecb31",
     "permissionIds": [
       "019db57d-5204-754d-917a-3070a6e01349"
     ]

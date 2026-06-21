@@ -1,0 +1,19 @@
+meta {
+  name: permissions
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{host.iam}}/api/{{version}}/iam/roles/019e2345-c761-700c-a61d-740429212805/permissions
+  body: none
+  auth: bearer
+}
+
+params:query {
+  ~module: sentinel
+}
+
+auth:bearer {
+  token: {{token}}
+}

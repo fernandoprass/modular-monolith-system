@@ -1,5 +1,6 @@
 export const ROLE_QUERY_PARAMS = {
   isActive: 'IsActive',
+  module: 'Module',
   name: 'Name',
   organizationId: 'OrganizationId',
   userId: 'UserId',

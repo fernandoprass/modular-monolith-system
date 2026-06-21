@@ -1,0 +1,19 @@
+meta {
+  name: available roles
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{host.iam}}/api/{{version}}/iam/user-access/users/{{userId}}/available-roles
+  body: none
+  auth: bearer
+}
+
+params:query {
+  ~name: a
+}
+
+auth:bearer {
+  token: {{token}}
+}

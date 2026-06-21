@@ -80,15 +80,15 @@ public class PermissionService(
       return await _permissionQueryRepository.GetByParams(request, cancellationToken);
    }
 
-   public async Task<Result<IEnumerable<PermissionDto>>> GetByRoleId(Guid roleId, CancellationToken cancellationToken = default)
+   public async Task<Result<IEnumerable<PermissionDto>>> GetByRoleId(Guid roleId, RolePermissionRequest request, CancellationToken cancellationToken = default)
    {
-      var permissions = await _permissionQueryRepository.GetByRoleIdAsync(roleId, cancellationToken);
+      var permissions = await _permissionQueryRepository.GetByRoleIdAsync(roleId, request, cancellationToken);
       return Result<IEnumerable<PermissionDto>>.Success(permissions);
    }
 
-   public async Task<Result<IEnumerable<PermissionDto>>> GetAvailablePermissionByRoleIdAsync(Guid roleId, CancellationToken cancellationToken = default)
+   public async Task<Result<IEnumerable<PermissionDto>>> GetAvailablePermissionByRoleIdAsync(Guid roleId, RolePermissionRequest request, CancellationToken cancellationToken = default)
    {
-      var permissions = await _permissionQueryRepository.GetByAvailablePermissionsRoleIdAsync(roleId, cancellationToken);
+      var permissions = await _permissionQueryRepository.GetByAvailablePermissionsRoleIdAsync(roleId, request, cancellationToken);
       return Result<IEnumerable<PermissionDto>>.Success(permissions);
    }
 

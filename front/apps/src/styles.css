@@ -857,11 +857,23 @@ textarea {
   justify-content: flex-end;
 }
 
+.permission-section {
+  display: grid;
+  gap: 14px;
+}
+
 .permission-assignment-grid {
   display: grid;
   gap: 16px;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: start;
+}
+
+.permission-filter-form {
+  display: grid;
+  grid-template-columns: minmax(180px, 220px) minmax(220px, 1fr);
+  gap: 12px;
+  align-items: end;
 }
 
 .permission-action-column {
@@ -904,8 +916,12 @@ textarea {
   margin-top: 12px;
 }
 
+.settings-page {
+  max-width: 1800px;
+}
+
 .settings-module-title {
-  margin: 4px 0 0;
+  margin: s4px 0 0;
   color: #334155;
   font-size: 1rem;
   font-weight: 700;
@@ -918,8 +934,26 @@ textarea {
 }
 
 .settings-parameter-row {
-  grid-template-columns: minmax(160px, 1fr) minmax(180px, 1.2fr);
+  grid-template-columns: minmax(140px, 1fr) minmax(160px, 0.54fr) auto;
   align-items: center;
+}
+
+.settings-parameter-copy {
+  display: grid;
+  gap: 3px;
+}
+
+.settings-parameter-description {
+  margin: 0;
+  color: #475569;
+  font-size: 0.75rem;
+  line-height: 1.35;
+}
+
+.settings-parameter-actions {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
 }
 
 .checkbox-row {
@@ -1213,6 +1247,7 @@ textarea {
   .toolbar,
   .detail-grid,
   .settings-group-grid,
+  .permission-filter-form,
   .permission-assignment-grid {
     grid-template-columns: 1fr;
   }

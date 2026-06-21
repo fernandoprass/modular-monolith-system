@@ -90,6 +90,8 @@ export const enMessages = {
           empty: 'No parameters found.',
         },
         notifications: {
+          overrideRemoved: 'Override removed.',
+          overrideSaved: 'Override saved.',
           updated: 'Parameter updated.',
         },
         pages: {
@@ -259,6 +261,7 @@ export const enMessages = {
       previousPage: '<',
       read: 'Read',
       remove: 'Remove',
+      removeOverride: 'Remove override',
       reset: 'Reset',
       save: 'Save',
       saveOverride: 'Save override',

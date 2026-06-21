@@ -88,6 +88,18 @@ export function deleteJson(path: string): Promise<unknown> {
   return request(path, { baseUrl: CONFIG.apiBaseUrls.core, method: 'DELETE' })
 }
 
+export function getCourierJson(path: string): Promise<unknown> {
+  return request(path, { baseUrl: CONFIG.apiBaseUrls.courier, method: 'GET' })
+}
+
+export function getCourierJsonWithQuery(path: string, query: URLSearchParams): Promise<unknown> {
+  return request(path, { baseUrl: CONFIG.apiBaseUrls.courier, method: 'GET', query })
+}
+
+export function postCourierJson(path: string, body: unknown): Promise<unknown> {
+  return request(path, { baseUrl: CONFIG.apiBaseUrls.courier, body, method: 'POST' })
+}
+
 export function getIamJson(path: string): Promise<unknown> {
   return request(path, { baseUrl: CONFIG.apiBaseUrls.iam, method: 'GET' })
 }

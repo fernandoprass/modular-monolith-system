@@ -1,4 +1,10 @@
 export const API_PATHS = {
+  courier: {
+    emails: {
+      byId: (id: string | number) => `/api/v1/emails/${id}`,
+      list: '/api/v1/emails',
+    },
+  },
   iam: {
     authentication: {
       login: '/api/v1/iam/authentication/login',
@@ -15,6 +21,7 @@ export const API_PATHS = {
       list: '/api/v1/iam/parameters',
       me: '/api/v1/iam/parameters/me',
       myOrganization: '/api/v1/iam/parameters/my-organization',
+      override: (id: string | number) => `/api/v1/iam/parameters/${id}/override`,
     },
     permissions: {
       byId: (id: string | number) => `/api/v1/iam/permissions/${id}`,

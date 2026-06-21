@@ -28,15 +28,10 @@ public class EmailRepository(CourierDbContext dbContext) : IEmailRepository
          .Limit(pageSize)
          .Project(e => new EmailLiteDto(
             e.Id,
-            e.OrganizationId,
-            e.UserId,
             e.Module,
             e.Feature,
-            e.TemplateKey,
             e.Recipient,
             e.Subject,
-            e.CreatedAt,
-            e.SentAt,
             e.Status))
          .ToListAsync(cancellationToken);
 

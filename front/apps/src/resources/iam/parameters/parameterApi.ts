@@ -1,9 +1,10 @@
 import { API_PATHS } from '../../../data/apiPaths'
-import { getIamJson, getIamJsonWithQuery, putIamJson } from '../../../data/httpClient'
+import { deleteIamJson, getIamJson, getIamJsonWithQuery, putIamJson } from '../../../data/httpClient'
 import { ensureResultSuccess, unwrapResult } from '../../../data/result'
 import type { PagedResultDto } from '../../../shared/pagination'
 import {
   PARAMETER_FILTER_VALUES,
+  PARAMETER_OWNER_REQUEST_FIELDS,
   PARAMETER_QUERY_PARAMS,
   PARAMETER_REQUEST_FIELDS,
   PARAMETER_TYPE_VALUES,
@@ -11,6 +12,7 @@ import {
   type ParameterForm,
   type ParameterLiteDto,
   type ParameterListQuery,
+  type ParameterOwnerUpdateRequest,
   type ParameterUpdateRequest,
 } from './parameterTypes'
 
@@ -163,6 +165,7 @@ function normalizeParameterLiteDto(value: unknown): ParameterLiteDto {
   const source = unwrapParameterSource(value)
 
   return {
+    description: readString(source, 'description', 'Description'),
     group: readString(source, 'group', 'Group'),
     id: readString(source, 'id', 'Id'),
     isOverridden: readBoolean(source, 'isOverridden', 'IsOverridden'),
@@ -181,7 +184,6 @@ function normalizeParameterDto(value: unknown): ParameterDto {
 
   return {
     ...normalizeParameterLiteDto(source),
-    description: readString(source, 'description', 'Description'),
     externalListEndpoint: readNullableString(source, 'externalListEndpoint', 'ExternalListEndpoint'),
     isVisible: readBoolean(source, 'isVisible', 'IsVisible'),
     key: readString(source, 'key', 'Key'),
@@ -256,8 +258,26 @@ export async function getParameter(id: string): Promise<ParameterDto> {
   return normalizeParameterDto(unwrapResult<unknown>(response))
 }
 
+function toParameterOwnerUpdateRequest(value: string): ParameterOwnerUpdateRequest {
+  return {
+    [PARAMETER_OWNER_REQUEST_FIELDS.value]: value,
+  }
+}
+
 export async function updateParameter(id: string, request: ParameterForm): Promise<void> {
   const response = await putIamJson(API_PATHS.iam.parameters.byId(id), toParameterUpdateRequest(request))
+
+  ensureResultSuccess(response)
+}
+
+export async function saveParameterOverride(id: string, value: string): Promise<void> {
+  const response = await putIamJson(API_PATHS.iam.parameters.override(id), toParameterOwnerUpdateRequest(value))
+
+  ensureResultSuccess(response)
+}
+
+export async function deleteParameterOverride(parameterOverrideId: string): Promise<void> {
+  const response = await deleteIamJson(API_PATHS.iam.parameters.override(parameterOverrideId))
 
   ensureResultSuccess(response)
 }

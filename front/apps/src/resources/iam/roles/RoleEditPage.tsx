@@ -17,11 +17,17 @@ import { Checkbox } from '../../../components/ui/checkbox'
 import { DataTable } from '../../../components/ui/data-table'
 import { Field, FieldGroup, FieldLabel } from '../../../components/ui/form'
 import { Input } from '../../../components/ui/input'
+import { Select } from '../../../components/ui/select'
 import { Textarea } from '../../../components/ui/textarea'
 import { IAM_PERMISSIONS } from '../../../shared/iamConstants'
 import type { PermissionDto } from '../../../shared/permissions'
 import { hasPermissionCode } from '../../../shared/permissions'
 import { OrganizationSelect } from '../organizations/OrganizationSelect'
+import {
+  PERMISSION_FILTER_VALUES,
+  PERMISSION_MODULE_OPTIONS,
+} from '../permissions/permissionTypes'
+import { toTranslatedOptions } from '../permissions/permissionUi'
 import {
   assignRolePermissions,
   createRole,
@@ -40,6 +46,8 @@ const EMPTY_ROLE_FORM: RoleForm = {
   name: '',
   organizationId: '',
 }
+
+const DEFAULT_ROLE_PERMISSION_MODULE = PERMISSION_MODULE_OPTIONS[0]?.value ?? PERMISSION_FILTER_VALUES.all
 
 const roleEditSchema = z.object({
   description: z.string().trim().min(1),
@@ -86,31 +94,35 @@ export function RoleEditPage() {
   const [rolePermissionSelection, setRolePermissionSelection] = useState<RowSelectionState>({})
   const [availableSorting, setAvailableSorting] = useState<SortingState>([])
   const [rolePermissionSorting, setRolePermissionSorting] = useState<SortingState>([])
-  const [availablePermissionTitleFilter, setAvailablePermissionTitleFilter] = useState('')
-  const [rolePermissionTitleFilter, setRolePermissionTitleFilter] = useState('')
+  const [permissionTitleFilter, setPermissionTitleFilter] = useState('')
+  const [permissionModuleFilter, setPermissionModuleFilter] = useState<string>(DEFAULT_ROLE_PERMISSION_MODULE)
   const [isPermissionLoading, setIsPermissionLoading] = useState(false)
   const [isPermissionSaving, setIsPermissionSaving] = useState(false)
   const isCreate = id === undefined
   const canAssignPermissions = hasPermissionCode(permissions, IAM_PERMISSIONS.permissions.assign)
   const pageTitle = isCreate ? t('features.iam.roles.pages.create') : t('features.iam.roles.pages.edit')
+  const permissionModuleOptions = useMemo(() => [
+    { label: t('shared.filters.all'), value: PERMISSION_FILTER_VALUES.all },
+    ...toTranslatedOptions(PERMISSION_MODULE_OPTIONS, t),
+  ], [t])
   const filteredAvailablePermissions = useMemo(() => {
-    const filter = availablePermissionTitleFilter.trim().toLowerCase()
+    const filter = permissionTitleFilter.trim().toLowerCase()
 
     if (filter.length === 0) {
       return availablePermissions
     }
 
     return availablePermissions.filter((permission) => permission.title.toLowerCase().includes(filter))
-  }, [availablePermissionTitleFilter, availablePermissions])
+  }, [availablePermissions, permissionTitleFilter])
   const filteredRolePermissions = useMemo(() => {
-    const filter = rolePermissionTitleFilter.trim().toLowerCase()
+    const filter = permissionTitleFilter.trim().toLowerCase()
 
     if (filter.length === 0) {
       return rolePermissions
     }
 
     return rolePermissions.filter((permission) => permission.title.toLowerCase().includes(filter))
-  }, [rolePermissionTitleFilter, rolePermissions])
+  }, [permissionTitleFilter, rolePermissions])
   const availablePermissionColumns = useMemo<ColumnDef<PermissionDto>[]>(() => [
     {
       accessorKey: 'module',
@@ -180,22 +192,27 @@ export function RoleEditPage() {
 
     try {
       const [available, assigned] = await Promise.all([
-        getAvailableRolePermissions(id),
-        getRolePermissions(id),
+        getAvailableRolePermissions(id, permissionModuleFilter),
+        getRolePermissions(id, permissionModuleFilter),
       ])
 
       setAvailablePermissions(available)
       setRolePermissions(assigned)
       setAvailableSelection({})
       setRolePermissionSelection({})
-      setAvailablePermissionTitleFilter('')
-      setRolePermissionTitleFilter('')
     } catch (error) {
       notifyError(error, t('shared.errors.generic'))
     } finally {
       setIsPermissionLoading(false)
     }
-  }, [canAssignPermissions, id, isCreate, notifyError, t])
+  }, [
+    canAssignPermissions,
+    id,
+    isCreate,
+    notifyError,
+    permissionModuleFilter,
+    t,
+  ])
 
   useEffect(() => {
     void loadRole()
@@ -208,6 +225,12 @@ export function RoleEditPage() {
   useEffect(() => {
     void loadPermissions()
   }, [loadPermissions])
+
+  function handlePermissionModuleChange(value: string) {
+    setAvailableSelection({})
+    setRolePermissionSelection({})
+    setPermissionModuleFilter(value)
+  }
 
   async function handleAssignPermissions() {
     if (id === undefined || !canAssignPermissions) {
@@ -286,18 +309,29 @@ export function RoleEditPage() {
       </Card>
       {!isCreate && canAssignPermissions && (
         <Card>
-          <CardContent>
+          <CardContent className="permission-section">
+            <h2 className="card-title">{t('features.iam.permissions.name')}</h2>
+            <div className="permission-filter-form">
+              <Field>
+                <FieldLabel>{t('shared.fields.module')}</FieldLabel>
+                <Select
+                  onValueChange={handlePermissionModuleChange}
+                  options={permissionModuleOptions}
+                  value={permissionModuleFilter}
+                />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="permission-title-filter">{t('shared.fields.title')}</FieldLabel>
+                <Input
+                  id="permission-title-filter"
+                  onChange={(event) => setPermissionTitleFilter(event.currentTarget.value)}
+                  value={permissionTitleFilter}
+                />
+              </Field>
+            </div>
             <div className="permission-assignment-grid">
               <div className="permission-table-column">
                 <h2 className="card-title">{t('features.iam.roles.labels.availablePermissions')}</h2>
-                <Field>
-                  <FieldLabel htmlFor="available-permission-title-filter">{t('shared.fields.title')}</FieldLabel>
-                  <Input
-                    id="available-permission-title-filter"
-                    onChange={(event) => setAvailablePermissionTitleFilter(event.currentTarget.value)}
-                    value={availablePermissionTitleFilter}
-                  />
-                </Field>
                 <DataTable
                   columns={availablePermissionColumns}
                   data={filteredAvailablePermissions}
@@ -332,14 +366,6 @@ export function RoleEditPage() {
               </div>
               <div className="permission-table-column">
                 <h2 className="card-title">{t('features.iam.roles.labels.assignedPermissions')}</h2>
-                <Field>
-                  <FieldLabel htmlFor="assigned-permission-title-filter">{t('shared.fields.title')}</FieldLabel>
-                  <Input
-                    id="assigned-permission-title-filter"
-                    onChange={(event) => setRolePermissionTitleFilter(event.currentTarget.value)}
-                    value={rolePermissionTitleFilter}
-                  />
-                </Field>
                 <DataTable
                   columns={assignedPermissionColumns}
                   data={filteredRolePermissions}
