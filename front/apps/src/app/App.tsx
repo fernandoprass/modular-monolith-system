@@ -2,6 +2,9 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 
 import { AuthProvider } from '../auth/AuthProvider'
 import { LoginPage } from '../auth/LoginPage'
+import { EmailCreatePage } from '../resources/courier/emails/EmailCreatePage'
+import { EmailListPage } from '../resources/courier/emails/EmailListPage'
+import { EmailViewPage } from '../resources/courier/emails/EmailViewPage'
 import { AuditLogListPage } from '../resources/sentinel/audit-logs/AuditLogListPage'
 import { AuditLogViewPage } from '../resources/sentinel/audit-logs/AuditLogViewPage'
 import { SystemLogListPage } from '../resources/sentinel/system-logs/SystemLogListPage'
@@ -51,6 +54,9 @@ function App() {
                 <Route path={APP_ROUTES.userSettings.slice(1)} element={<ParameterSettingsPage owner="user" />} />
                 <Route path={APP_ROUTES.auditLogs.slice(1)} element={<AuditLogListPage />} />
                 <Route path="audit-logs/:id/show" element={<AuditLogViewPage />} />
+                <Route path={APP_ROUTES.emails.slice(1)} element={<EmailListPage />} />
+                <Route path="emails/create" element={<EmailCreatePage />} />
+                <Route path="emails/:id/show" element={<EmailViewPage />} />
                 <Route path={APP_ROUTES.systemLogs.slice(1)} element={<SystemLogListPage />} />
                 <Route path="system-logs/:id/show" element={<SystemLogViewPage />} />
                 <Route path={APP_ROUTES.roles.slice(1)} element={<RoleListPage />} />

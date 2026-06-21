@@ -32,7 +32,8 @@ public class EmailRepository(CourierDbContext dbContext) : IEmailRepository
             e.Feature,
             e.Recipient,
             e.Subject,
-            e.Status))
+            e.Status,
+            e.CreatedAt))
          .ToListAsync(cancellationToken);
 
       var totalPages = totalCount == 0 ? 0 : (int)Math.Ceiling(totalCount / (double)pageSize);

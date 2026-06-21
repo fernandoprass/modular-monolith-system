@@ -956,6 +956,56 @@ textarea {
   justify-content: flex-end;
 }
 
+.courier-email-page {
+  max-width: 1600px;
+}
+
+.email-status-pending {
+  border-color: #cbd5e1;
+  background: #f1f5f9;
+  color: #334155;
+}
+
+.email-status-processing {
+  border-color: #bfdbfe;
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.email-status-sent {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+  color: #15803d;
+}
+
+.email-status-failed {
+  border-color: #fecaca;
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.email-body,
+.email-body-input {
+  min-height: 180px;
+}
+
+.email-body {
+  max-height: 520px;
+  white-space: pre-wrap;
+}
+
+.email-attempts {
+  display: grid;
+  gap: 12px;
+}
+
+.detail-section-title {
+  margin: 0;
+  color: #334155;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
 .checkbox-row {
   gap: 8px;
   font-size: 0.84rem;

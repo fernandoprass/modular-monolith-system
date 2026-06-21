@@ -10,17 +10,18 @@ export type SelectOption = {
 }
 
 type SelectProps = {
+  disabled?: boolean
   onValueChange: (value: string) => void
   options: SelectOption[]
   placeholder?: string
   value?: string
 }
 
-export function Select({ onValueChange, options, placeholder, value }: SelectProps) {
+export function Select({ disabled = false, onValueChange, options, placeholder, value }: SelectProps) {
   const selectedOption = options.find((option) => option.value === value)
 
   return (
-    <SelectPrimitive.Root onValueChange={onValueChange} value={value}>
+    <SelectPrimitive.Root disabled={disabled} onValueChange={onValueChange} value={value}>
       <SelectPrimitive.Trigger className="select-trigger">
         <span>{selectedOption?.label ?? placeholder}</span>
         <SelectPrimitive.Icon>

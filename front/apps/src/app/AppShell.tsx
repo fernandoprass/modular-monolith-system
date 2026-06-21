@@ -5,6 +5,7 @@ import {
   Gauge,
   Key,
   LogOut,
+  Mail,
   Menu,
   PanelLeftClose,
   PanelLeftOpen,
@@ -31,6 +32,7 @@ import {
   DropdownMenuTrigger,
 } from '../components/ui/dropdown-menu'
 import { cn } from '../lib/utils'
+import { COURIER_PERMISSIONS } from '../shared/courierConstants'
 import { IAM_PERMISSIONS, IAM_RESOURCES } from '../shared/iamConstants'
 import { hasPermissionCode, hasResourceAccess } from '../shared/permissions'
 import { SENTINEL_PERMISSIONS } from '../shared/sentinelConstants'
@@ -46,6 +48,7 @@ export function AppLayout() {
   const [isMobileOpen, setIsMobileOpen] = useState(false)
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [isAuthorizationOpen, setIsAuthorizationOpen] = useState(true)
+  const [isCourierOpen, setIsCourierOpen] = useState(true)
   const [isIamOpen, setIsIamOpen] = useState(true)
   const [isSentinelOpen, setIsSentinelOpen] = useState(true)
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false)
@@ -60,8 +63,10 @@ export function AppLayout() {
   const canOpenUserSettings = hasPermissionCode(permissions, IAM_PERMISSIONS.userProfile.parameters)
   const canOpenAuditLogs = hasPermissionCode(permissions, SENTINEL_PERMISSIONS.auditLogs.read)
   const canOpenSystemLogs = hasPermissionCode(permissions, SENTINEL_PERMISSIONS.systemLogs.read)
+  const canOpenEmails = hasPermissionCode(permissions, COURIER_PERMISSIONS.emails.read)
   const canOpenAuthorization = canOpenRoles || canOpenPermissions || canOpenUserAccess
   const canOpenIam = canOpenOrganizations || canOpenUsers || canOpenParameters || canOpenAuthorization
+  const canOpenCourier = canOpenEmails
   const canOpenSentinel = canOpenAuditLogs || canOpenSystemLogs
   const organizationName = user?.organizationName || APP_CONSTANTS.appName
   const canOpenOrganizationProfile = user?.isOrganizationAdmin === true
@@ -206,6 +211,23 @@ export function AppLayout() {
                   />
                 )}
                 </NavGroup>
+              )}
+            </NavGroup>
+          )}
+          {canOpenCourier && (
+            <NavGroup
+              icon={<Mail data-icon="inline-start" />}
+              isOpen={isCourierOpen}
+              label={t('navigation.groups.courier')}
+              onToggle={() => setIsCourierOpen((current) => !current)}
+            >
+              {canOpenEmails && (
+                <NavItem
+                  active={location.pathname.startsWith(APP_ROUTES.emails)}
+                  icon={<Mail data-icon="inline-start" />}
+                  label={t('features.courier.emails.name')}
+                  to={APP_ROUTES.emails}
+                />
               )}
             </NavGroup>
           )}

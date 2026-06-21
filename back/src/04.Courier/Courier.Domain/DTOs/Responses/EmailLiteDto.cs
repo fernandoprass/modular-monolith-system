@@ -8,4 +8,5 @@ public record EmailLiteDto(
    string Feature,
    string Recipient,
    string Subject,
-   EmailStatus Status);
+   EmailStatus Status,
+   DateTime CreatedAt);
