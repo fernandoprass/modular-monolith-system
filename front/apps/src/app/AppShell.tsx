@@ -2,6 +2,7 @@ import {
   Building2,
   ChevronDown,
   ChevronRight,
+  FileText,
   Gauge,
   Key,
   LogOut,
@@ -64,9 +65,10 @@ export function AppLayout() {
   const canOpenAuditLogs = hasPermissionCode(permissions, SENTINEL_PERMISSIONS.auditLogs.read)
   const canOpenSystemLogs = hasPermissionCode(permissions, SENTINEL_PERMISSIONS.systemLogs.read)
   const canOpenEmails = hasPermissionCode(permissions, COURIER_PERMISSIONS.emails.read)
+  const canOpenTemplates = hasPermissionCode(permissions, COURIER_PERMISSIONS.templates.read)
   const canOpenAuthorization = canOpenRoles || canOpenPermissions || canOpenUserAccess
   const canOpenIam = canOpenOrganizations || canOpenUsers || canOpenParameters || canOpenAuthorization
-  const canOpenCourier = canOpenEmails
+  const canOpenCourier = canOpenEmails || canOpenTemplates
   const canOpenSentinel = canOpenAuditLogs || canOpenSystemLogs
   const organizationName = user?.organizationName || APP_CONSTANTS.appName
   const canOpenOrganizationProfile = user?.isOrganizationAdmin === true
@@ -227,6 +229,14 @@ export function AppLayout() {
                   icon={<Mail data-icon="inline-start" />}
                   label={t('features.courier.emails.name')}
                   to={APP_ROUTES.emails}
+                />
+              )}
+              {canOpenTemplates && (
+                <NavItem
+                  active={location.pathname.startsWith(APP_ROUTES.templates)}
+                  icon={<FileText data-icon="inline-start" />}
+                  label={t('features.courier.templates.name')}
+                  to={APP_ROUTES.templates}
                 />
               )}
             </NavGroup>

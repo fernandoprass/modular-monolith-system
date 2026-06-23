@@ -5,6 +5,8 @@ import { LoginPage } from '../auth/LoginPage'
 import { EmailCreatePage } from '../resources/courier/emails/EmailCreatePage'
 import { EmailListPage } from '../resources/courier/emails/EmailListPage'
 import { EmailViewPage } from '../resources/courier/emails/EmailViewPage'
+import { TemplateEditPage } from '../resources/courier/templates/TemplateEditPage'
+import { TemplateListPage } from '../resources/courier/templates/TemplateListPage'
 import { AuditLogListPage } from '../resources/sentinel/audit-logs/AuditLogListPage'
 import { AuditLogViewPage } from '../resources/sentinel/audit-logs/AuditLogViewPage'
 import { SystemLogListPage } from '../resources/sentinel/system-logs/SystemLogListPage'
@@ -57,6 +59,9 @@ function App() {
                 <Route path={APP_ROUTES.emails.slice(1)} element={<EmailListPage />} />
                 <Route path="emails/create" element={<EmailCreatePage />} />
                 <Route path="emails/:id/show" element={<EmailViewPage />} />
+                <Route path={APP_ROUTES.templates.slice(1)} element={<TemplateListPage />} />
+                <Route path="templates/create" element={<TemplateEditPage />} />
+                <Route path="templates/:id" element={<TemplateEditPage />} />
                 <Route path={APP_ROUTES.systemLogs.slice(1)} element={<SystemLogListPage />} />
                 <Route path="system-logs/:id/show" element={<SystemLogViewPage />} />
                 <Route path={APP_ROUTES.roles.slice(1)} element={<RoleListPage />} />

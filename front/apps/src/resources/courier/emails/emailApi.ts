@@ -121,6 +121,7 @@ function normalizeEmailLiteDto(value: unknown): EmailLiteDto {
   const source = unwrapEmailSource(value)
 
   return {
+    createdAt: readString(source, 'createdAt', 'CreatedAt'),
     feature: readString(source, 'feature', 'Feature'),
     id: readString(source, 'id', 'Id'),
     module: readString(source, 'module', 'Module'),
@@ -148,7 +149,6 @@ function normalizeEmailDto(value: unknown): EmailDto {
     ...normalizeEmailLiteDto(source),
     attempts: Array.isArray(attempts) ? attempts.map(normalizeDeliveryAttempt) : [],
     body: readString(source, 'body', 'Body'),
-    createdAt: readString(source, 'createdAt', 'CreatedAt'),
     expiresAt: readString(source, 'expiresAt', 'ExpiresAt'),
     isHtml: readBoolean(source, 'isHtml', 'IsHtml'),
     nextAttemptAt: readNullableString(source, 'nextAttemptAt', 'NextAttemptAt'),

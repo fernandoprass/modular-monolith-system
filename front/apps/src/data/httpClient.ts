@@ -100,6 +100,14 @@ export function postCourierJson(path: string, body: unknown): Promise<unknown> {
   return request(path, { baseUrl: CONFIG.apiBaseUrls.courier, body, method: 'POST' })
 }
 
+export function putCourierJson(path: string, body: unknown): Promise<unknown> {
+  return request(path, { baseUrl: CONFIG.apiBaseUrls.courier, body, method: 'PUT' })
+}
+
+export function deleteCourierJson(path: string): Promise<unknown> {
+  return request(path, { baseUrl: CONFIG.apiBaseUrls.courier, method: 'DELETE' })
+}
+
 export function getIamJson(path: string): Promise<unknown> {
   return request(path, { baseUrl: CONFIG.apiBaseUrls.iam, method: 'GET' })
 }

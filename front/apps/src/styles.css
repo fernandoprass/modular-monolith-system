@@ -960,6 +960,12 @@ textarea {
   max-width: 1600px;
 }
 
+.courier-template-page {
+  display: grid;
+  max-width: 1400px;
+  gap: 14px;
+}
+
 .email-status-pending {
   border-color: #cbd5e1;
   background: #f1f5f9;
@@ -1004,6 +1010,57 @@ textarea {
   color: #334155;
   font-size: 1rem;
   font-weight: 700;
+}
+
+.template-translations-section {
+  display: grid;
+  gap: 10px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.template-type-note {
+  padding: 10px 0;
+}
+
+.dialog-content.dialog-content-wide {
+  width: min(100% - 32px, 960px);
+}
+
+.template-translation-dialog-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  gap: 16px;
+  max-height: calc(100vh - 180px);
+  overflow: auto;
+}
+
+.template-translation-editor,
+.template-preview-panel {
+  min-width: 0;
+}
+
+.template-translation-body-input,
+.template-preview-frame {
+  min-height: 360px;
+}
+
+.template-preview-panel {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+}
+
+.template-preview-frame {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 5px;
+  background: #fff;
 }
 
 .checkbox-row {
@@ -1322,5 +1379,14 @@ textarea {
 
   .form-row-two {
     grid-template-columns: 1fr;
+  }
+
+  .template-translation-dialog-body {
+    grid-template-columns: 1fr;
+  }
+
+  .section-header {
+    align-items: stretch;
+    flex-direction: column;
   }
 }

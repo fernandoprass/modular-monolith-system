@@ -59,7 +59,7 @@ export function EmailListPage() {
   const t = useTranslate()
   const navigate = useNavigate()
   const notifyError = useNotifyError()
-  const { permissions } = useAuth()
+  const { permissions, user } = useAuth()
   const [appliedFilters, setAppliedFilters] = useState<EmailSearchForm>(() => getDefaultEmailSearch())
   const [pageNumber, setPageNumber] = useState<number>(DEFAULT_PAGINATION.pageNumber)
   const [pageSize, setPageSize] = useState<number>(DEFAULT_PAGINATION.pageSize)
@@ -71,9 +71,10 @@ export function EmailListPage() {
     defaultValues: appliedFilters,
   })
   const columns = useMemo(() => createEmailTableColumns({
+    language: user?.language,
     onView: (email) => navigate(APP_ROUTES.emailView(email.id)),
     t,
-  }), [navigate, t])
+  }), [navigate, t, user?.language])
 
   const loadEmails = useCallback(async (targetPage: number) => {
     setIsLoading(true)

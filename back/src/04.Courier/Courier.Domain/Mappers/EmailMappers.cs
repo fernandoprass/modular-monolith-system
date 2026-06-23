@@ -35,6 +35,7 @@ public static class EmailMappers
          email.Feature,
          email.Recipient,
          email.Subject,
-         email.Status);
+         email.Status, 
+         email.CreatedAt);
    }
 }

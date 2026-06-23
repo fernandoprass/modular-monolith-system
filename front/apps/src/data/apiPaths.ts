@@ -4,6 +4,12 @@ export const API_PATHS = {
       byId: (id: string | number) => `/api/v1/emails/${id}`,
       list: '/api/v1/emails',
     },
+    templates: {
+      byId: (id: string | number) => `/api/v1/templates/${id}`,
+      emailTranslation: (id: string | number, language: string) => `/api/v1/templates/${id}/email-translations/${language}`,
+      emailTranslations: (id: string | number) => `/api/v1/templates/${id}/email-translations`,
+      list: '/api/v1/templates',
+    },
   },
   iam: {
     authentication: {

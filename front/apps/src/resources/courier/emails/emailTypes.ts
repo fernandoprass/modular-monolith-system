@@ -55,6 +55,7 @@ export const EMAIL_STATUSES = {
 export type EmailStatus = typeof EMAIL_STATUSES[keyof typeof EMAIL_STATUSES]
 
 export type EmailLiteDto = {
+  createdAt: string
   feature: string
   id: string
   module: string
@@ -72,7 +73,6 @@ export type DeliveryAttemptDto = {
 export type EmailDto = EmailLiteDto & {
   attempts: DeliveryAttemptDto[]
   body: string
-  createdAt: string
   expiresAt: string
   isHtml: boolean
   nextAttemptAt: string | null

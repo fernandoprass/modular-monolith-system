@@ -78,7 +78,7 @@ public class TemplateController(ITemplateService templateService) : BaseControll
       return result.HasError ? BadRequest(result) : Ok(result);
    }
 
-   [HttpDelete("{id:guid}/translations/{language}")]
+   [HttpDelete("{id:guid}/email-translations/{language}")]
    [Authorize]
    [RequirePermission(CourierPermission.Templates.Write)]
    public async Task<IActionResult> RemoveTranslation(Guid id, string language, CancellationToken cancellationToken)
