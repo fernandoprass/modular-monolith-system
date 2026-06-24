@@ -22,8 +22,9 @@ import { hasPermissionCode } from '../../../shared/permissions'
 import { deleteTemplate, getTemplates } from './templateApi'
 import { createTemplateTableColumns } from './TemplateListPageColumns'
 import {
+  NOTIFICATION_SEVERITY_OPTIONS,
   TEMPLATE_FILTER_VALUES,
-  TEMPLATE_TYPE_OPTIONS,
+  TEMPLATE_MODULE_OPTIONS,
   type TemplateLiteDto,
   type TemplateSearchForm,
 } from './templateTypes'
@@ -31,8 +32,9 @@ import { toTranslatedTemplateOptions } from './templateUi'
 
 const EMPTY_TEMPLATE_SEARCH: TemplateSearchForm = {
   key: '',
+  module: TEMPLATE_FILTER_VALUES.all,
   name: '',
-  type: TEMPLATE_FILTER_VALUES.all,
+  severity: TEMPLATE_FILTER_VALUES.all,
 }
 
 export function TemplateListPage() {
@@ -125,6 +127,23 @@ export function TemplateListPage() {
         )}
       </div>
       <FilterToolbar onReset={handleReset} onSubmit={handleSubmit(handleSearch)}>
+        <Controller
+          control={control}
+          name="module"
+          render={({ field }) => (
+            <Field>
+              <FieldLabel>{t('shared.fields.module')}</FieldLabel>
+              <Select
+                onValueChange={field.onChange}
+                options={[
+                  { label: t('shared.filters.all'), value: TEMPLATE_FILTER_VALUES.all },
+                  ...toTranslatedTemplateOptions(TEMPLATE_MODULE_OPTIONS, t),
+                ]}
+                value={field.value}
+              />
+            </Field>
+          )}
+        />
         <Field>
           <FieldLabel htmlFor="template-key-filter">{t('shared.fields.key')}</FieldLabel>
           <Input id="template-key-filter" {...register('key')} />
@@ -135,15 +154,15 @@ export function TemplateListPage() {
         </Field>
         <Controller
           control={control}
-          name="type"
+          name="severity"
           render={({ field }) => (
             <Field>
-              <FieldLabel>{t('shared.fields.type')}</FieldLabel>
+              <FieldLabel>{t('shared.fields.severity')}</FieldLabel>
               <Select
                 onValueChange={field.onChange}
                 options={[
                   { label: t('shared.filters.all'), value: TEMPLATE_FILTER_VALUES.all },
-                  ...toTranslatedTemplateOptions(TEMPLATE_TYPE_OPTIONS, t),
+                  ...toTranslatedTemplateOptions(NOTIFICATION_SEVERITY_OPTIONS, t),
                 ]}
                 value={field.value}
               />

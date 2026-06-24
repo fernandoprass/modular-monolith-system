@@ -6,13 +6,23 @@ import {
   DATA_TABLE_ROW_ACTION_KINDS,
   DataTableRowActions,
 } from '../../../components/ui/data-table-row-actions'
-import type { TemplateEmailTranslationDto } from './templateTypes'
+import type { TemplateTranslationDto } from './templateTypes'
 
 type CreateTemplateTranslationColumnsRequest = {
   canWrite: boolean
-  onDelete: (translation: TemplateEmailTranslationDto) => void
-  onEdit: (translation: TemplateEmailTranslationDto) => void
+  onDelete: (translation: TemplateTranslationDto) => void
+  onEdit: (translation: TemplateTranslationDto) => void
   t: Translate
+}
+
+function ChannelBadge({ isConfigured, t }: { isConfigured: boolean; t: Translate }) {
+  return (
+    <Badge variant={isConfigured ? 'active' : 'inactive'}>
+      {t(isConfigured
+        ? 'features.courier.templates.channels.configured'
+        : 'features.courier.templates.channels.notConfigured')}
+    </Badge>
+  )
 }
 
 export function createTemplateTranslationColumns({
@@ -20,26 +30,25 @@ export function createTemplateTranslationColumns({
   onDelete,
   onEdit,
   t,
-}: CreateTemplateTranslationColumnsRequest): ColumnDef<TemplateEmailTranslationDto>[] {
+}: CreateTemplateTranslationColumnsRequest): ColumnDef<TemplateTranslationDto>[] {
   return [
     {
       accessorKey: 'language',
       header: t('shared.fields.language'),
     },
     {
-      accessorKey: 'subject',
-      header: t('shared.fields.subject'),
+      accessorKey: 'name',
+      header: t('shared.fields.name'),
     },
     {
-      accessorKey: 'isHtml',
-      cell: ({ row }) => (
-        <Badge variant={row.original.isHtml ? 'active' : 'inactive'}>
-          {row.original.isHtml
-            ? t('features.courier.templates.formats.html')
-            : t('features.courier.templates.formats.text')}
-        </Badge>
-      ),
-      header: t('shared.fields.format'),
+      accessorKey: 'email',
+      cell: ({ row }) => <ChannelBadge isConfigured={row.original.email !== null} t={t} />,
+      header: t('shared.fields.email'),
+    },
+    {
+      accessorKey: 'notification',
+      cell: ({ row }) => <ChannelBadge isConfigured={row.original.notification !== null} t={t} />,
+      header: t('features.courier.templates.channels.notification'),
     },
     {
       cell: ({ row }) => (

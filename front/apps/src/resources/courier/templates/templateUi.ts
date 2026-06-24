@@ -1,9 +1,9 @@
 import type { Translate } from '../../../app/i18n/i18n'
 import {
+  NOTIFICATION_SEVERITIES,
   RETENTION_POLICIES,
-  TEMPLATE_TYPES,
+  type NotificationSeverity,
   type RetentionPolicy,
-  type TemplateType,
 } from './templateTypes'
 
 type TemplateOption = {
@@ -11,10 +11,10 @@ type TemplateOption = {
   value: string
 }
 
-const TEMPLATE_TYPE_LABEL_KEYS: Record<TemplateType, string> = {
-  [TEMPLATE_TYPES.comment]: 'features.courier.templates.types.comment',
-  [TEMPLATE_TYPES.email]: 'features.courier.templates.types.email',
-  [TEMPLATE_TYPES.notification]: 'features.courier.templates.types.notification',
+const NOTIFICATION_SEVERITY_LABEL_KEYS: Record<NotificationSeverity, string> = {
+  [NOTIFICATION_SEVERITIES.information]: 'features.courier.templates.severities.information',
+  [NOTIFICATION_SEVERITIES.warning]: 'features.courier.templates.severities.warning',
+  [NOTIFICATION_SEVERITIES.critical]: 'features.courier.templates.severities.critical',
 }
 
 const RETENTION_POLICY_LABEL_KEYS: Record<RetentionPolicy, string> = {
@@ -25,8 +25,8 @@ const RETENTION_POLICY_LABEL_KEYS: Record<RetentionPolicy, string> = {
   [RETENTION_POLICIES.longTerm]: 'features.courier.templates.retentionPolicies.longTerm',
 }
 
-export function getTemplateTypeLabel(value: TemplateType, t: Translate): string {
-  return t(TEMPLATE_TYPE_LABEL_KEYS[value])
+export function getNotificationSeverityLabel(value: NotificationSeverity, t: Translate): string {
+  return t(NOTIFICATION_SEVERITY_LABEL_KEYS[value])
 }
 
 export function getRetentionPolicyLabel(value: RetentionPolicy, t: Translate): string {

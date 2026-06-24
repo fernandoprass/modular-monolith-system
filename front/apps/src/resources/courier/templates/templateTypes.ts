@@ -1,38 +1,41 @@
 export const TEMPLATE_QUERY_PARAMS = {
   key: 'Key',
+  module: 'Module',
   name: 'Name',
   pageNumber: 'PageNumber',
   pageSize: 'PageSize',
-  type: 'Type',
+  severity: 'Severity',
 } as const
 
 export const TEMPLATE_REQUEST_FIELDS = {
+  isAllowingOptOut: 'IsAllowingOptOut',
   key: 'Key',
-  name: 'Name',
+  module: 'Module',
   retentionPolicy: 'RetentionPolicy',
-  type: 'Type',
-} as const
-
-export const TEMPLATE_TRANSLATION_REQUEST_FIELDS = {
-  body: 'Body',
-  language: 'Language',
-  subject: 'Subject',
+  severity: 'Severity',
 } as const
 
 export const TEMPLATE_FILTER_VALUES = {
   all: 'all',
 } as const
 
-export const TEMPLATE_TYPES = {
-  comment: 1,
-  email: 2,
-  notification: 3,
+export const TEMPLATE_MODULE_OPTIONS = [
+  { labelKey: 'modules.iam', value: 'iam' },
+  { labelKey: 'modules.shared', value: 'shared' },
+  { labelKey: 'modules.sentinel', value: 'sentinel' },
+  { labelKey: 'modules.courier', value: 'courier' },
+] as const
+
+export const NOTIFICATION_SEVERITIES = {
+  critical: 3,
+  information: 1,
+  warning: 2,
 } as const
 
-export const TEMPLATE_TYPE_OPTIONS = [
-  { labelKey: 'features.courier.templates.types.comment', value: String(TEMPLATE_TYPES.comment) },
-  { labelKey: 'features.courier.templates.types.email', value: String(TEMPLATE_TYPES.email) },
-  { labelKey: 'features.courier.templates.types.notification', value: String(TEMPLATE_TYPES.notification) },
+export const NOTIFICATION_SEVERITY_OPTIONS = [
+  { labelKey: 'features.courier.templates.severities.information', value: String(NOTIFICATION_SEVERITIES.information) },
+  { labelKey: 'features.courier.templates.severities.warning', value: String(NOTIFICATION_SEVERITIES.warning) },
+  { labelKey: 'features.courier.templates.severities.critical', value: String(NOTIFICATION_SEVERITIES.critical) },
 ] as const
 
 export const RETENTION_POLICIES = {
@@ -51,36 +54,51 @@ export const RETENTION_POLICY_OPTIONS = [
   { labelKey: 'features.courier.templates.retentionPolicies.longTerm', value: String(RETENTION_POLICIES.longTerm) },
 ] as const
 
-export type TemplateType = typeof TEMPLATE_TYPES[keyof typeof TEMPLATE_TYPES]
+export type NotificationSeverity = typeof NOTIFICATION_SEVERITIES[keyof typeof NOTIFICATION_SEVERITIES]
 export type RetentionPolicy = typeof RETENTION_POLICIES[keyof typeof RETENTION_POLICIES]
 
 export type TemplateLiteDto = {
   id: string
+  isAllowingOptOut: boolean
   key: string
+  module: string
   name: string
   retentionPolicy: RetentionPolicy
-  type: TemplateType
+  severity: NotificationSeverity
 }
 
-export type TemplateEmailTranslationDto = {
+export type TemplateTranslationEmailDto = {
   body: string
   isHtml: boolean
-  language: string
   subject: string
 }
 
-export type TemplateDto = TemplateLiteDto & {
+export type TemplateTranslationNotificationDto = {
+  actionLink: string | null
+  message: string
+  title: string
+}
+
+export type TemplateTranslationDto = {
+  email: TemplateTranslationEmailDto | null
+  language: string
+  name: string
+  notification: TemplateTranslationNotificationDto | null
+}
+
+export type TemplateDto = Omit<TemplateLiteDto, 'name'> & {
   createdAt: string
   createdBy: string
-  emailTranslations: TemplateEmailTranslationDto[]
+  translations: TemplateTranslationDto[]
   updatedAt: string | null
   updatedBy: string | null
 }
 
 export type TemplateSearchForm = {
   key: string
+  module: string
   name: string
-  type: string
+  severity: string
 }
 
 export type TemplateListQuery = TemplateSearchForm & {
@@ -89,27 +107,43 @@ export type TemplateListQuery = TemplateSearchForm & {
 }
 
 export type TemplateForm = {
+  isAllowingOptOut: boolean
   key: string
-  name: string
+  module: string
   retentionPolicy: string
-  type: string
+  severity: string
 }
 
 export type TemplateRequest = {
+  IsAllowingOptOut: boolean
   Key: string
-  Name: string
+  Module: string
   RetentionPolicy: number
-  Type: number
+  Severity: number
 }
 
 export type TemplateTranslationForm = {
-  body: string
+  emailBody: string
+  emailEnabled: boolean
+  emailSubject: string
   language: string
-  subject: string
+  name: string
+  notificationActionLink: string
+  notificationEnabled: boolean
+  notificationMessage: string
+  notificationTitle: string
 }
 
 export type TemplateTranslationRequest = {
-  Body: string
+  Email: {
+    Body: string
+    Subject: string
+  } | null
   Language: string
-  Subject: string
+  Name: string
+  Notification: {
+    ActionLink: string | null
+    Message: string
+    Title: string
+  } | null
 }

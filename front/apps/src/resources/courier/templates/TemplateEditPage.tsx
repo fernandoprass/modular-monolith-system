@@ -12,13 +12,14 @@ import { APP_ROUTES } from '../../../app/routes'
 import { useAuth, useNotifyError } from '../../../auth/AuthProvider'
 import { Button } from '../../../components/ui/button'
 import { Card, CardContent } from '../../../components/ui/card'
+import { Checkbox } from '../../../components/ui/checkbox'
 import { DataTable } from '../../../components/ui/data-table'
 import { ConfirmDialog } from '../../../components/ui/dialog-confirm'
 import { Field, FieldGroup, FieldLabel } from '../../../components/ui/form'
 import { Input } from '../../../components/ui/input'
 import { Select } from '../../../components/ui/select'
 import { COURIER_PERMISSIONS } from '../../../shared/courierConstants'
-import { LANGUAGE_OPTIONS } from '../../../shared/languages'
+import { LANGUAGE_OPTIONS, normalizeLanguageCode } from '../../../shared/languages'
 import { hasPermissionCode } from '../../../shared/permissions'
 import {
   createTemplate,
@@ -29,27 +30,29 @@ import {
 import { TemplateTranslationDialog } from './TemplateTranslationDialog'
 import { createTemplateTranslationColumns } from './TemplateTranslationTableColumns'
 import {
+  NOTIFICATION_SEVERITY_OPTIONS,
   RETENTION_POLICY_OPTIONS,
-  TEMPLATE_TYPES,
-  TEMPLATE_TYPE_OPTIONS,
+  TEMPLATE_MODULE_OPTIONS,
   type TemplateDto,
-  type TemplateEmailTranslationDto,
   type TemplateForm,
+  type TemplateTranslationDto,
 } from './templateTypes'
 import { toTranslatedTemplateOptions } from './templateUi'
 
 const EMPTY_TEMPLATE_FORM: TemplateForm = {
+  isAllowingOptOut: false,
   key: '',
-  name: '',
+  module: TEMPLATE_MODULE_OPTIONS[0].value,
   retentionPolicy: RETENTION_POLICY_OPTIONS[0].value,
-  type: TEMPLATE_TYPE_OPTIONS[1].value,
+  severity: NOTIFICATION_SEVERITY_OPTIONS[0].value,
 }
 
 const templateSchema = z.object({
+  isAllowingOptOut: z.boolean(),
   key: z.string().trim().min(5),
-  name: z.string().trim().min(1),
+  module: z.string().trim().min(2),
   retentionPolicy: z.string().trim().min(1),
-  type: z.string().trim().min(1),
+  severity: z.string().trim().min(1),
 })
 
 type TemplateDetailsFormProps = {
@@ -59,10 +62,11 @@ type TemplateDetailsFormProps = {
 
 function toForm(template: TemplateDto): TemplateForm {
   return {
+    isAllowingOptOut: template.isAllowingOptOut,
     key: template.key,
-    name: template.name,
+    module: template.module,
     retentionPolicy: String(template.retentionPolicy),
-    type: String(template.type),
+    severity: String(template.severity),
   }
 }
 
@@ -118,13 +122,8 @@ export function TemplateEditPage() {
           )}
         </CardContent>
       </Card>
-      {template !== null && template.type === TEMPLATE_TYPES.email && (
+      {template !== null && (
         <TemplateTranslations onChanged={loadTemplate} template={template} />
-      )}
-      {template !== null && template.type !== TEMPLATE_TYPES.email && (
-        <p className="page-subtitle template-type-note">
-          {t('features.courier.templates.messages.translationsEmailOnly')}
-        </p>
       )}
     </main>
   )
@@ -137,7 +136,6 @@ function TemplateDetailsForm({ onSaved, template }: TemplateDetailsFormProps) {
   const { showSuccess } = useToast()
   const [isSaving, setIsSaving] = useState(false)
   const isCreate = template === null
-  const hasTranslations = (template?.emailTranslations.length ?? 0) > 0
   const form = useForm<TemplateForm>({
     defaultValues: template === null ? EMPTY_TEMPLATE_FORM : toForm(template),
     resolver: zodResolver(templateSchema),
@@ -168,26 +166,35 @@ function TemplateDetailsForm({ onSaved, template }: TemplateDetailsFormProps) {
     <form className="edit-form" onSubmit={form.handleSubmit(handleSave)}>
       <FieldGroup>
         <div className="form-row-two">
+          <Controller
+            control={form.control}
+            name="module"
+            render={({ field }) => (
+              <Field>
+                <FieldLabel>{t('shared.fields.module')}</FieldLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  options={toTranslatedTemplateOptions(TEMPLATE_MODULE_OPTIONS, t)}
+                  value={field.value}
+                />
+              </Field>
+            )}
+          />
           <Field>
             <FieldLabel htmlFor="template-key">{t('shared.fields.key')}</FieldLabel>
             <Input id="template-key" required {...form.register('key')} />
-          </Field>
-          <Field>
-            <FieldLabel htmlFor="template-name">{t('shared.fields.name')}</FieldLabel>
-            <Input id="template-name" required {...form.register('name')} />
           </Field>
         </div>
         <div className="form-row-two">
           <Controller
             control={form.control}
-            name="type"
+            name="severity"
             render={({ field }) => (
               <Field>
-                <FieldLabel>{t('shared.fields.type')}</FieldLabel>
+                <FieldLabel>{t('shared.fields.severity')}</FieldLabel>
                 <Select
-                  disabled={hasTranslations}
                   onValueChange={field.onChange}
-                  options={toTranslatedTemplateOptions(TEMPLATE_TYPE_OPTIONS, t)}
+                  options={toTranslatedTemplateOptions(NOTIFICATION_SEVERITY_OPTIONS, t)}
                   value={field.value}
                 />
               </Field>
@@ -208,6 +215,17 @@ function TemplateDetailsForm({ onSaved, template }: TemplateDetailsFormProps) {
             )}
           />
         </div>
+        <Controller
+          control={form.control}
+          name="isAllowingOptOut"
+          render={({ field }) => (
+            <Checkbox
+              checked={field.value}
+              label={t('features.courier.templates.fields.allowOptOut')}
+              onCheckedChange={field.onChange}
+            />
+          )}
+        />
       </FieldGroup>
       <div className="form-actions">
         <Button disabled={isSaving} type="submit">
@@ -229,12 +247,14 @@ function TemplateTranslations({ onChanged, template }: TemplateTranslationsProps
   const { showSuccess } = useToast()
   const { permissions } = useAuth()
   const [sorting, setSorting] = useState<SortingState>([])
-  const [translationToEdit, setTranslationToEdit] = useState<TemplateEmailTranslationDto | null>(null)
-  const [translationToDelete, setTranslationToDelete] = useState<TemplateEmailTranslationDto | null>(null)
+  const [translationToEdit, setTranslationToEdit] = useState<TemplateTranslationDto | null>(null)
+  const [translationToDelete, setTranslationToDelete] = useState<TemplateTranslationDto | null>(null)
   const [isTranslationDialogOpen, setIsTranslationDialogOpen] = useState(false)
   const canWrite = hasPermissionCode(permissions, COURIER_PERMISSIONS.templates.write)
-  const usedLanguages = template.emailTranslations.map((translation) => translation.language)
-  const canAddLanguage = LANGUAGE_OPTIONS.some((option) => !usedLanguages.includes(option.value))
+  const usedLanguages = template.translations.map((translation) => normalizeLanguageCode(translation.language))
+  const canAddLanguage = LANGUAGE_OPTIONS.some((option) => (
+    !usedLanguages.includes(normalizeLanguageCode(option.value))
+  ))
   const columns = useMemo(() => createTemplateTranslationColumns({
     canWrite,
     onDelete: setTranslationToDelete,
@@ -248,6 +268,11 @@ function TemplateTranslations({ onChanged, template }: TemplateTranslationsProps
   function handleAdd() {
     setTranslationToEdit(null)
     setIsTranslationDialogOpen(true)
+  }
+
+  function handleDialogClose() {
+    setIsTranslationDialogOpen(false)
+    setTranslationToEdit(null)
   }
 
   async function handleDelete() {
@@ -278,7 +303,7 @@ function TemplateTranslations({ onChanged, template }: TemplateTranslationsProps
       </div>
       <DataTable
         columns={columns}
-        data={template.emailTranslations}
+        data={template.translations}
         emptyText={t('features.courier.templates.messages.noTranslations')}
         isLoading={false}
         loadingText={t('shared.common.loading')}
@@ -287,7 +312,7 @@ function TemplateTranslations({ onChanged, template }: TemplateTranslationsProps
       />
       <TemplateTranslationDialog
         isOpen={isTranslationDialogOpen}
-        onClose={() => setIsTranslationDialogOpen(false)}
+        onClose={handleDialogClose}
         onSaved={onChanged}
         templateId={template.id}
         translation={translationToEdit}

@@ -304,7 +304,7 @@ Example:
 ```ts
 export const LANGUAGE_CODES = {
   english: 'en',
-  portugueseBrazil: 'pt-br',
+  portugueseBrazil: 'pt-BR',
   spanish: 'es',
 } as const
 ```

@@ -100,6 +100,15 @@ export const enMessages = {
           create: 'Create template',
           editTranslation: 'Edit translation',
         },
+        channels: {
+          configured: 'Configured',
+          notConfigured: 'Not configured',
+          notification: 'Notification',
+        },
+        fields: {
+          actionLink: 'Action link',
+          allowOptOut: 'Allow recipients to opt out',
+        },
         formats: {
           html: 'HTML',
           text: 'Text',
@@ -111,7 +120,6 @@ export const enMessages = {
           deleteTranslationTitle: 'Delete translation',
           empty: 'No templates found.',
           noTranslations: 'No translations found.',
-          translationsEmailOnly: 'Localized content is currently available only for email templates.',
         },
         name: 'Templates',
         notifications: {
@@ -140,10 +148,22 @@ export const enMessages = {
         sections: {
           translations: 'Translations',
         },
+        severities: {
+          critical: 'Critical',
+          information: 'Information',
+          warning: 'Warning',
+        },
         types: {
           comment: 'Comment',
           email: 'Email',
           notification: 'Notification',
+        },
+        validation: {
+          channelRequired: 'Enable email, notification, or both.',
+          emailBody: 'Email body is required.',
+          emailSubject: 'Email subject must contain at least 10 characters.',
+          notificationMessage: 'Notification message is required.',
+          notificationTitle: 'Notification title is required.',
         },
       },
     },
@@ -427,6 +447,7 @@ export const enMessages = {
       requestId: 'Request ID',
       recipient: 'Recipient',
       retentionPolicy: 'Retention policy',
+      severity: 'Severity',
       retryCount: 'Retry count',
       startsAt: 'Starts at',
       stackTrace: 'Stack trace',

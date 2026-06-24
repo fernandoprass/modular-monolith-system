@@ -6,7 +6,7 @@ import {
   DataTableRowActions,
 } from '../../../components/ui/data-table-row-actions'
 import type { TemplateLiteDto } from './templateTypes'
-import { getRetentionPolicyLabel, getTemplateTypeLabel } from './templateUi'
+import { getNotificationSeverityLabel, getRetentionPolicyLabel } from './templateUi'
 
 type CreateTemplateTableColumnsRequest = {
   canDelete: boolean
@@ -25,6 +25,10 @@ export function createTemplateTableColumns({
 }: CreateTemplateTableColumnsRequest): ColumnDef<TemplateLiteDto>[] {
   return [
     {
+      accessorKey: 'module',
+      header: t('shared.fields.module'),
+    },
+    {
       accessorKey: 'key',
       header: t('shared.fields.key'),
     },
@@ -33,9 +37,9 @@ export function createTemplateTableColumns({
       header: t('shared.fields.name'),
     },
     {
-      accessorKey: 'type',
-      cell: ({ row }) => getTemplateTypeLabel(row.original.type, t),
-      header: t('shared.fields.type'),
+      accessorKey: 'severity',
+      cell: ({ row }) => getNotificationSeverityLabel(row.original.severity, t),
+      header: t('shared.fields.severity'),
     },
     {
       accessorKey: 'retentionPolicy',

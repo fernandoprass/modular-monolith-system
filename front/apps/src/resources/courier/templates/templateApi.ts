@@ -9,22 +9,21 @@ import {
 import { ensureResultSuccess, unwrapResult } from '../../../data/result'
 import type { PagedResultDto } from '../../../shared/pagination'
 import {
+  NOTIFICATION_SEVERITIES,
   RETENTION_POLICIES,
   TEMPLATE_FILTER_VALUES,
   TEMPLATE_QUERY_PARAMS,
   TEMPLATE_REQUEST_FIELDS,
-  TEMPLATE_TRANSLATION_REQUEST_FIELDS,
-  TEMPLATE_TYPES,
+  type NotificationSeverity,
   type RetentionPolicy,
   type TemplateDto,
-  type TemplateEmailTranslationDto,
   type TemplateForm,
   type TemplateListQuery,
   type TemplateLiteDto,
   type TemplateRequest,
+  type TemplateTranslationDto,
   type TemplateTranslationForm,
   type TemplateTranslationRequest,
-  type TemplateType,
 } from './templateTypes'
 
 function appendOptional(query: URLSearchParams, key: string, value: string): void {
@@ -36,9 +35,10 @@ function appendOptional(query: URLSearchParams, key: string, value: string): voi
 function toTemplateQuery(request: TemplateListQuery): URLSearchParams {
   const query = new URLSearchParams()
 
+  appendOptional(query, TEMPLATE_QUERY_PARAMS.module, request.module)
   appendOptional(query, TEMPLATE_QUERY_PARAMS.key, request.key)
   appendOptional(query, TEMPLATE_QUERY_PARAMS.name, request.name)
-  appendOptional(query, TEMPLATE_QUERY_PARAMS.type, request.type)
+  appendOptional(query, TEMPLATE_QUERY_PARAMS.severity, request.severity)
   query.set(TEMPLATE_QUERY_PARAMS.pageNumber, request.pageNumber.toString())
   query.set(TEMPLATE_QUERY_PARAMS.pageSize, request.pageSize.toString())
 
@@ -99,6 +99,18 @@ function readNullableString(value: Record<string, unknown>, ...keys: string[]): 
   return data.length === 0 ? null : data
 }
 
+function readRecord(value: Record<string, unknown>, ...keys: string[]): Record<string, unknown> | null {
+  for (const key of keys) {
+    const data = value[key]
+
+    if (isRecord(data)) {
+      return data
+    }
+  }
+
+  return null
+}
+
 function unwrapTemplateSource(value: unknown): Record<string, unknown> {
   if (!isRecord(value)) {
     return {}
@@ -115,18 +127,22 @@ function unwrapTemplateSource(value: unknown): Record<string, unknown> {
   return value
 }
 
-function readTemplateType(value: Record<string, unknown>, ...keys: string[]): TemplateType {
-  const type = readNumber(value, ...keys)
-  const types = Object.values(TEMPLATE_TYPES)
+function readNotificationSeverity(value: Record<string, unknown>, ...keys: string[]): NotificationSeverity {
+  const severity = readNumber(value, ...keys)
+  const severities = Object.values(NOTIFICATION_SEVERITIES)
 
-  return types.includes(type as TemplateType) ? type as TemplateType : TEMPLATE_TYPES.email
+  return severities.includes(severity as NotificationSeverity)
+    ? severity as NotificationSeverity
+    : NOTIFICATION_SEVERITIES.information
 }
 
 function readRetentionPolicy(value: Record<string, unknown>, ...keys: string[]): RetentionPolicy {
   const policy = readNumber(value, ...keys)
   const policies = Object.values(RETENTION_POLICIES)
 
-  return policies.includes(policy as RetentionPolicy) ? policy as RetentionPolicy : RETENTION_POLICIES.operational
+  return policies.includes(policy as RetentionPolicy)
+    ? policy as RetentionPolicy
+    : RETENTION_POLICIES.operational
 }
 
 function normalizeTemplateLiteDto(value: unknown): TemplateLiteDto {
@@ -134,33 +150,45 @@ function normalizeTemplateLiteDto(value: unknown): TemplateLiteDto {
 
   return {
     id: readString(source, 'id', 'Id'),
+    isAllowingOptOut: readBoolean(source, 'isAllowingOptOut', 'IsAllowingOptOut'),
     key: readString(source, 'key', 'Key'),
+    module: readString(source, 'module', 'Module'),
     name: readString(source, 'name', 'Name'),
     retentionPolicy: readRetentionPolicy(source, 'retentionPolicy', 'RetentionPolicy'),
-    type: readTemplateType(source, 'type', 'Type'),
+    severity: readNotificationSeverity(source, 'severity', 'Severity'),
   }
 }
 
-function normalizeTranslation(value: unknown): TemplateEmailTranslationDto {
+function normalizeTranslation(value: unknown): TemplateTranslationDto {
   const source = isRecord(value) ? value : {}
+  const email = readRecord(source, 'email', 'Email')
+  const notification = readRecord(source, 'notification', 'Notification')
 
   return {
-    body: readString(source, 'body', 'Body'),
-    isHtml: readBoolean(source, 'isHtml', 'IsHtml'),
+    email: email === null ? null : {
+      body: readString(email, 'body', 'Body'),
+      isHtml: readBoolean(email, 'isHtml', 'IsHtml'),
+      subject: readString(email, 'subject', 'Subject'),
+    },
     language: readString(source, 'language', 'Language'),
-    subject: readString(source, 'subject', 'Subject'),
+    name: readString(source, 'name', 'Name'),
+    notification: notification === null ? null : {
+      actionLink: readNullableString(notification, 'actionLink', 'ActionLink'),
+      message: readString(notification, 'message', 'Message'),
+      title: readString(notification, 'title', 'Title'),
+    },
   }
 }
 
 function normalizeTemplateDto(value: unknown): TemplateDto {
   const source = unwrapTemplateSource(value)
-  const translations = source.emailTranslations ?? source.EmailTranslations
+  const translations = source.translations ?? source.Translations
 
   return {
     ...normalizeTemplateLiteDto(source),
     createdAt: readString(source, 'createdAt', 'CreatedAt'),
     createdBy: readString(source, 'createdBy', 'CreatedBy'),
-    emailTranslations: Array.isArray(translations) ? translations.map(normalizeTranslation) : [],
+    translations: Array.isArray(translations) ? translations.map(normalizeTranslation) : [],
     updatedAt: readNullableString(source, 'updatedAt', 'UpdatedAt'),
     updatedBy: readNullableString(source, 'updatedBy', 'UpdatedBy'),
   }
@@ -181,18 +209,27 @@ function normalizePagedTemplates(value: unknown): PagedResultDto<TemplateLiteDto
 
 function toTemplateRequest(data: TemplateForm): TemplateRequest {
   return {
+    [TEMPLATE_REQUEST_FIELDS.isAllowingOptOut]: data.isAllowingOptOut,
     [TEMPLATE_REQUEST_FIELDS.key]: data.key,
-    [TEMPLATE_REQUEST_FIELDS.name]: data.name,
+    [TEMPLATE_REQUEST_FIELDS.module]: data.module,
     [TEMPLATE_REQUEST_FIELDS.retentionPolicy]: Number(data.retentionPolicy),
-    [TEMPLATE_REQUEST_FIELDS.type]: Number(data.type),
+    [TEMPLATE_REQUEST_FIELDS.severity]: Number(data.severity),
   }
 }
 
 function toTranslationRequest(data: TemplateTranslationForm): TemplateTranslationRequest {
   return {
-    [TEMPLATE_TRANSLATION_REQUEST_FIELDS.body]: data.body,
-    [TEMPLATE_TRANSLATION_REQUEST_FIELDS.language]: data.language,
-    [TEMPLATE_TRANSLATION_REQUEST_FIELDS.subject]: data.subject,
+    Email: data.emailEnabled ? {
+      Body: data.emailBody,
+      Subject: data.emailSubject,
+    } : null,
+    Language: data.language,
+    Name: data.name,
+    Notification: data.notificationEnabled ? {
+      ActionLink: data.notificationActionLink.trim() || null,
+      Message: data.notificationMessage,
+      Title: data.notificationTitle,
+    } : null,
   }
 }
 
@@ -228,7 +265,7 @@ export async function deleteTemplate(id: string): Promise<void> {
 
 export async function addTemplateTranslation(id: string, request: TemplateTranslationForm): Promise<void> {
   const response = await postCourierJson(
-    API_PATHS.courier.templates.emailTranslations(id),
+    API_PATHS.courier.templates.translations(id),
     toTranslationRequest(request),
   )
 
@@ -241,7 +278,7 @@ export async function updateTemplateTranslation(
   request: TemplateTranslationForm,
 ): Promise<void> {
   const response = await putCourierJson(
-    API_PATHS.courier.templates.emailTranslation(id, language),
+    API_PATHS.courier.templates.translation(id, language),
     toTranslationRequest(request),
   )
 
@@ -249,7 +286,7 @@ export async function updateTemplateTranslation(
 }
 
 export async function deleteTemplateTranslation(id: string, language: string): Promise<void> {
-  const response = await deleteCourierJson(API_PATHS.courier.templates.emailTranslation(id, language))
+  const response = await deleteCourierJson(API_PATHS.courier.templates.translation(id, language))
 
   ensureResultSuccess(response)
 }

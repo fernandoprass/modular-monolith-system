@@ -18,6 +18,7 @@ public class EmailTemplates(
       new(
          "orgazination-welcome",
          "Organization welcome",
+         AllowOptOut: false,
          "Welcome to {{organization.name}}.",
          "<p>Welcome to {{organization.name}}.</p>",
          "Bem-vindo a {{organization.name}}.",
@@ -25,6 +26,7 @@ public class EmailTemplates(
       new(
          "orgazination-delete",
          "Organization delete",
+         AllowOptOut: false,
          "{{organization.name}} was deleted.",
          "<p>{{organization.name}} was deleted.</p>",
          "{{organization.name}} foi removida.",
@@ -32,6 +34,7 @@ public class EmailTemplates(
       new(
          "user-welcome",
          "User welcome",
+         AllowOptOut: false,
          "Welcome, {{user.name}}.",
          "<p>Welcome, {{user.name}}.</p>",
          "Bem-vindo, {{user.name}}.",
@@ -39,6 +42,7 @@ public class EmailTemplates(
       new(
          "user-reset-password",
          "User reset password",
+         AllowOptOut: false,
          "Use the reset password link to continue.",
          "<p>Use the reset password link to continue.</p>",
          "Use o link de redefinicao de senha para continuar.",
@@ -46,6 +50,7 @@ public class EmailTemplates(
       new(
          "user-password-updated",
          "User password updated",
+         AllowOptOut: true,
          "Your password has been updated.",
          "<p>{{user.name}}</p><p>Your password has been updated.</p>",
          "Sua senha foi atualizada.",
@@ -53,6 +58,7 @@ public class EmailTemplates(
       new(
          "user-max-failed-login-attempts",
          "User max failed login attempts",
+         AllowOptOut: false,
          "Your account was locked after too many failed login attempts.",
          "<p>Your account was locked after too many failed login attempts.</p>",
          "Sua conta foi bloqueada apos muitas tentativas de login sem sucesso.",
@@ -60,6 +66,7 @@ public class EmailTemplates(
       new(
          "user-delete",
          "User delete",
+         AllowOptOut: false,
          "The user {{user.email}} was deleted.",
          "<p>The user {{user.email}} was deleted.</p>",
          "O usuario {{user.email}} foi removido.",
@@ -126,6 +133,7 @@ public class EmailTemplates(
    private sealed record EmailTemplateSeed(
       string Key,
       string Name,
+      bool AllowOptOut,
       string SubjectEn,
       string BodyEn,
       string SubjectPt,

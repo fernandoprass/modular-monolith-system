@@ -1024,30 +1024,46 @@ textarea {
   gap: 10px;
 }
 
-.template-type-note {
-  padding: 10px 0;
-}
-
 .dialog-content.dialog-content-wide {
-  width: min(100% - 32px, 960px);
+  width: min(100% - 32px, 1180px);
 }
 
 .template-translation-dialog-body {
   display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
   gap: 16px;
   max-height: calc(100vh - 180px);
   overflow: auto;
 }
 
-.template-translation-editor,
+.template-translation-identity,
+.template-channel-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.template-channel-section,
 .template-preview-panel {
   min-width: 0;
 }
 
+.template-channel-section {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid #d7dee8;
+  border-radius: 6px;
+  background: #f8fafc;
+}
+
 .template-translation-body-input,
 .template-preview-frame {
-  min-height: 360px;
+  min-height: 220px;
+}
+
+.template-notification-message-input {
+  min-height: 150px;
 }
 
 .template-preview-panel {
@@ -1382,6 +1398,11 @@ textarea {
   }
 
   .template-translation-dialog-body {
+    max-height: calc(100vh - 150px);
+  }
+
+  .template-translation-identity,
+  .template-channel-grid {
     grid-template-columns: 1fr;
   }
 
