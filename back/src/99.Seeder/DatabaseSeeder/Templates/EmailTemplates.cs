@@ -1,6 +1,8 @@
 using Courier.Domain.Entities;
 using Courier.Domain.Enums;
 using Courier.Domain.Interfaces.Repositories;
+using Courier.Domain.ValueObjects;
+using Shared.Domain;
 using Shared.Domain.Enums;
 
 namespace DatabaseSeeder.Templates;
@@ -9,8 +11,7 @@ public class EmailTemplates(
    ITemplateRepository templateRepository,
    ITemplateWriteRepository templateWriteRepository)
 {
-   private const string LanguageEnglish = "en";
-   private const string LanguagePortuguese = "pt";
+   private const string Module = "iam";
 
    private static readonly EmailTemplateSeed[] Templates =
    [
@@ -75,29 +76,29 @@ public class EmailTemplates(
 
    private async Task AddTemplateAsync(EmailTemplateSeed seed, CancellationToken cancellationToken)
    {
-      var template = await templateRepository.GetByKeyAsync(seed.Key, cancellationToken);
+      var template = await templateRepository.GetByModuleAndKeyAsync(Module, seed.Key, cancellationToken);
 
       if (template == null)
       {
-         template = Template.Create(seed.Key, seed.Name, TemplateType.Email, RetentionPolicy.Standard, Guid.Empty);
-         template.AddEmailTranslation(LanguageEnglish, seed.SubjectEn, seed.BodyEn, Guid.Empty);
-         template.AddEmailTranslation(LanguagePortuguese, seed.SubjectPr, seed.BodyPr, Guid.Empty);
+         template = Template.Create(
+            Module,
+            seed.Key,
+            false,
+            NotificationSeverity.Information,
+            RetentionPolicy.Standard,
+            Guid.Empty);
+         AddTranslation(template, LanguageOptions.English, seed.Name, seed.SubjectEn, seed.BodyEn);
+         AddTranslation(template, LanguageOptions.PortugueseBrazil, seed.Name, seed.SubjectPt, seed.BodyPt);
 
          await templateWriteRepository.AddAsync(template, cancellationToken);
          Console.WriteLine($"Template: {seed.Key}");
          return;
       }
 
-      if (template.Type != TemplateType.Email)
-      {
-         Console.WriteLine($"Template skipped: {seed.Key}");
-         return;
-      }
-
       var changed = false;
 
-      changed |= template.AddEmailTranslation(LanguageEnglish, seed.SubjectEn, seed.BodyEn, Guid.Empty);
-      changed |= template.AddEmailTranslation(LanguagePortuguese, seed.SubjectPr, seed.BodyPr, Guid.Empty);
+      changed |= AddTranslation(template, LanguageOptions.English, seed.Name, seed.SubjectEn, seed.BodyEn);
+      changed |= AddTranslation(template, LanguageOptions.PortugueseBrazil, seed.Name, seed.SubjectPt, seed.BodyPt);
 
       if (changed)
       {
@@ -106,11 +107,27 @@ public class EmailTemplates(
       }
    }
 
+   private static bool AddTranslation(
+      Template template,
+      string language,
+      string name,
+      string subject,
+      string body)
+   {
+      var translation = TemplateTranslation.Create(
+         language,
+         name,
+         TemplateTranslationEmail.Create(subject, body),
+         null);
+
+      return template.AddTranslation(translation, Guid.Empty);
+   }
+
    private sealed record EmailTemplateSeed(
       string Key,
       string Name,
       string SubjectEn,
       string BodyEn,
-      string SubjectPr,
-      string BodyPr);
+      string SubjectPt,
+      string BodyPt);
 }

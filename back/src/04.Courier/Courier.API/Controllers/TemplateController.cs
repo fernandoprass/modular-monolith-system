@@ -60,25 +60,25 @@ public class TemplateController(ITemplateService templateService) : BaseControll
       return result.HasError ? NotFound(result) : Ok(result);
    }
 
-   [HttpPost("{id:guid}/email-translations")]
+   [HttpPost("{id:guid}/translations")]
    [Authorize]
    [RequirePermission(CourierPermission.Templates.Write)]
-   public async Task<IActionResult> AddEmailTranslation(Guid id, [FromBody] TemplateEmailTranslationRequest request, CancellationToken cancellationToken)
+   public async Task<IActionResult> AddTranslation(Guid id, [FromBody] TemplateTranslationRequest request, CancellationToken cancellationToken)
    {
-      var result = await _templateService.AddEmailTranslationAsync(id, request, cancellationToken);
+      var result = await _templateService.AddTranslationAsync(id, request, cancellationToken);
       return result.HasError ? BadRequest(result) : Ok(result);
    }
 
-   [HttpPut("{id:guid}/email-translations/{language}")]
+   [HttpPut("{id:guid}/translations/{language}")]
    [Authorize]
    [RequirePermission(CourierPermission.Templates.Write)]
-   public async Task<IActionResult> UpdateEmailTranslation(Guid id, string language, [FromBody] TemplateEmailTranslationRequest request, CancellationToken cancellationToken)
+   public async Task<IActionResult> UpdateTranslation(Guid id, string language, [FromBody] TemplateTranslationRequest request, CancellationToken cancellationToken)
    {
-      var result = await _templateService.UpdateEmailTranslationAsync(id, language, request, cancellationToken);
+      var result = await _templateService.UpdateTranslationAsync(id, language, request, cancellationToken);
       return result.HasError ? BadRequest(result) : Ok(result);
    }
 
-   [HttpDelete("{id:guid}/email-translations/{language}")]
+   [HttpDelete("{id:guid}/translations/{language}")]
    [Authorize]
    [RequirePermission(CourierPermission.Templates.Write)]
    public async Task<IActionResult> RemoveTranslation(Guid id, string language, CancellationToken cancellationToken)

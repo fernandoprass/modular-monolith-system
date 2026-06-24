@@ -1,0 +1,31 @@
+meta {
+  name: add translation
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{host.courier}}/api/{{version}}/templates/{{templateId}}/translations
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "language": "pt-BR",
+    "name": "User welcome",
+    "email": {
+      "subject": "Bem-vindo, {{user.name}}",
+      "body": "<p>Sua conta foi criada...</p>"
+    },
+    "notification": {
+      "title": "Nova conta criada!",
+      "message": "Acesse seu perfil para começar.",
+      "actionLink": "/perfil"
+    }
+  }
+}

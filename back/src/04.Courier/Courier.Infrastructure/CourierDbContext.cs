@@ -1,5 +1,6 @@
 using Courier.Domain;
 using Courier.Domain.Entities;
+using Courier.Domain.Enums;
 using Courier.Domain.ValueObjects;
 using Microsoft.Extensions.Configuration;
 using MongoDB.Bson;
@@ -65,8 +66,8 @@ public class CourierDbContext
       var templateIndexes = new[]
       {
          new CreateIndexModel<Template>(
-            Builders<Template>.IndexKeys.Ascending(t => t.Key),
-            new CreateIndexOptions { Unique = true, Name = "ux_templates_key" })
+            Builders<Template>.IndexKeys.Ascending(t => t.Module).Ascending(t => t.Key),
+            new CreateIndexOptions { Unique = true, Name = "ux_templates_module_key" })
       };
 
       await Templates.Indexes.CreateManyAsync(templateIndexes, cancellationToken);
@@ -86,16 +87,51 @@ public class CourierDbContext
          BsonClassMap.RegisterClassMap<Template>(cm =>
          {
             cm.AutoMap();
-            cm.MapField("_emailTranslations").SetElementName("emailTranslations");
-            cm.UnmapMember(t => t.EmailTranslations);
+            cm.MapMember(t => t.Module).SetElementName("module");
+            cm.MapMember(t => t.Key).SetElementName("key");
+            cm.MapMember(t => t.IsAllowingOptOut).SetElementName("isAllowingOptOut");
+            cm.MapField("_translations").SetElementName("translations");
+            cm.UnmapMember(t => t.Translations);
+            cm.MapMember(t => t.Severity)
+               .SetElementName("severity")
+               .SetSerializer(new EnumSerializer<NotificationSeverity>(BsonType.String));
+            cm.MapMember(t => t.RetentionPolicy)
+               .SetElementName("retentionPolicy")
+               .SetSerializer(new EnumSerializer<Shared.Domain.Enums.RetentionPolicy>(BsonType.String));
          });
       }
 
-      if (!BsonClassMap.IsClassMapRegistered(typeof(TemplateEmailTranslation)))
+      if (!BsonClassMap.IsClassMapRegistered(typeof(TemplateTranslation)))
       {
-         BsonClassMap.RegisterClassMap<TemplateEmailTranslation>(cm =>
+         BsonClassMap.RegisterClassMap<TemplateTranslation>(cm =>
          {
             cm.AutoMap();
+            cm.MapMember(t => t.Language).SetElementName("language");
+            cm.MapMember(t => t.Name).SetElementName("name");
+            cm.MapMember(t => t.Email).SetElementName("email");
+            cm.MapMember(t => t.Notification).SetElementName("notification");
+         });
+      }
+
+      if (!BsonClassMap.IsClassMapRegistered(typeof(TemplateTranslationEmail)))
+      {
+         BsonClassMap.RegisterClassMap<TemplateTranslationEmail>(cm =>
+         {
+            cm.AutoMap();
+            cm.MapMember(t => t.Subject).SetElementName("subject");
+            cm.MapMember(t => t.Body).SetElementName("body");
+            cm.MapMember(t => t.IsHtml).SetElementName("isHtml");
+         });
+      }
+
+      if (!BsonClassMap.IsClassMapRegistered(typeof(TemplateTranslationNotification)))
+      {
+         BsonClassMap.RegisterClassMap<TemplateTranslationNotification>(cm =>
+         {
+            cm.AutoMap();
+            cm.MapMember(t => t.Title).SetElementName("title");
+            cm.MapMember(t => t.Message).SetElementName("message");
+            cm.MapMember(t => t.ActionLink).SetElementName("actionLink");
          });
       }
    }

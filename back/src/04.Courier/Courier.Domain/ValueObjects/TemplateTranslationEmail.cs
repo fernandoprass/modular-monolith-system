@@ -2,20 +2,18 @@ namespace Courier.Domain.ValueObjects;
 
 using System.Text.RegularExpressions;
 
-public class TemplateEmailTranslation
+public partial class TemplateTranslationEmail
 {
    public bool IsHtml { get; private set; } = false;
-   public string Language { get; private set; } = string.Empty;
    public string Subject { get; private set; } = string.Empty;
    public string Body { get; private set; } = string.Empty;
 
-   private TemplateEmailTranslation() { }
+   private TemplateTranslationEmail() { }
 
-   public static TemplateEmailTranslation Create(string language, string subject, string body)
+   public static TemplateTranslationEmail Create(string subject, string body)
    {
-      return new TemplateEmailTranslation
+      return new TemplateTranslationEmail
       {
-         Language = language.ToLowerInvariant().Trim(),
          Subject = subject.Trim(),
          Body = body,
          IsHtml = GetIsHtml(body)
@@ -29,8 +27,12 @@ public class TemplateEmailTranslation
       IsHtml = GetIsHtml(body);
    }
 
+   [GeneratedRegex(@"<\s*[a-z][^>]*>", RegexOptions.IgnoreCase)]
+   private static partial Regex HtmlDetectorRegex();
+
    private static bool GetIsHtml(string body)
    {
-      return Regex.IsMatch(body, @"<\s*[a-z][^>]*>", RegexOptions.IgnoreCase);
+      return HtmlDetectorRegex().IsMatch(body);
    }
 }
+

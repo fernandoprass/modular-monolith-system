@@ -5,12 +5,13 @@ namespace Courier.Domain.DTOs.Responses;
 
 public record TemplateDto(
    Guid Id,
+   string Module,
    string Key,
-   string Name,
-   TemplateType Type,
+   bool IsAllowingOptOut,
+   NotificationSeverity Severity,
    RetentionPolicy RetentionPolicy,
    DateTime CreatedAt,
    Guid CreatedBy,
    DateTime? UpdatedAt,
    Guid? UpdatedBy,
-   IReadOnlyCollection<TemplateEmailTranslationDto> EmailTranslations);
+   IReadOnlyCollection<TemplateTranslationDto> Translations);

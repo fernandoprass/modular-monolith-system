@@ -5,8 +5,9 @@ namespace Courier.Domain.DTOs.Responses;
 
 public record TemplateLiteDto(
    Guid Id,
+   string Module,
    string Key,
    string Name,
-   TemplateType Type,
-   RetentionPolicy RetentionPolicy
-   );
+   bool IsAllowingOptOut,
+   NotificationSeverity Severity,
+   RetentionPolicy RetentionPolicy);

@@ -39,9 +39,9 @@ public class EmailOutboxServiceTests
    public async Task QueueAsync_ShouldCreateEmailAndLogAudit()
    {
       var request = CreateQueueRequest();
-      var template = CreateEmailTemplate(request.TemplateKey, request.Language);
+      var template = CreateEmailTemplate(request.Module, request.TemplateKey, request.Language);
       Email? savedEmail = null;
-      _templateRepository.GetByKeyAsync(request.TemplateKey, Arg.Any<CancellationToken>()).Returns(template);
+      _templateRepository.GetByModuleAndKeyAsync(request.Module, request.TemplateKey, Arg.Any<CancellationToken>()).Returns(template);
       _emailRepository.AddAsync(Arg.Any<Email>(), Arg.Any<CancellationToken>())
          .Returns(call =>
          {
@@ -62,7 +62,7 @@ public class EmailOutboxServiceTests
    public async Task QueueAsync_ShouldReturnNotFound_WhenTemplateDoesNotExist()
    {
       var request = CreateQueueRequest();
-      _templateRepository.GetByKeyAsync(request.TemplateKey, Arg.Any<CancellationToken>()).Returns((Template?)null);
+      _templateRepository.GetByModuleAndKeyAsync(request.Module, request.TemplateKey, Arg.Any<CancellationToken>()).Returns((Template?)null);
 
       var result = await _service.QueueAsync(request, TestContext.Current.CancellationToken);
 
@@ -75,8 +75,8 @@ public class EmailOutboxServiceTests
    public async Task QueueAsync_ShouldReturnLanguageError_WhenTranslationDoesNotExist()
    {
       var request = CreateQueueRequest() with { Language = "pt-br" };
-      var template = CreateEmailTemplate(request.TemplateKey, "en");
-      _templateRepository.GetByKeyAsync(request.TemplateKey, Arg.Any<CancellationToken>()).Returns(template);
+      var template = CreateEmailTemplate(request.Module, request.TemplateKey, "en");
+      _templateRepository.GetByModuleAndKeyAsync(request.Module, request.TemplateKey, Arg.Any<CancellationToken>()).Returns(template);
 
       var result = await _service.QueueAsync(request, TestContext.Current.CancellationToken);
 
@@ -89,8 +89,8 @@ public class EmailOutboxServiceTests
    public async Task QueueAsync_ShouldReturnPlaceholderError_WhenValueIsMissing()
    {
       var request = CreateQueueRequest() with { Values = new Dictionary<string, string>() };
-      var template = CreateEmailTemplate(request.TemplateKey, request.Language);
-      _templateRepository.GetByKeyAsync(request.TemplateKey, Arg.Any<CancellationToken>()).Returns(template);
+      var template = CreateEmailTemplate(request.Module, request.TemplateKey, request.Language);
+      _templateRepository.GetByModuleAndKeyAsync(request.Module, request.TemplateKey, Arg.Any<CancellationToken>()).Returns(template);
 
       var result = await _service.QueueAsync(request, TestContext.Current.CancellationToken);
 
@@ -195,10 +195,23 @@ public class EmailOutboxServiceTests
          });
    }
 
-   private static Template CreateEmailTemplate(string key, string language)
+   private static Template CreateEmailTemplate(string module, string key, string language)
    {
-      var template = Template.Create(key, "Welcome", TemplateType.Email, RetentionPolicy.Standard, Guid.NewGuid());
-      template.AddEmailTranslation(language, "Welcome {{user.name}}", "<p>Hello {{user.name}}</p>", Guid.NewGuid());
+      var template = Template.Create(
+         module,
+         key,
+         false,
+         NotificationSeverity.Information,
+         RetentionPolicy.Standard,
+         Guid.NewGuid());
+      var translation = Courier.Domain.ValueObjects.TemplateTranslation.Create(
+         language,
+         "Welcome",
+         Courier.Domain.ValueObjects.TemplateTranslationEmail.Create(
+            "Welcome {{user.name}}",
+            "<p>Hello {{user.name}}</p>"),
+         null);
+      template.AddTranslation(translation, Guid.NewGuid());
 
       return template;
    }

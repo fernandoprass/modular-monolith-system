@@ -5,17 +5,18 @@ meta {
 }
 
 get {
-  url: {{host.courier}}/api/{{version}}/templates
+  url: {{host.courier}}/api/{{version}}/templates?severity=1&pageNumber=1
   body: none
   auth: bearer
 }
 
 params:query {
-  ~key:
-  ~name:
-  ~type: 2
+  severity: 1
   pageNumber: 1
-  pageSize: 25
+  ~pageSize: 25
+  ~module: iam
+  ~key: res
+  ~name: welcome
 }
 
 auth:bearer {

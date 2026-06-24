@@ -62,7 +62,10 @@ public class EmailService(
          return Result<EmailCreateDto>.Failure(validation.Messages);
       }
 
-      var retentionPolicy = await _templateRepository.GetRetentionPolicyByKeyAsync(request.TemplateKey, cancellationToken);
+      var retentionPolicy = await _templateRepository.GetRetentionPolicyByModuleAndKeyAsync(
+         request.Module,
+         request.TemplateKey,
+         cancellationToken);
 
       if (retentionPolicy == null)
       {

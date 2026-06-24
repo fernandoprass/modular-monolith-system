@@ -7,6 +7,7 @@ using Courier.Domain.Interfaces.Repositories;
 using Courier.Domain.Messages;
 using Myce.Response;
 using Shared.Application.Contracts;
+using Shared.Domain;
 using Shared.Domain.Enums;
 using Shared.Domain.Messages;
 
@@ -29,35 +30,41 @@ public class EmailOutboxService(
 
    public async Task<Result<Guid>> QueueAsync(EmailQueueRequest request, CancellationToken cancellationToken = default)
    {
-      var template = await _templateRepository.GetByKeyAsync(request.TemplateKey, cancellationToken);
+      var template = await _templateRepository.GetByModuleAndKeyAsync(
+         request.Module,
+         request.TemplateKey,
+         cancellationToken);
 
       if (template == null)
       {
          return Result<Guid>.Failure(new NotFoundError(CourierConst.Entity.Template));
       }
 
-      if (template.Type != TemplateType.Email)
-      {
-         return Result<Guid>.Failure(new TemplateTypeMismatchError(TemplateType.Email.ToString()));
-      }
-
-      var translation = template.EmailTranslations.SingleOrDefault(t =>
-         t.Language == request.Language.ToLowerInvariant().Trim());
+      var translation = template.Translations.SingleOrDefault(t =>
+         t.Language == LanguageOptions.Normalize(request.Language));
 
       if (translation == null)
       {
          return Result<Guid>.Failure(new TemplateLanguageNotFoundError(request.TemplateKey, request.Language));
       }
 
+      if (translation.Email == null)
+      {
+         return Result<Guid>.Failure(new TemplateEmailChannelNotFoundError(request.TemplateKey, request.Language));
+      }
+
       var values = BuildTemplateValues(request.Values);
-      var subjectResult = _emailTemplateRenderer.Render(translation.Subject, values);
+      var subjectResult = _emailTemplateRenderer.Render(translation.Email.Subject, values);
 
       if (subjectResult.HasError)
       {
          return Result<Guid>.Failure(subjectResult.Messages);
       }
 
-      var bodyResult = _emailTemplateRenderer.Render(translation.Body, values, translation.IsHtml);
+      var bodyResult = _emailTemplateRenderer.Render(
+         translation.Email.Body,
+         values,
+         translation.Email.IsHtml);
 
       if (bodyResult.HasError)
       {
@@ -73,7 +80,7 @@ public class EmailOutboxService(
          request.Recipient,
          subjectResult.Data!,
          bodyResult.Data!,
-         translation.IsHtml,
+         translation.Email.IsHtml,
          template.RetentionPolicy);
 
       var id = await _emailRepository.AddAsync(email, cancellationToken);
