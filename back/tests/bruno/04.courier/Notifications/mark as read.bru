@@ -1,0 +1,15 @@
+meta {
+  name: mark as read
+  type: http
+  seq: 3
+}
+
+patch {
+  url: {{host.courier}}/api/{{version}}/notifications/{{notificationId}}/read
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}

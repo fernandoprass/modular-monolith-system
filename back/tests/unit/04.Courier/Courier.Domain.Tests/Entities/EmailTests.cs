@@ -40,11 +40,11 @@ public class EmailTests
    }
 
    [Theory]
-   [InlineData(RetentionPolicy.Operational, CourierConst.EmailRetentionPoliciesTimeSpans.Operational)]
-   [InlineData(RetentionPolicy.Standard, CourierConst.EmailRetentionPoliciesTimeSpans.Standard)]
-   [InlineData(RetentionPolicy.Extended, CourierConst.EmailRetentionPoliciesTimeSpans.Extended)]
-   [InlineData(RetentionPolicy.Compliance, CourierConst.EmailRetentionPoliciesTimeSpans.Compliance)]
-   [InlineData(RetentionPolicy.LongTerm, CourierConst.EmailRetentionPoliciesTimeSpans.LongTerm)]
+   [InlineData(RetentionPolicy.Operational, CourierConst.RetentionPoliciesTimeSpans.Email.Operational)]
+   [InlineData(RetentionPolicy.Standard, CourierConst.RetentionPoliciesTimeSpans.Email.Standard)]
+   [InlineData(RetentionPolicy.Extended, CourierConst.RetentionPoliciesTimeSpans.Email.Extended)]
+   [InlineData(RetentionPolicy.Compliance, CourierConst.RetentionPoliciesTimeSpans.Email.Compliance)]
+   [InlineData(RetentionPolicy.LongTerm, CourierConst.RetentionPoliciesTimeSpans.Email.LongTerm)]
    public void Create_ShouldSetExpirationFromRetentionPolicy(RetentionPolicy retentionPolicy, int expectedDays)
    {
       var email = CreateEmail(retentionPolicy);

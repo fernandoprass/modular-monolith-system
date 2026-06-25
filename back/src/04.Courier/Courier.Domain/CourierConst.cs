@@ -9,6 +9,7 @@ public static partial class CourierConst
       public static class Collection
       {
          public const string Emails = "emails";
+         public const string Notifications = "notifications";
          public const string Templates = "templates";
       }
    }
@@ -18,7 +19,7 @@ public static partial class CourierConst
       public static class Email
       {
          public const int Operational = 30;  // 1 month
-         public const int Standard = 90;      // 3 months
+         public const int Standard = 90;     // 3 months
          public const int Extended = 365;    // 1 year
          public const int Compliance = 1825; // 5 years
          public const int LongTerm = 3965;   // 10 years
@@ -37,6 +38,7 @@ public static partial class CourierConst
    public static class Entity
    {
       public const string Email = nameof(Entities.Email);
+      public const string Notification = nameof(Entities.Notification);
       public const string Template = nameof(Entities.Template);
    }
 

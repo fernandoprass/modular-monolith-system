@@ -1,0 +1,27 @@
+meta {
+  name: search by params
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{host.courier}}/api/{{version}}/notifications?pageNumber=1&pageSize=25&dateFrom=2026-03-01&dateTo=2026-06-30
+  body: none
+  auth: bearer
+}
+
+params:query {
+  pageNumber: 1
+  pageSize: 25
+  dateFrom: 2026-03-01
+  dateTo: 2026-06-30
+  ~organizationId: {{organizationId}}
+  ~userId: {{userId}}
+  ~module: iam
+  ~title:
+  ~status: 1
+}
+
+auth:bearer {
+  token: {{token}}
+}

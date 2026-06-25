@@ -79,6 +79,8 @@ public class SeederPermissions(
       Console.WriteLine("Adding Courier permissions...");
       await AddPermissionAsync(CourierPermission.Emails.Read, "Read Emails", "Allows reading Courier emails.", cancellationToken);
       await AddPermissionAsync(CourierPermission.Emails.Write, "Create Emails", "Allows creating Courier emails.", cancellationToken);
+      await AddPermissionAsync(CourierPermission.Notifications.Read, "Read Notifications", "Allows reading Courier notifications.", cancellationToken);
+      await AddPermissionAsync(CourierPermission.Notifications.Write, "Update Notifications", "Allows updating Courier notification status.", cancellationToken);
 
       await AddPermissionAsync(CourierPermission.Templates.Read, "Read Templates", "Allows reading templates.", cancellationToken);
       await AddPermissionAsync(CourierPermission.Templates.Write, "Edit Templates", "Allows creating, updating, and deleting templates.", cancellationToken);

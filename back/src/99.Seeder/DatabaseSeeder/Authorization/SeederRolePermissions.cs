@@ -182,6 +182,8 @@ public class SeederRolePermissions(
       {
          CourierPermission.Emails.Read,
          CourierPermission.Emails.Write,
+         CourierPermission.Notifications.Read,
+         CourierPermission.Notifications.Write,
          CourierPermission.Templates.Read,
          CourierPermission.Templates.Write
       };

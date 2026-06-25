@@ -40,20 +40,51 @@ public class CourierDbContext
 
    public IMongoCollection<Email> Emails => _database.GetCollection<Email>(CourierConst.Database.Collection.Emails);
 
+   internal IMongoCollection<Notification> Notifications =>
+      _database.GetCollection<Notification>(CourierConst.Database.Collection.Notifications);
+
    internal IMongoCollection<Template> Templates => _database.GetCollection<Template>(CourierConst.Database.Collection.Templates);
 
    public async Task ConfigureIndexesAsync(CancellationToken cancellationToken = default)
+   {
+      await ConfigureIndexesForEmailAsync(cancellationToken);
+
+      await ConfigureIndexesForNotificationAsync(cancellationToken);
+
+      await ConfigureIndexesForTemplateAsync(cancellationToken);
+   }
+
+   private async Task ConfigureIndexesForNotificationAsync(CancellationToken cancellationToken)
+   {
+      var notificationIndexes = new[]
+      {
+         new CreateIndexModel<Notification>(
+            Builders<Notification>.IndexKeys.Ascending(n => n.OrganizationId).Ascending(n => n.UserId)
+                                            .Ascending(n => n.Status).Descending(n => n.CreatedAt)),
+
+         new CreateIndexModel<Notification>(
+            Builders<Notification>.IndexKeys.Ascending(n => n.UserId).Descending(n => n.CreatedAt)),
+
+         new CreateIndexModel<Notification>(
+            Builders<Notification>.IndexKeys.Ascending(n => n.UserId).Ascending(n => n.Status)
+                                            .Descending(n => n.CreatedAt)),
+
+         new CreateIndexModel<Notification>(
+            Builders<Notification>.IndexKeys.Ascending(n => n.ExpiresAt),
+            new CreateIndexOptions { ExpireAfter = TimeSpan.Zero, Name = "ttl_notifications_expires_at" })
+      };
+
+      await Notifications.Indexes.CreateManyAsync(notificationIndexes, cancellationToken);
+   }
+
+   private async Task ConfigureIndexesForEmailAsync(CancellationToken cancellationToken)
    {
       var emailIndexes = new[]
       {
          new CreateIndexModel<Email>(
             Builders<Email>.IndexKeys.Ascending(e => e.OrganizationId).Descending(e => e.CreatedAt)),
          new CreateIndexModel<Email>(
-            Builders<Email>.IndexKeys.Ascending(e => e.OrganizationId).Ascending(e => e.UserId).Descending(e => e.CreatedAt)),
-         new CreateIndexModel<Email>(
-            Builders<Email>.IndexKeys.Ascending(e => e.OrganizationId).Ascending(e => e.Module).Ascending(e => e.Feature).Descending(e => e.CreatedAt)),
-         new CreateIndexModel<Email>(
-            Builders<Email>.IndexKeys.Ascending(e => e.OrganizationId).Ascending(e => e.Recipient).Descending(e => e.CreatedAt)),
+            Builders<Email>.IndexKeys.Ascending(e => e.UserId).Descending(e => e.CreatedAt)),
          new CreateIndexModel<Email>(
             Builders<Email>.IndexKeys.Ascending(e => e.Status).Ascending(e => e.NextAttemptAt).Ascending(e => e.CreatedAt)),
          new CreateIndexModel<Email>(
@@ -62,7 +93,10 @@ public class CourierDbContext
       };
 
       await Emails.Indexes.CreateManyAsync(emailIndexes, cancellationToken);
+   }
 
+   private async Task ConfigureIndexesForTemplateAsync(CancellationToken cancellationToken)
+   {
       var templateIndexes = new[]
       {
          new CreateIndexModel<Template>(

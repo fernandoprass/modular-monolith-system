@@ -70,6 +70,36 @@ public class CourierRepositoryFilterTests
    }
 
    [Fact]
+   public void NotificationBuildFilter_ShouldIncludeOwnerStatusAndDateRange()
+   {
+      var organizationId = Guid.NewGuid();
+      var userId = Guid.NewGuid();
+      var request = new NotificationSearchRequest(
+         organizationId,
+         userId,
+         "iam",
+         "welcome",
+         NotificationStatus.Unread,
+         DateTime.UtcNow.AddDays(-1),
+         DateTime.UtcNow);
+
+      var filter = InvokeFilter<Notification, NotificationSearchRequest>(
+         typeof(NotificationRepository),
+         request);
+      var document = Render(filter);
+      var json = document.ToJson();
+
+      Assert.Contains("OrganizationId", json);
+      Assert.Contains("UserId", json);
+      Assert.Contains("CreatedAt", json);
+      Assert.Contains("Module", json);
+      Assert.Contains("Title", json);
+      Assert.Contains("Status", json);
+      Assert.True(ContainsGuidValue(document, organizationId));
+      Assert.True(ContainsGuidValue(document, userId));
+   }
+
+   [Fact]
    public void TemplateBuildFilter_ShouldMatchNameWithinUserLanguageTranslation()
    {
       var request = new TemplateSearchRequest(null, null, "boas-vindas", null);
