@@ -11,14 +11,14 @@ using System.Text.Json;
 
 namespace Courier.Infrastructure.BackgroundServices;
 
-public class EmailRequestConsumer(
+public class MessageRequestConsumer(
    IConnectionMultiplexer redis,
    IServiceProvider serviceProvider,
-   ILogger<EmailRequestConsumer> logger) : BackgroundService
+   ILogger<MessageRequestConsumer> logger) : BackgroundService
 {
    private readonly IDatabase _database = redis.GetDatabase();
    private readonly IServiceProvider _serviceProvider = serviceProvider;
-   private readonly ILogger<EmailRequestConsumer> _logger = logger;
+   private readonly ILogger<MessageRequestConsumer> _logger = logger;
 
    private static readonly JsonSerializerOptions JsonOptions = new()
    {
@@ -28,7 +28,7 @@ public class EmailRequestConsumer(
 
    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
    {
-      _logger.LogInformation("Courier email request consumer started");
+      _logger.LogInformation("Courier message request consumer started");
       await EnsureConsumerGroupExistsAsync();
 
       while (!stoppingToken.IsCancellationRequested)
@@ -36,8 +36,8 @@ public class EmailRequestConsumer(
          try
          {
             var entries = await _database.StreamReadGroupAsync(
-               CourierConst.Redis.EmailRequestsStream,
-               CourierConst.Redis.EmailRequestConsumerGroup,
+               CourierConst.Redis.MessageRequestsStream,
+               CourierConst.Redis.MessageRequestConsumerGroup,
                GetConsumerName(),
                CourierConst.Redis.NewMessagesStreamPosition,
                count: CourierConst.Redis.ReadBatchSize);
@@ -58,13 +58,13 @@ public class EmailRequestConsumer(
          }
          catch (Exception ex)
          {
-            _logger.LogError(ex, "Error consuming Courier email requests");
-            await TryLogSystemErrorAsync("Error consuming Courier email requests", ex, stoppingToken);
+            _logger.LogError(ex, "Error consuming Courier message requests");
+            await TryLogSystemErrorAsync("Error consuming Courier message requests", ex, stoppingToken);
             await Task.Delay(TimeSpan.FromSeconds(CourierConst.Redis.ErrorDelaySeconds), stoppingToken);
          }
       }
 
-      _logger.LogInformation("Courier email request consumer stopped");
+      _logger.LogInformation("Courier message request consumer stopped");
    }
 
    private async Task EnsureConsumerGroupExistsAsync()
@@ -72,14 +72,14 @@ public class EmailRequestConsumer(
       try
       {
          await _database.StreamCreateConsumerGroupAsync(
-            CourierConst.Redis.EmailRequestsStream,
-            CourierConst.Redis.EmailRequestConsumerGroup,
+            CourierConst.Redis.MessageRequestsStream,
+            CourierConst.Redis.MessageRequestConsumerGroup,
             CourierConst.Redis.InitialStreamPosition,
             createStream: true);
       }
       catch (RedisServerException ex) when (ex.Message.Contains("BUSYGROUP", StringComparison.OrdinalIgnoreCase))
       {
-         _logger.LogDebug("Consumer group {ConsumerGroup} already exists", CourierConst.Redis.EmailRequestConsumerGroup);
+         _logger.LogDebug("Consumer group {ConsumerGroup} already exists", CourierConst.Redis.MessageRequestConsumerGroup);
       }
    }
 
@@ -95,23 +95,23 @@ public class EmailRequestConsumer(
             return;
          }
 
-         IntegrationEvent<EmailQueueRequest>? envelope;
+         IntegrationEvent<CourierMessageRequest>? envelope;
 
          try
          {
-            envelope = JsonSerializer.Deserialize<IntegrationEvent<EmailQueueRequest>>(json.ToString(), JsonOptions);
+            envelope = JsonSerializer.Deserialize<IntegrationEvent<CourierMessageRequest>>(json.ToString(), JsonOptions);
          }
          catch (JsonException ex)
          {
-            _logger.LogError(ex, "Invalid Courier email request {EntryId}", entry.Id);
-            await TryLogSystemErrorAsync($"Invalid Courier email request {entry.Id}", ex, cancellationToken);
+            _logger.LogError(ex, "Invalid Courier message request {EntryId}", entry.Id);
+            await TryLogSystemErrorAsync($"Invalid Courier message request {entry.Id}", ex, cancellationToken);
             await AcknowledgeAsync(entry);
             return;
          }
          catch (NotSupportedException ex)
          {
-            _logger.LogError(ex, "Unsupported Courier email request {EntryId}", entry.Id);
-            await TryLogSystemErrorAsync($"Unsupported Courier email request {entry.Id}", ex, cancellationToken);
+            _logger.LogError(ex, "Unsupported Courier message request {EntryId}", entry.Id);
+            await TryLogSystemErrorAsync($"Unsupported Courier message request {entry.Id}", ex, cancellationToken);
             await AcknowledgeAsync(entry);
             return;
          }
@@ -122,10 +122,10 @@ public class EmailRequestConsumer(
             return;
          }
 
-         if (envelope.EventName != CourierConst.Event.Name.EmailRequested || envelope.Version != CourierConst.Event.Version)
+         if (envelope.EventName != CourierConst.Event.Name.MessageRequested || envelope.Version != CourierConst.Event.Version)
          {
             _logger.LogWarning(
-               "Unsupported Courier email request event {EventName} version {Version}",
+               "Unsupported Courier message request event {EventName} version {Version}",
                envelope.EventName,
                envelope.Version);
             await AcknowledgeAsync(entry);
@@ -136,20 +136,20 @@ public class EmailRequestConsumer(
 
          if (request == null)
          {
-            await TryLogQueueFailureAsync(entry, "Courier email request payload is missing", null, cancellationToken);
+            await TryLogQueueFailureAsync(entry, "Courier message request payload is missing", null, cancellationToken);
             await AcknowledgeAsync(entry);
             return;
          }
 
          using var scope = _serviceProvider.CreateScope();
-         var service = scope.ServiceProvider.GetRequiredService<IEmailOutboxService>();
+         var service = scope.ServiceProvider.GetRequiredService<ICourierMessageService>();
          var result = await service.QueueAsync(request, cancellationToken);
 
          if (result.HasError)
          {
             await TryLogQueueFailureAsync(
                entry,
-               $"Failed to queue email request {entry.Id}",
+               $"Failed to queue Courier message request {entry.Id}",
                request,
                cancellationToken,
                new KeyValuePair<string, object>("errors", string.Join(" | ", result.Messages.Select(m => m.Show()))));
@@ -159,25 +159,25 @@ public class EmailRequestConsumer(
       }
       catch (Exception ex)
       {
-         _logger.LogError(ex, "Failed to process Courier email request {EntryId}", entry.Id);
-         await TryLogSystemErrorAsync($"Failed to process Courier email request {entry.Id}", ex, cancellationToken);
+         _logger.LogError(ex, "Failed to process Courier message request {EntryId}", entry.Id);
+         await TryLogSystemErrorAsync($"Failed to process Courier message request {entry.Id}", ex, cancellationToken);
       }
    }
 
    private Task<long> AcknowledgeAsync(StreamEntry entry)
    {
-      return _database.StreamAcknowledgeAsync(CourierConst.Redis.EmailRequestsStream, CourierConst.Redis.EmailRequestConsumerGroup, entry.Id);
+      return _database.StreamAcknowledgeAsync(CourierConst.Redis.MessageRequestsStream, CourierConst.Redis.MessageRequestConsumerGroup, entry.Id);
    }
 
    private static string GetConsumerName()
    {
-      return $"{CourierConst.Redis.EmailRequestConsumerNamePrefix}-{Environment.MachineName}";
+      return $"{CourierConst.Redis.MessageRequestConsumerNamePrefix}-{Environment.MachineName}";
    }
 
    private async Task TryLogQueueFailureAsync(
       StreamEntry entry,
       string message,
-      EmailQueueRequest? request,
+      CourierMessageRequest? request,
       CancellationToken cancellationToken,
       params KeyValuePair<string, object>[] extraProperties)
    {
@@ -191,7 +191,7 @@ public class EmailRequestConsumer(
          if (request != null)
          {
             properties["templateKey"] = request.TemplateKey;
-            properties["recipient"] = request.Recipient;
+            properties["recipient"] = request.Recipient ?? string.Empty;
          }
 
          foreach (var property in extraProperties)

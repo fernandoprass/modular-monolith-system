@@ -140,6 +140,7 @@ public class NotificationServiceTests
          organizationId,
          Guid.NewGuid(),
          "iam",
+         "users",
          "user-welcome",
          "Account created",
          "Open your profile.",

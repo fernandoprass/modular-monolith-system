@@ -34,6 +34,7 @@ public class NotificationRepository(CourierDbContext dbContext) : INotificationR
          .Project(n => new NotificationLiteDto(
             n.Id,
             n.Module,
+            n.Feature,
             n.Title,
             n.Message,
             n.ActionLink,

@@ -18,7 +18,7 @@ public class AspNetUserContext(IHttpContextAccessor accessor) : IUserContext
    public string? IpAddress => _accessor.HttpContext?.Connection.RemoteIpAddress?.ToString();
    public string? UserAgent => _accessor.HttpContext?.Request.Headers[HeaderNames.UserAgent].ToString();
    public string Language => GetLanguage();
-
+   public string UserEmail => GetEmail();
    public Guid UserId => GetUserId();
    public IEnumerable<string> Roles => GetRoles();
 
@@ -44,6 +44,13 @@ public class AspNetUserContext(IHttpContextAccessor accessor) : IUserContext
    {
       var value = _accessor.HttpContext?.User.FindFirst(SharedConst.Security.Claim.IsSystemAdmin)?.Value;
       return bool.TryParse(value, out var isSystemAdmin) && isSystemAdmin;
+   }
+
+   private string GetEmail()
+   {
+      var value = _accessor.HttpContext?.User.FindFirst(ClaimTypes.Email)?.Value;
+
+      return string.IsNullOrEmpty(value) ? SharedConst.System.DefaultLanguage : value;
    }
 
    private Guid GetUserId()

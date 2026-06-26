@@ -111,8 +111,8 @@ public class RegisterOrchestrator(
          metadata: request,
          cancellationToken: cancellationToken);
 
-      await _eventPublisher.NotifyEmailAsync(
-         IamConst.EmailTemplate.OrganizationWelcome,
+      await _eventPublisher.NotifyUserAsync(
+         IamConst.Templates.OrganizationWelcome,
          organization.Id,
          user.Id,
          user.Email,
@@ -150,13 +150,13 @@ public class RegisterOrchestrator(
             RetentionPolicy.Compliance,
             description: $"Deleted organization {organization.Name}",
             targetId: organization.Id,
-            metadata: new { Id = id, Code = organization.Code, Name = organization.Name},
+            metadata: new { Id = id, Code = organization.Code, Name = organization.Name },
             cancellationToken: ct);
 
          foreach (var user in users)
          {
-            await _eventPublisher.NotifyEmailAsync(
-               IamConst.EmailTemplate.OrganizationDelete,
+            await _eventPublisher.NotifyUserAsync(
+               IamConst.Templates.OrganizationDelete,
                organization.Id,
                user.Id,
                user.Email,

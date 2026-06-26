@@ -5,6 +5,7 @@ namespace Courier.Domain.DTOs.Responses;
 public record NotificationLiteDto(
    Guid Id,
    string Module,
+   string Feature,
    string Title,
    string Message,
    string ActionLink,

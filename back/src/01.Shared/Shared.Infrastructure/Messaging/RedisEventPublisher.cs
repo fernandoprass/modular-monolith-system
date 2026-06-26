@@ -47,31 +47,17 @@ public class RedisEventPublisher(IConnectionMultiplexer redis, ILogger<RedisEven
       _logger.LogDebug("Published system log {EventId} to stream {StreamId}", systemLogEvent.Id, streamId);
    }
 
-   public async Task PublishEmailRequestedEventAsync(EmailRequestedEvent emailRequest, CancellationToken cancellationToken = default)
+   public async Task PublishUserMessageEventAsync(UserMessageEvent messageRequest, CancellationToken cancellationToken = default)
    {
       cancellationToken.ThrowIfCancellationRequested();
 
-      var envelope = IntegrationEvent<EmailRequestedEvent>.Create(
-         SharedConst.Event.Name.EmailRequested,
+      var envelope = IntegrationEvent<UserMessageEvent>.Create(
+         SharedConst.Event.Name.UserMessageRequested,
          SharedConst.Event.Version,
-         emailRequest);
+         messageRequest);
       var json = JsonSerializer.Serialize(envelope, JsonOptions);
-      var streamId = await _database.StreamAddAsync(SharedConst.Redis.EmailRequestsStream, SharedConst.Redis.EventFieldName, json);
+      var streamId = await _database.StreamAddAsync(SharedConst.Redis.UserMessageEventsStream, SharedConst.Redis.EventFieldName, json);
 
-      _logger.LogDebug("Published email request {EventId} to stream {StreamId}", envelope.EventId, streamId);
-   }
-
-   public async Task PublishNotificationEventAsync(NotificationEvent notification, CancellationToken cancellationToken = default)
-   {
-      cancellationToken.ThrowIfCancellationRequested();
-
-      var envelope = IntegrationEvent<NotificationEvent>.Create(
-         SharedConst.Event.Name.NotificationRequested,
-         SharedConst.Event.Version,
-         notification);
-      var json = JsonSerializer.Serialize(envelope, JsonOptions);
-      await _subscriber.PublishAsync(RedisChannel.Literal(SharedConst.Redis.NotificationEventsChannel), json);
-
-      _logger.LogDebug("Published notification {NotificationId}", notification.Id);
+      _logger.LogDebug("Published Courier message request {EventId} to stream {StreamId}", envelope.EventId, streamId);
    }
 }

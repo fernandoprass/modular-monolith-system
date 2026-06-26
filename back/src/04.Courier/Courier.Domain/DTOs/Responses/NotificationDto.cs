@@ -7,6 +7,7 @@ public record NotificationDto(
    Guid OrganizationId,
    Guid UserId,
    string Module,
+   string Feature,
    string TemplateKey,
    string Title,
    string Message,

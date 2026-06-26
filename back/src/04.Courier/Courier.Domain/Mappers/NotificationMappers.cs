@@ -12,6 +12,7 @@ public static class NotificationMappers
          notification.OrganizationId,
          notification.UserId,
          notification.Module,
+         notification.Feature,
          notification.TemplateKey,
          notification.Title,
          notification.Message,

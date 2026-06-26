@@ -53,19 +53,19 @@ public static partial class CourierConst
 
       public static class Name
       {
-         public const string EmailRequested = "courier.email.requested";
+         public const string MessageRequested = "courier.message.requested";
       }
    }
 
    public static class Redis
    {
-      public const string EmailRequestsStream = "courier-email-requests";
+      public const string MessageRequestsStream = "courier-message-requests";
       public const string EventFieldName = "event";
       public const string InitialStreamPosition = "0-0";
       public const string NewMessagesStreamPosition = ">";
 
-      public const string EmailRequestConsumerGroup = "courier-email-request-consumer";
-      public const string EmailRequestConsumerNamePrefix = "courier-email-request";
+      public const string MessageRequestConsumerGroup = "courier-message-request-consumer";
+      public const string MessageRequestConsumerNamePrefix = "courier-message-request";
 
       public const int ReadBatchSize = 10;
       public const int EmptyStreamDelaySeconds = 1;

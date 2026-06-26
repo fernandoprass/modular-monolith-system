@@ -173,8 +173,8 @@ public class RegisterOrchestratorTests
          result.Data.Id,
          request,
          Arg.Any<CancellationToken>());
-      await _eventPublisher.Received(1).NotifyEmailAsync(
-         IamConst.EmailTemplate.OrganizationWelcome,
+      await _eventPublisher.Received(1).NotifyUserAsync(
+         IamConst.Templates.OrganizationWelcome,
          result.Data.Id,
          Arg.Any<Guid>(),
          request.User.Email.ToLowerInvariant().Trim(),
@@ -233,8 +233,8 @@ public class RegisterOrchestratorTests
          organization.Id,
          Arg.Any<object>(),
          Arg.Any<CancellationToken>());
-      await _eventPublisher.Received(2).NotifyEmailAsync(
-         IamConst.EmailTemplate.OrganizationDelete,
+      await _eventPublisher.Received(2).NotifyUserAsync(
+         IamConst.Templates.OrganizationDelete,
          organization.Id,
          Arg.Any<Guid>(),
          Arg.Any<string>(),

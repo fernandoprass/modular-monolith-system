@@ -77,7 +77,7 @@ public sealed class CoreApiTestFixture : WebApplicationFactory<CoreApi::Program>
          services.RemoveHostedService<AuditLogConsumer>();
          services.RemoveHostedService<SystemLogConsumer>();
          services.RemoveHostedService<CourierIndexInitializer>();
-         services.RemoveHostedService<EmailRequestConsumer>();
+         services.RemoveHostedService<MessageRequestConsumer>();
          services.RemoveHostedService<EmailDeliveryWorker>();
       });
    }

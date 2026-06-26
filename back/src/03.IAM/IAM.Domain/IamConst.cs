@@ -51,7 +51,7 @@ public static partial class IamConst
       }
    }
 
-   public static class EmailTemplate
+   public static class Templates
    {
       public const string OrganizationWelcome = "orgazination-welcome";
       public const string OrganizationDelete = "orgazination-delete";

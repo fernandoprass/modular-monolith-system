@@ -1,0 +1,120 @@
+using Courier.Domain.Enums;
+using IAM.Domain;
+using Shared.Domain.Enums;
+using static DatabaseSeeder.Templates.Templates;
+
+namespace DatabaseSeeder.Templates;
+
+public static class TemplatesIam
+{
+   public static string Module = "iam";
+
+   public static readonly TemplateSeed[] Templates =
+   [
+      new(
+         Key:IamConst.Templates.OrganizationWelcome,
+         AllowOptOut: false,
+         Severity:NotificationSeverity.Information,
+         RetentionPolicy:RetentionPolicy.Standard,
+         NameEn:"Organization welcome",
+         EmailSubjectEn:"Welcome {{organization.name}}.",
+         EmailBodyEn:"<p>Welcome {{organization.name}}.</p>",
+         NotificationTitleEn:"Welcome",
+         NotificationMessageEn:"Welcome {{organization.name}}.",
+         NamePt:"Bem-vindo Organização",
+         EmailSubjectPt:"<p>Bem-vindo(a) {{organization.name}}.</p>",
+         EmailBodyPt:"Bem-vindo(a) {{organization.name}}.",
+         NotificationTitlePt:"Bem-vindo(a)",
+         NotificationMessagePt:"Bem-vindo(a) {{organization.name}}."),
+      new(
+         Key:IamConst.Templates.OrganizationDelete,
+         AllowOptOut: false,
+         Severity:NotificationSeverity.Warning,
+         RetentionPolicy:RetentionPolicy.Extended,
+         NameEn:"Organization delete",
+         EmailSubjectEn:"{{organization.name}} was deleted.",
+         EmailBodyEn:"<p>{{organization.name}} was deleted.</p>",
+         NotificationTitleEn:"Organization deleted",
+         NotificationMessageEn:"{{organization.name}} was deleted.",
+         NamePt:"Organizacao removida",
+         EmailSubjectPt:"{{organization.name}} foi removida.",
+         EmailBodyPt:"<p>{{organization.name}} foi removida.</p>",
+         NotificationTitlePt:"Organizacao removida",
+         NotificationMessagePt:"{{organization.name}} foi removida."),
+      new(
+         Key:IamConst.Templates.UserWelcome,
+         AllowOptOut: false,
+         Severity:NotificationSeverity.Information,
+         RetentionPolicy:RetentionPolicy.Operational,
+         NameEn:"User welcome",
+         EmailSubjectEn:"Welcome, {{user.name}}.",
+         EmailBodyEn:"<p>Welcome, {{user.name}}.</p>",
+         NotificationTitleEn:"Welcome",
+         NotificationMessageEn:"Welcome, {{user.name}}.",
+         NamePt:"Bem-vindo usuario",
+         EmailSubjectPt:"Bem-vindo, {{user.name}}.",
+         EmailBodyPt:"<p>Bem-vindo, {{user.name}}.</p>",
+         NotificationTitlePt:"Bem-vindo",
+         NotificationMessagePt:"Bem-vindo, {{user.name}}."),
+      new(
+         Key:IamConst.Templates.UserResetPassword,
+         AllowOptOut: false,
+         Severity:NotificationSeverity.Warning,
+         RetentionPolicy:RetentionPolicy.Operational,
+         NameEn:"User reset password",
+         EmailSubjectEn:"Use the reset password link to continue.",
+         EmailBodyEn:"<p>Use the reset password link to continue.</p>",
+         NotificationTitleEn:"Reset password",
+         NotificationMessageEn:"Use the reset password link to continue.",
+         NamePt:"Redefinicao de senha",
+         EmailSubjectPt:"Use o link de redefinicao de senha para continuar.",
+         EmailBodyPt:"<p>Use o link de redefinicao de senha para continuar.</p>",
+         NotificationTitlePt:"Redefinir senha",
+         NotificationMessagePt:"Use o link de redefinicao de senha para continuar."),
+      new(
+         Key:IamConst.Templates.UserPasswordUpdated,
+         AllowOptOut: true,
+         Severity:NotificationSeverity.Information,
+         RetentionPolicy:RetentionPolicy.Operational,
+         NameEn:"User password updated",
+         EmailSubjectEn:"Your password has been updated.",
+         EmailBodyEn:"<p>{{user.name}}</p><p>Your password has been updated.</p>",
+         NotificationTitleEn:"Password updated",
+         NotificationMessageEn:"Your password has been updated.",
+         NamePt:"Senha atualizada",
+         EmailSubjectPt:"Sua senha foi atualizada.",
+         EmailBodyPt:"<p>{{user.name}}</p><p>Sua senha foi atualizada.</p>",
+         NotificationTitlePt:"Senha atualizada",
+         NotificationMessagePt:"Sua senha foi atualizada."),
+      new(
+         Key:IamConst.Templates.UserMaxFailedLoginAttempts,
+         AllowOptOut: false,
+         Severity:NotificationSeverity.Critical,
+         RetentionPolicy:RetentionPolicy.Extended,
+         NameEn:"User max failed login attempts",
+         EmailSubjectEn:"Your account was locked after too many failed login attempts.",
+         EmailBodyEn:"<p>Your account was locked after too many failed login attempts.</p>",
+         NotificationTitleEn:"Account locked",
+         NotificationMessageEn:"Your account was locked after too many failed login attempts.",
+         NamePt:"Conta bloqueada",
+         EmailSubjectPt:"Sua conta foi bloqueada apos muitas tentativas de login sem sucesso.",
+         EmailBodyPt:"<p>Sua conta foi bloqueada apos muitas tentativas de login sem sucesso.</p>",
+         NotificationTitlePt:"Conta bloqueada",
+         NotificationMessagePt:"Sua conta foi bloqueada apos muitas tentativas de login sem sucesso."),
+      new(
+         Key:IamConst.Templates.UserDelete,
+         AllowOptOut: false,
+         Severity:NotificationSeverity.Warning,
+         RetentionPolicy:RetentionPolicy.Operational,
+         NameEn:"User delete",
+         EmailSubjectEn:"The user {{user.email}} was deleted.",
+         EmailBodyEn:"<p>The user {{user.email}} was deleted.</p>",
+         NotificationTitleEn:"User deleted",
+         NotificationMessageEn:"The user {{user.email}} was deleted.",
+         NamePt:"Usuario removido",
+         EmailSubjectPt:"O usuario {{user.email}} foi removido.",
+         EmailBodyPt:"<p>O usuario {{user.email}} foi removido.</p>",
+         NotificationTitlePt:"Usuario removido",
+         NotificationMessagePt:"O usuario {{user.email}} foi removido.")
+   ];
+}

@@ -9,6 +9,7 @@ The files are grouped by prefix:
 - `01` for Shared module documentation.
 - `02` for Sentinel module documentation.
 - `03` for IAM module documentation.
+- `04` for Courier module documentation.
 
 ---
 
@@ -65,3 +66,15 @@ Module overview:
 
 Module overview:
 - `back/src/03.IAM/readme.md`
+
+---
+
+## Courier Docs
+
+| File | Description |
+| :--- | :--- |
+| `04.courier.entities.md` | Explains Courier entities such as emails, notifications, templates, translations, and delivery/read statuses. |
+
+Module overview:
+
+- `back/src/04.Courier/readme.md`

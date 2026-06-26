@@ -1,11 +1,11 @@
-namespace Courier.Domain.DTOs.Requests;
+namespace Shared.Domain.Events;
 
-public record EmailQueueRequest(
+public record UserMessageEvent(
    Guid OrganizationId,
    Guid UserId,
    string Module,
    string Feature,
    string TemplateKey,
    string Language,
-   string Recipient,
+   string? Recipient,
    IReadOnlyDictionary<string, string>? Values = null);

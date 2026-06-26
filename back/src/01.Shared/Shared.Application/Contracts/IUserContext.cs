@@ -9,6 +9,7 @@ public interface IUserContext
    string? IpAddress { get; }
    string? UserAgent { get; }
    string Language { get; }
+   string? UserEmail { get; }
    Guid UserId { get; }
    Guid OrganizationId { get; }
    IEnumerable<string> Roles { get; }

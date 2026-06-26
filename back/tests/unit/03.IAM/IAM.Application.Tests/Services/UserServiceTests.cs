@@ -109,8 +109,8 @@ public class UserServiceTests
 
       await _unitOfWorkMock.Users.Received(1).AddAsync(Arg.Any<User>(), Arg.Any<CancellationToken>());
       await _unitOfWorkMock.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
-      await _eventPublisherMock.Received(1).NotifyEmailAsync(
-         IamConst.EmailTemplate.UserWelcome,
+      await _eventPublisherMock.Received(1).NotifyUserAsync(
+         IamConst.Templates.UserWelcome,
          request.OrganizationId,
          Arg.Any<Guid>(),
          request.Email.ToLower().Trim(),

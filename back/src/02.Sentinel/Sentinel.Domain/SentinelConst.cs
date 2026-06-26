@@ -30,7 +30,6 @@ public static partial class SentinelConst
    {
       public const string AuditLogEventsStream = SharedConst.Redis.AuditLogEventsStream;
       public const string SystemLogEventsStream = SharedConst.Redis.SystemLogEventsStream;
-      public const string NotificationEventsChannel = SharedConst.Redis.NotificationEventsChannel;
 
       public const string EventFieldName = "event";
       public const string InitialStreamPosition = "0-0";

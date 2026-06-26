@@ -76,7 +76,7 @@ The numeric prefix keeps modules ordered in the file tree, it does not replace d
 | `01.Shared` | Common contracts, base classes, infrastructure helpers, parameters, cache, and messaging. |
 | `02.Sentinel` | Logging and monitoring module. Stores audit logs and system logs. |
 | `03.IAM` | Identity and access management module. Users, organizations, roles, permissions, and authentication. |
-| `04.Courier` | Communication and notification module. Stores and sends email messages. |
+| `04.Courier` | Communication module. Stores emails and notifications, and sends queued emails. |
 | `99.Seeder` | Console app that creates default database data. |
 
 New business modules should follow the same pattern as IAM and Sentinel.

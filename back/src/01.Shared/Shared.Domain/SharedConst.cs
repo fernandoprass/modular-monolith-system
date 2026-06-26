@@ -29,7 +29,7 @@ public static partial class SharedConst
       {
          public const string AuditLogRequested = "sentinel.audit-log.requested";
          public const string SystemLogRequested = "sentinel.system-log.requested";
-         public const string EmailRequested = "courier.email.requested";
+         public const string UserMessageRequested = "courier.message.requested";
          public const string NotificationRequested = "courier.notification.requested";
       }
    }
@@ -65,8 +65,7 @@ public static partial class SharedConst
 
       public const string AuditLogEventsStream = "audit-log-events";
       public const string SystemLogEventsStream = "system-log-events";
-      public const string EmailRequestsStream = "courier-email-requests";
-      public const string NotificationEventsChannel = "notification-events";
+      public const string UserMessageEventsStream = "user-message-events";
       public const string CacheKeyPrefixForParameter = "param:";
       public const string CacheKeyPrefixForRole = "role:";
    }

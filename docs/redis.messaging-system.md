@@ -77,7 +77,7 @@ The source module does not reference Sentinel entities or repositories.
 
 | Pattern | Use Case | Persistence | Delivery Guarantee |
 |---------|----------|-------------|-------------------|
-| **Redis Streams** | Audit events, system logs | Persistent when Redis persistence is enabled | At-least-once with consumer groups |
+| **Redis Streams** | Audit events, system logs, Courier user messages | Persistent when Redis persistence is enabled | At-least-once with consumer groups |
 | **Redis Pub/Sub** | Real-time notifications | Ephemeral memory only | Fire-and-forget |
 
 Streams are the main pattern today.
@@ -106,6 +106,7 @@ Current streams:
 | --- | --- | --- |
 | `audit-log-events` | `AuditLogEvent` | `AuditLogConsumer` |
 | `system-log-events` | `SystemLogEvent` | `SystemLogConsumer` |
+| `courier-message-requests` | `UserMessageEvent` | `CourierMessageRequestConsumer` |
 
 The stream names are centralized in `SharedConst.Redis`.
 
@@ -197,6 +198,7 @@ Methods:
 ```csharp
 Task PublishAuditLogEventAsync(AuditLogEvent auditEvent, CancellationToken cancellationToken = default);
 Task PublishSystemLogEventAsync(SystemLogEvent systemLog, CancellationToken cancellationToken = default);
+Task PublishUserMessageEventAsync(UserMessageEvent messageRequest, CancellationToken cancellationToken = default);
 Task PublishNotificationEventAsync(NotificationEvent notification, CancellationToken cancellationToken = default);
 ```
 
@@ -213,6 +215,7 @@ Important behavior:
 - The Redis stream field name is `event`.
 - The publisher checks `CancellationToken`.
 - The publisher does not know Sentinel.
+- User messages are published to Courier through `courier-message-requests`.
 
 ---
 
@@ -295,14 +298,56 @@ await _eventPublisher.PublishSystemLogEventAsync(new SystemLogEvent
 
 ---
 
+## Publishing a User Message Event
+
+Use user message events when a module wants Courier to notify a user.
+
+Courier decides which channels to create by reading the template.
+
+The selected template language can create:
+- an email
+- a notification
+- both
+
+Small example:
+
+```csharp
+await _eventPublisher.PublishUserMessageEventAsync(new UserMessageEvent(
+   organizationId,
+   userId,
+   "iam",
+   "users",
+   "user-welcome",
+   "en",
+   "person@example.com",
+   new Dictionary<string, string>
+   {
+      ["user.name"] = "Ana"
+   }), cancellationToken);
+```
+
+Rules:
+- `Module` is the source module, like `iam`.
+- `Feature` is the source feature, like `users`.
+- `TemplateKey` identifies the Courier template.
+- `Recipient` can be null when only notification is needed.
+- Do not put secrets in template values.
+
+---
+
 ## Consumers
 
-Consumers live in Sentinel Infrastructure.
+Consumers live in the module that owns the destination behavior.
+
+Sentinel consumes audit and system logs.
+
+Courier consumes user message requests.
 
 Files:
 - `back/src/02.Sentinel/Sentinel.Infrastructure/BackgroundServices/RedisStreamConsumer.cs`
 - `back/src/02.Sentinel/Sentinel.Infrastructure/BackgroundServices/AuditLogConsumer.cs`
 - `back/src/02.Sentinel/Sentinel.Infrastructure/BackgroundServices/SystemLogConsumer.cs`
+- `back/src/04.Courier/Courier.Infrastructure/BackgroundServices/CourierMessageRequestConsumer.cs`
 
 `RedisStreamConsumer<TEvent>` contains the generic stream loop.
 
@@ -323,6 +368,8 @@ Concrete consumers only define:
 - Display name.
 - Error message.
 - How to map the event to Sentinel entities.
+
+Courier has its own consumer because it creates emails and notifications from templates.
 
 ---
 

@@ -9,6 +9,7 @@ namespace Courier.Domain.Entities
       public Guid OrganizationId { get; private set; }
       public Guid UserId { get; private set; }
       public string Module { get; private set; } = string.Empty;
+      public string Feature { get; private set; } = string.Empty;
       public string TemplateKey { get; private set; } = string.Empty;
       public string Title { get; private set; } = string.Empty;
       public string Message { get; private set; } = string.Empty;
@@ -25,6 +26,7 @@ namespace Courier.Domain.Entities
           Guid organizationId,
           Guid userId,
           string module,
+          string feature,
           string templateKey,
           string title,
           string message,
@@ -37,6 +39,7 @@ namespace Courier.Domain.Entities
             OrganizationId = organizationId,
             UserId = userId,
             Module = module.Trim(),
+            Feature = feature.Trim(),
             TemplateKey = templateKey.Trim(),
             Title = title,
             Message = message,
