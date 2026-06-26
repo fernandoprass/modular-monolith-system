@@ -148,6 +148,7 @@ public class GlobalExceptionHandlerTests
       public string? Language => "en";
       public string? IpAddress => "127.0.0.1";
       public string? UserAgent => "test-agent";
+      public string UserEmail => "user@test.com";
       public IEnumerable<string> Roles => [];
    }
 }

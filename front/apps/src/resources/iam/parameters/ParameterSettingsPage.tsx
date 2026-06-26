@@ -1,10 +1,18 @@
+import { RotateCcw, Save, Trash2 } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
+import { useToast } from '../../../app/ToastProvider'
 import { useTranslate } from '../../../app/i18n/i18n'
 import { useNotifyError } from '../../../auth/AuthProvider'
+import { Button } from '../../../components/ui/button'
 import { Card, CardContent } from '../../../components/ui/card'
 import { Field, FieldLabel } from '../../../components/ui/form'
-import { getOrganizationSettingsParameters, getUserSettingsParameters } from './parameterApi'
+import {
+  deleteParameterOverride,
+  getOrganizationSettingsParameters,
+  getUserSettingsParameters,
+  saveParameterOverride,
+} from './parameterApi'
 import { ParameterValueInput } from './ParameterValueInput'
 import type { ParameterLiteDto } from './parameterTypes'
 
@@ -56,7 +64,10 @@ function getPageTitleKey(owner: ParameterSettingsOwner): string {
 export function ParameterSettingsPage({ owner }: ParameterSettingsPageProps) {
   const t = useTranslate()
   const notifyError = useNotifyError()
+  const { showSuccess } = useToast()
   const [parameters, setParameters] = useState<ParameterLiteDto[]>([])
+  const [originalValues, setOriginalValues] = useState<Record<string, string>>({})
+  const [savingParameterIds, setSavingParameterIds] = useState<Set<string>>(new Set())
   const [values, setValues] = useState<Record<string, string>>({})
   const [isLoading, setIsLoading] = useState(false)
   const groupedParameters = useMemo(() => groupParameters(parameters), [parameters])
@@ -70,7 +81,9 @@ export function ParameterSettingsPage({ owner }: ParameterSettingsPageProps) {
         : await getUserSettingsParameters()
 
       setParameters(loaded)
-      setValues(Object.fromEntries(loaded.map((parameter) => [parameter.id, parameter.value])))
+      const loadedValues = Object.fromEntries(loaded.map((parameter) => [parameter.id, parameter.value]))
+      setOriginalValues(loadedValues)
+      setValues(loadedValues)
     } catch (error) {
       notifyError(error, t('shared.errors.generic'))
     } finally {
@@ -82,8 +95,63 @@ export function ParameterSettingsPage({ owner }: ParameterSettingsPageProps) {
     void loadParameters()
   }, [loadParameters])
 
+  function setParameterSaving(parameterId: string, isSaving: boolean) {
+    setSavingParameterIds((current) => {
+      const next = new Set(current)
+
+      if (isSaving) {
+        next.add(parameterId)
+      } else {
+        next.delete(parameterId)
+      }
+
+      return next
+    })
+  }
+
+  async function handleSaveOverride(parameter: ParameterLiteDto) {
+    const value = values[parameter.id] ?? ''
+
+    setParameterSaving(parameter.id, true)
+
+    try {
+      await saveParameterOverride(parameter.id, value)
+      showSuccess(t('features.iam.parameters.notifications.overrideSaved'))
+      await loadParameters()
+    } catch (error) {
+      notifyError(error, t('shared.errors.generic'))
+    } finally {
+      setParameterSaving(parameter.id, false)
+    }
+  }
+
+  async function handleDeleteOverride(parameter: ParameterLiteDto) {
+    if (parameter.parameterOverrideId === null) {
+      return
+    }
+
+    setParameterSaving(parameter.id, true)
+
+    try {
+      await deleteParameterOverride(parameter.parameterOverrideId)
+      showSuccess(t('features.iam.parameters.notifications.overrideRemoved'))
+      await loadParameters()
+    } catch (error) {
+      notifyError(error, t('shared.errors.generic'))
+    } finally {
+      setParameterSaving(parameter.id, false)
+    }
+  }
+
+  function handleReset(parameterId: string) {
+    setValues((current) => ({
+      ...current,
+      [parameterId]: originalValues[parameterId] ?? '',
+    }))
+  }
+
   return (
-    <main className="page">
+    <main className="page settings-page">
       <h1 className="page-title">{t(getPageTitleKey(owner))}</h1>
       {isLoading && <p className="page-subtitle">{t('shared.common.loading')}</p>}
       {!isLoading && parameters.length === 0 && (
@@ -101,8 +169,14 @@ export function ParameterSettingsPage({ owner }: ParameterSettingsPageProps) {
                     <div className="settings-parameter-list">
                       {group.parameters.map((parameter) => (
                         <Field className="settings-parameter-row" key={parameter.id}>
-                          <FieldLabel htmlFor={`parameter-${parameter.id}`}>{parameter.title}</FieldLabel>
+                          <div className="settings-parameter-copy">
+                            <FieldLabel htmlFor={`parameter-${parameter.id}`}>{parameter.title}</FieldLabel>
+                            {parameter.description.length > 0 && (
+                              <p className="settings-parameter-description">{parameter.description}</p>
+                            )}
+                          </div>
                           <ParameterValueInput
+                            disabled={savingParameterIds.has(parameter.id)}
                             id={`parameter-${parameter.id}`}
                             onBlur={() => undefined}
                             onChange={(value) => setValues((current) => ({
@@ -112,6 +186,40 @@ export function ParameterSettingsPage({ owner }: ParameterSettingsPageProps) {
                             type={String(parameter.type)}
                             value={values[parameter.id] ?? ''}
                           />
+                          <div className="settings-parameter-actions">
+                            <Button
+                              aria-label={t('shared.actions.saveOverride')}
+                              disabled={savingParameterIds.has(parameter.id) || values[parameter.id] === originalValues[parameter.id]}
+                              onClick={() => void handleSaveOverride(parameter)}
+                              size="icon"
+                              title={t('shared.actions.saveOverride')}
+                              type="button"
+                            >
+                              <Save />
+                            </Button>
+                            <Button
+                              aria-label={t('shared.actions.reset')}
+                              disabled={savingParameterIds.has(parameter.id) || values[parameter.id] === originalValues[parameter.id]}
+                              onClick={() => handleReset(parameter.id)}
+                              size="icon"
+                              title={t('shared.actions.reset')}
+                              type="button"
+                              variant="outline"
+                            >
+                              <RotateCcw />
+                            </Button>
+                            <Button
+                              aria-label={t('shared.actions.removeOverride')}
+                              disabled={savingParameterIds.has(parameter.id) || parameter.parameterOverrideId === null}
+                              onClick={() => void handleDeleteOverride(parameter)}
+                              size="icon"
+                              title={t('shared.actions.removeOverride')}
+                              type="button"
+                              variant="outline"
+                            >
+                              <Trash2 />
+                            </Button>
+                          </div>
                         </Field>
                       ))}
                     </div>

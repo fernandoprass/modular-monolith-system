@@ -41,10 +41,7 @@ public class SentinelLogQueryRepository(SentinelDbContext dbContext) : ISentinel
          a.Action,
          a.PrivacyLevel,
          a.Description,
-         a.CreatedAt,
-         a.ExpiresAt,
-         a.UserId,
-         a.TargetId)).ToList();
+         a.CreatedAt)).ToList();
 
       return new PagedResultDto<AuditLogLiteDto>(
          items,
@@ -76,11 +73,7 @@ public class SentinelLogQueryRepository(SentinelDbContext dbContext) : ISentinel
          s.Status,
          s.Module,
          s.Message,
-         s.CreatedAt,
-         s.ExpiresAt,
-         s.RequestId,
-         s.UserId,
-         s.OrganizationId)).ToList();
+         s.CreatedAt)).ToList();
 
       return new PagedResultDto<SystemLogLiteDto>(
          items,

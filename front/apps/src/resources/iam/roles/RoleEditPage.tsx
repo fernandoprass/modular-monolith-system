@@ -1,13 +1,15 @@
-import { useForm } from '@tanstack/react-form'
-import type { RowSelectionState, SortingState, ColumnDef } from '@tanstack/react-table'
+import { zodResolver } from '@hookform/resolvers/zod'
+import type { ColumnDef, RowSelectionState, SortingState } from '@tanstack/react-table'
 import { ArrowLeft, Minus, Plus } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Controller, useForm } from 'react-hook-form'
 import { useNavigate, useParams } from 'react-router-dom'
+import { z } from 'zod'
 
 import { useToast } from '../../../app/ToastProvider'
 import { useTranslate } from '../../../app/i18n/i18n'
 import { APP_ROUTES } from '../../../app/routes'
-import { useNotifyError } from '../../../auth/AuthProvider'
+import { useAuth, useNotifyError } from '../../../auth/AuthProvider'
 import { Badge } from '../../../components/ui/badge'
 import { Button } from '../../../components/ui/button'
 import { Card, CardContent } from '../../../components/ui/card'
@@ -15,9 +17,17 @@ import { Checkbox } from '../../../components/ui/checkbox'
 import { DataTable } from '../../../components/ui/data-table'
 import { Field, FieldGroup, FieldLabel } from '../../../components/ui/form'
 import { Input } from '../../../components/ui/input'
+import { Select } from '../../../components/ui/select'
 import { Textarea } from '../../../components/ui/textarea'
+import { IAM_PERMISSIONS } from '../../../shared/iamConstants'
 import type { PermissionDto } from '../../../shared/permissions'
+import { hasPermissionCode } from '../../../shared/permissions'
 import { OrganizationSelect } from '../organizations/OrganizationSelect'
+import {
+  PERMISSION_FILTER_VALUES,
+  PERMISSION_MODULE_OPTIONS,
+} from '../permissions/permissionTypes'
+import { toTranslatedOptions } from '../permissions/permissionUi'
 import {
   assignRolePermissions,
   createRole,
@@ -37,6 +47,33 @@ const EMPTY_ROLE_FORM: RoleForm = {
   organizationId: '',
 }
 
+const DEFAULT_ROLE_PERMISSION_MODULE = PERMISSION_MODULE_OPTIONS[0]?.value ?? PERMISSION_FILTER_VALUES.all
+
+const roleEditSchema = z.object({
+  description: z.string().trim().min(1),
+  isActive: z.boolean(),
+  isDefault: z.boolean(),
+  name: z.string().trim().min(1),
+  organizationId: z.string(),
+})
+
+type RoleEditFormProps = {
+  isCreate: boolean
+  onCreated: (role: RoleDto) => void
+  onSaved: () => Promise<void>
+  role: RoleDto | null
+}
+
+function toForm(role: RoleDto): RoleForm {
+  return {
+    description: role.description,
+    isActive: role.isActive,
+    isDefault: role.isDefault,
+    name: role.name,
+    organizationId: role.organizationId ?? '',
+  }
+}
+
 function getSelectedIds(selection: RowSelectionState): string[] {
   return Object.entries(selection)
     .filter(([, selected]) => selected)
@@ -48,6 +85,7 @@ export function RoleEditPage() {
   const navigate = useNavigate()
   const notifyError = useNotifyError()
   const { showSuccess } = useToast()
+  const { permissions } = useAuth()
   const { id } = useParams()
   const [role, setRole] = useState<RoleDto | null>(null)
   const [availablePermissions, setAvailablePermissions] = useState<PermissionDto[]>([])
@@ -56,32 +94,36 @@ export function RoleEditPage() {
   const [rolePermissionSelection, setRolePermissionSelection] = useState<RowSelectionState>({})
   const [availableSorting, setAvailableSorting] = useState<SortingState>([])
   const [rolePermissionSorting, setRolePermissionSorting] = useState<SortingState>([])
-  const [availablePermissionTitleFilter, setAvailablePermissionTitleFilter] = useState('')
-  const [rolePermissionTitleFilter, setRolePermissionTitleFilter] = useState('')
+  const [permissionTitleFilter, setPermissionTitleFilter] = useState('')
+  const [permissionModuleFilter, setPermissionModuleFilter] = useState<string>(DEFAULT_ROLE_PERMISSION_MODULE)
   const [isPermissionLoading, setIsPermissionLoading] = useState(false)
   const [isPermissionSaving, setIsPermissionSaving] = useState(false)
-  const [isSaving, setIsSaving] = useState(false)
   const isCreate = id === undefined
+  const canAssignPermissions = hasPermissionCode(permissions, IAM_PERMISSIONS.permissions.assign)
+  const pageTitle = isCreate ? t('features.iam.roles.pages.create') : t('features.iam.roles.pages.edit')
+  const permissionModuleOptions = useMemo(() => [
+    { label: t('shared.filters.all'), value: PERMISSION_FILTER_VALUES.all },
+    ...toTranslatedOptions(PERMISSION_MODULE_OPTIONS, t),
+  ], [t])
   const filteredAvailablePermissions = useMemo(() => {
-    const filter = availablePermissionTitleFilter.trim().toLowerCase()
+    const filter = permissionTitleFilter.trim().toLowerCase()
 
     if (filter.length === 0) {
       return availablePermissions
     }
 
     return availablePermissions.filter((permission) => permission.title.toLowerCase().includes(filter))
-  }, [availablePermissionTitleFilter, availablePermissions])
+  }, [availablePermissions, permissionTitleFilter])
   const filteredRolePermissions = useMemo(() => {
-    const filter = rolePermissionTitleFilter.trim().toLowerCase()
+    const filter = permissionTitleFilter.trim().toLowerCase()
 
     if (filter.length === 0) {
       return rolePermissions
     }
 
     return rolePermissions.filter((permission) => permission.title.toLowerCase().includes(filter))
-  }, [rolePermissionTitleFilter, rolePermissions])
+  }, [permissionTitleFilter, rolePermissions])
   const availablePermissionColumns = useMemo<ColumnDef<PermissionDto>[]>(() => [
-
     {
       accessorKey: 'module',
       header: t('shared.fields.module'),
@@ -94,7 +136,7 @@ export function RoleEditPage() {
       accessorKey: 'title',
       header: t('shared.fields.title'),
     },
-        {
+    {
       cell: ({ row }) => (
         <span className="permission-info" title={row.original.description}>
           ?
@@ -128,30 +170,6 @@ export function RoleEditPage() {
       header: t('shared.fields.isActive'),
     },
   ], [t])
-  const form = useForm({
-    defaultValues: EMPTY_ROLE_FORM,
-    onSubmit: async ({ value }) => {
-      setIsSaving(true)
-
-      try {
-        if (isCreate) {
-          const created = await createRole(value)
-          setRole(created)
-          showSuccess(t('features.iam.roles.notifications.created'))
-          navigate(APP_ROUTES.roleEdit(created.id), { replace: true })
-        } else {
-          await updateRole(id, value)
-          showSuccess(t('features.iam.roles.notifications.updated'))
-          await loadRole()
-        }
-      } catch (error) {
-        notifyError(error, t('shared.errors.generic'))
-      } finally {
-        setIsSaving(false)
-      }
-    },
-  })
-
   const loadRole = useCallback(async () => {
     if (isCreate) {
       return
@@ -160,18 +178,13 @@ export function RoleEditPage() {
     try {
       const loaded = await getRole(id)
       setRole(loaded)
-      form.setFieldValue('description', loaded.description)
-      form.setFieldValue('isActive', loaded.isActive)
-      form.setFieldValue('isDefault', loaded.isDefault)
-      form.setFieldValue('name', loaded.name)
-      form.setFieldValue('organizationId', loaded.organizationId ?? '')
     } catch (error) {
       notifyError(error, t('shared.errors.generic'))
     }
-  }, [form, id, isCreate, notifyError, t])
+  }, [id, isCreate, notifyError, t])
 
   const loadPermissions = useCallback(async () => {
-    if (isCreate || id === undefined) {
+    if (isCreate || id === undefined || !canAssignPermissions) {
       return
     }
 
@@ -179,41 +192,48 @@ export function RoleEditPage() {
 
     try {
       const [available, assigned] = await Promise.all([
-        getAvailableRolePermissions(id),
-        getRolePermissions(id),
+        getAvailableRolePermissions(id, permissionModuleFilter),
+        getRolePermissions(id, permissionModuleFilter),
       ])
 
       setAvailablePermissions(available)
       setRolePermissions(assigned)
       setAvailableSelection({})
       setRolePermissionSelection({})
-      setAvailablePermissionTitleFilter('')
-      setRolePermissionTitleFilter('')
     } catch (error) {
       notifyError(error, t('shared.errors.generic'))
     } finally {
       setIsPermissionLoading(false)
     }
-  }, [id, isCreate, notifyError, t])
+  }, [
+    canAssignPermissions,
+    id,
+    isCreate,
+    notifyError,
+    permissionModuleFilter,
+    t,
+  ])
 
   useEffect(() => {
     void loadRole()
   }, [loadRole])
 
   useEffect(() => {
+    setRole(null)
+  }, [id])
+
+  useEffect(() => {
     void loadPermissions()
   }, [loadPermissions])
 
-  useEffect(() => {
-    if (isCreate) {
-      form.reset(EMPTY_ROLE_FORM)
-      return
-    }
-
-  }, [form, isCreate])
+  function handlePermissionModuleChange(value: string) {
+    setAvailableSelection({})
+    setRolePermissionSelection({})
+    setPermissionModuleFilter(value)
+  }
 
   async function handleAssignPermissions() {
-    if (id === undefined) {
+    if (id === undefined || !canAssignPermissions) {
       return
     }
 
@@ -237,7 +257,7 @@ export function RoleEditPage() {
   }
 
   async function handleUnassignPermissions() {
-    if (id === undefined) {
+    if (id === undefined || !canAssignPermissions) {
       return
     }
 
@@ -263,7 +283,7 @@ export function RoleEditPage() {
   return (
     <main className="page">
       <div className="page-header">
-        <h1 className="page-title">{isCreate ? t('shared.actions.create') : t('shared.actions.edit')}</h1>
+        <h1 className="page-title">{pageTitle}</h1>
         <Button onClick={() => navigate(APP_ROUTES.roles)} type="button" variant="outline">
           <ArrowLeft data-icon="inline-start" />
           {t('shared.actions.back')}
@@ -274,83 +294,44 @@ export function RoleEditPage() {
           {!isCreate && role === null ? (
             <p className="page-subtitle">{t('shared.common.loading')}</p>
           ) : (
-            <form className="edit-form" onSubmit={(event) => {
-              event.preventDefault()
-              void form.handleSubmit()
-            }}>
-              <FieldGroup>
-                <form.Field name="organizationId">
-                  {(field) => (
-                    <Field data-disabled={!isCreate}>
-                      <FieldLabel>{t('shared.fields.organization')}</FieldLabel>
-                      <OrganizationSelect
-                        clearable
-                        disabled={!isCreate}
-                        includeInactive
-                        onValueChange={field.handleChange}
-                        value={field.state.value}
-                      />
-                    </Field>
-                  )}
-                </form.Field>
-                <form.Field name="name">
-                  {(field) => (
-                    <Field>
-                      <FieldLabel htmlFor={field.name}>{t('shared.fields.name')}</FieldLabel>
-                      <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required value={field.state.value} />
-                    </Field>
-                  )}
-                </form.Field>
-                <form.Field name="description">
-                  {(field) => (
-                    <Field>
-                      <FieldLabel htmlFor={field.name}>{t('shared.fields.description')}</FieldLabel>
-                      <Textarea id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required value={field.state.value} />
-                    </Field>
-                  )}
-                </form.Field>
-                <form.Field name="isActive">
-                  {(field) => (
-                    <Checkbox
-                      checked={field.state.value}
-                      label={t('shared.fields.isActive')}
-                      onCheckedChange={(checked) => field.handleChange(checked === true)}
-                    />
-                  )}
-                </form.Field>
-                <form.Field name="isDefault">
-                  {(field) => (
-                    <Checkbox
-                      checked={field.state.value}
-                      label={t('shared.fields.isDefault')}
-                      onCheckedChange={(checked) => field.handleChange(checked === true)}
-                    />
-                  )}
-                </form.Field>
-              </FieldGroup>
-              <div className="form-actions">
-                <Button disabled={isSaving} type="submit">
-                  {isCreate ? t('shared.actions.create') : t('shared.actions.save')}
-                </Button>
-              </div>
-            </form>
+            <RoleEditForm
+              key={role?.id ?? 'create'}
+              isCreate={isCreate}
+              onCreated={(created) => {
+                setRole(created)
+                navigate(APP_ROUTES.roleEdit(created.id), { replace: true })
+              }}
+              onSaved={loadRole}
+              role={role}
+            />
           )}
         </CardContent>
       </Card>
-      {!isCreate && (
+      {!isCreate && canAssignPermissions && (
         <Card>
-          <CardContent>
+          <CardContent className="permission-section">
+            <h2 className="card-title">{t('features.iam.permissions.name')}</h2>
+            <div className="permission-filter-form">
+              <Field>
+                <FieldLabel>{t('shared.fields.module')}</FieldLabel>
+                <Select
+                  onValueChange={handlePermissionModuleChange}
+                  options={permissionModuleOptions}
+                  value={permissionModuleFilter}
+                />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="permission-title-filter">{t('shared.fields.title')}</FieldLabel>
+                <Input
+                  id="permission-title-filter"
+                  onChange={(event) => setPermissionTitleFilter(event.currentTarget.value)}
+                  value={permissionTitleFilter}
+                />
+              </Field>
+            </div>
             <div className="permission-assignment-grid">
               <div className="permission-table-column">
                 <h2 className="card-title">{t('features.iam.roles.labels.availablePermissions')}</h2>
-                <Field>
-                  <FieldLabel htmlFor="available-permission-title-filter">{t('shared.fields.title')}</FieldLabel>
-                  <Input
-                    id="available-permission-title-filter"
-                    onChange={(event) => setAvailablePermissionTitleFilter(event.currentTarget.value)}
-                    value={availablePermissionTitleFilter}
-                  />
-                </Field>
                 <DataTable
                   columns={availablePermissionColumns}
                   data={filteredAvailablePermissions}
@@ -371,7 +352,7 @@ export function RoleEditPage() {
                   type="button"
                 >
                   <Plus data-icon="inline-start" />
-                  Add
+                  {t('shared.actions.add')}
                 </Button>
                 <Button
                   disabled={isPermissionSaving || getSelectedIds(rolePermissionSelection).length === 0}
@@ -380,19 +361,11 @@ export function RoleEditPage() {
                   variant="outline"
                 >
                   <Minus data-icon="inline-start" />
-                  Remove
+                  {t('shared.actions.remove')}
                 </Button>
               </div>
               <div className="permission-table-column">
                 <h2 className="card-title">{t('features.iam.roles.labels.assignedPermissions')}</h2>
-                <Field>
-                  <FieldLabel htmlFor="assigned-permission-title-filter">{t('shared.fields.title')}</FieldLabel>
-                  <Input
-                    id="assigned-permission-title-filter"
-                    onChange={(event) => setRolePermissionTitleFilter(event.currentTarget.value)}
-                    value={rolePermissionTitleFilter}
-                  />
-                </Field>
                 <DataTable
                   columns={assignedPermissionColumns}
                   data={filteredRolePermissions}
@@ -411,5 +384,103 @@ export function RoleEditPage() {
         </Card>
       )}
     </main>
+  )
+}
+
+function RoleEditForm({
+  isCreate,
+  onCreated,
+  onSaved,
+  role,
+}: RoleEditFormProps) {
+  const t = useTranslate()
+  const notifyError = useNotifyError()
+  const { showSuccess } = useToast()
+  const [isSaving, setIsSaving] = useState(false)
+  const {
+    control,
+    handleSubmit,
+    register,
+  } = useForm<RoleForm>({
+    defaultValues: role === null ? EMPTY_ROLE_FORM : toForm(role),
+    resolver: zodResolver(roleEditSchema),
+  })
+
+  async function handleSave(value: RoleForm) {
+    setIsSaving(true)
+
+    try {
+      if (isCreate) {
+        const created = await createRole(value)
+        showSuccess(t('features.iam.roles.notifications.created'))
+        onCreated(created)
+      } else if (role !== null) {
+        await updateRole(role.id, value)
+        showSuccess(t('features.iam.roles.notifications.updated'))
+        await onSaved()
+      }
+    } catch (error) {
+      notifyError(error, t('shared.errors.generic'))
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  return (
+    <form className="edit-form" onSubmit={handleSubmit(handleSave)}>
+      <FieldGroup>
+        <Controller
+          control={control}
+          name="organizationId"
+          render={({ field }) => (
+            <Field data-disabled={!isCreate}>
+              <FieldLabel>{t('shared.fields.organization')}</FieldLabel>
+              <OrganizationSelect
+                clearable
+                disabled={!isCreate}
+                includeInactive
+                onValueChange={field.onChange}
+                value={field.value}
+              />
+            </Field>
+          )}
+        />
+        <Field>
+          <FieldLabel htmlFor="name">{t('shared.fields.name')}</FieldLabel>
+          <Input id="name" required {...register('name')} />
+        </Field>
+        <Field>
+          <FieldLabel htmlFor="description">{t('shared.fields.description')}</FieldLabel>
+          <Textarea id="description" required {...register('description')} />
+        </Field>
+        <Controller
+          control={control}
+          name="isActive"
+          render={({ field }) => (
+            <Checkbox
+              checked={field.value}
+              label={t('shared.fields.isActive')}
+              onCheckedChange={field.onChange}
+            />
+          )}
+        />
+        <Controller
+          control={control}
+          name="isDefault"
+          render={({ field }) => (
+            <Checkbox
+              checked={field.value}
+              label={t('shared.fields.isDefault')}
+              onCheckedChange={field.onChange}
+            />
+          )}
+        />
+      </FieldGroup>
+      <div className="form-actions">
+        <Button disabled={isSaving} type="submit">
+          {isCreate ? t('shared.actions.create') : t('shared.actions.save')}
+        </Button>
+      </div>
+    </form>
   )
 }

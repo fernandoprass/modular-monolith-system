@@ -1,25 +1,43 @@
-import { useForm } from '@tanstack/react-form'
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import type { SortingState } from '@tanstack/react-table'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Controller, useForm } from 'react-hook-form'
+import { useNavigate } from 'react-router-dom'
 
 import { useToast } from '../../../app/ToastProvider'
 import { useTranslate } from '../../../app/i18n/i18n'
 import { useAuth, useNotifyError } from '../../../auth/AuthProvider'
 import { DataTable } from '../../../components/ui/data-table'
+import { DataTablePagination } from '../../../components/ui/data-table-pagination'
 import { ConfirmDialog } from '../../../components/ui/dialog-confirm'
 import { Field, FieldLabel } from '../../../components/ui/form'
 import { FilterToolbar } from '../../../components/ui/filter-toolbar'
 import { Input } from '../../../components/ui/input'
 import { Select } from '../../../components/ui/select'
-import { DataTablePagination } from '../../../components/ui/data-table-pagination'
 import { IAM_PERMISSIONS } from '../../../shared/iamConstants'
-import { DEFAULT_PAGINATION } from '../../../shared/pagination'
+import { DEFAULT_PAGINATION, type PagedResultDto } from '../../../shared/pagination'
 import { hasPermissionCode } from '../../../shared/permissions'
 import { deleteOrganization, getOrganizations } from './organizationApi'
 import { createOrganizationTableColumns } from './OrganizationListPageColumns'
-import { ORGANIZATION_TYPE_OPTIONS, type OrganizationDto, type PagedResultDto } from './organizationTypes'
+import { ORGANIZATION_TYPE_OPTIONS, type OrganizationDto } from './organizationTypes'
 import { toTranslatedOptions } from './organizationUi'
+
+const ORGANIZATION_FILTER_VALUES = {
+  all: 'all',
+} as const
+
+type OrganizationSearchForm = {
+  code: string
+  isActive: string
+  name: string
+  type: string
+}
+
+const EMPTY_ORGANIZATION_SEARCH: OrganizationSearchForm = {
+  code: '',
+  isActive: ORGANIZATION_FILTER_VALUES.all,
+  name: '',
+  type: ORGANIZATION_FILTER_VALUES.all,
+}
 
 export function OrganizationListPage() {
   const t = useTranslate()
@@ -27,10 +45,7 @@ export function OrganizationListPage() {
   const notifyError = useNotifyError()
   const { showSuccess } = useToast()
   const { permissions } = useAuth()
-  const [appliedCodeFilter, setAppliedCodeFilter] = useState('')
-  const [appliedIsActiveFilter, setAppliedIsActiveFilter] = useState<string | null>(null)
-  const [appliedNameFilter, setAppliedNameFilter] = useState('')
-  const [appliedTypeFilter, setAppliedTypeFilter] = useState<string | null>(null)
+  const [appliedFilters, setAppliedFilters] = useState<OrganizationSearchForm>(EMPTY_ORGANIZATION_SEARCH)
   const [pageNumber, setPageNumber] = useState<number>(DEFAULT_PAGINATION.pageNumber)
   const [pageSize, setPageSize] = useState<number>(DEFAULT_PAGINATION.pageSize)
   const [result, setResult] = useState<PagedResultDto<OrganizationDto> | null>(null)
@@ -40,6 +55,9 @@ export function OrganizationListPage() {
   const canView = hasPermissionCode(permissions, IAM_PERMISSIONS.organizations.read)
   const canUpdate = hasPermissionCode(permissions, IAM_PERMISSIONS.organizations.write)
   const canDelete = hasPermissionCode(permissions, IAM_PERMISSIONS.organizations.write)
+  const { control, handleSubmit, register, reset } = useForm<OrganizationSearchForm>({
+    defaultValues: EMPTY_ORGANIZATION_SEARCH,
+  })
   const columns = useMemo(() => createOrganizationTableColumns({
     canDelete,
     canUpdate,
@@ -48,51 +66,38 @@ export function OrganizationListPage() {
     setDeleteTarget,
     t,
   }), [canDelete, canUpdate, canView, navigate, t])
-  const filterForm = useForm({
-    defaultValues: {
-      code: '',
-      isActive: 'all',
-      name: '',
-      type: 'all',
-    },
-    onSubmit: ({ value }) => {
-      setPageNumber(DEFAULT_PAGINATION.pageNumber)
-      setAppliedCodeFilter(value.code)
-      setAppliedIsActiveFilter(value.isActive === 'all' ? null : value.isActive)
-      setAppliedNameFilter(value.name)
-      setAppliedTypeFilter(value.type === 'all' ? null : value.type)
-    },
-  })
-  const loadOrganizations = useCallback(async (targetPage = pageNumber) => {
+  const loadOrganizations = useCallback(async (targetPage: number) => {
     setIsLoading(true)
 
     try {
       setResult(await getOrganizations({
-        code: appliedCodeFilter,
-        isActive: appliedIsActiveFilter,
-        name: appliedNameFilter,
+        code: appliedFilters.code,
+        isActive: appliedFilters.isActive === ORGANIZATION_FILTER_VALUES.all ? null : appliedFilters.isActive,
+        name: appliedFilters.name,
         pageNumber: targetPage,
         pageSize,
-        type: appliedTypeFilter,
+        type: appliedFilters.type === ORGANIZATION_FILTER_VALUES.all ? null : appliedFilters.type,
       }))
     } catch (error) {
       notifyError(error, t('shared.errors.generic'))
     } finally {
       setIsLoading(false)
     }
-  }, [appliedCodeFilter, appliedIsActiveFilter, appliedNameFilter, appliedTypeFilter, notifyError, pageNumber, pageSize, t])
+  }, [appliedFilters, notifyError, pageSize, t])
 
   useEffect(() => {
     void loadOrganizations(pageNumber)
   }, [loadOrganizations, pageNumber])
 
   function handleReset() {
-    filterForm.reset()
-    setAppliedCodeFilter('')
-    setAppliedIsActiveFilter(null)
-    setAppliedNameFilter('')
-    setAppliedTypeFilter(null)
+    reset(EMPTY_ORGANIZATION_SEARCH)
+    setAppliedFilters(EMPTY_ORGANIZATION_SEARCH)
     setPageNumber(DEFAULT_PAGINATION.pageNumber)
+  }
+
+  function handleSearch(value: OrganizationSearchForm) {
+    setPageNumber(DEFAULT_PAGINATION.pageNumber)
+    setAppliedFilters({ ...value })
   }
 
   function handlePageSizeChange(nextPageSize: number) {
@@ -115,59 +120,54 @@ export function OrganizationListPage() {
     }
   }
 
-  const totalPages = result?.totalPages ?? 1
+  const totalPages = result?.totalPages ?? DEFAULT_PAGINATION.pageNumber
 
   return (
     <main className="page">
-      <h1 className="page-title">{t('features.iam.organizations.pages.list')}</h1>
-      <FilterToolbar onReset={handleReset} onSubmit={(event) => {
-        event.preventDefault()
-        void filterForm.handleSubmit()
-      }}>
-        <filterForm.Field name="type">
-          {(field) => (
+      <div className="page-header">
+        <h1 className="page-title">{t('features.iam.organizations.pages.list')}</h1>
+      </div>
+      <FilterToolbar onReset={handleReset} onSubmit={handleSubmit(handleSearch)}>
+        <Controller
+          control={control}
+          name="type"
+          render={({ field }) => (
             <Field>
               <FieldLabel>{t('shared.fields.type')}</FieldLabel>
               <Select
-                onValueChange={field.handleChange}
-                options={[{ label: t('shared.filters.all'), value: 'all' }, ...toTranslatedOptions(ORGANIZATION_TYPE_OPTIONS, t)]}
-                value={field.state.value}
+                onValueChange={field.onChange}
+                options={[{ label: t('shared.filters.all'), value: ORGANIZATION_FILTER_VALUES.all }, ...toTranslatedOptions(ORGANIZATION_TYPE_OPTIONS, t)]}
+                value={field.value}
               />
             </Field>
           )}
-        </filterForm.Field>
-        <filterForm.Field name="code">
-          {(field) => (
-            <Field>
-              <FieldLabel htmlFor={field.name}>{t('shared.fields.code')}</FieldLabel>
-              <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} value={field.state.value} />
-            </Field>
-          )}
-        </filterForm.Field>
-        <filterForm.Field name="name">
-          {(field) => (
-            <Field>
-              <FieldLabel htmlFor={field.name}>{t('shared.fields.name')}</FieldLabel>
-              <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} value={field.state.value} />
-            </Field>
-          )}
-        </filterForm.Field>
-                <filterForm.Field name="isActive">
-          {(field) => (
+        />
+        <Field>
+          <FieldLabel htmlFor="code">{t('shared.fields.code')}</FieldLabel>
+          <Input id="code" {...register('code')} />
+        </Field>
+        <Field>
+          <FieldLabel htmlFor="name">{t('shared.fields.name')}</FieldLabel>
+          <Input id="name" {...register('name')} />
+        </Field>
+        <Controller
+          control={control}
+          name="isActive"
+          render={({ field }) => (
             <Field>
               <FieldLabel>{t('shared.fields.isActive')}</FieldLabel>
               <Select
-                onValueChange={field.handleChange}
+                onValueChange={field.onChange}
                 options={[
-                  { label: t('shared.filters.all'), value: 'all' },
+                  { label: t('shared.filters.all'), value: ORGANIZATION_FILTER_VALUES.all },
                   { label: t('shared.status.active'), value: 'true' },
                   { label: t('shared.status.inactive'), value: 'false' },
                 ]}
-                value={field.state.value}
+                value={field.value}
               />
             </Field>
           )}
-        </filterForm.Field>
+        />
       </FilterToolbar>
 
       <DataTable

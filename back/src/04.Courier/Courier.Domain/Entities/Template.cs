@@ -1,5 +1,6 @@
 using Courier.Domain.Enums;
 using Courier.Domain.ValueObjects;
+using Shared.Domain;
 using Shared.Domain.Entities;
 using Shared.Domain.Enums;
 
@@ -7,79 +8,93 @@ namespace Courier.Domain.Entities;
 
 public class Template : EntityAudited<Guid>
 {
-   private List<TemplateEmailTranslation> _emailTranslations = [];
+   private List<TemplateTranslation> _translations = [];
 
+   public string Module { get; private set; } = string.Empty;
    public string Key { get; private set; } = string.Empty;
-   public string Name { get; private set; } = string.Empty;
-   public TemplateType Type { get; private set; } = TemplateType.Email;
+   public bool IsAllowingOptOut { get; private set; } = false;
+
+   public NotificationSeverity Severity { get; private set; } = NotificationSeverity.Information;
+
    public RetentionPolicy RetentionPolicy { get; private set; } = RetentionPolicy.Operational;
 
-   public IReadOnlyCollection<TemplateEmailTranslation> EmailTranslations => _emailTranslations.AsReadOnly();
+   public IReadOnlyCollection<TemplateTranslation> Translations => _translations.AsReadOnly();
 
    private Template() { }
 
-   public static Template Create(string key, string name, TemplateType type, RetentionPolicy retentionPolicy, Guid createdBy)
+   public static Template Create(
+      string module,
+      string key,
+      bool isAllowingOptOut,
+      NotificationSeverity severity,
+      RetentionPolicy retentionPolicy,
+      Guid createdBy)
    {
       var now = DateTime.UtcNow;
 
       return new Template
       {
          Id = Guid.CreateVersion7(),
+         Module = NormalizeModule(module),
          Key = NormalizeKey(key),
-         Name = name.Trim(),
-         Type = type,
+         IsAllowingOptOut = isAllowingOptOut,
+         Severity = severity,
          RetentionPolicy = retentionPolicy,
          CreatedAt = now,
          CreatedBy = createdBy
       };
    }
 
-   public void Update(string key, string name, TemplateType type, RetentionPolicy retentionPolicy, Guid updatedBy)
+   public void Update(
+      string module,
+      string key,
+      bool isAllowingOptOut,
+      NotificationSeverity severity,
+      RetentionPolicy retentionPolicy,
+      Guid updatedBy)
    {
+      Module = NormalizeModule(module);
       Key = NormalizeKey(key);
-      Name = name.Trim();
-      Type = type;
+      IsAllowingOptOut = isAllowingOptOut;
+      Severity = severity;
       RetentionPolicy = retentionPolicy;
       MarkUpdated(updatedBy);
    }
 
-   public bool AddEmailTranslation(string language, string subject, string body, Guid updatedBy)
+   public bool AddTranslation(TemplateTranslation translation, Guid updatedBy)
    {
-      var normalizedLanguage = NormalizeLanguage(language);
-
-      if (_emailTranslations.Any(t => t.Language == normalizedLanguage))
+      if (_translations.Any(t => t.Language == translation.Language))
       {
          return false;
       }
 
-      _emailTranslations.Add(TemplateEmailTranslation.Create(normalizedLanguage, subject, body));
+      _translations.Add(translation);
       MarkUpdated(updatedBy);
       return true;
    }
 
-   public bool UpdateEmailTranslation(string language, string subject, string body, Guid updatedBy)
+   public bool UpdateTranslation(string language, TemplateTranslation updatedTranslation, Guid updatedBy)
    {
-      var normalizedLanguage = NormalizeLanguage(language);
-      var translation = _emailTranslations.SingleOrDefault(t => t.Language == normalizedLanguage);
+      var normalizedLanguage = LanguageOptions.Normalize(language);
+      var translation = _translations.SingleOrDefault(t => t.Language == normalizedLanguage);
 
       if (translation == null)
       {
          return false;
       }
 
-      translation.Update(subject, body);
+      translation.Update(
+         updatedTranslation.Name,
+         updatedTranslation.Email,
+         updatedTranslation.Notification);
       MarkUpdated(updatedBy);
       return true;
    }
 
    public bool RemoveTranslation(string language, Guid updatedBy)
    {
-      var normalizedLanguage = NormalizeLanguage(language);
-      var removed = Type switch
-      {
-         TemplateType.Email => _emailTranslations.RemoveAll(t => t.Language == normalizedLanguage) > 0,
-         _ => false
-      };
+      var normalizedLanguage = LanguageOptions.Normalize(language);
+      var removed = _translations.RemoveAll(t => t.Language == normalizedLanguage) > 0;
 
       if (removed)
       {
@@ -95,13 +110,13 @@ public class Template : EntityAudited<Guid>
       UpdatedBy = updatedBy;
    }
 
+   private static string NormalizeModule(string module)
+   {
+      return module.ToLowerInvariant().Trim();
+   }
+
    private static string NormalizeKey(string key)
    {
       return key.ToLowerInvariant().Trim();
-   }
-
-   private static string NormalizeLanguage(string language)
-   {
-      return language.ToLowerInvariant().Trim();
    }
 }

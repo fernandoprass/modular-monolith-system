@@ -106,15 +106,15 @@ public class UserQueryRepository(IamDbContext dbContext, IUserContext userContex
          .OrderBy(u => u.Name)
          .Skip((pageNumber - 1) * pageSize)
          .Take(pageSize)
-          .Select(u => new UserLiteDto
-          {
-             Id = u.Id,
-             Name = u.Name,
-             Email = u.Email,
-             Language = u.Language,
-             IsActive = u.IsActive
-          })
-          .ToListAsync(cancellationToken);
+         .Select(u => new UserLiteDto
+         {
+            Id = u.Id,
+            Name = u.Name,
+            Email = u.Email,
+            Language = u.Language,
+            IsActive = u.IsActive
+         })
+         .ToListAsync(cancellationToken);
 
       var totalPages = totalCount == 0 ? 0 : (int)Math.Ceiling(totalCount / (double)pageSize);
 

@@ -58,6 +58,7 @@ export function createPermissionTableColumns({
           ]}
         />
       ),
+      enableHiding: false,
       enableSorting: false,
       header: t('shared.fields.actions'),
       id: 'actions',

@@ -27,6 +27,10 @@ export const PARAMETER_REQUEST_FIELDS = {
   value: 'Value',
 } as const
 
+export const PARAMETER_OWNER_REQUEST_FIELDS = {
+  value: 'Value',
+} as const
+
 export const PARAMETER_MODULE_OPTIONS = [
   { labelKey: 'modules.iam', value: 'IAM' },
   { labelKey: 'modules.courier', value: 'Courier' },
@@ -72,6 +76,7 @@ export const PARAMETER_TYPE_VALUES = {
 } as const
 
 export type ParameterLiteDto = {
+  description: string
   id: string
   group: string
   isOverridden: boolean
@@ -85,7 +90,6 @@ export type ParameterLiteDto = {
 }
 
 export type ParameterDto = ParameterLiteDto & {
-  description: string
   externalListEndpoint: string | null
   isVisible: boolean
   key: string
@@ -102,14 +106,6 @@ export type ParameterSearchForm = {
 export type ParameterListQuery = ParameterSearchForm & {
   pageNumber: number
   pageSize: number
-}
-
-export type PagedResultDto<TItem> = {
-  items: TItem[]
-  pageNumber: number
-  pageSize: number
-  totalCount: number
-  totalPages: number
 }
 
 export type ParameterForm = {
@@ -139,5 +135,9 @@ export type ParameterUpdateRequest = {
   Type: number
   ValidationErrorCustomMessage: string | null
   ValidationRegex: string | null
+  Value: string
+}
+
+export type ParameterOwnerUpdateRequest = {
   Value: string
 }

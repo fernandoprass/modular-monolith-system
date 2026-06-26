@@ -86,8 +86,8 @@ public class UserService(
          await _iamUnitOfWork.Users.AddAsync(user, ct);
          await _iamUnitOfWork.SaveChangesAsync(ct);
 
-         await _eventPublisher.NotifyEmailAsync(
-            IamConst.EmailTemplate.UserWelcome,
+         await _eventPublisher.NotifyUserAsync(
+            IamConst.Templates.UserWelcome,
             user.OrganizationId,
             user.Id,
             user.Email,
@@ -178,8 +178,8 @@ public class UserService(
             metadata: new { user.Id, user.Email },
             cancellationToken);
 
-         await _eventPublisher.NotifyEmailAsync(
-            IamConst.EmailTemplate.UserPasswordUpdated,
+         await _eventPublisher.NotifyUserAsync(
+            IamConst.Templates.UserPasswordUpdated,
             user.OrganizationId,
             user.Id,
             user.Email,
@@ -283,8 +283,8 @@ public class UserService(
             metadata: new { user.Id, user.Email },
             cancellationToken: ct);
 
-         await _eventPublisher.NotifyEmailAsync(
-            IamConst.EmailTemplate.UserDelete,
+         await _eventPublisher.NotifyUserAsync(
+            IamConst.Templates.UserDelete,
             user.OrganizationId,
             user.Id,
             user.Email,
@@ -330,8 +330,8 @@ public class UserService(
 
       if (result.IsSuccess && !wasLocked && user.LockedOutUntil.HasValue)
       {
-         await _eventPublisher.NotifyEmailAsync(
-            IamConst.EmailTemplate.UserMaxFailedLoginAttempts,
+         await _eventPublisher.NotifyUserAsync(
+            IamConst.Templates.UserMaxFailedLoginAttempts,
             user.OrganizationId,
             user.Id,
             user.Email,

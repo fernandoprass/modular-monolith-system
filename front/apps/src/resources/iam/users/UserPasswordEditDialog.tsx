@@ -1,5 +1,7 @@
-import { useForm } from '@tanstack/react-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect, useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
 
 import { useToast } from '../../../app/ToastProvider'
 import { useTranslate } from '../../../app/i18n/i18n'
@@ -17,6 +19,12 @@ const EMPTY_PASSWORD_FORM: UserPasswordUpdateForm = {
   passwordOld: '',
 }
 
+const passwordEditSchema = z.object({
+  passwordConfirm: z.string().min(1),
+  passwordNew: z.string().min(1),
+  passwordOld: z.string().min(1),
+})
+
 type UserPasswordEditDialogProps = {
   isOpen: boolean
   onClose: () => void
@@ -27,36 +35,42 @@ export function UserPasswordEditDialog({ isOpen, onClose }: UserPasswordEditDial
   const notifyError = useNotifyError()
   const { showError, showSuccess } = useToast()
   const [isSaving, setIsSaving] = useState(false)
-  const form = useForm({
+  const {
+    handleSubmit,
+    register,
+    reset,
+  } = useForm<UserPasswordUpdateForm>({
     defaultValues: EMPTY_PASSWORD_FORM,
-    onSubmit: async ({ value }) => {
-      if (value.passwordNew !== value.passwordConfirm) {
-        showError(t('features.iam.users.messages.passwordsDoNotMatch'))
-        return
-      }
-
-      setIsSaving(true)
-
-      try {
-        await updateCurrentUserPassword({
-          [USER_REQUEST_FIELDS.passwordNew]: value.passwordNew,
-          [USER_REQUEST_FIELDS.passwordOld]: value.passwordOld,
-        })
-        showSuccess(t('features.iam.users.notifications.passwordUpdated'))
-        onClose()
-      } catch (error) {
-        notifyError(error, t('shared.errors.generic'))
-      } finally {
-        setIsSaving(false)
-      }
-    },
+    resolver: zodResolver(passwordEditSchema),
   })
 
   useEffect(() => {
     if (isOpen) {
-      form.reset(EMPTY_PASSWORD_FORM)
+      reset(EMPTY_PASSWORD_FORM)
     }
-  }, [form, isOpen])
+  }, [isOpen, reset])
+
+  async function handleSave(value: UserPasswordUpdateForm) {
+    if (value.passwordNew !== value.passwordConfirm) {
+      showError(t('features.iam.users.messages.passwordsDoNotMatch'))
+      return
+    }
+
+    setIsSaving(true)
+
+    try {
+      await updateCurrentUserPassword({
+        [USER_REQUEST_FIELDS.passwordNew]: value.passwordNew,
+        [USER_REQUEST_FIELDS.passwordOld]: value.passwordOld,
+      })
+      showSuccess(t('features.iam.users.notifications.passwordUpdated'))
+      onClose()
+    } catch (error) {
+      notifyError(error, t('shared.errors.generic'))
+    } finally {
+      setIsSaving(false)
+    }
+  }
 
   return (
     <Dialog
@@ -65,36 +79,21 @@ export function UserPasswordEditDialog({ isOpen, onClose }: UserPasswordEditDial
       open={isOpen}
       title={t('features.iam.users.pages.changePassword')}
     >
-      <form onSubmit={(event) => {
-        event.preventDefault()
-        void form.handleSubmit()
-      }}>
+      <form onSubmit={handleSubmit(handleSave)}>
         <div className="dialog-body">
           <FieldGroup>
-            <form.Field name="passwordOld">
-              {(field) => (
-                <Field>
-                  <FieldLabel htmlFor={field.name}>{t('shared.fields.currentPassword')}</FieldLabel>
-                  <Input autoComplete="current-password" autoFocus id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required type="password" value={field.state.value} />
-                </Field>
-              )}
-            </form.Field>
-            <form.Field name="passwordNew">
-              {(field) => (
-                <Field>
-                  <FieldLabel htmlFor={field.name}>{t('shared.fields.newPassword')}</FieldLabel>
-                  <Input autoComplete="new-password" id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required type="password" value={field.state.value} />
-                </Field>
-              )}
-            </form.Field>
-            <form.Field name="passwordConfirm">
-              {(field) => (
-                <Field>
-                  <FieldLabel htmlFor={field.name}>{t('shared.fields.confirmPassword')}</FieldLabel>
-                  <Input autoComplete="new-password" id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required type="password" value={field.state.value} />
-                </Field>
-              )}
-            </form.Field>
+            <Field>
+              <FieldLabel htmlFor="passwordOld">{t('shared.fields.currentPassword')}</FieldLabel>
+              <Input autoComplete="current-password" autoFocus id="passwordOld" required type="password" {...register('passwordOld')} />
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="passwordNew">{t('shared.fields.newPassword')}</FieldLabel>
+              <Input autoComplete="new-password" id="passwordNew" required type="password" {...register('passwordNew')} />
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="passwordConfirm">{t('shared.fields.confirmPassword')}</FieldLabel>
+              <Input autoComplete="new-password" id="passwordConfirm" required type="password" {...register('passwordConfirm')} />
+            </Field>
           </FieldGroup>
         </div>
         <div className="dialog-actions">

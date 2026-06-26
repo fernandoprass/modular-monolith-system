@@ -1,5 +1,6 @@
 using Courier.Domain.Entities;
 using Courier.Domain.Enums;
+using Courier.Domain.ValueObjects;
 using FluentAssertions;
 using Shared.Domain.Enums;
 
@@ -8,128 +9,127 @@ namespace Courier.Domain.Tests.Entities;
 public class TemplateTests
 {
    [Fact]
-   public void Create_ShouldNormalizeKeyAndName()
+   public void Create_ShouldNormalizeMetadataAndSetAuditFields()
    {
       var createdBy = Guid.NewGuid();
 
       var template = Template.Create(
-         " Welcome-Email ",
-         " Welcome Email ",
-         TemplateType.Email,
+         " IAM ",
+         " User-Welcome ",
+         true,
+         NotificationSeverity.Warning,
          RetentionPolicy.Standard,
          createdBy);
 
-      template.Key.Should().Be("welcome-email");
-      template.Name.Should().Be("Welcome Email");
-      template.Type.Should().Be(TemplateType.Email);
+      template.Module.Should().Be("iam");
+      template.Key.Should().Be("user-welcome");
+      template.IsAllowingOptOut.Should().BeTrue();
+      template.Severity.Should().Be(NotificationSeverity.Warning);
       template.RetentionPolicy.Should().Be(RetentionPolicy.Standard);
       template.CreatedBy.Should().Be(createdBy);
+      template.CreatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(2));
    }
 
    [Fact]
-   public void AddEmailTranslation_ShouldAddTranslation()
+   public void AddTranslation_ShouldStoreEmailAndNotificationUnderOneLanguage()
    {
       var template = CreateTemplate();
       var updatedBy = Guid.NewGuid();
+      var translation = CreateTranslation("pt-br");
 
-      var result = template.AddEmailTranslation(" EN ", " Subject ", "<p>Body</p>", updatedBy);
+      var result = template.AddTranslation(translation, updatedBy);
 
       result.Should().BeTrue();
+      template.Translations.Should().ContainSingle(item =>
+         item.Language == "pt-BR"
+         && item.Name == "User welcome"
+         && item.Email != null
+         && item.Email.Subject == "Welcome {{user.name}}"
+         && item.Email.IsHtml
+         && item.Notification != null
+         && item.Notification.Title == "Account created"
+         && item.Notification.ActionLink == "/profile");
       template.UpdatedBy.Should().Be(updatedBy);
-      template.EmailTranslations.Should().ContainSingle(translation =>
-         translation.Language == "en" &&
-         translation.Subject == "Subject" &&
-         translation.Body == "<p>Body</p>" &&
-         translation.IsHtml);
    }
 
    [Fact]
-   public void AddEmailTranslation_ShouldReturnFalse_WhenLanguageExists()
+   public void AddTranslation_ShouldReturnFalse_WhenLanguageExists()
    {
       var template = CreateTemplate();
-      template.AddEmailTranslation("en", "Subject", "Body", Guid.NewGuid());
+      template.AddTranslation(CreateTranslation("pt-BR"), Guid.NewGuid());
 
-      var result = template.AddEmailTranslation(" EN ", "Other", "Other", Guid.NewGuid());
+      var result = template.AddTranslation(CreateTranslation("PT-br"), Guid.NewGuid());
 
       result.Should().BeFalse();
-      template.EmailTranslations.Should().ContainSingle();
+      template.Translations.Should().ContainSingle();
    }
 
    [Fact]
-   public void UpdateEmailTranslation_ShouldUpdateTranslation()
+   public void UpdateTranslation_ShouldReplaceBothChannels()
    {
       var template = CreateTemplate();
       var updatedBy = Guid.NewGuid();
-      template.AddEmailTranslation("en", "Subject", "Body", Guid.NewGuid());
+      template.AddTranslation(CreateTranslation("en"), Guid.NewGuid());
+      var updated = TemplateTranslation.Create(
+         "en",
+         "Updated name",
+         TemplateTranslationEmail.Create("Updated subject", "Plain body"),
+         null);
 
-      var result = template.UpdateEmailTranslation(" EN ", " Updated ", "<p>Updated</p>", updatedBy);
+      var result = template.UpdateTranslation(" EN ", updated, updatedBy);
 
       result.Should().BeTrue();
+      template.Translations.Should().ContainSingle(item =>
+         item.Name == "Updated name"
+         && item.Email != null
+         && item.Email.Subject == "Updated subject"
+         && !item.Email.IsHtml
+         && item.Notification == null);
       template.UpdatedBy.Should().Be(updatedBy);
-      template.EmailTranslations.Should().ContainSingle(translation =>
-         translation.Language == "en" &&
-         translation.Subject == "Updated" &&
-         translation.Body == "<p>Updated</p>" &&
-         translation.IsHtml);
    }
 
    [Fact]
-   public void UpdateEmailTranslation_ShouldReturnFalse_WhenLanguageDoesNotExist()
+   public void UpdateTranslation_ShouldReturnFalse_WhenLanguageDoesNotExist()
    {
       var template = CreateTemplate();
 
-      var result = template.UpdateEmailTranslation("en", "Subject", "Body", Guid.NewGuid());
+      var result = template.UpdateTranslation("en", CreateTranslation("en"), Guid.NewGuid());
 
       result.Should().BeFalse();
-      template.EmailTranslations.Should().BeEmpty();
+      template.Translations.Should().BeEmpty();
    }
 
    [Fact]
-   public void RemoveTranslation_ShouldRemoveTranslation()
+   public void RemoveTranslation_ShouldRemoveLanguageNode()
    {
       var template = CreateTemplate();
       var updatedBy = Guid.NewGuid();
-      template.AddEmailTranslation("en", "Subject", "Body", Guid.NewGuid());
+      template.AddTranslation(CreateTranslation("en"), Guid.NewGuid());
 
       var result = template.RemoveTranslation(" EN ", updatedBy);
 
       result.Should().BeTrue();
+      template.Translations.Should().BeEmpty();
       template.UpdatedBy.Should().Be(updatedBy);
-      template.EmailTranslations.Should().BeEmpty();
-   }
-
-   [Fact]
-   public void RemoveTranslation_ShouldReturnFalse_WhenLanguageDoesNotExist()
-   {
-      var template = CreateTemplate();
-
-      var result = template.RemoveTranslation("en", Guid.NewGuid());
-
-      result.Should().BeFalse();
-   }
-
-   [Fact]
-   public void RemoveTranslation_ShouldReturnFalse_WhenTemplateIsNotEmail()
-   {
-      var template = Template.Create(
-         "comment-template",
-         "Comment Template",
-         TemplateType.Comment,
-         RetentionPolicy.Standard,
-         Guid.NewGuid());
-
-      var result = template.RemoveTranslation("en", Guid.NewGuid());
-
-      result.Should().BeFalse();
    }
 
    private static Template CreateTemplate()
    {
       return Template.Create(
-         "welcome-email",
-         "Welcome Email",
-         TemplateType.Email,
+         "iam",
+         "user-welcome",
+         false,
+         NotificationSeverity.Information,
          RetentionPolicy.Standard,
          Guid.NewGuid());
+   }
+
+   private static TemplateTranslation CreateTranslation(string language)
+   {
+      return TemplateTranslation.Create(
+         language,
+         "User welcome",
+         TemplateTranslationEmail.Create("Welcome {{user.name}}", "<p>Hello</p>"),
+         TemplateTranslationNotification.Create("Account created", "Open your profile", "/profile"));
    }
 }

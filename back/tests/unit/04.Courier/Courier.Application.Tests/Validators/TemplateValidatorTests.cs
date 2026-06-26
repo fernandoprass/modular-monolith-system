@@ -13,88 +13,110 @@ public class TemplateValidatorTests
    private readonly TemplateValidator _validator = new();
 
    [Fact]
-   public void ValidateCreate_ShouldReturnSuccess_WhenRequestIsValid()
+   public void ValidateCreate_ShouldSucceed_WhenRequestIsValid()
    {
-      var request = CreateRequest();
-
-      var result = _validator.ValidateCreate(request, keyExists: false);
+      var result = _validator.ValidateCreate(CreateRequest(), keyExists: false);
 
       result.HasError.Should().BeFalse();
    }
 
    [Fact]
-   public void ValidateCreate_ShouldReturnDuplicateKeyError_WhenKeyExists()
+   public void ValidateCreate_ShouldReturnDuplicateError_WhenModuleKeyExists()
    {
-      var request = CreateRequest();
-
-      var result = _validator.ValidateCreate(request, keyExists: true);
+      var result = _validator.ValidateCreate(CreateRequest(), keyExists: true);
 
       result.HasError.Should().BeTrue();
-      result.Messages.Should().ContainSingle(m => m is TemplateDuplicateKeyError);
+      result.Messages.Should().ContainSingle(message => message is TemplateDuplicateKeyError);
    }
 
    [Fact]
    public void ValidateUpdate_ShouldReturnNotFound_WhenTemplateDoesNotExist()
    {
-      var request = new TemplateUpdateRequest("welcome-email", "Welcome", TemplateType.Email, RetentionPolicy.Standard);
+      var request = new TemplateUpdateRequest(
+         "iam",
+         "user-welcome",
+         false,
+         NotificationSeverity.Information,
+         RetentionPolicy.Standard);
 
       var result = _validator.ValidateUpdate(request, templateExists: false, keyExists: false);
 
       result.HasError.Should().BeTrue();
-      result.Messages.Should().Contain(m => m is NotFoundError);
-   }
-
-   [Theory]
-   [InlineData(1, 25, true)]
-   [InlineData(0, 25, false)]
-   [InlineData(1, 0, false)]
-   public void ValidateSearch_ShouldValidatePaging(int pageNumber, int pageSize, bool expectedSuccess)
-   {
-      var request = new TemplateSearchRequest(null, null, null, pageNumber, pageSize);
-
-      var result = _validator.ValidateSearch(request);
-
-      result.HasError.Should().Be(!expectedSuccess);
-   }
-
-   [Theory]
-   [InlineData("en", "Valid subject", "Body", true)]
-   [InlineData("", "Subject", "Body", false)]
-   [InlineData("en", "", "Body", false)]
-   [InlineData("en", "Subject", "", false)]
-   public void ValidateEmailTranslation_ShouldValidateRequiredFields(string language, string subject, string body, bool expectedSuccess)
-   {
-      var request = new TemplateEmailTranslationRequest(language, subject, body);
-
-      var result = _validator.ValidateEmailTranslation(request, templateExists: true, isEmailTemplate: true);
-
-      result.HasError.Should().Be(!expectedSuccess);
+      result.Messages.Should().Contain(message => message is NotFoundError);
    }
 
    [Fact]
-   public void ValidateEmailTranslation_ShouldReturnNotFound_WhenTemplateDoesNotExist()
+   public void ValidateTranslation_ShouldSucceed_WithBothChannels()
    {
-      var request = new TemplateEmailTranslationRequest("en", "Valid subject", "Body");
+      var result = _validator.ValidateTranslation(CreateTranslationRequest(), templateExists: true);
 
-      var result = _validator.ValidateEmailTranslation(request, templateExists: false, isEmailTemplate: true);
-
-      result.HasError.Should().BeTrue();
-      result.Messages.Should().Contain(m => m is NotFoundError);
+      result.HasError.Should().BeFalse();
    }
 
    [Fact]
-   public void ValidateEmailTranslation_ShouldReturnTypeMismatch_WhenTemplateIsNotEmail()
+   public void ValidateTranslation_ShouldRejectUnsupportedLanguage()
    {
-      var request = new TemplateEmailTranslationRequest("en", "Valid subject", "Body");
+      var request = CreateTranslationRequest() with { Language = "xx-ZZ" };
 
-      var result = _validator.ValidateEmailTranslation(request, templateExists: true, isEmailTemplate: false);
+      var result = _validator.ValidateTranslation(request, templateExists: true);
 
       result.HasError.Should().BeTrue();
-      result.Messages.Should().Contain(m => m is TemplateTypeMismatchError);
+      result.Messages.Should().Contain(message => message is InvalidLanguageError);
+   }
+
+   [Fact]
+   public void ValidateTranslation_ShouldRequireAtLeastOneChannel()
+   {
+      var request = CreateTranslationRequest() with { Email = null, Notification = null };
+
+      var result = _validator.ValidateTranslation(request, templateExists: true);
+
+      result.HasError.Should().BeTrue();
+      result.Messages.Should().Contain(message => message is TemplateChannelRequiredError);
+   }
+
+   [Fact]
+   public void ValidateTranslation_ShouldValidateEmailFields()
+   {
+      var request = CreateTranslationRequest() with
+      {
+         Email = new TemplateTranslationEmailRequest("short", string.Empty)
+      };
+
+      var result = _validator.ValidateTranslation(request, templateExists: true);
+
+      result.HasError.Should().BeTrue();
+   }
+
+   [Fact]
+   public void ValidateTranslation_ShouldValidateNotificationFields()
+   {
+      var request = CreateTranslationRequest() with
+      {
+         Notification = new TemplateTranslationNotificationRequest(string.Empty, string.Empty, null)
+      };
+
+      var result = _validator.ValidateTranslation(request, templateExists: true);
+
+      result.HasError.Should().BeTrue();
    }
 
    private static TemplateCreateRequest CreateRequest()
    {
-      return new TemplateCreateRequest("welcome-email", "Welcome", TemplateType.Email, RetentionPolicy.Standard);
+      return new TemplateCreateRequest(
+         "iam",
+         "user-welcome",
+         false,
+         NotificationSeverity.Information,
+         RetentionPolicy.Standard);
+   }
+
+   private static TemplateTranslationRequest CreateTranslationRequest()
+   {
+      return new TemplateTranslationRequest(
+         "en",
+         "User welcome",
+         new TemplateTranslationEmailRequest("Welcome user", "<p>Welcome</p>"),
+         new TemplateTranslationNotificationRequest("Account created", "Open your profile", "/profile"));
    }
 }

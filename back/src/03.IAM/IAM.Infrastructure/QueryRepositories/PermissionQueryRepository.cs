@@ -4,6 +4,8 @@ using IAM.Domain.Mappers;
 using IAM.Domain.QueryRepositories;
 using Microsoft.EntityFrameworkCore;
 using Shared.Application.Contracts;
+using Shared.Domain;
+using Shared.Domain.DTOs.Responses;
 
 namespace IAM.Infrastructure.QueryRepositories;
 
@@ -21,7 +23,7 @@ public class PermissionQueryRepository(IamDbContext dbContext, IUserContext user
       return permission?.ToPermissionDto();
    }
 
-   public async Task<IEnumerable<PermissionDto>> GetByParams(PermissionSearchRequest request, CancellationToken cancellationToken = default)
+   public async Task<PagedResultDto<PermissionDto>> GetByParams(PermissionSearchRequest request, CancellationToken cancellationToken = default)
    {
       var query = _dbContext.Permissions.AsNoTracking();
 
@@ -49,23 +51,50 @@ public class PermissionQueryRepository(IamDbContext dbContext, IUserContext user
       if (!request.IncludeInactive)
          query = query.Where(p => p.IsActive);
 
-      return await query
-         .Select(p => p.ToPermissionDto())
-         .ToListAsync(cancellationToken);
-   }
+      var pageNumber = request.PageNumber < 1 ? SharedConst.Pagination.DefaultPageNumber : request.PageNumber;
+      var pageSize = request.PageSize < 1 ? SharedConst.Pagination.DefaultPageSize : Math.Min(request.PageSize, SharedConst.Pagination.MaxPageSize);
+      var totalCount = await query.LongCountAsync(cancellationToken);
 
-   public async Task<IEnumerable<PermissionDto>> GetByRoleIdAsync(Guid roleId, CancellationToken cancellationToken = default)
-   {
-      var query = _dbContext.Permissions
-         .AsNoTracking()
-         .Include(p => p.RolePermissions)
-         .Where(p => p.RolePermissions.Any(rp => rp.RoleId == roleId))
+      var items = await query
          .OrderBy(p => p.Module)
          .ThenBy(p => p.Resource)
          .ThenBy(p => p.Action)
-         .Select(p => p.ToPermissionDto());
+         .Skip((pageNumber - 1) * pageSize)
+         .Take(pageSize)
+         .Select(p => p.ToPermissionDto())
+         .ToListAsync(cancellationToken);
 
-      return await query.ToListAsync(cancellationToken);
+      var totalPages = totalCount == 0 ? 0 : (int)Math.Ceiling(totalCount / (double)pageSize);
+
+      return new PagedResultDto<PermissionDto>(items, pageNumber, pageSize, totalCount, totalPages);
+   }
+
+   public async Task<IEnumerable<PermissionDto>> GetByRoleIdAsync(Guid roleId, RolePermissionRequest request, CancellationToken cancellationToken = default)
+   {
+      var query = _dbContext.Permissions
+         .AsNoTracking()
+         .Where(p => p.RolePermissions.Any(rp => rp.RoleId == roleId));
+
+      if (!string.IsNullOrWhiteSpace(request.Module))
+      {
+         query = query.Where(p => p.Module == request.Module);
+      }
+
+      return await query
+         .OrderBy(p => p.Module)
+         .ThenBy(p => p.Resource)
+         .ThenBy(p => p.Action)
+         .Select(p => new PermissionDto(
+            p.Id,
+            p.Module,
+            p.Resource,
+            p.Action,
+            p.Code,
+            p.Title,
+            p.Description,
+            p.IsActive
+         ))
+         .ToListAsync(cancellationToken);
    }
 
    /// <summary>
@@ -81,7 +110,7 @@ public class PermissionQueryRepository(IamDbContext dbContext, IUserContext user
    /// <param name="roleId">The unique identifier of the target role receiving the new permission.</param>
    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
    /// <returns>A read-only collection of <see cref="PermissionDto"/> objects sorted by module, resource, and action.</returns>
-   public async Task<IEnumerable<PermissionDto>> GetByAvailablePermissionsRoleIdAsync(Guid roleId, CancellationToken cancellationToken = default)
+   public async Task<IEnumerable<PermissionDto>> GetByAvailablePermissionsRoleIdAsync(Guid roleId, RolePermissionRequest request, CancellationToken cancellationToken = default)
    {
       var now = DateTime.UtcNow;
 
@@ -96,7 +125,14 @@ public class PermissionQueryRepository(IamDbContext dbContext, IUserContext user
                        ur.StartsAt <= now &&
                        (ur.ExpiresAt == null || ur.ExpiresAt >= now))
           .SelectMany(ur => ur.Role.RolePermissions.Select(rp => rp.Permission))
-          .Where(p => p.IsActive && !existingPermissionIds.Contains(p.Id))
+          .Where(p => p.IsActive && !existingPermissionIds.Contains(p.Id));
+
+      if (!string.IsNullOrWhiteSpace(request.Module))
+      {
+         query = query.Where(p => p.Module == request.Module);
+      }
+
+      return await query
           .Distinct()
           .OrderBy(p => p.Module)
           .ThenBy(p => p.Resource)
@@ -110,9 +146,8 @@ public class PermissionQueryRepository(IamDbContext dbContext, IUserContext user
               p.Title,
               p.Description,
               p.IsActive
-          ));
-
-      return await query.ToListAsync(cancellationToken);
+          ))
+          .ToListAsync(cancellationToken);
    }
 
    public async Task<bool> CodeExistsAsync(string code, CancellationToken cancellationToken = default)

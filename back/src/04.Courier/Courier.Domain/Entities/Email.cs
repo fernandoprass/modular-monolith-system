@@ -67,12 +67,12 @@ public class Email : Entity
    {
       return retentionPolicy switch
       {
-         RetentionPolicy.Operational => CourierConst.EmailRetentionPoliciesTimeSpans.Operational,
-         RetentionPolicy.Standard => CourierConst.EmailRetentionPoliciesTimeSpans.Standard,
-         RetentionPolicy.Extended => CourierConst.EmailRetentionPoliciesTimeSpans.Extended,
-         RetentionPolicy.Compliance => CourierConst.EmailRetentionPoliciesTimeSpans.Compliance,
-         RetentionPolicy.LongTerm => CourierConst.EmailRetentionPoliciesTimeSpans.LongTerm,
-         _ => CourierConst.EmailRetentionPoliciesTimeSpans.Standard
+         RetentionPolicy.Operational => CourierConst.RetentionPoliciesTimeSpans.Email.Operational,
+         RetentionPolicy.Standard => CourierConst.RetentionPoliciesTimeSpans.Email.Standard,
+         RetentionPolicy.Extended => CourierConst.RetentionPoliciesTimeSpans.Email.Extended,
+         RetentionPolicy.Compliance => CourierConst.RetentionPoliciesTimeSpans.Email.Compliance,
+         RetentionPolicy.LongTerm => CourierConst.RetentionPoliciesTimeSpans.Email.LongTerm,
+         _ => CourierConst.RetentionPoliciesTimeSpans.Email.Standard
       };
    }
 

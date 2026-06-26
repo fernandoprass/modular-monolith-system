@@ -37,7 +37,9 @@ Prefer shadcn MCP examples before guessing component usage.
 
 ## SKILLS
 
-Read .agent/skill folder
+Read `.agent/skill` if it exists.
+
+If it does not exist, say so briefly and continue.
 
 ---
 
@@ -49,6 +51,8 @@ Use:
 - Vite
 - shadcn/ui style components
 - Radix UI primitives when useful
+- React Hook Form for create/edit/profile/modal forms
+- Zod with `@hookform/resolvers` for form validation
 - TanStack Table for reusable data tables
 
 Do not use React-admin unless the user asks.
@@ -72,6 +76,17 @@ shadcn/ui style components own:
 - checkboxes
 - reusable UI primitives
 
+React Hook Form owns:
+- local create/edit/profile form state
+- modal form state
+- form submission handling
+- field registration
+
+Zod owns:
+- client-side form schemas
+- required field validation
+- request-shape validation when useful
+
 Plain CSS owns:
 - app shell layout
 - spacing
@@ -89,8 +104,8 @@ Before working on API integration, read:
 front/backend.md
 docs/readme.md
 docs/00.core.e2e-tests.md
-src/00.Core/00.core.md
-src/03.IAM/readme.md
+back/src/00.Core/00.core.md
+back/src/03.IAM/readme.md
 ```
 
 Use backend docs for endpoint ownership and domain rules.
@@ -170,6 +185,299 @@ Avoid mixed prefixes for the same component family.
 
 ---
 
+## Listing Page Rules
+
+Keep resource listing pages as similar as possible.
+
+Use this standard shape:
+- constants and local types first
+- hooks
+- permission booleans
+- form setup
+- column setup
+- loader callback
+- effects
+- handlers
+- derived render values
+- JSX
+
+For search forms, create an empty search constant.
+
+Good:
+
+```ts
+const EMPTY_USER_SEARCH = {
+  email: '',
+  isActive: 'all',
+  name: '',
+}
+```
+
+Use applied filter state for loading data.
+
+Do not load from current form values inside loader callbacks.
+
+Good:
+
+```tsx
+const [appliedFilters, setAppliedFilters] = useState(EMPTY_USER_SEARCH)
+
+const { handleSubmit, register, reset } = useForm<UserSearchForm>({
+  defaultValues: EMPTY_USER_SEARCH,
+})
+
+function handleSearch(value: UserSearchForm) {
+  setPageNumber(DEFAULT_PAGINATION.pageNumber)
+  setAppliedFilters({ ...value })
+}
+
+<FilterToolbar onReset={handleReset} onSubmit={handleSubmit(handleSearch)}>
+  <Input id="name" {...register('name')} />
+</FilterToolbar>
+```
+
+Reset should reset both the form and applied filters.
+
+For paged list endpoints:
+- keep `pageNumber` and `pageSize` state in the page
+- reset `pageNumber` to `DEFAULT_PAGINATION.pageNumber` when filters or page size change
+- use `PagedResultDto<T>` from `front/apps/src/shared/pagination.ts`
+- do not duplicate `PagedResultDto<T>` in resource type files
+
+For array-backed list endpoints, still use `appliedFilters`.
+
+This keeps reload-after-save and reload-after-delete behavior predictable.
+
+When using values from objects in memoized callbacks, derive primitive values first.
+
+Good:
+
+```ts
+const organizationId = user?.organizationId ?? ''
+```
+
+Prefer depending on `organizationId` instead of `user?.organizationId` in callback dependency arrays.
+
+---
+
+## Form Rules
+
+Use React Hook Form plus Zod for create, edit, profile, and modal forms.
+
+Use `Controller` for controlled shadcn/Radix/custom inputs:
+- `Select`
+- `Checkbox`
+- lookup selects such as `OrganizationSelect` and `UserSelect`
+- date/time pickers
+
+Use `register` for plain inputs and textareas.
+
+Good:
+
+```tsx
+const form = useForm<UserForm>({
+  defaultValues: EMPTY_USER_FORM,
+  resolver: zodResolver(userSchema),
+})
+
+<Input id="name" required {...form.register('name')} />
+
+<Controller
+  control={form.control}
+  name="language"
+  render={({ field }) => (
+    <Select
+      onValueChange={field.onChange}
+      options={toTranslatedOptions(LANGUAGE_OPTIONS, t)}
+      value={field.value}
+    />
+  )}
+/>
+```
+
+Normalize DTO data before it reaches the form whenever possible.
+
+For fixed option values, the form value must exactly match the option value.
+
+Example:
+
+```ts
+export const LANGUAGE_CODES = {
+  english: 'en',
+  portugueseBrazil: 'pt-BR',
+  spanish: 'es',
+} as const
+```
+
+Do not paper over a bad read by falling back to a default in edit mode. Fix the API boundary or form initialization instead.
+
+---
+
+## Edit Page Rules
+
+Keep edit and profile pages as similar as possible.
+
+Use this standard shape:
+- `EMPTY_*_FORM`
+- `toForm(dto)`
+- Zod schema
+- request-mapping helper when the backend request shape differs from form shape
+- load callback
+- keyed child form component rendered after the DTO is loaded
+- submit handler
+
+Good:
+
+```ts
+const EMPTY_ROLE_FORM = {
+  description: '',
+  isActive: true,
+  isDefault: false,
+  name: '',
+  organizationId: '',
+}
+
+function toForm(role: RoleDto): RoleForm {
+  return {
+    description: role.description,
+    isActive: role.isActive,
+    isDefault: role.isDefault,
+    name: role.name,
+    organizationId: role.organizationId ?? '',
+  }
+}
+```
+
+For edit pages, load the entity into state.
+
+Then render a keyed child form component after the entity is loaded.
+
+The child form should initialize React Hook Form from final props.
+
+Good:
+
+```ts
+const [role, setRole] = useState<RoleDto | null>(null)
+
+const loadRole = useCallback(async () => {
+  const loaded = await getRole(id)
+  setRole(loaded)
+}, [id])
+
+useEffect(() => {
+  void loadRole()
+}, [loadRole])
+
+return role === null
+  ? <p>{t('shared.common.loading')}</p>
+  : <RoleEditForm key={role.id} role={role} />
+```
+
+Good:
+
+```ts
+function RoleEditForm({ role }: RoleEditFormProps) {
+  const form = useForm<RoleForm>({
+    defaultValues: toForm(role),
+    resolver: zodResolver(roleSchema),
+  })
+
+  async function handleSave(value: RoleForm) {
+    await updateRole(role.id, value)
+  }
+
+  return <form onSubmit={form.handleSubmit(handleSave)}>...</form>
+}
+```
+
+Avoid long `form.setFieldValue` sequences after loading an entity.
+
+Avoid `form.reset(toForm(dto))` as the main edit-page hydration strategy.
+
+For edit mode, prefer mounting the child form after the DTO is loaded so the form is born with final `defaultValues`.
+
+This matters for controlled Radix components such as `Select`, where async value changes can be easy to get wrong.
+
+For create/edit pages, derive `isCreate` once.
+
+Good:
+
+```ts
+const isCreate = id === undefined
+```
+
+For create mode, reset the form from the empty-form helper when context defaults change.
+
+For modal forms, each modal should own its own React Hook Form instance.
+
+When a modal opens or receives a different DTO, call `reset(...)` inside an effect.
+
+Good:
+
+```ts
+useEffect(() => {
+  if (!isOpen) {
+    return
+  }
+
+  form.reset(item === null ? EMPTY_FORM : toForm(item))
+}, [form, isOpen, item])
+```
+
+For DTO normalization, normalize unknown API data at the API boundary.
+
+If a backend can return nested `data` wrappers, unwrap them in the API helper before the page sees the DTO.
+
+Do not patch empty form fields inside pages when the real issue is response normalization.
+
+---
+
+## Data Table Rules
+
+Use TanStack Table through the shared data table components.
+
+Current shared data table files:
+
+```text
+components/ui/data-table.tsx
+components/ui/data-table-pagination.tsx
+components/ui/data-table-row-actions.tsx
+components/ui/data-table-sortable-button.tsx
+```
+
+Action columns should be consistent.
+
+Use:
+
+```ts
+{
+  id: 'actions',
+  enableHiding: false,
+  enableSorting: false,
+}
+```
+
+Use `DataTableRowActions` for row buttons.
+
+Use icon buttons for common row actions such as view, edit, and delete.
+
+For paged tables, use `DataTablePagination`.
+
+Pagination must handle empty backend results.
+
+The backend can return:
+
+```json
+{
+  "totalCount": 0,
+  "totalPages": 0
+}
+```
+
+In that case the UI should show a zero range and disable navigation.
+
+---
+
 ## No Magic Strings
 
 Avoid magic strings.
@@ -186,6 +494,7 @@ Create constants for:
 - query parameter names
 - field names used in filters more than once
 - enum display labels
+- action labels such as Add and Remove
 - notification messages reused across files
 
 Good:
@@ -215,6 +524,20 @@ Prefer:
 
 ```ts
 localStorage.getItem(STORAGE_KEYS.authToken);
+```
+
+User-facing action labels must use translation keys.
+
+Good:
+
+```tsx
+{t('shared.actions.add')}
+```
+
+Avoid:
+
+```tsx
+Add
 ```
 
 ---
@@ -445,6 +768,18 @@ Use React and TanStack Table behavior before adding another state library.
 
 Do not add Redux unless explicitly approved.
 
+Avoid callback dependencies that confuse React Compiler memoization.
+
+Derive primitive values outside callbacks when reading optional object properties.
+
+Good:
+
+```ts
+const userLanguage = user?.language
+```
+
+Then use `userLanguage` inside `useMemo` or `useCallback`.
+
 ---
 
 ## Error Handling
@@ -516,9 +851,11 @@ Do not write docs only for agents.
 ## Before Finishing
 
 For frontend code changes:
-- run TypeScript build if available
 - run tests if available
-- run lint if available
+- run lint if available: `npm.cmd run lint`
+- run TypeScript build if available: `npm.cmd run build`
 - start dev server if the user asked to try the app
 
 If a command cannot run, say why.
+
+If Vite reports only a large chunk warning and the build succeeds, report it as a warning, not a failure.

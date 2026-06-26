@@ -7,6 +7,7 @@ import { Textarea } from '../../../components/ui/textarea'
 import { PARAMETER_TYPE_VALUES } from './parameterTypes'
 
 type ParameterValueInputProps = {
+  disabled?: boolean
   id: string
   onBlur: () => void
   onChange: (value: string) => void
@@ -23,6 +24,7 @@ function handleTextareaChange(onChange: (value: string) => void) {
 }
 
 export function ParameterValueInput({
+  disabled = false,
   id,
   onBlur,
   onChange,
@@ -34,6 +36,7 @@ export function ParameterValueInput({
   if (type === PARAMETER_TYPE_VALUES.boolean) {
     return (
       <Select
+        disabled={disabled}
         onValueChange={onChange}
         options={[
           { label: t('shared.common.true'), value: 'true' },
@@ -48,6 +51,7 @@ export function ParameterValueInput({
     return (
       <Input
         id={id}
+        disabled={disabled}
         onBlur={onBlur}
         onChange={handleInputChange(onChange)}
         required
@@ -62,6 +66,7 @@ export function ParameterValueInput({
     return (
       <Input
         id={id}
+        disabled={disabled}
         onBlur={onBlur}
         onChange={handleInputChange(onChange)}
         required
@@ -76,6 +81,7 @@ export function ParameterValueInput({
     return (
       <Input
         id={id}
+        disabled={disabled}
         onBlur={onBlur}
         onChange={handleInputChange(onChange)}
         required
@@ -89,6 +95,7 @@ export function ParameterValueInput({
     return (
       <Input
         id={id}
+        disabled={disabled}
         onBlur={onBlur}
         onChange={handleInputChange(onChange)}
         required
@@ -102,6 +109,7 @@ export function ParameterValueInput({
     return (
       <Input
         id={id}
+        disabled={disabled}
         onBlur={onBlur}
         onChange={handleInputChange(onChange)}
         required
@@ -115,6 +123,7 @@ export function ParameterValueInput({
     return (
       <Input
         id={id}
+        disabled={disabled}
         maxLength={1}
         onBlur={onBlur}
         onChange={handleInputChange(onChange)}
@@ -128,6 +137,7 @@ export function ParameterValueInput({
     return (
       <Textarea
         id={id}
+        disabled={disabled}
         onBlur={onBlur}
         onChange={handleTextareaChange(onChange)}
         required
@@ -139,6 +149,7 @@ export function ParameterValueInput({
   return (
     <Input
       id={id}
+      disabled={disabled}
       onBlur={onBlur}
       onChange={handleInputChange(onChange)}
       required

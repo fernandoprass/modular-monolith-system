@@ -16,9 +16,10 @@ auth:bearer {
 
 body:json {
   {
-    "key": "welcome-email",
-    "name": "Welcome email",
-    "type": 1,
-    "retentionPolicy": 2
+    "module": "iam",
+    "key": "user-welcome",
+    "isAllowingOptOut": false,
+    "severity": 1,
+    "retentionPolicy": 1
   }
 }

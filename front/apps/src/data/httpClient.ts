@@ -88,6 +88,26 @@ export function deleteJson(path: string): Promise<unknown> {
   return request(path, { baseUrl: CONFIG.apiBaseUrls.core, method: 'DELETE' })
 }
 
+export function getCourierJson(path: string): Promise<unknown> {
+  return request(path, { baseUrl: CONFIG.apiBaseUrls.courier, method: 'GET' })
+}
+
+export function getCourierJsonWithQuery(path: string, query: URLSearchParams): Promise<unknown> {
+  return request(path, { baseUrl: CONFIG.apiBaseUrls.courier, method: 'GET', query })
+}
+
+export function postCourierJson(path: string, body: unknown): Promise<unknown> {
+  return request(path, { baseUrl: CONFIG.apiBaseUrls.courier, body, method: 'POST' })
+}
+
+export function putCourierJson(path: string, body: unknown): Promise<unknown> {
+  return request(path, { baseUrl: CONFIG.apiBaseUrls.courier, body, method: 'PUT' })
+}
+
+export function deleteCourierJson(path: string): Promise<unknown> {
+  return request(path, { baseUrl: CONFIG.apiBaseUrls.courier, method: 'DELETE' })
+}
+
 export function getIamJson(path: string): Promise<unknown> {
   return request(path, { baseUrl: CONFIG.apiBaseUrls.iam, method: 'GET' })
 }
@@ -114,4 +134,12 @@ export function deleteIamJson(path: string): Promise<unknown> {
 
 export function deleteIamJsonWithBody(path: string, body: unknown): Promise<unknown> {
   return request(path, { baseUrl: CONFIG.apiBaseUrls.iam, body, method: 'DELETE' })
+}
+
+export function getSentinelJson(path: string): Promise<unknown> {
+  return request(path, { baseUrl: CONFIG.apiBaseUrls.sentinel, method: 'GET' })
+}
+
+export function getSentinelJsonWithQuery(path: string, query: URLSearchParams): Promise<unknown> {
+  return request(path, { baseUrl: CONFIG.apiBaseUrls.sentinel, method: 'GET', query })
 }

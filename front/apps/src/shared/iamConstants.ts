@@ -38,6 +38,7 @@ export const IAM_PERMISSIONS = {
     write: permission(IAM_RESOURCES.parameters, IAM_ACTIONS.write),
   },
   permissions: {
+    assign: permission(IAM_RESOURCES.permissions, IAM_ACTIONS.assign),
     read: permission(IAM_RESOURCES.permissions, IAM_ACTIONS.read),
     write: permission(IAM_RESOURCES.permissions, IAM_ACTIONS.write),
   },

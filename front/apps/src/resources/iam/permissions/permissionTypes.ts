@@ -3,6 +3,8 @@ export const PERMISSION_QUERY_PARAMS = {
   includeInactive: 'IncludeInactive',
   isActive: 'IsActive',
   module: 'Module',
+  pageNumber: 'PageNumber',
+  pageSize: 'PageSize',
   resource: 'Resource',
   title: 'Title',
 } as const

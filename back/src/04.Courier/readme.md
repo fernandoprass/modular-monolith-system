@@ -1,17 +1,15 @@
 # Courier Module
 
-Courier is the communication and notification module.
+Courier is the communication module.
 
-It tracks email messages and sends queued emails.
+It stores email and notification records in MongoDB.
 
-Courier stores email records in MongoDB.
-
-It uses Redis for message brokering and queue work.
+It uses Redis streams to receive user message requests from other modules.
 
 The module lives in:
 
 ```text
-src/04.Courier
+back/src/04.Courier
 ```
 
 ---
@@ -21,20 +19,21 @@ src/04.Courier
 Courier keeps communication history outside business modules.
 
 Example:
-- IAM needs to send a welcome email.
-- IAM creates or publishes an email request.
-- Courier stores the email record.
-- A client can search email metadata later.
-- A detail endpoint can load the full body when needed.
+- IAM publishes a user message request.
+- Courier reads the request.
+- Courier loads the template.
+- Courier creates an email, a notification, or both.
+- The email worker sends pending emails later.
+- The UI can read notification counts and notification details.
 
-This keeps business modules decoupled from email storage and delivery details.
+This keeps business modules decoupled from delivery and storage details.
 
 ---
 
 ## 2. Project Structure
 
 ```text
-src/04.Courier/
+back/src/04.Courier/
 +-- Courier.API/
 +-- Courier.Application/
 +-- Courier.Domain/
@@ -44,47 +43,15 @@ src/04.Courier/
 | Project | Responsibility |
 | :--- | :--- |
 | `Courier.API` | HTTP endpoints, startup, and request handling. |
-| `Courier.Application` | Email services and validation. |
+| `Courier.Application` | Message, email, notification, and template services. |
 | `Courier.Domain` | Entities, DTOs, constants, mappers, and repository contracts. |
-| `Courier.Infrastructure` | MongoDB context, repositories, and Redis client setup. |
+| `Courier.Infrastructure` | MongoDB context, repositories, Redis consumer, and email sender implementation. |
 
 ---
 
-## 3. Email Read Flow
+## 3. Templates
 
-```text
-HTTP request
-  -> EmailController
-    -> EmailService
-      -> IEmailRepository
-        -> MongoDB
-```
-
-List endpoint:
-
-```text
-GET /api/v1/emails
-```
-
-It returns lightweight email metadata.
-
-It does not return the email body.
-
-Detail endpoint:
-
-```text
-GET /api/v1/emails/{id}
-```
-
-It returns the complete email log.
-
-It includes the body.
-
----
-
-## 4. Template Management
-
-Templates are stored in one MongoDB collection:
+Templates are stored in MongoDB:
 
 ```text
 templates
@@ -96,11 +63,21 @@ The main entity is:
 Template
 ```
 
-For now, it has:
-- `Type`
-- `EmailTranslations`
+Important fields:
+- `Module`
+- `Key`
+- `IsAllowingOptOut`
+- `Severity`
+- `RetentionPolicy`
+- `Translations`
 
-Future types can add their own translation lists.
+Translations are grouped by language.
+
+Each language can contain:
+- `Email`
+- `Notification`
+
+If one channel is not used for a language, that channel is `null`.
 
 Template endpoints:
 
@@ -110,29 +87,116 @@ GET    /api/v1/templates/{id}
 POST   /api/v1/templates
 PUT    /api/v1/templates/{id}
 DELETE /api/v1/templates/{id}
-```
-
-Email translation endpoints:
-
-```text
-POST   /api/v1/templates/{id}/email-translations
-PUT    /api/v1/templates/{id}/email-translations/{language}
+POST   /api/v1/templates/{id}/translations
+PUT    /api/v1/templates/{id}/translations/{language}
 DELETE /api/v1/templates/{id}/translations/{language}
 ```
 
-Only one email translation is allowed per language.
+Only one translation is allowed per language.
+
+Languages use BCP 47 names, like `en` and `pt-BR`.
 
 ---
 
-## 5. Email Write Flow
+## 4. Message Request Flow
+
+Other modules publish a `UserMessageEvent` to Redis.
+
+Shared publishes the event to:
+
+```csharp
+SharedConst.Redis.CourierMessageRequestsStream
+```
+
+Courier consumes the same Redis stream through:
+
+```csharp
+CourierConst.Redis.MessageRequestsStream
+```
+
+Both constants point to:
 
 ```text
-HTTP request
-  -> EmailController
-    -> EmailService
-      -> Email.Create(...)
-        -> IEmailRepository
-          -> MongoDB
+courier-message-requests
+```
+
+High-level flow:
+
+```text
+Source module
+  -> IEventPublisher.PublishUserMessageEventAsync(...)
+    -> Redis stream courier-message-requests
+      -> CourierMessageRequestConsumer
+        -> CourierMessageService.QueueAsync(...)
+          -> TemplateRepository.GetByModuleAndKeyAsync(...)
+          -> SimpleEmailTemplateRenderer.Render(...)
+          -> EmailRepository.AddAsync(...) when email exists
+          -> NotificationRepository.AddAsync(...) when notification exists
+```
+
+The Redis envelope uses:
+
+```csharp
+IntegrationEvent<UserMessageEvent>
+```
+
+Inside Courier, the consumer deserializes the payload into:
+
+```csharp
+CourierMessageRequest
+```
+
+---
+
+## 5. Message Creation Rules
+
+`CourierMessageService` loads the template by module and key.
+
+Then it finds the requested language translation.
+
+If the requested language is missing, it tries:
+
+```csharp
+SharedConst.System.DefaultLanguage
+```
+
+Then it creates channel records:
+- If `translation.Email` exists, it creates an `Email`.
+- If `translation.Notification` exists, it creates a `Notification`.
+- If both exist, it creates both.
+- If both are missing, the request fails.
+
+`Recipient` is nullable on the message request.
+
+It is required only when the selected template language has an email channel.
+
+Template placeholders are rendered for:
+- email subject
+- email body
+- notification title
+- notification message
+- notification action link
+
+The renderer adds this automatic value:
+
+```text
+{{today}}
+```
+
+---
+
+## 6. Email API
+
+List endpoint:
+
+```text
+GET /api/v1/emails
+```
+
+Detail endpoint:
+
+```text
+GET /api/v1/emails/{id}
 ```
 
 Create endpoint:
@@ -141,31 +205,55 @@ Create endpoint:
 POST /api/v1/emails
 ```
 
-It stores a new email record with `Pending` status.
+The list endpoint returns lightweight email metadata.
 
-It returns the generated ID.
+The detail endpoint returns the full email body.
+
+The body can be large, so do not include it in list responses.
 
 ---
 
-## 6. Email Delivery Flow
+## 7. Notification API
 
-This is the normal async email flow.
-
-Another module publishes an email request to Redis.
-
-Courier reads that request, creates an `Email` document in MongoDB, then a worker sends it later.
+List endpoint:
 
 ```text
-Redis stream
-  -> EmailRequestConsumer.ExecuteAsync(...)
-    -> EmailRequestConsumer.ProcessEntryAsync(...)
-      -> EmailOutboxService.QueueAsync(...)
-        -> TemplateRepository.GetByKeyAsync(...)
-        -> SimpleEmailTemplateRenderer.Render(...)
-        -> Email.Create(...)
-        -> EmailRepository.AddAsync(...)
-        -> ICourierLogger.LogAuditAsync(...)
+GET /api/v1/notifications
+```
 
+Unread count endpoint:
+
+```text
+GET /api/v1/notifications/unread-count
+```
+
+Mark as read endpoint:
+
+```text
+PATCH /api/v1/notifications/{id}/read
+```
+
+Delete endpoint:
+
+```text
+DELETE /api/v1/notifications/{id}
+```
+
+Notifications are created by workers/services, not by a public POST endpoint.
+
+---
+
+## 8. Email Delivery Flow
+
+Emails are created with:
+
+```csharp
+EmailStatus.Pending
+```
+
+The delivery worker sends pending emails later.
+
+```text
 MongoDB pending email
   -> EmailDeliveryWorker.ExecuteAsync(...)
     -> EmailOutboxService.ProcessNextPendingAsync(...)
@@ -173,161 +261,22 @@ MongoDB pending email
       -> IEmailSender.SendAsync(...)
         -> Email.MarkAsSent(...)
         -> EmailRepository.UpdateAsync(...)
-        -> ICourierLogger.LogAuditAsync(...)
 ```
 
-### Step 1: Read From Redis
-
-`EmailRequestConsumer` is a background service.
-
-It runs from:
-
-```text
-Courier.Infrastructure/BackgroundServices/EmailRequestConsumer.cs
-```
-
-Main method:
-
-```csharp
-ExecuteAsync(CancellationToken stoppingToken)
-```
-
-It reads messages from this Redis stream:
-
-```csharp
-CourierConst.Redis.EmailRequestsStream
-```
-
-Each Redis message must have the field:
-
-```csharp
-CourierConst.Redis.EventFieldName
-```
-
-That field contains JSON for:
-
-```csharp
-IntegrationEvent<EmailQueueRequest>
-```
-
-`ProcessEntryAsync(...)` deserializes the envelope.
-
-Then it validates the event name and version.
-
-If the JSON is invalid, Courier logs a system error and acknowledges the message.
-
-This prevents the same bad message from blocking the stream.
-
-### Step 2: Queue The Email
-
-After Redis data is parsed, the consumer calls:
-
-```csharp
-EmailOutboxService.QueueAsync(...)
-```
-
-This method:
-- Loads the template with `TemplateRepository.GetByKeyAsync(...)`.
-- Verifies the template type is `TemplateType.Email`.
-- Finds the requested language translation.
-- Builds template values.
-- Adds the automatic `today` value.
-- Renders the subject.
-- Renders the body.
-- Creates the `Email` entity with `Email.Create(...)`.
-- Saves the email with `EmailRepository.AddAsync(...)`.
-- Writes an audit log with `ICourierLogger.LogAuditAsync(...)`.
-
-The saved email starts with:
-
-```csharp
-EmailStatus.Pending
-```
-
-This means the email is stored but not sent yet.
-
-### Step 3: Render The Template
-
-Template rendering happens in:
-
-```text
-Courier.Application/Services/SimpleEmailTemplateRenderer.cs
-```
-
-Main method:
-
-```csharp
-Render(string template, IReadOnlyDictionary<string, string> values, bool htmlEncodeValues = false)
-```
-
-It replaces placeholders like:
-
-```text
-{{user.name}}
-{{organization.name}}
-{{today}}
-```
-
-If a placeholder value is missing, rendering fails.
-
-The email is not queued.
-
-For HTML templates, values are encoded before replacement.
-
-This helps avoid injecting unsafe HTML from placeholder values.
-
-### Step 4: Claim A Pending Email
-
-`EmailDeliveryWorker` is another background service.
-
-It runs from:
-
-```text
-Courier.Infrastructure/BackgroundServices/EmailDeliveryWorker.cs
-```
-
-Main method:
-
-```csharp
-ExecuteAsync(CancellationToken stoppingToken)
-```
-
-It calls:
-
-```csharp
-EmailOutboxService.ProcessNextPendingAsync(...)
-```
-
-That method calls:
-
-```csharp
-EmailRepository.ClaimNextPendingAsync(...)
-```
-
-The repository finds the oldest email where:
+`EmailRepository.ClaimNextPendingAsync(...)` finds the oldest email where:
 
 ```csharp
 Status == Pending
 NextAttemptAt <= DateTime.UtcNow
 ```
 
-Then it changes the status to:
+Then it marks the email as:
 
 ```csharp
 EmailStatus.Processing
 ```
 
-This claim step helps avoid duplicate sending when more than one worker is running.
-
-### Step 5: Send The Email
-
-After the email is claimed, `EmailOutboxService` calls:
-
-```csharp
-IEmailSender.SendAsync(...)
-```
-
-`IEmailSender` is the vendor boundary.
+This helps avoid duplicate sending when more than one worker is running.
 
 Today Courier uses:
 
@@ -339,19 +288,11 @@ Courier.Infrastructure/EmailSenders/NoopEmailSender.cs
 
 It only returns success.
 
-Later, this can be replaced with another sender.
+Later, replace only the `IEmailSender` implementation.
 
-Examples:
-- SMTP sender.
-- SendGrid sender.
-- Amazon SES sender.
-- Azure Communication Services sender.
+---
 
-Only the `IEmailSender` implementation should change.
-
-The outbox flow should stay the same.
-
-### Step 6: Mark Success Or Failure
+## 9. Retry Behavior
 
 If sending succeeds:
 
@@ -363,22 +304,6 @@ The email becomes:
 
 ```csharp
 EmailStatus.Sent
-```
-
-`SentAt` is set.
-
-`NextAttemptAt` is cleared.
-
-Courier updates MongoDB with:
-
-```csharp
-EmailRepository.UpdateAsync(...)
-```
-
-Then it writes an audit log with:
-
-```csharp
-ICourierLogger.LogAuditAsync(...)
 ```
 
 If sending fails:
@@ -397,17 +322,11 @@ If retries remain, it goes back to:
 EmailStatus.Pending
 ```
 
-`NextAttemptAt` is moved into the future.
-
 If retry limit is reached, it becomes:
 
 ```csharp
 EmailStatus.Failed
 ```
-
-Courier writes:
-- An audit log with `ICourierLogger.LogAuditAsync(...)`.
-- A system log with `ICourierLogger.LogSystemAsync(...)`.
 
 The retry limit comes from:
 
@@ -421,60 +340,36 @@ If that parameter cannot be loaded, Courier uses:
 CourierConst.Worker.DefaultMaxRetries
 ```
 
-### Important Classes
+---
+
+## 10. Important Classes
 
 | Class | Responsibility |
 | :--- | :--- |
-| `EmailRequestConsumer` | Reads email requests from Redis. |
-| `EmailOutboxService` | Queues and processes pending emails. |
+| `CourierMessageRequestConsumer` | Reads user message requests from Redis. |
+| `CourierMessageService` | Creates email and notification records from templates. |
+| `EmailOutboxService` | Processes pending emails. |
 | `TemplateRepository` | Loads templates from MongoDB. |
 | `SimpleEmailTemplateRenderer` | Replaces template placeholders. |
 | `EmailRepository` | Saves, claims, and updates email documents. |
+| `NotificationRepository` | Saves, lists, counts, updates, and deletes notification documents. |
 | `EmailDeliveryWorker` | Background worker that sends pending emails. |
 | `IEmailSender` | Abstraction for the email vendor. |
 | `NoopEmailSender` | Current fake sender implementation. |
-| `ICourierLogger` | Publishes audit and system log events. |
-| `Email` | Domain entity that owns status changes and retry behavior. |
+| `ICourierLogger` | Publishes system log events. |
+| `Email` | Domain entity that owns email status and retry behavior. |
+| `Notification` | Domain entity that owns notification read status. |
 
 ---
 
-## 6. Main Entity
+## 11. Design Rules
 
-Courier owns:
-- `Email`
-
-Important fields:
-- `OrganizationId`
-- `UserId`
-- `Module`
-- `Feature`
-- `TemplateKey`
-- `Recipient`
-- `Subject`
-- `Body`
-- `Status`
-- `Timestamp`
-- `SentAt`
-- `NextAttemptAt`
-- `RetryCount`
-- `Attempts`
-
-`Body` can be large.
-
-Do not include it in list responses.
-
----
-
-## 7. Design Rules
-
-- Keep email behavior in the `Email` entity.
-- Use `EmailService` for orchestration.
-- Use `EmailValidator` for request validation.
-- Use `EmailRepository` for MongoDB access.
-- Use `EmailOutboxService` for async queue and delivery work.
+- Keep email status behavior in the `Email` entity.
+- Keep notification read behavior in the `Notification` entity.
+- Use `CourierMessageService` to create email and notification records from templates.
+- Use `EmailOutboxService` only for pending email delivery.
 - Use `IEmailSender` as the email vendor boundary.
 - Do not put vendor-specific email code inside services.
 - Use DTOs for API responses.
-- Use `EmailLiteDto` for lists.
-- Use `EmailDto` for details.
+- Use lightweight DTOs for list endpoints.
 - Do not expose heavy message bodies in list endpoints.

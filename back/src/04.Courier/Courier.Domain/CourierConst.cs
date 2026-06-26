@@ -9,22 +9,36 @@ public static partial class CourierConst
       public static class Collection
       {
          public const string Emails = "emails";
+         public const string Notifications = "notifications";
          public const string Templates = "templates";
       }
    }
 
-   public static class EmailRetentionPoliciesTimeSpans
+   public static class RetentionPoliciesTimeSpans
    {
-      public const int Operational = 30;  // 1 month
-      public const int Standard= 90;      // 3 months
-      public const int Extended = 365;    // 1 year
-      public const int Compliance = 1825; // 5 years
-      public const int LongTerm = 3965;   // 10 years
+      public static class Email
+      {
+         public const int Operational = 30;  // 1 month
+         public const int Standard = 90;     // 3 months
+         public const int Extended = 365;    // 1 year
+         public const int Compliance = 1825; // 5 years
+         public const int LongTerm = 3965;   // 10 years
+      }
+
+      public static class Notification
+      {
+         public const int Operational = 7;  // 1 week
+         public const int Standard = 30;    // 1 month
+         public const int Extended = 90;    // 3 months
+         public const int Compliance = 180; // 6 months
+         public const int LongTerm = 360;   // 1 year
+      }
    }
 
    public static class Entity
    {
       public const string Email = nameof(Entities.Email);
+      public const string Notification = nameof(Entities.Notification);
       public const string Template = nameof(Entities.Template);
    }
 
@@ -39,19 +53,19 @@ public static partial class CourierConst
 
       public static class Name
       {
-         public const string EmailRequested = "courier.email.requested";
+         public const string MessageRequested = "courier.message.requested";
       }
    }
 
    public static class Redis
    {
-      public const string EmailRequestsStream = "courier-email-requests";
+      public const string MessageRequestsStream = "courier-message-requests";
       public const string EventFieldName = "event";
       public const string InitialStreamPosition = "0-0";
       public const string NewMessagesStreamPosition = ">";
 
-      public const string EmailRequestConsumerGroup = "courier-email-request-consumer";
-      public const string EmailRequestConsumerNamePrefix = "courier-email-request";
+      public const string MessageRequestConsumerGroup = "courier-message-request-consumer";
+      public const string MessageRequestConsumerNamePrefix = "courier-message-request";
 
       public const int ReadBatchSize = 10;
       public const int EmptyStreamDelaySeconds = 1;

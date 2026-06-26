@@ -31,15 +31,11 @@ public static class EmailMappers
    {
       return new EmailLiteDto(
          email.Id,
-         email.OrganizationId,
-         email.UserId,
          email.Module,
          email.Feature,
-         email.TemplateKey,
          email.Recipient,
          email.Subject,
-         email.CreatedAt,
-         email.SentAt,
-         email.Status);
+         email.Status, 
+         email.CreatedAt);
    }
 }

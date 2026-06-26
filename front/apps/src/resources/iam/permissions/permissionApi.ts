@@ -1,6 +1,7 @@
 import { API_PATHS } from '../../../data/apiPaths'
 import { getIamJsonWithQuery, putIamJson } from '../../../data/httpClient'
 import { ensureResultSuccess, unwrapResult } from '../../../data/result'
+import type { PagedResultDto } from '../../../shared/pagination'
 import type { PermissionDto } from '../../../shared/permissions'
 import {
   PERMISSION_FILTER_VALUES,
@@ -11,15 +12,22 @@ import {
   type PermissionUpdateRequest,
 } from './permissionTypes'
 
+export type PermissionListQuery = PermissionSearchForm & {
+  pageNumber: number
+  pageSize: number
+}
+
 function appendOptional(query: URLSearchParams, key: string, value: string): void {
   if (value !== PERMISSION_FILTER_VALUES.all && value.trim().length > 0) {
     query.set(key, value.trim())
   }
 }
 
-function toPermissionQuery(request: PermissionSearchForm): URLSearchParams {
+function toPermissionQuery(request: PermissionListQuery): URLSearchParams {
   const query = new URLSearchParams()
 
+  query.set(PERMISSION_QUERY_PARAMS.pageNumber, request.pageNumber.toString())
+  query.set(PERMISSION_QUERY_PARAMS.pageSize, request.pageSize.toString())
   appendOptional(query, PERMISSION_QUERY_PARAMS.module, request.module)
   appendOptional(query, PERMISSION_QUERY_PARAMS.resource, request.resource)
   appendOptional(query, PERMISSION_QUERY_PARAMS.action, request.action)
@@ -45,13 +53,13 @@ function toPermissionUpdateRequest(data: PermissionUpdateForm): PermissionUpdate
   }
 }
 
-export async function getPermissions(request: PermissionSearchForm): Promise<PermissionDto[]> {
+export async function getPermissions(request: PermissionListQuery): Promise<PagedResultDto<PermissionDto>> {
   const response = await getIamJsonWithQuery(
     API_PATHS.iam.permissions.list,
     toPermissionQuery(request),
   )
 
-  return unwrapResult<PermissionDto[]>(response)
+  return unwrapResult<PagedResultDto<PermissionDto>>(response)
 }
 
 export async function updatePermission(id: string, request: PermissionUpdateForm): Promise<void> {

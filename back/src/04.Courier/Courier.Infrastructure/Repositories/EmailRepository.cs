@@ -28,16 +28,12 @@ public class EmailRepository(CourierDbContext dbContext) : IEmailRepository
          .Limit(pageSize)
          .Project(e => new EmailLiteDto(
             e.Id,
-            e.OrganizationId,
-            e.UserId,
             e.Module,
             e.Feature,
-            e.TemplateKey,
             e.Recipient,
             e.Subject,
-            e.CreatedAt,
-            e.SentAt,
-            e.Status))
+            e.Status,
+            e.CreatedAt))
          .ToListAsync(cancellationToken);
 
       var totalPages = totalCount == 0 ? 0 : (int)Math.Ceiling(totalCount / (double)pageSize);

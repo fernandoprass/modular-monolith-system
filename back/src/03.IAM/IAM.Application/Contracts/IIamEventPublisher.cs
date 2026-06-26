@@ -14,7 +14,13 @@ public interface IIamEventPublisher
       object? metadata = null,
       CancellationToken cancellationToken = default);
 
-   Task NotifyEmailAsync(
+   Task NotifyUserAsync(
+   string templateKey,
+   string feature,
+   IReadOnlyDictionary<string, string>? values = null,
+   CancellationToken cancellationToken = default);
+
+   Task NotifyUserAsync(
       string templateKey,
       Guid organizationId,
       Guid userId,

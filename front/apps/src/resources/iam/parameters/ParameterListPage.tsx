@@ -1,26 +1,25 @@
-import { useForm } from '@tanstack/react-form'
 import type { SortingState } from '@tanstack/react-table'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Controller, useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 
 import { useTranslate, type Translate } from '../../../app/i18n/i18n'
 import { APP_ROUTES } from '../../../app/routes'
 import { useAuth, useNotifyError } from '../../../auth/AuthProvider'
-import { DataTablePagination } from '../../../components/ui/data-table-pagination'
 import { DataTable } from '../../../components/ui/data-table'
+import { DataTablePagination } from '../../../components/ui/data-table-pagination'
 import { Field, FieldLabel } from '../../../components/ui/form'
 import { FilterToolbar } from '../../../components/ui/filter-toolbar'
 import { Input } from '../../../components/ui/input'
 import { Select } from '../../../components/ui/select'
 import { IAM_PERMISSIONS } from '../../../shared/iamConstants'
-import { DEFAULT_PAGINATION } from '../../../shared/pagination'
+import { DEFAULT_PAGINATION, type PagedResultDto } from '../../../shared/pagination'
 import { hasPermissionCode } from '../../../shared/permissions'
 import { getParameters } from './parameterApi'
 import { createParameterTableColumns } from './ParameterListPageColumns'
 import {
   PARAMETER_FILTER_VALUES,
   PARAMETER_MODULE_OPTIONS,
-  type PagedResultDto,
   type ParameterLiteDto,
   type ParameterSearchForm,
 } from './parameterTypes'
@@ -49,25 +48,15 @@ export function ParameterListPage() {
   const navigate = useNavigate()
   const notifyError = useNotifyError()
   const { permissions } = useAuth()
-  const [appliedGroupFilter, setAppliedGroupFilter] = useState('')
-  const [appliedModuleFilter, setAppliedModuleFilter] = useState<string>(PARAMETER_FILTER_VALUES.all)
-  const [appliedNameFilter, setAppliedNameFilter] = useState('')
-  const [appliedTitleFilter, setAppliedTitleFilter] = useState('')
+  const [appliedFilters, setAppliedFilters] = useState<ParameterSearchForm>(EMPTY_PARAMETER_SEARCH)
   const [pageNumber, setPageNumber] = useState<number>(DEFAULT_PAGINATION.pageNumber)
   const [pageSize, setPageSize] = useState<number>(DEFAULT_PAGINATION.pageSize)
   const [result, setResult] = useState<PagedResultDto<ParameterLiteDto> | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [sorting, setSorting] = useState<SortingState>([])
   const canUpdate = hasPermissionCode(permissions, IAM_PERMISSIONS.parameters.write)
-  const filterForm = useForm({
+  const { control, handleSubmit, register, reset } = useForm<ParameterSearchForm>({
     defaultValues: EMPTY_PARAMETER_SEARCH,
-    onSubmit: ({ value }) => {
-      setPageNumber(DEFAULT_PAGINATION.pageNumber)
-      setAppliedGroupFilter(value.group)
-      setAppliedModuleFilter(value.module)
-      setAppliedNameFilter(value.name)
-      setAppliedTitleFilter(value.title)
-    },
   })
   const columns = useMemo(() => createParameterTableColumns({
     canUpdate,
@@ -75,36 +64,38 @@ export function ParameterListPage() {
     t,
   }), [canUpdate, navigate, t])
 
-  const loadParameters = useCallback(async (targetPage = pageNumber) => {
+  const loadParameters = useCallback(async (targetPage: number) => {
     setIsLoading(true)
 
     try {
       setResult(await getParameters({
-        group: appliedGroupFilter,
-        module: appliedModuleFilter,
-        name: appliedNameFilter,
+        group: appliedFilters.group,
+        module: appliedFilters.module,
+        name: appliedFilters.name,
         pageNumber: targetPage,
         pageSize,
-        title: appliedTitleFilter,
+        title: appliedFilters.title,
       }))
     } catch (error) {
       notifyError(error, t('shared.errors.generic'))
     } finally {
       setIsLoading(false)
     }
-  }, [appliedGroupFilter, appliedModuleFilter, appliedNameFilter, appliedTitleFilter, notifyError, pageNumber, pageSize, t])
+  }, [appliedFilters, notifyError, pageSize, t])
 
   useEffect(() => {
     void loadParameters(pageNumber)
   }, [loadParameters, pageNumber])
 
   function handleReset() {
-    filterForm.reset()
-    setAppliedGroupFilter('')
-    setAppliedModuleFilter(PARAMETER_FILTER_VALUES.all)
-    setAppliedNameFilter('')
-    setAppliedTitleFilter('')
+    reset(EMPTY_PARAMETER_SEARCH)
+    setAppliedFilters(EMPTY_PARAMETER_SEARCH)
     setPageNumber(DEFAULT_PAGINATION.pageNumber)
+  }
+
+  function handleSearch(value: ParameterSearchForm) {
+    setPageNumber(DEFAULT_PAGINATION.pageNumber)
+    setAppliedFilters({ ...value })
   }
 
   function handlePageSizeChange(nextPageSize: number) {
@@ -112,51 +103,40 @@ export function ParameterListPage() {
     setPageNumber(DEFAULT_PAGINATION.pageNumber)
   }
 
-  const totalPages = result?.totalPages ?? 1
+  const totalPages = result?.totalPages ?? DEFAULT_PAGINATION.pageNumber
 
   return (
     <main className="page">
-      <h1 className="page-title">{t('features.iam.parameters.pages.list')}</h1>
-      <FilterToolbar onReset={handleReset} onSubmit={(event) => {
-        event.preventDefault()
-        void filterForm.handleSubmit()
-      }}>
-        <filterForm.Field name="module">
-          {(field) => (
+      <div className="page-header">
+        <h1 className="page-title">{t('features.iam.parameters.pages.list')}</h1>
+      </div>
+      <FilterToolbar onReset={handleReset} onSubmit={handleSubmit(handleSearch)}>
+        <Controller
+          control={control}
+          name="module"
+          render={({ field }) => (
             <Field>
               <FieldLabel>{t('shared.fields.module')}</FieldLabel>
               <Select
-                onValueChange={field.handleChange}
+                onValueChange={field.onChange}
                 options={[{ label: t('shared.filters.all'), value: PARAMETER_FILTER_VALUES.all }, ...toTranslatedOptions(PARAMETER_MODULE_OPTIONS, t)]}
-                value={field.state.value}
+                value={field.value}
               />
             </Field>
           )}
-        </filterForm.Field>
-        <filterForm.Field name="group">
-          {(field) => (
-            <Field>
-              <FieldLabel htmlFor={field.name}>{t('shared.fields.group')}</FieldLabel>
-              <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} value={field.state.value} />
-            </Field>
-          )}
-        </filterForm.Field>
-        <filterForm.Field name="name">
-          {(field) => (
-            <Field>
-              <FieldLabel htmlFor={field.name}>{t('shared.fields.name')}</FieldLabel>
-              <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} value={field.state.value} />
-            </Field>
-          )}
-        </filterForm.Field>
-        <filterForm.Field name="title">
-          {(field) => (
-            <Field>
-              <FieldLabel htmlFor={field.name}>{t('shared.fields.title')}</FieldLabel>
-              <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} value={field.state.value} />
-            </Field>
-          )}
-        </filterForm.Field>
+        />
+        <Field>
+          <FieldLabel htmlFor="group">{t('shared.fields.group')}</FieldLabel>
+          <Input id="group" {...register('group')} />
+        </Field>
+        <Field>
+          <FieldLabel htmlFor="name">{t('shared.fields.name')}</FieldLabel>
+          <Input id="name" {...register('name')} />
+        </Field>
+        <Field>
+          <FieldLabel htmlFor="title">{t('shared.fields.title')}</FieldLabel>
+          <Input id="title" {...register('title')} />
+        </Field>
       </FilterToolbar>
       <DataTable
         columns={columns}

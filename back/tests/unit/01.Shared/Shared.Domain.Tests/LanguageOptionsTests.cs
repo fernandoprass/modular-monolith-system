@@ -91,7 +91,7 @@ public class LanguageOptionsTests
    [Fact]
    public void PortugueseBrazil_Constant_ShouldBeCorrectValue()
    {
-      LanguageOptions.PortugueseBrazil.Should().Be("pt-br");
+      LanguageOptions.PortugueseBrazil.Should().Be("pt-BR");
    }
 
    [Fact]

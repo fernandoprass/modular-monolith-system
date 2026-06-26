@@ -12,6 +12,6 @@ public class SeederTemplates(
    public async Task SeedAsync(CancellationToken cancellationToken = default)
    {
       await courierDbContext.ConfigureIndexesAsync(cancellationToken);
-      await new EmailTemplates(templateRepository, templateWriteRepository).SeedAsync(cancellationToken);
+      await new Templates.Templates(templateRepository, templateWriteRepository).SeedAsync(cancellationToken);
    }
 }

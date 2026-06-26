@@ -17,7 +17,7 @@ public class CourierDependencyInjectionTests
       services.AddCourierInfrastructure(configuration);
 
       Assert.Contains(services, IsHostedService<CourierIndexInitializer>);
-      Assert.Contains(services, IsHostedService<EmailRequestConsumer>);
+      Assert.Contains(services, IsHostedService<MessageRequestConsumer>);
       Assert.Contains(services, IsHostedService<EmailDeliveryWorker>);
    }
 
@@ -30,7 +30,7 @@ public class CourierDependencyInjectionTests
       services.AddCourierInfrastructure(configuration);
 
       Assert.DoesNotContain(services, IsHostedService<CourierIndexInitializer>);
-      Assert.DoesNotContain(services, IsHostedService<EmailRequestConsumer>);
+      Assert.DoesNotContain(services, IsHostedService<MessageRequestConsumer>);
       Assert.DoesNotContain(services, IsHostedService<EmailDeliveryWorker>);
    }
 

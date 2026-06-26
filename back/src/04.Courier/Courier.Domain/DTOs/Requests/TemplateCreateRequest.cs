@@ -4,7 +4,8 @@ using Shared.Domain.Enums;
 namespace Courier.Domain.DTOs.Requests;
 
 public record TemplateCreateRequest(
+   string Module,
    string Key,
-   string Name,
-   TemplateType Type,
+   bool IsAllowingOptOut,
+   NotificationSeverity Severity,
    RetentionPolicy RetentionPolicy);

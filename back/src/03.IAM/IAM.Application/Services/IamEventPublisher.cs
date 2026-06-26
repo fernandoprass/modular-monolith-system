@@ -44,7 +44,7 @@ public class IamEventPublisher(
       await _eventPublisher.PublishAuditLogEventAsync(auditLog, cancellationToken);
    }
 
-   public async Task NotifyEmailAsync(
+   public async Task NotifyUserAsync(
    string templateKey,
    Guid organizationId,
    Guid userId,
@@ -53,7 +53,7 @@ public class IamEventPublisher(
    IReadOnlyDictionary<string, string>? values = null,
    CancellationToken cancellationToken = default)
    {
-      var emailRequest = new EmailRequestedEvent(
+      var messageRequest = new UserMessageEvent(
          organizationId,
          userId,
          IamConst.System.ModuleName.ToLowerInvariant(),
@@ -63,7 +63,26 @@ public class IamEventPublisher(
          recipient,
          values);
 
-      await _eventPublisher.PublishEmailRequestedEventAsync(emailRequest, cancellationToken);
+      await _eventPublisher.PublishUserMessageEventAsync(messageRequest, cancellationToken);
+   }
+
+   public async Task NotifyUserAsync(
+      string templateKey,
+      string feature,
+      IReadOnlyDictionary<string, string>? values = null,
+      CancellationToken cancellationToken = default)
+   {
+      var messageRequest = new UserMessageEvent(
+         _userContext.OrganizationId,
+         _userContext.UserId, 
+         IamConst.System.ModuleName.ToLowerInvariant(),
+         feature,
+         templateKey,
+         GetLanguage(),
+         _userContext.UserEmail,
+         values);
+
+      await _eventPublisher.PublishUserMessageEventAsync(messageRequest, cancellationToken);
    }
 
    private string GetLanguage()

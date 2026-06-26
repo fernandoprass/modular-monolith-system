@@ -1,6 +1,8 @@
-import { useForm, useStore } from '@tanstack/react-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
+import { Controller, useForm } from 'react-hook-form'
 import { Link } from 'react-router-dom'
+import { z } from 'zod'
 
 import { APP_CONSTANTS } from '../../../app/appConstants'
 import { useToast } from '../../../app/ToastProvider'
@@ -18,13 +20,29 @@ import { ORGANIZATION_TYPES, ORGANIZATION_TYPE_OPTIONS, type OrganizationCreateF
 import { createOrganization } from './organizationApi'
 import { toTranslatedOptions } from './organizationUi'
 
+const publicOrganizationCreateSchema = z.object({
+  code: z.string(),
+  defaultLanguage: z.string().trim().min(1),
+  description: z.string().trim().min(1),
+  name: z.string(),
+  type: z.number(),
+  userEmail: z.string().trim().email(),
+  userName: z.string().trim().min(1),
+  userPassword: z.string().min(1),
+})
+
 export function PublicOrganizationCreatePage() {
   const t = useTranslate()
   const notifyError = useNotifyError()
   const { showSuccess } = useToast()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
-  const form = useForm({
+  const {
+    control,
+    handleSubmit,
+    register,
+    watch,
+  } = useForm<OrganizationCreateForm>({
     defaultValues: {
       code: '',
       defaultLanguage: LANGUAGE_CODES.english,
@@ -34,22 +52,24 @@ export function PublicOrganizationCreatePage() {
       userEmail: '',
       userName: '',
       userPassword: '',
-    } as OrganizationCreateForm,
-    onSubmit: async ({ value }) => {
-      setIsSubmitting(true)
-
-      try {
-        await createOrganization(value)
-        setIsSuccess(true)
-        showSuccess(t('public.organizationRegistration.messages.success'))
-      } catch (error) {
-        notifyError(error, t('shared.errors.generic'))
-      } finally {
-        setIsSubmitting(false)
-      }
     },
+    resolver: zodResolver(publicOrganizationCreateSchema),
   })
-  const isCompany = useStore(form.store, (state) => state.values.type === ORGANIZATION_TYPES.company)
+  const isCompany = watch('type') === ORGANIZATION_TYPES.company
+
+  async function handleCreate(value: OrganizationCreateForm) {
+    setIsSubmitting(true)
+
+    try {
+      await createOrganization(value)
+      setIsSuccess(true)
+      showSuccess(t('public.organizationRegistration.messages.success'))
+    } catch (error) {
+      notifyError(error, t('shared.errors.generic'))
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
   return (
     <main className="auth-page">
@@ -68,87 +88,64 @@ export function PublicOrganizationCreatePage() {
                 </Link>
               </>
             ) : (
-              <form onSubmit={(event) => {
-                event.preventDefault()
-                void form.handleSubmit()
-              }}>
+              <form onSubmit={handleSubmit(handleCreate)}>
                 <FieldGroup>
-                  <form.Field name="type">
-                    {(field) => (
+                  <Controller
+                    control={control}
+                    name="type"
+                    render={({ field }) => (
                       <Field>
                         <FieldLabel>{t('public.organizationRegistration.fields.type')}</FieldLabel>
                         <Select
-                          onValueChange={(value) => field.handleChange(Number(value))}
+                          onValueChange={(value) => field.onChange(Number(value))}
                           options={toTranslatedOptions(ORGANIZATION_TYPE_OPTIONS, t)}
-                          value={String(field.state.value)}
+                          value={String(field.value)}
                         />
                       </Field>
                     )}
-                  </form.Field>
+                  />
                   {isCompany && (
                     <>
-                      <form.Field name="code">
-                        {(field) => (
-                          <Field>
-                            <FieldLabel htmlFor={field.name}>{t('public.organizationRegistration.fields.code')}</FieldLabel>
-                            <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required value={field.state.value} />
-                          </Field>
-                        )}
-                      </form.Field>
-                      <form.Field name="name">
-                        {(field) => (
-                          <Field>
-                            <FieldLabel htmlFor={field.name}>{t('public.organizationRegistration.fields.name')}</FieldLabel>
-                            <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required value={field.state.value} />
-                          </Field>
-                        )}
-                      </form.Field>
+                      <Field>
+                        <FieldLabel htmlFor="code">{t('public.organizationRegistration.fields.code')}</FieldLabel>
+                        <Input id="code" required {...register('code')} />
+                      </Field>
+                      <Field>
+                        <FieldLabel htmlFor="name">{t('public.organizationRegistration.fields.name')}</FieldLabel>
+                        <Input id="name" required {...register('name')} />
+                      </Field>
                     </>
                   )}
-                  <form.Field name="description">
-                    {(field) => (
-                      <Field>
-                        <FieldLabel htmlFor={field.name}>{t('public.organizationRegistration.fields.description')}</FieldLabel>
-                        <Textarea id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required value={field.state.value} />
-                      </Field>
-                    )}
-                  </form.Field>
-                  <form.Field name="defaultLanguage">
-                    {(field) => (
+                  <Field>
+                    <FieldLabel htmlFor="description">{t('public.organizationRegistration.fields.description')}</FieldLabel>
+                    <Textarea id="description" required {...register('description')} />
+                  </Field>
+                  <Controller
+                    control={control}
+                    name="defaultLanguage"
+                    render={({ field }) => (
                       <Field>
                         <FieldLabel>{t('public.organizationRegistration.fields.defaultLanguage')}</FieldLabel>
                         <Select
-                          onValueChange={field.handleChange}
+                          onValueChange={field.onChange}
                           options={toTranslatedOptions(LANGUAGE_OPTIONS, t)}
-                          value={field.state.value}
+                          value={field.value}
                         />
                       </Field>
                     )}
-                  </form.Field>
-                  <form.Field name="userName">
-                    {(field) => (
-                      <Field>
-                        <FieldLabel htmlFor={field.name}>{t('public.organizationRegistration.fields.adminName')}</FieldLabel>
-                        <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required value={field.state.value} />
-                      </Field>
-                    )}
-                  </form.Field>
-                  <form.Field name="userEmail">
-                    {(field) => (
-                      <Field>
-                        <FieldLabel htmlFor={field.name}>{t('public.organizationRegistration.fields.adminEmail')}</FieldLabel>
-                        <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required type="email" value={field.state.value} />
-                      </Field>
-                    )}
-                  </form.Field>
-                  <form.Field name="userPassword">
-                    {(field) => (
-                      <Field>
-                        <FieldLabel htmlFor={field.name}>{t('public.organizationRegistration.fields.adminPassword')}</FieldLabel>
-                        <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} required type="password" value={field.state.value} />
-                      </Field>
-                    )}
-                  </form.Field>
+                  />
+                  <Field>
+                    <FieldLabel htmlFor="userName">{t('public.organizationRegistration.fields.adminName')}</FieldLabel>
+                    <Input id="userName" required {...register('userName')} />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor="userEmail">{t('public.organizationRegistration.fields.adminEmail')}</FieldLabel>
+                    <Input id="userEmail" required type="email" {...register('userEmail')} />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor="userPassword">{t('public.organizationRegistration.fields.adminPassword')}</FieldLabel>
+                    <Input id="userPassword" required type="password" {...register('userPassword')} />
+                  </Field>
                   <Button disabled={isSubmitting} type="submit">
                     {t('public.organizationRegistration.actions.submit')}
                   </Button>

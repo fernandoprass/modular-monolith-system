@@ -91,6 +91,7 @@ public class SeederRolePermissions(
    {
       var sentinelSytemAdminPermissions = new List<string>
       {
+         SentinelPermission.AuditLogs.Read,
          SentinelPermission.SystemLogs.Read
       };
 
@@ -101,10 +102,7 @@ public class SeederRolePermissions(
 
    private static List<string> GetSentinelOrganizationAdminPermissions()
    {
-      List<string> sentinelOrgPermissions = 
-      [
-         SentinelPermission.AuditLogs.Read
-      ];
+      List<string> sentinelOrgPermissions = [ ];
 
       sentinelOrgPermissions.AddRange(GetSentinelUserPermissions());
 
@@ -184,6 +182,8 @@ public class SeederRolePermissions(
       {
          CourierPermission.Emails.Read,
          CourierPermission.Emails.Write,
+         CourierPermission.Notifications.Read,
+         CourierPermission.Notifications.Write,
          CourierPermission.Templates.Read,
          CourierPermission.Templates.Write
       };

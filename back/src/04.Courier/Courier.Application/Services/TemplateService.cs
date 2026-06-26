@@ -3,10 +3,10 @@ using Courier.Domain;
 using Courier.Domain.DTOs.Requests;
 using Courier.Domain.DTOs.Responses;
 using Courier.Domain.Entities;
-using Courier.Domain.Enums;
 using Courier.Domain.Interfaces.Repositories;
 using Courier.Domain.Mappers;
 using Courier.Domain.Messages;
+using Courier.Domain.ValueObjects;
 using Myce.Response;
 using Shared.Application.Contracts;
 using Shared.Domain.DTOs.Responses;
@@ -24,7 +24,9 @@ public partial class TemplateService(
    private readonly ITemplateValidator _templateValidator = templateValidator;
    private readonly IUserContext _userContext = userContext;
 
-   public async Task<Result<PagedResultDto<TemplateLiteDto>>> GetAsync(TemplateSearchRequest request, CancellationToken cancellationToken = default)
+   public async Task<Result<PagedResultDto<TemplateLiteDto>>> GetAsync(
+      TemplateSearchRequest request,
+      CancellationToken cancellationToken = default)
    {
       var validation = _templateValidator.ValidateSearch(request);
 
@@ -49,9 +51,14 @@ public partial class TemplateService(
       return Result<TemplateDto>.Success(template.ToTemplateDto());
    }
 
-   public async Task<Result<TemplateDto>> CreateAsync(TemplateCreateRequest request, CancellationToken cancellationToken = default)
+   public async Task<Result<TemplateDto>> CreateAsync(
+      TemplateCreateRequest request,
+      CancellationToken cancellationToken = default)
    {
-      var keyExists = await _templateRepository.KeyExistsAsync(request.Key, cancellationToken: cancellationToken);
+      var keyExists = await _templateRepository.KeyExistsAsync(
+         request.Module,
+         request.Key,
+         cancellationToken: cancellationToken);
       var validation = _templateValidator.ValidateCreate(request, keyExists);
 
       if (validation.HasError)
@@ -59,17 +66,30 @@ public partial class TemplateService(
          return Result<TemplateDto>.Failure(validation.Messages);
       }
 
-      var template = Template.Create(request.Key, request.Name, request.Type, request.RetentionPolicy, _userContext.UserId);
+      var template = Template.Create(
+         request.Module,
+         request.Key,
+         request.IsAllowingOptOut,
+         request.Severity,
+         request.RetentionPolicy,
+         _userContext.UserId);
 
       await _templateRepository.AddAsync(template, cancellationToken);
 
       return Result<TemplateDto>.Success(template.ToTemplateDto());
    }
 
-   public async Task<Result> UpdateAsync(Guid id, TemplateUpdateRequest request, CancellationToken cancellationToken = default)
+   public async Task<Result> UpdateAsync(
+      Guid id,
+      TemplateUpdateRequest request,
+      CancellationToken cancellationToken = default)
    {
       var template = await _templateRepository.GetByIdAsync(id, cancellationToken);
-      var keyExists = await _templateRepository.KeyExistsAsync(request.Key, id, cancellationToken);
+      var keyExists = await _templateRepository.KeyExistsAsync(
+         request.Module,
+         request.Key,
+         id,
+         cancellationToken);
       var validation = _templateValidator.ValidateUpdate(request, template != null, keyExists);
 
       if (validation.HasError)
@@ -77,7 +97,13 @@ public partial class TemplateService(
          return Result.Failure(validation.Messages);
       }
 
-      template!.Update(request.Key, request.Name, request.Type, request.RetentionPolicy, _userContext.UserId);
+      template!.Update(
+         request.Module,
+         request.Key,
+         request.IsAllowingOptOut,
+         request.Severity,
+         request.RetentionPolicy,
+         _userContext.UserId);
       await _templateRepository.UpdateAsync(template, cancellationToken);
 
       return Result.Success(new SuccessInfo());
@@ -96,55 +122,60 @@ public partial class TemplateService(
       return Result.Success(new SuccessInfo());
    }
 
-   public async Task<Result> AddEmailTranslationAsync(Guid id, TemplateEmailTranslationRequest request, CancellationToken cancellationToken = default)
+   public async Task<Result> AddTranslationAsync(
+      Guid id,
+      TemplateTranslationRequest request,
+      CancellationToken cancellationToken = default)
    {
       var template = await _templateRepository.GetByIdAsync(id, cancellationToken);
-      var validation = _templateValidator.ValidateEmailTranslation(
-         request,
-         templateExists: template != null,
-         isEmailTemplate: template?.Type == TemplateType.Email);
+      var validation = _templateValidator.ValidateTranslation(request, template != null);
 
       if (validation.HasError)
       {
          return Result.Failure(validation.Messages);
       }
 
-      var sanitizedBody = SanitizeTemplateBody(request.Body);
+      var translation = ToTranslation(request);
 
-      if (!template.AddEmailTranslation(request.Language, request.Subject, sanitizedBody, _userContext.UserId))
+      if (!template!.AddTranslation(translation, _userContext.UserId))
       {
-         return Result.Failure(new EmailTemplateTranslationAlreadyExistsError(request.Language));
+         return Result.Failure(new TemplateTranslationAlreadyExistsError(request.Language));
       }
 
       await _templateRepository.UpdateAsync(template, cancellationToken);
       return Result.Success(new SuccessInfo());
    }
 
-   public async Task<Result> UpdateEmailTranslationAsync(Guid id, string language, TemplateEmailTranslationRequest request, CancellationToken cancellationToken = default)
+   public async Task<Result> UpdateTranslationAsync(
+      Guid id,
+      string language,
+      TemplateTranslationRequest request,
+      CancellationToken cancellationToken = default)
    {
+      var normalizedRequest = request with { Language = language };
       var template = await _templateRepository.GetByIdAsync(id, cancellationToken);
-      var validation = _templateValidator.ValidateEmailTranslation(
-         request,
-         templateExists: template != null,
-         isEmailTemplate: template?.Type == TemplateType.Email);
+      var validation = _templateValidator.ValidateTranslation(normalizedRequest, template != null);
 
       if (validation.HasError)
       {
          return Result.Failure(validation.Messages);
       }
 
-      var sanitizedBody = SanitizeTemplateBody(request.Body);
+      var translation = ToTranslation(normalizedRequest);
 
-      if (!template.UpdateEmailTranslation(language, request.Subject, sanitizedBody, _userContext.UserId))
+      if (!template!.UpdateTranslation(language, translation, _userContext.UserId))
       {
-         return Result.Failure(new EmailTemplateTranslationNotFoundError(language));
+         return Result.Failure(new TemplateTranslationNotFoundError(language));
       }
 
       await _templateRepository.UpdateAsync(template, cancellationToken);
       return Result.Success(new SuccessInfo());
    }
 
-   public async Task<Result> RemoveTranslationAsync(Guid id, string language, CancellationToken cancellationToken = default)
+   public async Task<Result> RemoveTranslationAsync(
+      Guid id,
+      string language,
+      CancellationToken cancellationToken = default)
    {
       var template = await _templateRepository.GetByIdAsync(id, cancellationToken);
 
@@ -153,18 +184,30 @@ public partial class TemplateService(
          return Result.Failure(new NotFoundError(CourierConst.Entity.Template));
       }
 
-      if (template.Type != TemplateType.Email)
-      {
-         return Result.Failure(new TemplateTypeMismatchError(TemplateType.Email.ToString()));
-      }
-
       if (!template.RemoveTranslation(language, _userContext.UserId))
       {
-         return Result.Failure(new EmailTemplateTranslationNotFoundError(language));
+         return Result.Failure(new TemplateTranslationNotFoundError(language));
       }
 
       await _templateRepository.UpdateAsync(template, cancellationToken);
       return Result.Success(new SuccessInfo());
+   }
+
+   private static TemplateTranslation ToTranslation(TemplateTranslationRequest request)
+   {
+      var email = request.Email == null
+         ? null
+         : TemplateTranslationEmail.Create(
+            request.Email.Subject,
+            SanitizeTemplateBody(request.Email.Body));
+      var notification = request.Notification == null
+         ? null
+         : TemplateTranslationNotification.Create(
+            request.Notification.Title,
+            request.Notification.Message,
+            request.Notification.ActionLink);
+
+      return TemplateTranslation.Create(request.Language, request.Name, email, notification);
    }
 
    private static string SanitizeTemplateBody(string body)

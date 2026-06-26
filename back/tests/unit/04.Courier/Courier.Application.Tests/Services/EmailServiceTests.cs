@@ -112,7 +112,7 @@ public class EmailServiceTests
       var request = CreateRequest();
       var id = Guid.NewGuid();
       _emailValidator.ValidateCreate(request).Returns(Result.Success());
-      _templateRepository.GetRetentionPolicyByKeyAsync(request.TemplateKey, Arg.Any<CancellationToken>())
+      _templateRepository.GetRetentionPolicyByModuleAndKeyAsync(request.Module, request.TemplateKey, Arg.Any<CancellationToken>())
          .Returns(RetentionPolicy.Standard);
       _emailRepository.AddAsync(Arg.Any<Email>(), Arg.Any<CancellationToken>()).Returns(id);
 

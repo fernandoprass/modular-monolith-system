@@ -1,7 +1,7 @@
-import { useForm } from '@tanstack/react-form'
 import type { SortingState } from '@tanstack/react-table'
 import { Plus } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Controller, useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 
 import { useToast } from '../../../app/ToastProvider'
@@ -35,16 +35,14 @@ export function RoleListPage() {
   const { permissions } = useAuth()
   const [roles, setRoles] = useState<RoleDto[]>([])
   const [deleteTarget, setDeleteTarget] = useState<RoleDto | null>(null)
+  const [appliedFilters, setAppliedFilters] = useState<RoleSearchForm>(EMPTY_ROLE_SEARCH)
   const [isLoading, setIsLoading] = useState(false)
   const [sorting, setSorting] = useState<SortingState>([])
   const canCreate = hasPermissionCode(permissions, IAM_PERMISSIONS.roles.write)
   const canUpdate = hasPermissionCode(permissions, IAM_PERMISSIONS.roles.write)
   const canDelete = hasPermissionCode(permissions, IAM_PERMISSIONS.roles.write)
-  const filterForm = useForm({
+  const { control, handleSubmit, register, reset } = useForm<RoleSearchForm>({
     defaultValues: EMPTY_ROLE_SEARCH,
-    onSubmit: async ({ value }) => {
-      await loadRoles(value)
-    },
   })
   const columns = useMemo(() => createRoleTableColumns({
     canDelete,
@@ -54,17 +52,17 @@ export function RoleListPage() {
     t,
   }), [canDelete, canUpdate, navigate, t])
 
-  const loadRoles = useCallback(async (request: RoleSearchForm = filterForm.state.values) => {
+  const loadRoles = useCallback(async () => {
     setIsLoading(true)
 
     try {
-      setRoles(await getRoles(request))
+      setRoles(await getRoles(appliedFilters))
     } catch (error) {
       notifyError(error, t('shared.errors.generic'))
     } finally {
       setIsLoading(false)
     }
-  }, [filterForm.state.values, notifyError, t])
+  }, [appliedFilters, notifyError, t])
 
   useEffect(() => {
     void loadRoles()
@@ -75,8 +73,12 @@ export function RoleListPage() {
   }
 
   function handleReset() {
-    filterForm.reset()
-    void loadRoles(EMPTY_ROLE_SEARCH)
+    reset(EMPTY_ROLE_SEARCH)
+    setAppliedFilters(EMPTY_ROLE_SEARCH)
+  }
+
+  function handleSearch(value: RoleSearchForm) {
+    setAppliedFilters({ ...value })
   }
 
   async function handleConfirmDelete() {
@@ -105,30 +107,25 @@ export function RoleListPage() {
           </Button>
         )}
       </div>
-      <FilterToolbar onReset={handleReset} onSubmit={(event) => {
-        event.preventDefault()
-        void filterForm.handleSubmit()
-      }}>
-        <filterForm.Field name="userId">
-          {(field) => (
+      <FilterToolbar onReset={handleReset} onSubmit={handleSubmit(handleSearch)}>
+        <Controller
+          control={control}
+          name="userId"
+          render={({ field }) => (
             <Field>
               <FieldLabel>{t('shared.fields.user')}</FieldLabel>
               <UserSelect
                 clearable
-                onValueChange={field.handleChange}
-                value={field.state.value}
+                onValueChange={field.onChange}
+                value={field.value}
               />
             </Field>
           )}
-        </filterForm.Field>
-        <filterForm.Field name="name">
-          {(field) => (
-            <Field>
-              <FieldLabel htmlFor={field.name}>{t('shared.fields.name')}</FieldLabel>
-              <Input id={field.name} onBlur={field.handleBlur} onChange={(event) => field.handleChange(event.currentTarget.value)} value={field.state.value} />
-            </Field>
-          )}
-        </filterForm.Field>
+        />
+        <Field>
+          <FieldLabel htmlFor="name">{t('shared.fields.name')}</FieldLabel>
+          <Input id="name" {...register('name')} />
+        </Field>
       </FilterToolbar>
       <DataTable
         columns={columns}

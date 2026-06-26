@@ -82,14 +82,6 @@ export type OrganizationCodeUpdateRequest = {
   Code: string
 }
 
-export type PagedResultDto<TItem> = {
-  items: TItem[]
-  pageNumber: number
-  pageSize: number
-  totalCount: number
-  totalPages: number
-}
-
 export const ORGANIZATION_TYPE_OPTIONS = [
   {
     labelKey: 'features.iam.organizations.types.company',

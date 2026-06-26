@@ -1,4 +1,16 @@
 export const API_PATHS = {
+  courier: {
+    emails: {
+      byId: (id: string | number) => `/api/v1/emails/${id}`,
+      list: '/api/v1/emails',
+    },
+    templates: {
+      byId: (id: string | number) => `/api/v1/templates/${id}`,
+      list: '/api/v1/templates',
+      translation: (id: string | number, language: string) => `/api/v1/templates/${id}/translations/${encodeURIComponent(language)}`,
+      translations: (id: string | number) => `/api/v1/templates/${id}/translations`,
+    },
+  },
   iam: {
     authentication: {
       login: '/api/v1/iam/authentication/login',
@@ -15,6 +27,7 @@ export const API_PATHS = {
       list: '/api/v1/iam/parameters',
       me: '/api/v1/iam/parameters/me',
       myOrganization: '/api/v1/iam/parameters/my-organization',
+      override: (id: string | number) => `/api/v1/iam/parameters/${id}/override`,
     },
     permissions: {
       byId: (id: string | number) => `/api/v1/iam/permissions/${id}`,
@@ -42,6 +55,16 @@ export const API_PATHS = {
       lookup: '/api/v1/iam/users/lookup',
       password: '/api/v1/iam/users/profile/password',
       profile: '/api/v1/iam/users/profile',
+    },
+  },
+  sentinel: {
+    auditLogs: {
+      byId: (id: string | number) => `/api/v1/sentinel/logs/audit/${id}`,
+      list: '/api/v1/sentinel/logs/audit',
+    },
+    systemLogs: {
+      byId: (id: string | number) => `/api/v1/sentinel/logs/system/${id}`,
+      list: '/api/v1/sentinel/logs/system',
     },
   },
 } as const

@@ -9,6 +9,7 @@ using IAM.Domain.QueryRepositories;
 using Myce.Response;
 using Shared.Application.Contracts;
 using Shared.Application.Services;
+using Shared.Domain.DTOs.Responses;
 using Shared.Domain.Enums;
 using Shared.Domain.Interfaces;
 using Shared.Domain.Messages;
@@ -74,21 +75,20 @@ public class PermissionService(
       return Result.Success(new SuccessInfo());
    }
 
-   public async Task<Result<IEnumerable<PermissionDto>>> GetByParams(PermissionSearchRequest request, CancellationToken cancellationToken = default)
+   public async Task<PagedResultDto<PermissionDto>> GetByParams(PermissionSearchRequest request, CancellationToken cancellationToken = default)
    {
-      var permissions = await _permissionQueryRepository.GetByParams(request, cancellationToken);
+      return await _permissionQueryRepository.GetByParams(request, cancellationToken);
+   }
+
+   public async Task<Result<IEnumerable<PermissionDto>>> GetByRoleId(Guid roleId, RolePermissionRequest request, CancellationToken cancellationToken = default)
+   {
+      var permissions = await _permissionQueryRepository.GetByRoleIdAsync(roleId, request, cancellationToken);
       return Result<IEnumerable<PermissionDto>>.Success(permissions);
    }
 
-   public async Task<Result<IEnumerable<PermissionDto>>> GetByRoleId(Guid roleId, CancellationToken cancellationToken = default)
+   public async Task<Result<IEnumerable<PermissionDto>>> GetAvailablePermissionByRoleIdAsync(Guid roleId, RolePermissionRequest request, CancellationToken cancellationToken = default)
    {
-      var permissions = await _permissionQueryRepository.GetByRoleIdAsync(roleId, cancellationToken);
-      return Result<IEnumerable<PermissionDto>>.Success(permissions);
-   }
-
-   public async Task<Result<IEnumerable<PermissionDto>>> GetAvailablePermissionByRoleIdAsync(Guid roleId, CancellationToken cancellationToken = default)
-   {
-      var permissions = await _permissionQueryRepository.GetByAvailablePermissionsRoleIdAsync(roleId, cancellationToken);
+      var permissions = await _permissionQueryRepository.GetByAvailablePermissionsRoleIdAsync(roleId, request, cancellationToken);
       return Result<IEnumerable<PermissionDto>>.Success(permissions);
    }
 

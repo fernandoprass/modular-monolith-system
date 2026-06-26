@@ -6,5 +6,7 @@ public record PermissionSearchRequest(
    string? Resource,
    string? Action,
    string? Title,
-   bool IncludeInactive = false
+   bool IncludeInactive = false,
+   int PageNumber = 1,
+   int PageSize = 25
 );

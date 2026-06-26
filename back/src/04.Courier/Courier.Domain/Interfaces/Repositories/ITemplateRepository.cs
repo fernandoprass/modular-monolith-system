@@ -5,6 +5,6 @@ namespace Courier.Domain.Interfaces.Repositories;
 
 public interface ITemplateRepository
 {
-   Task<Template?> GetByKeyAsync(string key, CancellationToken cancellationToken = default);
-   Task<RetentionPolicy?> GetRetentionPolicyByKeyAsync(string key, CancellationToken cancellationToken = default);
+   Task<Template?> GetByModuleAndKeyAsync(string module, string key, CancellationToken cancellationToken = default);
+   Task<RetentionPolicy?> GetRetentionPolicyByModuleAndKeyAsync(string module, string key, CancellationToken cancellationToken = default);
 }

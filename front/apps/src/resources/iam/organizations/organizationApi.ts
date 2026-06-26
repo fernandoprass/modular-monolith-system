@@ -8,6 +8,7 @@ import {
   putIamJson,
 } from '../../../data/httpClient'
 import { ensureResultSuccess, unwrapResult } from '../../../data/result'
+import type { PagedResultDto } from '../../../shared/pagination'
 import {
   ORGANIZATION_QUERY_PARAMS,
   ORGANIZATION_REQUEST_FIELDS,
@@ -17,7 +18,6 @@ import {
   type OrganizationDto,
   type OrganizationLookupDto,
   type OrganizationUpdateRequest,
-  type PagedResultDto,
 } from './organizationTypes'
 
 export type OrganizationListQuery = {

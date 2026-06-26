@@ -1,10 +1,8 @@
 using Courier.Application.Contracts;
 using Courier.Domain;
-using Courier.Domain.DTOs.Requests;
 using Courier.Domain.Entities;
 using Courier.Domain.Enums;
 using Courier.Domain.Interfaces.Repositories;
-using Courier.Domain.Messages;
 using Myce.Response;
 using Shared.Application.Contracts;
 using Shared.Domain.Enums;
@@ -14,72 +12,14 @@ namespace Courier.Application.Services;
 
 public class EmailOutboxService(
    IEmailRepository emailRepository,
-   ITemplateRepository templateRepository,
-   IEmailTemplateRenderer emailTemplateRenderer,
    IEmailSender emailSender,
    IParameterService parameterService,
    ICourierLogger courierLogger) : IEmailOutboxService
 {
    private readonly IEmailRepository _emailRepository = emailRepository;
-   private readonly ITemplateRepository _templateRepository = templateRepository;
-   private readonly IEmailTemplateRenderer _emailTemplateRenderer = emailTemplateRenderer;
    private readonly IEmailSender _emailSender = emailSender;
    private readonly IParameterService _parameterService = parameterService;
    private readonly ICourierLogger _courierLogger = courierLogger;
-
-   public async Task<Result<Guid>> QueueAsync(EmailQueueRequest request, CancellationToken cancellationToken = default)
-   {
-      var template = await _templateRepository.GetByKeyAsync(request.TemplateKey, cancellationToken);
-
-      if (template == null)
-      {
-         return Result<Guid>.Failure(new NotFoundError(CourierConst.Entity.Template));
-      }
-
-      if (template.Type != TemplateType.Email)
-      {
-         return Result<Guid>.Failure(new TemplateTypeMismatchError(TemplateType.Email.ToString()));
-      }
-
-      var translation = template.EmailTranslations.SingleOrDefault(t =>
-         t.Language == request.Language.ToLowerInvariant().Trim());
-
-      if (translation == null)
-      {
-         return Result<Guid>.Failure(new TemplateLanguageNotFoundError(request.TemplateKey, request.Language));
-      }
-
-      var values = BuildTemplateValues(request.Values);
-      var subjectResult = _emailTemplateRenderer.Render(translation.Subject, values);
-
-      if (subjectResult.HasError)
-      {
-         return Result<Guid>.Failure(subjectResult.Messages);
-      }
-
-      var bodyResult = _emailTemplateRenderer.Render(translation.Body, values, translation.IsHtml);
-
-      if (bodyResult.HasError)
-      {
-         return Result<Guid>.Failure(bodyResult.Messages);
-      }
-
-      var email = Email.Create(
-         request.OrganizationId,
-         request.UserId,
-         request.Module,
-         request.Feature,
-         request.TemplateKey,
-         request.Recipient,
-         subjectResult.Data!,
-         bodyResult.Data!,
-         translation.IsHtml,
-         template.RetentionPolicy);
-
-      var id = await _emailRepository.AddAsync(email, cancellationToken);
-
-      return Result<Guid>.Success(id);
-   }
 
    public async Task<bool> ProcessNextPendingAsync(CancellationToken cancellationToken = default)
    {
@@ -173,14 +113,4 @@ public class EmailOutboxService(
       }
    }
 
-   private static IReadOnlyDictionary<string, string> BuildTemplateValues(IReadOnlyDictionary<string, string>? values)
-   {
-      var result = values == null
-         ? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-         : new Dictionary<string, string>(values, StringComparer.OrdinalIgnoreCase);
-
-      result["today"] = DateTime.UtcNow.ToString("yyyy-MM-dd");
-
-      return result;
-   }
 }

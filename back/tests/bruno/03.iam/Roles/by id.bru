@@ -1,0 +1,15 @@
+meta {
+  name: by id
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{host.iam}}/api/{{version}}/iam/roles/019ed142-7e0f-7bfe-821b-68e7dbb390ec
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}

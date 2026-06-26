@@ -1,0 +1,15 @@
+meta {
+  name: unread count
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{host.courier}}/api/{{version}}/notifications/unread-count
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}

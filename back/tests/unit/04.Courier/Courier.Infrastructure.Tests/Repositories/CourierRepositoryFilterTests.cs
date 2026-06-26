@@ -1,11 +1,13 @@
 using Courier.Domain.DTOs.Requests;
 using Courier.Domain.Entities;
 using Courier.Domain.Enums;
+using Courier.Domain.ValueObjects;
 using Courier.Infrastructure.Repositories;
 using Microsoft.Extensions.Configuration;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
+using Shared.Domain.Enums;
 using System.Reflection;
 
 namespace Courier.Infrastructure.Tests.Repositories;
@@ -54,24 +56,115 @@ public class CourierRepositoryFilterTests
    }
 
    [Fact]
-   public void TemplateBuildFilter_ShouldIncludeKeyNameAndType()
+   public void TemplateBuildFilter_ShouldIncludeModuleKeyAndSeverity()
    {
-      var request = new TemplateSearchRequest("welcome", "Welcome", TemplateType.Email);
+      var request = new TemplateSearchRequest("iam", "welcome", null, NotificationSeverity.Warning);
 
-      var filter = InvokeFilter<Template, TemplateSearchRequest>(typeof(TemplateRepository), request);
+      var filter = InvokeFilter<Template, TemplateSearchRequest>(typeof(TemplateRepository), request, "pt-BR");
       var json = Render(filter).ToJson();
 
-      Assert.Contains("Key", json);
-      Assert.Contains("Name", json);
-      Assert.Contains("Type", json);
+      Assert.Contains("module", json);
+      Assert.Contains("key", json);
+      Assert.Contains("severity", json);
+      Assert.Contains("Warning", json);
    }
 
-   private static FilterDefinition<TEntity> InvokeFilter<TEntity, TRequest>(Type repositoryType, TRequest request)
+   [Fact]
+   public void NotificationBuildFilter_ShouldIncludeOwnerStatusAndDateRange()
+   {
+      var organizationId = Guid.NewGuid();
+      var userId = Guid.NewGuid();
+      var request = new NotificationSearchRequest(
+         organizationId,
+         userId,
+         "iam",
+         "welcome",
+         NotificationStatus.Unread,
+         DateTime.UtcNow.AddDays(-1),
+         DateTime.UtcNow);
+
+      var filter = InvokeFilter<Notification, NotificationSearchRequest>(
+         typeof(NotificationRepository),
+         request);
+      var document = Render(filter);
+      var json = document.ToJson();
+
+      Assert.Contains("OrganizationId", json);
+      Assert.Contains("UserId", json);
+      Assert.Contains("CreatedAt", json);
+      Assert.Contains("Module", json);
+      Assert.Contains("Title", json);
+      Assert.Contains("Status", json);
+      Assert.True(ContainsGuidValue(document, organizationId));
+      Assert.True(ContainsGuidValue(document, userId));
+   }
+
+   [Fact]
+   public void TemplateBuildFilter_ShouldMatchNameWithinUserLanguageTranslation()
+   {
+      var request = new TemplateSearchRequest(null, null, "boas-vindas", null);
+
+      var filter = InvokeFilter<Template, TemplateSearchRequest>(typeof(TemplateRepository), request, "pt-br");
+      var json = Render(filter).ToJson();
+
+      Assert.Contains("translations", json);
+      Assert.Contains("pt-BR", json);
+      Assert.Contains("boas-vindas", json);
+      Assert.Contains("$elemMatch", json);
+   }
+
+   [Fact]
+   public void TemplateSerialization_ShouldUseNestedCamelCaseShapeAndStringEnums()
+   {
+      var template = Template.Create(
+         "iam",
+         "user-welcome",
+         true,
+         NotificationSeverity.Information,
+         RetentionPolicy.Operational,
+         Guid.NewGuid());
+      template.AddTranslation(
+         TemplateTranslation.Create(
+            "pt-br",
+            "User welcome",
+            TemplateTranslationEmail.Create("Bem-vindo, {{user.name}}", "<p>Sua conta foi criada...</p>"),
+            TemplateTranslationNotification.Create("Nova conta criada!", "Acesse seu perfil para começar.", "/perfil")),
+         Guid.NewGuid());
+
+      var document = template.ToBsonDocument();
+      var translation = document["translations"].AsBsonArray.Single().AsBsonDocument;
+      var email = translation["email"].AsBsonDocument;
+      var notification = translation["notification"].AsBsonDocument;
+
+      Assert.Equal("iam", document["module"].AsString);
+      Assert.Equal("user-welcome", document["key"].AsString);
+      Assert.True(document["isAllowingOptOut"].AsBoolean);
+      Assert.Equal("Information", document["severity"].AsString);
+      Assert.Equal("Operational", document["retentionPolicy"].AsString);
+      Assert.Equal("pt-BR", translation["language"].AsString);
+      Assert.Equal("User welcome", translation["name"].AsString);
+      Assert.Equal("Bem-vindo, {{user.name}}", email["subject"].AsString);
+      Assert.True(email["isHtml"].AsBoolean);
+      Assert.Equal("Nova conta criada!", notification["title"].AsString);
+      Assert.Equal("/perfil", notification["actionLink"].AsString);
+
+      var hydratedTemplate = BsonSerializer.Deserialize<Template>(document);
+
+      Assert.Single(hydratedTemplate.Translations);
+      Assert.Equal("pt-BR", hydratedTemplate.Translations.Single().Language);
+      Assert.NotNull(hydratedTemplate.Translations.Single().Email);
+      Assert.NotNull(hydratedTemplate.Translations.Single().Notification);
+   }
+
+   private static FilterDefinition<TEntity> InvokeFilter<TEntity, TRequest>(
+      Type repositoryType,
+      TRequest request,
+      params object[] additionalArguments)
    {
       var method = repositoryType.GetMethod("BuildFilter", BindingFlags.Static | BindingFlags.NonPublic);
       Assert.NotNull(method);
 
-      return (FilterDefinition<TEntity>)method.Invoke(null, [request])!;
+      return (FilterDefinition<TEntity>)method.Invoke(null, [request!, .. additionalArguments])!;
    }
 
    private static BsonDocument Render<T>(FilterDefinition<T> filter)

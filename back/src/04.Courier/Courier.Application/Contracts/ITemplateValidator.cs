@@ -8,5 +8,5 @@ public interface ITemplateValidator
    Result ValidateCreate(TemplateCreateRequest request, bool keyExists);
    Result ValidateUpdate(TemplateUpdateRequest request, bool templateExists, bool keyExists);
    Result ValidateSearch(TemplateSearchRequest request);
-   Result ValidateEmailTranslation(TemplateEmailTranslationRequest request, bool templateExists, bool isEmailTemplate);
+   Result ValidateTranslation(TemplateTranslationRequest request, bool templateExists);
 }

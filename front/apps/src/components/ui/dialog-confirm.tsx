@@ -2,19 +2,22 @@ import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { X } from 'lucide-react'
 import type { PropsWithChildren, ReactNode } from 'react'
 
+import { cn } from '../../lib/utils'
+
 type DialogProps = PropsWithChildren<{
   backLabel: string
+  className?: string
   onOpenChange: (open: boolean) => void
   open: boolean
   title: string
 }>
 
-export function Dialog({ children, backLabel, onOpenChange, open, title }: DialogProps) {
+export function Dialog({ children, backLabel, className, onOpenChange, open, title }: DialogProps) {
   return (
     <DialogPrimitive.Root onOpenChange={onOpenChange} open={open}>
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="dialog-overlay" />
-        <DialogPrimitive.Content className="dialog-content">
+        <DialogPrimitive.Content className={cn('dialog-content', className)}>
           <div className="dialog-header">
             <DialogPrimitive.Title className="dialog-title">{title}</DialogPrimitive.Title>
             <DialogPrimitive.Close aria-label={backLabel} className="dialog-close">

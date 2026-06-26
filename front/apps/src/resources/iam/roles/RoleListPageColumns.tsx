@@ -65,6 +65,7 @@ export function createRoleTableColumns({
           ]}
         />
       ),
+      enableHiding: false,
       enableSorting: false,
       header: t('shared.fields.actions'),
       id: 'actions',

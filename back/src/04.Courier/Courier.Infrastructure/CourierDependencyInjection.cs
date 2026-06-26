@@ -24,13 +24,17 @@ public static class CourierDependencyInjection
 
       services.AddSingleton<CourierDbContext>();
       services.AddScoped<IEmailRepository, EmailRepository>();
+      services.AddScoped<INotificationRepository, NotificationRepository>();
       services.AddScoped<ITemplateRepository, TemplateRepository>();
       services.AddScoped<ITemplateWriteRepository, TemplateRepository>();
       services.AddScoped<IEmailService, EmailService>();
+      services.AddScoped<INotificationService, NotificationService>();
       services.AddScoped<IEmailValidator, EmailValidator>();
+      services.AddScoped<INotificationValidator, NotificationValidator>();
       services.AddScoped<ITemplateService, TemplateService>();
       services.AddScoped<IEmailTemplateRenderer, SimpleEmailTemplateRenderer>();
       services.AddScoped<ITemplateValidator, TemplateValidator>();
+      services.AddScoped<ICourierMessageService, CourierMessageService>();
       services.AddScoped<IEmailOutboxService, EmailOutboxService>();
       services.AddScoped<IEmailSender, NoopEmailSender>();
       services.AddScoped<ICourierLogger, CourierLogger>();
@@ -40,7 +44,7 @@ public static class CourierDependencyInjection
       if (IsHostedServicesEnabled(configuration))
       {
          services.AddHostedService<CourierIndexInitializer>();
-         services.AddHostedService<EmailRequestConsumer>();
+         services.AddHostedService<MessageRequestConsumer>();
          services.AddHostedService<EmailDeliveryWorker>();
       }
 
