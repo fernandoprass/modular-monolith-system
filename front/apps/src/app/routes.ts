@@ -6,6 +6,7 @@ export const APP_ROUTES = {
   emailView: (id: string) => `/emails/${id}/show`,
   emails: '/emails',
   login: '/login',
+  notifications: '/notifications',
   organizationEdit: (id: string) => `/organizations/${id}`,
   organizationProfile: '/organization-profile',
   organizationSettings: '/organization-settings',

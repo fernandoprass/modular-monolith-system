@@ -4,6 +4,12 @@ export const API_PATHS = {
       byId: (id: string | number) => `/api/v1/emails/${id}`,
       list: '/api/v1/emails',
     },
+    notifications: {
+      byId: (id: string | number) => `/api/v1/notifications/${id}`,
+      list: '/api/v1/notifications',
+      read: (id: string | number) => `/api/v1/notifications/${id}/read`,
+      unreadCount: '/api/v1/notifications/unread-count',
+    },
     templates: {
       byId: (id: string | number) => `/api/v1/templates/${id}`,
       list: '/api/v1/templates',

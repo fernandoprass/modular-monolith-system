@@ -5,6 +5,7 @@ import { LoginPage } from '../auth/LoginPage'
 import { EmailCreatePage } from '../resources/courier/emails/EmailCreatePage'
 import { EmailListPage } from '../resources/courier/emails/EmailListPage'
 import { EmailViewPage } from '../resources/courier/emails/EmailViewPage'
+import { NotificationListPage } from '../resources/courier/notifications/NotificationListPage'
 import { TemplateEditPage } from '../resources/courier/templates/TemplateEditPage'
 import { TemplateListPage } from '../resources/courier/templates/TemplateListPage'
 import { AuditLogListPage } from '../resources/sentinel/audit-logs/AuditLogListPage'
@@ -59,6 +60,7 @@ function App() {
                 <Route path={APP_ROUTES.emails.slice(1)} element={<EmailListPage />} />
                 <Route path="emails/create" element={<EmailCreatePage />} />
                 <Route path="emails/:id/show" element={<EmailViewPage />} />
+                <Route path={APP_ROUTES.notifications.slice(1)} element={<NotificationListPage />} />
                 <Route path={APP_ROUTES.templates.slice(1)} element={<TemplateListPage />} />
                 <Route path="templates/create" element={<TemplateEditPage />} />
                 <Route path="templates/:id" element={<TemplateEditPage />} />

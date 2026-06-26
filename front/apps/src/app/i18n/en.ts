@@ -94,6 +94,29 @@ export const enMessages = {
           sent: 'Sent',
         },
       },
+      notifications: {
+        actions: {
+          markRead: 'Mark as read',
+          openLink: 'Open link',
+        },
+        messages: {
+          deleteConfirm: 'Delete this notification?',
+          deleteTitle: 'Delete notification',
+          empty: 'No notifications found.',
+        },
+        name: 'Notifications',
+        notifications: {
+          deleted: 'Notification deleted.',
+          markedRead: 'Notification marked as read.',
+        },
+        pages: {
+          list: 'Notifications',
+        },
+        statuses: {
+          read: 'Read',
+          unread: 'Unread',
+        },
+      },
       templates: {
         actions: {
           addTranslation: 'Add translation',
@@ -446,6 +469,7 @@ export const enMessages = {
       resource: 'Resource',
       requestId: 'Request ID',
       recipient: 'Recipient',
+      readAt: 'Read at',
       retentionPolicy: 'Retention policy',
       severity: 'Severity',
       retryCount: 'Retry count',
@@ -492,6 +516,7 @@ export const enMessages = {
     courier: {
       emailtemplates: 'Email templates',
       emails: 'Emails',
+      notifications: 'Notifications',
       templates: 'Templates',       
     },
     sentinel: {

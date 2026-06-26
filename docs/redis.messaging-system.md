@@ -106,7 +106,7 @@ Current streams:
 | --- | --- | --- |
 | `audit-log-events` | `AuditLogEvent` | `AuditLogConsumer` |
 | `system-log-events` | `SystemLogEvent` | `SystemLogConsumer` |
-| `courier-message-requests` | `UserMessageEvent` | `CourierMessageRequestConsumer` |
+| `user-message-events` | `UserMessageEvent` | `MessageRequestConsumer` |
 
 The stream names are centralized in `SharedConst.Redis`.
 
