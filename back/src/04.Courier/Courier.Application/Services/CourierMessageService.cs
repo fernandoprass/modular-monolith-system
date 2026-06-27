@@ -15,12 +15,14 @@ public class CourierMessageService(
    IEmailRepository emailRepository,
    INotificationRepository notificationRepository,
    ITemplateRepository templateRepository,
+   IUserPreferenceRepository userPreferenceRepository,
    IEmailTemplateRenderer templateRenderer,
    IEmailValidator emailValidator) : ICourierMessageService
 {
    private readonly IEmailRepository _emailRepository = emailRepository;
    private readonly INotificationRepository _notificationRepository = notificationRepository;
    private readonly ITemplateRepository _templateRepository = templateRepository;
+   private readonly IUserPreferenceRepository _userPreferenceRepository = userPreferenceRepository;
    private readonly IEmailTemplateRenderer _templateRenderer = templateRenderer;
    private readonly IEmailValidator _emailValidator = emailValidator;
 
@@ -48,9 +50,12 @@ public class CourierMessageService(
          return Result.Failure(new TemplateChannelRequiredError());
       }
 
+      var preference = await _userPreferenceRepository.GetByUserIdAsync(request.UserId, cancellationToken);
+      var isEmailEnabled = preference?.IsEmailEnabledForTemplate(request.Module, request.TemplateKey) ?? true;
+      var isNotificationEnabled = preference?.IsNotificationEnabledForTemplate(request.Module, request.TemplateKey) ?? true;
       var values = BuildTemplateValues(request.Values);
 
-      if (translation.Email != null)
+      if (translation.Email != null && isEmailEnabled)
       {
          var emailResult = await QueueEmailAsync(request, template, translation.Email, values, cancellationToken);
 
@@ -60,7 +65,7 @@ public class CourierMessageService(
          }
       }
 
-      if (translation.Notification != null)
+      if (translation.Notification != null && isNotificationEnabled)
       {
          var notificationResult = await QueueNotificationAsync(request, template, translation.Notification, values, cancellationToken);
 

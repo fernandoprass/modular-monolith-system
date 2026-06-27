@@ -1,0 +1,15 @@
+meta {
+  name: get preferences
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{host.courier}}/api/{{version}}/user-preferences
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}

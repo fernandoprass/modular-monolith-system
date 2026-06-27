@@ -185,7 +185,9 @@ public class SeederRolePermissions(
          CourierPermission.Notifications.Read,
          CourierPermission.Notifications.Write,
          CourierPermission.Templates.Read,
-         CourierPermission.Templates.Write
+         CourierPermission.Templates.Write,
+         CourierPermission.UserPreferences.Read,
+         CourierPermission.UserPreferences.Write
       };
 
       courierSystemAdminPermissions.AddRange(GetCourierOrganizationAdminPermissions());
@@ -204,7 +206,11 @@ public class SeederRolePermissions(
 
    private static List<string> GetCourierUserPermissions()
    {
-      return [];
+      return
+      [
+         CourierPermission.UserPreferences.Read,
+         CourierPermission.UserPreferences.Write
+      ];
    }
    #endregion
 }
