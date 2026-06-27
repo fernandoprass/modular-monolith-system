@@ -117,6 +117,29 @@ export const enMessages = {
           unread: 'Unread',
         },
       },
+      userPreferences: {
+        fields: {
+          enableAllEmail: 'Receive email for all templates',
+          enableAllNotification: 'Receive notifications for all templates',
+          enableEmail: 'Receive email',
+          enableNotification: 'Receive notification',
+          communications:'Communications'
+        },
+        messages: {
+          empty: 'No opt-out templates found.',
+          communicationsHelp: 'Disable the communications you do not want to receive.',
+        },
+        name: 'Preferences',
+        notifications: {
+          updated: 'Preferences updated.',
+        },
+        pages: {
+          edit: 'Preferences',
+        },
+        sections: {
+          templates: 'Templates',
+        },
+      },
       templates: {
         actions: {
           addTranslation: 'Add translation',
@@ -272,6 +295,13 @@ export const enMessages = {
         },
       },
       users: {
+        account: {
+          communication: 'Communication',
+          profile: 'Profile',
+          security: 'Security',
+          settings: 'Settings',
+          title: 'User profile',
+        },
         messages: {
           deleteConfirm: 'Delete this user?',
           empty: 'No users found.',
@@ -457,6 +487,7 @@ export const enMessages = {
       message: 'Message',
       module: 'Module',
       name: 'Name',
+      notification: 'Notification',
       newPassword: 'New password',
       nextAttemptAt: 'Next attempt at',
       organization: 'Organization',
@@ -518,6 +549,7 @@ export const enMessages = {
       emails: 'Emails',
       notifications: 'Notifications',
       templates: 'Templates',       
+      userpreferences: 'Preferences',
     },
     sentinel: {
       auditlogs: 'Audit logs',

@@ -20,5 +20,14 @@ export const LANGUAGE_OPTIONS = [
 ] as const
 
 export function normalizeLanguageCode(language: string): string {
-  return language.trim().toLowerCase()
+  const [languageCode = '', ...subtags] = language.trim().split('-')
+
+  return [
+    languageCode.toLowerCase(),
+    ...subtags.map((subtag) => (
+      subtag.length === 2 || subtag.length === 3
+        ? subtag.toUpperCase()
+        : subtag
+    )),
+  ].join('-')
 }

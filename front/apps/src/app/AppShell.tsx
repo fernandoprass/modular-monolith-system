@@ -64,7 +64,6 @@ export function AppLayout() {
   const canOpenPermissions = hasResourceAccess(permissions, IAM_RESOURCES.permissions)
   const canOpenUserAccess = hasPermissionCode(permissions, IAM_PERMISSIONS.roles.assign)
   const canOpenOrganizationSettings = hasPermissionCode(permissions, IAM_PERMISSIONS.organizationProfile.parameters)
-  const canOpenUserSettings = hasPermissionCode(permissions, IAM_PERMISSIONS.userProfile.parameters)
   const canOpenAuditLogs = hasPermissionCode(permissions, SENTINEL_PERMISSIONS.auditLogs.read)
   const canOpenSystemLogs = hasPermissionCode(permissions, SENTINEL_PERMISSIONS.systemLogs.read)
   const canOpenEmails = hasPermissionCode(permissions, COURIER_PERMISSIONS.emails.read)
@@ -114,10 +113,6 @@ export function AppLayout() {
 
   function handleUserProfile() {
     navigate(APP_ROUTES.userProfile)
-  }
-
-  function handleUserSettings() {
-    navigate(APP_ROUTES.userSettings)
   }
 
   return (
@@ -359,12 +354,6 @@ export function AppLayout() {
                     <LockKeyhole data-icon="inline-start" />
                     {t('features.iam.users.pages.changePassword')}
                   </DropdownMenuItem>
-                  {canOpenUserSettings && (
-                    <DropdownMenuItem onClick={handleUserSettings}>
-                      <Settings data-icon="inline-start" />
-                      {t('navigation.settings')}
-                    </DropdownMenuItem>
-                  )}
                   <DropdownMenuItem onClick={handleLogout}>
                     <LogOut data-icon="inline-start" />
                     {t('auth.userMenu.logout')}

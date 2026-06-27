@@ -16,6 +16,9 @@ export const API_PATHS = {
       translation: (id: string | number, language: string) => `/api/v1/templates/${id}/translations/${encodeURIComponent(language)}`,
       translations: (id: string | number) => `/api/v1/templates/${id}/translations`,
     },
+    userPreferences: {
+      list: '/api/v1/user-preferences',
+    },
   },
   iam: {
     authentication: {

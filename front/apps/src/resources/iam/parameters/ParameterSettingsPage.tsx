@@ -19,6 +19,7 @@ import type { ParameterLiteDto } from './parameterTypes'
 type ParameterSettingsOwner = 'organization' | 'user'
 
 type ParameterSettingsPageProps = {
+  embedded?: boolean
   owner: ParameterSettingsOwner
 }
 
@@ -61,7 +62,7 @@ function getPageTitleKey(owner: ParameterSettingsOwner): string {
     : 'features.iam.parameters.pages.userSettings'
 }
 
-export function ParameterSettingsPage({ owner }: ParameterSettingsPageProps) {
+export function ParameterSettingsPage({ embedded = false, owner }: ParameterSettingsPageProps) {
   const t = useTranslate()
   const notifyError = useNotifyError()
   const { showSuccess } = useToast()
@@ -150,9 +151,9 @@ export function ParameterSettingsPage({ owner }: ParameterSettingsPageProps) {
     }))
   }
 
-  return (
-    <main className="page settings-page">
-      <h1 className="page-title">{t(getPageTitleKey(owner))}</h1>
+  const content = (
+    <>
+      {!embedded && <h1 className="page-title">{t(getPageTitleKey(owner))}</h1>}
       {isLoading && <p className="page-subtitle">{t('shared.common.loading')}</p>}
       {!isLoading && parameters.length === 0 && (
         <p className="page-subtitle">{t('features.iam.parameters.messages.empty')}</p>
@@ -230,6 +231,10 @@ export function ParameterSettingsPage({ owner }: ParameterSettingsPageProps) {
           </section>
         ))}
       </div>
-    </main>
+    </>
   )
+
+  return embedded
+    ? <section className="settings-page">{content}</section>
+    : <main className="page settings-page">{content}</main>
 }

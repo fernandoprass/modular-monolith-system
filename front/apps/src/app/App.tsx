@@ -26,10 +26,10 @@ import { RoleListPage } from '../resources/iam/roles/RoleListPage'
 import { UserAccessPage } from '../resources/iam/user-access/UserAccessPage'
 import { UserEditPage } from '../resources/iam/users/UserEditPage'
 import { UserListPage } from '../resources/iam/users/UserListPage'
-import { UserProfilePage } from '../resources/iam/users/UserProfilePage'
 import { UserViewPage } from '../resources/iam/users/UserViewPage'
 import { ToastProvider } from './ToastProvider'
 import { AppLayout } from './AppShell'
+import { UserAccountPage } from './UserAccountPage'
 import { I18nContext, translate } from './i18n/i18n'
 import { APP_ROUTES } from './routes'
 
@@ -53,14 +53,22 @@ function App() {
                 <Route path="users/create" element={<UserEditPage />} />
                 <Route path="users/:id" element={<UserEditPage />} />
                 <Route path="users/:id/show" element={<UserViewPage />} />
-                <Route path={APP_ROUTES.userProfile.slice(1)} element={<UserProfilePage />} />
-                <Route path={APP_ROUTES.userSettings.slice(1)} element={<ParameterSettingsPage owner="user" />} />
+                <Route path="user-profile/:section" element={<UserAccountPage />} />
+                <Route path={APP_ROUTES.userProfileBase.slice(1)} element={<Navigate to={APP_ROUTES.userProfile} replace />} />
+                <Route
+                  path={APP_ROUTES.userSettings.slice(1)}
+                  element={<Navigate to={APP_ROUTES.userProfileSection('settings')} replace />}
+                />
                 <Route path={APP_ROUTES.auditLogs.slice(1)} element={<AuditLogListPage />} />
                 <Route path="audit-logs/:id/show" element={<AuditLogViewPage />} />
                 <Route path={APP_ROUTES.emails.slice(1)} element={<EmailListPage />} />
                 <Route path="emails/create" element={<EmailCreatePage />} />
                 <Route path="emails/:id/show" element={<EmailViewPage />} />
                 <Route path={APP_ROUTES.notifications.slice(1)} element={<NotificationListPage />} />
+                <Route
+                  path={APP_ROUTES.userPreferences.slice(1)}
+                  element={<Navigate to={APP_ROUTES.userProfileSection('communication')} replace />}
+                />
                 <Route path={APP_ROUTES.templates.slice(1)} element={<TemplateListPage />} />
                 <Route path="templates/create" element={<TemplateEditPage />} />
                 <Route path="templates/:id" element={<TemplateEditPage />} />

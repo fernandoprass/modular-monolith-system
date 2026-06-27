@@ -25,6 +25,10 @@ textarea {
   font: inherit;
 }
 
+h2 {
+  padding-bottom: 10px;
+}
+
 .shell {
   min-height: 100vh;
   background: #ffffff;
@@ -777,6 +781,16 @@ textarea {
   min-width: 0;
 }
 
+.user-account-tabs > .tabs-list {
+  width: 100%;
+  justify-content: flex-start;
+  overflow-x: auto;
+}
+
+.user-account-tabs > .tabs-content {
+  min-width: 0;
+}
+
 .access-table-wrap {
   overflow: hidden;
   border: 1px solid #e5e7eb;
@@ -1037,6 +1051,28 @@ textarea {
   gap: 12px;
 }
 
+.user-preference-form {
+  display: grid;
+  gap: 14px;
+}
+
+.user-preference-table-wrap {
+  margin-top: 12px;
+}
+
+.user-preference-table td:nth-child(3),
+.user-preference-table td:nth-child(4),
+.user-preference-table th:nth-child(3),
+.user-preference-table th:nth-child(4) {
+  width: 170px;
+}
+
+.user-preference-column-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .detail-section-title {
   margin: 0;
   color: #334155;
@@ -1219,7 +1255,8 @@ textarea {
   padding: 0;
 }
 
-.checkbox[data-state='checked'] {
+.checkbox[data-state='checked'],
+.checkbox[data-state='indeterminate'] {
   border-color: #2563eb;
   background: #2563eb;
   color: #fff;
