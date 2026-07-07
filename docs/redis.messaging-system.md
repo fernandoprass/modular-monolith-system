@@ -318,7 +318,7 @@ await _eventPublisher.PublishUserMessageEventAsync(new UserMessageEvent(
    "iam",
    "users",
    "user-welcome",
-   "en",
+   "en-US",
    "person@example.com",
    new Dictionary<string, string>
    {

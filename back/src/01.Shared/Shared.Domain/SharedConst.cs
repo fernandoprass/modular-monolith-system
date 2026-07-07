@@ -88,6 +88,6 @@ public static partial class SharedConst
    public static class System
    {
       public const string ModuleName = "Shared";
-      public const string DefaultLanguage = "en";
+      public const string DefaultLanguage = "en-US";
    }
 }

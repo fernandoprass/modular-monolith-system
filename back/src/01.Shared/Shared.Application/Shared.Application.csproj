@@ -4,7 +4,7 @@
   </ItemGroup>
 
 	<ItemGroup>
-		<packageReference Include="Myce.FluentValidator" Version="1.8.2" />
+		<packageReference Include="Myce.FluentValidator" Version="2.0.3" />
 	</ItemGroup>
 
 	<ItemGroup>

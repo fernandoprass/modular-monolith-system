@@ -1,7 +1,7 @@
 export const LANGUAGE_CODES = {
-  english: 'en',
+  english: 'en-US',
   portugueseBrazil: 'pt-BR',
-  spanish: 'es',
+  spanish: 'es-ES',
 } as const
 
 export const LANGUAGE_OPTIONS = [
