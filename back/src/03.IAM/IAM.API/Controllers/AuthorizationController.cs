@@ -3,6 +3,7 @@ using IAM.Application.Contracts;
 using IAM.Domain.DTOs.Requests;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Shared.Application.Contracts;
 
 namespace IAM.API.Controllers;
 
@@ -11,7 +12,8 @@ namespace IAM.API.Controllers;
 [Authorize]
 public class AuthorizationController(
    IPermissionAuthorizationService permissionAuthorizationService,
-   IConfiguration configuration) : BaseController
+   IConfiguration configuration,
+   IUserContext userContext) : BaseController(userContext)
 {
    private const string InternalApiKeyHeader = "X-Internal-Api-Key";
 

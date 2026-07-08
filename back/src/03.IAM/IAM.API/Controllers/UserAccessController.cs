@@ -4,6 +4,7 @@ using IAM.Domain;
 using IAM.Domain.DTOs.Requests;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Shared.Application.Contracts;
 using Shared.Infrastructure.Authorization;
 
 namespace IAM.API.Controllers;
@@ -11,7 +12,9 @@ namespace IAM.API.Controllers;
 [ApiVersion(1)]
 [Route("api/v{version:apiVersion}/iam/user-access")]
 [Authorize]
-public class UserAccessController(IRoleService roleService) : BaseController
+public class UserAccessController(
+   IRoleService roleService,
+   IUserContext userContext) : BaseController(userContext)
 {
    private readonly IRoleService _roleService = roleService;
 

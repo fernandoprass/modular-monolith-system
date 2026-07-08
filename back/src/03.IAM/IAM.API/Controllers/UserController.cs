@@ -14,7 +14,7 @@ namespace IAM.API.Controllers;
 public class UserController(
    IUserContext userContext,
    IRegisterOrchestrator registerOrchestrator,
-   IUserService userService) : BaseController
+   IUserService userService) : BaseController(userContext)
 {
    private readonly IUserContext _userContext = userContext;
    private readonly IRegisterOrchestrator _registerOrchestrator = registerOrchestrator;

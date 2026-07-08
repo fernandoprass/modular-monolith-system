@@ -81,7 +81,7 @@ public class RegisterOrchestrator(
 
       if (result.HasError)
       {
-         return Result<OrganizationDto>.Failure(result.Messages.WithLanguage(_userContext.Language));
+         return Result<OrganizationDto>.Failure(result.Messages);
       }
 
       var user = User.CreateOrganizationAdmin(

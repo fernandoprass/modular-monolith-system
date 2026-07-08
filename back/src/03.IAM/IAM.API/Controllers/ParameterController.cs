@@ -11,7 +11,9 @@ namespace IAM.API.Controllers;
 
 [ApiVersion(1)]
 [Route("api/v{version:apiVersion}/iam/parameters")]
-public class ParameterController(IParameterService parameterService) : BaseController
+public class ParameterController(
+   IParameterService parameterService,
+   IUserContext userContext) : BaseController(userContext)
 {
    private readonly IParameterService _parameterService = parameterService;
 

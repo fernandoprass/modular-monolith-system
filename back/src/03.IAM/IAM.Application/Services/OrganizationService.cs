@@ -6,7 +6,6 @@ using IAM.Domain.Interfaces;
 using IAM.Domain.QueryRepositories;
 using IAM.Domain.Repositories;
 using Myce.Response;
-using Myce.Response.Messages;
 using Shared.Application.Contracts;
 using Shared.Application.Services;
 using Shared.Domain.DTOs.Responses;
