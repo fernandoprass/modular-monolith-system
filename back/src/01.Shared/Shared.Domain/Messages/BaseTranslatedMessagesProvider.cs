@@ -4,17 +4,27 @@ namespace Shared.Domain.Messages
 {
    public abstract class BaseTranslatedMessagesProvider
    {
-      private readonly Dictionary<string, Dictionary<string, string>> _translations = [];
+      //text translations: error code, language, message
+      private readonly Dictionary<string, Dictionary<string, string>> _textTranslations = [];
+
+      //variable translations: name, language, value
+      private readonly Dictionary<string, Dictionary<string, string>> _variableTranslations = [];
 
       public void AddTranslation(string code, string language, string message)
       {
-         _translations.TryAdd(code, []);
-         _translations[code][LanguageOptions.Normalize(language)] = message;
+         _textTranslations.TryAdd(code, []);
+         _textTranslations[code][LanguageOptions.Normalize(language)] = message;
+      }
+
+      public void AddVariableTranslation(string name, string language, string value)
+      {
+         _variableTranslations.TryAdd(name, []);
+         _variableTranslations[name][LanguageOptions.Normalize(language)] = value;
       }
 
       public string GetTranslation(string code, string language)
       {
-         if (!_translations.TryGetValue(code, out var translations))
+         if (!_textTranslations.TryGetValue(code, out var translations))
          {
             return string.Empty;
          }
@@ -32,7 +42,7 @@ namespace Shared.Domain.Messages
 
       public Dictionary<string, string> GetTranslations(string code)
       {
-         if (_translations.TryGetValue(code, out var translations))
+         if (_textTranslations.TryGetValue(code, out var translations))
          {
             return new Dictionary<string, string>(translations);
          }
