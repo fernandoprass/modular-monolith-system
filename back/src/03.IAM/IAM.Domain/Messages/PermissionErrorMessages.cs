@@ -6,8 +6,8 @@ public class PermissionDuplicateCodeError : ErrorMessage
 {
    public PermissionDuplicateCodeError(string code)
       : base(
-         IamTranslatedMessagesProvider.PermissionDuplicateCodeError,
-         IamTranslatedMessagesProvider.Instance.GetTranslations(IamTranslatedMessagesProvider.PermissionDuplicateCodeError))
+         IamTranslatedMessagesProvider.PermissionDuplicateError,
+         IamTranslatedMessagesProvider.Instance.GetTranslations(IamTranslatedMessagesProvider.PermissionDuplicateError))
    {
       AddVariable("code", code);
    }

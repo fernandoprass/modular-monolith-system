@@ -8,7 +8,7 @@ public static class OrganizationErrorMessages
 
    public static ErrorMessage DuplicateCode(string code)
    {
-      var error = IamTranslatedMessagesProvider.Instance.Error(IamTranslatedMessagesProvider.OrganizationDuplicateCodeError);
+      var error = IamTranslatedMessagesProvider.Instance.Error(IamTranslatedMessagesProvider.OrganizationDuplicateError);
       error.AddVariable(Code, code);
       return error;
    }

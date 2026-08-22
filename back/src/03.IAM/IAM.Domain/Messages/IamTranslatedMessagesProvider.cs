@@ -5,11 +5,11 @@ namespace IAM.Domain.Messages
 {
    internal sealed class IamTranslatedMessagesProvider : BaseTranslatedMessagesProvider
    {
-      public const string OrganizationDuplicateCodeError = nameof(OrganizationDuplicateCodeError);
+      public const string OrganizationDuplicateError = nameof(OrganizationDuplicateError);
       public const string OrganizationForbiddenError = nameof(OrganizationForbiddenError);
       public const string OrganizationInvalidCodeFormatError = nameof(OrganizationInvalidCodeFormatError);
       public const string OrganizationInvalidTypeError = nameof(OrganizationInvalidTypeError);
-      public const string PermissionDuplicateCodeError = nameof(PermissionDuplicateCodeError);
+      public const string PermissionDuplicateError = nameof(PermissionDuplicateError);
       public const string PermissionNotFoundInAssignmentError = nameof(PermissionNotFoundInAssignmentError);
       public const string PermissionsCannotBeUnassignedError = nameof(PermissionsCannotBeUnassignedError);
       public const string RoleDuplicateNameError = nameof(RoleDuplicateNameError);
@@ -32,8 +32,8 @@ namespace IAM.Domain.Messages
 
       private IamTranslatedMessagesProvider()
       {
-         AddTranslation(OrganizationDuplicateCodeError, LanguageOptions.English, "The organization code '{code}' already exists.");
-         AddTranslation(OrganizationDuplicateCodeError, LanguageOptions.PortugueseBrazil, "O código de organização '{code}' já existe.");
+         AddTranslation(OrganizationDuplicateError, LanguageOptions.English, "The organization code '{code}' already exists.");
+         AddTranslation(OrganizationDuplicateError, LanguageOptions.PortugueseBrazil, "O código de organização '{code}' já existe.");
          AddTranslation(OrganizationForbiddenError, LanguageOptions.English, "The informing organization is different from the logged-in organization.");
          AddTranslation(OrganizationForbiddenError, LanguageOptions.PortugueseBrazil, "A organização informada é diferente da organização do usuário logado.");
          AddTranslation(OrganizationInvalidCodeFormatError, LanguageOptions.English, "Code must contain only letters and numbers.");
@@ -41,8 +41,8 @@ namespace IAM.Domain.Messages
          AddTranslation(OrganizationInvalidTypeError, LanguageOptions.English, "Invalid Type, inform 1 for a Company and 2 for an Individual.");
          AddTranslation(OrganizationInvalidTypeError, LanguageOptions.PortugueseBrazil, "Tipo inválido. Informe 1 para Pessoa Jurídica e 2 para Pessoa Física.");
 
-         AddTranslation(PermissionDuplicateCodeError, LanguageOptions.English, "The permission code '{code}' already exists.");
-         AddTranslation(PermissionDuplicateCodeError, LanguageOptions.PortugueseBrazil, "O código de permissão '{code}' já existe.");
+         AddTranslation(PermissionDuplicateError, LanguageOptions.English, "The permission code '{code}' already exists.");
+         AddTranslation(PermissionDuplicateError, LanguageOptions.PortugueseBrazil, "O código de permissão '{code}' já existe.");
          AddTranslation(PermissionNotFoundInAssignmentError, LanguageOptions.English, "One or more permissions do not exist.");
          AddTranslation(PermissionNotFoundInAssignmentError, LanguageOptions.PortugueseBrazil, "Uma ou mais permissões não existem.");
          AddTranslation(PermissionsCannotBeUnassignedError, LanguageOptions.English, "Permissions cannot be unassigned. One or more permissions are not assigned to the role.");
