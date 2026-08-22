@@ -2,14 +2,14 @@ using Myce.Response.Messages;
 
 namespace IAM.Domain.Messages;
 
-public class PermissionDuplicateCodeError : ErrorMessage
+public class PermissionDuplicateError : ErrorMessage
 {
-   public PermissionDuplicateCodeError(string code)
+   public PermissionDuplicateError(string code)
       : base(
          IamTranslatedMessagesProvider.PermissionDuplicateError,
          IamTranslatedMessagesProvider.Instance.GetTranslations(IamTranslatedMessagesProvider.PermissionDuplicateError))
    {
-      AddVariable("code", code);
+      AddVariable(IamConst.Messages.Variables.Code, code);
    }
 }
 

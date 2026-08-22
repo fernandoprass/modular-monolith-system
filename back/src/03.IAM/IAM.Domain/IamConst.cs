@@ -51,6 +51,16 @@ public static partial class IamConst
       }
    }
 
+   public static class Messages
+   {
+      public static class Variables
+      {
+         public const string Code = "code";
+         public const string Email = "email";
+         public const string Name = "name";
+      }
+   }
+
    public static class Templates
    {
       public const string OrganizationWelcome = "orgazination-welcome";

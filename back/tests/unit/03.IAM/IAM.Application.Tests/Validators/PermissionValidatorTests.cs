@@ -31,7 +31,7 @@ public class PermissionValidatorTests
       var result = _validator.ValidateCreate(request, codeAlreadyExists: true);
 
       result.IsSuccess.Should().BeFalse();
-      result.Messages.Should().Contain(e => e is PermissionDuplicateCodeError);
+      result.Messages.Should().Contain(e => e is PermissionDuplicateError);
    }
 
    [Fact]
@@ -78,7 +78,7 @@ public class PermissionValidatorTests
       var result = _validator.ValidateUpdate(request, codeAlreadyExists: true, permissionExists: true);
 
       result.IsSuccess.Should().BeFalse();
-      result.Messages.Should().Contain(e => e is PermissionDuplicateCodeError);
+      result.Messages.Should().Contain(e => e is PermissionDuplicateError);
    }
 
    #endregion

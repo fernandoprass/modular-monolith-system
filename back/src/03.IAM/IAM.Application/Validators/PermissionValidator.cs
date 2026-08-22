@@ -22,7 +22,7 @@ public class PermissionValidator : IPermissionValidator
          .RuleFor(x => x.Module).ApplyTemplate(MemberCodeTemplate)
          .RuleFor(x => x.Resource).ApplyTemplate(MemberCodeTemplate)
          .RuleFor(x => x.Action).ApplyTemplate(MemberCodeTemplate)
-         .RuleForValue(codeAlreadyExists).IsFalse(new PermissionDuplicateCodeError(code));
+         .RuleForValue(codeAlreadyExists).IsFalse(new PermissionDuplicateError(code));
 
       var isValid = validator.Validate(request);
 
@@ -37,7 +37,7 @@ public class PermissionValidator : IPermissionValidator
          .RuleFor(x => x.Module).ApplyTemplate(MemberCodeTemplate)
          .RuleFor(x => x.Resource).ApplyTemplate(MemberCodeTemplate)
          .RuleFor(x => x.Action).ApplyTemplate(MemberCodeTemplate)
-         .RuleForValue(codeAlreadyExists).IsFalse(new PermissionDuplicateCodeError(code))
+         .RuleForValue(codeAlreadyExists).IsFalse(new PermissionDuplicateError(code))
          .RuleForValue(permissionExists).IsTrue(new NotFoundError(IamConst.Entity.Permission));
 
       var isValid = validator.Validate(request);

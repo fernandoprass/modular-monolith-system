@@ -67,7 +67,7 @@ public class PermissionServiceTests
       var request = CreatePermissionCreateRequestRecord();
 
       _permissionQueryRepositoryMock.CodeExistsAsync("iam.users.create", Arg.Any<CancellationToken>()).Returns(true);
-      _permissionValidatorMock.ValidateCreate(request, true).Returns(Result.Failure(new PermissionDuplicateCodeError("iam.users.create")));
+      _permissionValidatorMock.ValidateCreate(request, true).Returns(Result.Failure(new PermissionDuplicateError("iam.users.create")));
 
       var result = await _permissionService.CreateAsync(request);
 
@@ -82,7 +82,7 @@ public class PermissionServiceTests
       var request = CreatePermissionCreateRequestRecord(module: string.Empty);
 
       _permissionQueryRepositoryMock.CodeExistsAsync(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(false);
-      _permissionValidatorMock.ValidateCreate(request, false).Returns(Result.Failure(new PermissionDuplicateCodeError("")));
+      _permissionValidatorMock.ValidateCreate(request, false).Returns(Result.Failure(new PermissionDuplicateError("")));
 
       var result = await _permissionService.CreateAsync(request);
 
@@ -138,7 +138,7 @@ public class PermissionServiceTests
 
       _unitOfWorkMock.Permissions.GetByIdAsync(permissionId, Arg.Any<CancellationToken>()).Returns(permission);
       _permissionQueryRepositoryMock.CodeExistsAsync("iam.users.update", permissionId, Arg.Any<CancellationToken>()).Returns(true);
-      _permissionValidatorMock.ValidateUpdate(request, true, true).Returns(Result.Failure(new PermissionDuplicateCodeError("iam.users.update")));
+      _permissionValidatorMock.ValidateUpdate(request, true, true).Returns(Result.Failure(new PermissionDuplicateError("iam.users.update")));
 
       var result = await _permissionService.UpdateAsync(permissionId, request);
 

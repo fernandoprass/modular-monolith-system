@@ -4,12 +4,10 @@ namespace IAM.Domain.Messages;
 
 public static class OrganizationErrorMessages
 {
-   private const string Code = "code";
-
    public static ErrorMessage DuplicateCode(string code)
    {
       var error = IamTranslatedMessagesProvider.Instance.Error(IamTranslatedMessagesProvider.OrganizationDuplicateError);
-      error.AddVariable(Code, code);
+      error.AddVariable(IamConst.Messages.Variables.Code, code);
       return error;
    }
 
