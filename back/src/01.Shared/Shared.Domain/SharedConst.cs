@@ -34,6 +34,19 @@ public static partial class SharedConst
       }
    }
 
+   public static class Message
+   {
+      public static class Variable
+      {
+         public const string Entity = "entity";
+         public const string Group = "group";
+         public const string Language = "language";
+         public const string Module = "module";
+         public const string Name = "name";
+         public const string TypeName = "typeName";
+      }
+   }
+
    public static class Logger
    {
       public static class Feature
