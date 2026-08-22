@@ -9,7 +9,7 @@ public class EmailAlreadyExistError : ErrorMessage
          IamTranslatedMessagesProvider.EmailAlreadyExistError,
          IamTranslatedMessagesProvider.Instance.GetTranslations(IamTranslatedMessagesProvider.EmailAlreadyExistError))
    {
-      AddVariable(IamConst.Messages.Variables.Email, email);
+      AddVariable(IamConst.Message.Variable.Email, email);
    }
 }
 

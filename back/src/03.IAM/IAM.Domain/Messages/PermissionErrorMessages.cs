@@ -9,7 +9,7 @@ public class PermissionDuplicateError : ErrorMessage
          IamTranslatedMessagesProvider.PermissionDuplicateError,
          IamTranslatedMessagesProvider.Instance.GetTranslations(IamTranslatedMessagesProvider.PermissionDuplicateError))
    {
-      AddVariable(IamConst.Messages.Variables.Code, code);
+      AddVariable(IamConst.Message.Variable.Code, code);
    }
 }
 

@@ -9,7 +9,7 @@ namespace IAM.Domain.Messages
             IamTranslatedMessagesProvider.RoleDuplicateNameError,
             IamTranslatedMessagesProvider.Instance.GetTranslations(IamTranslatedMessagesProvider.RoleDuplicateNameError))
       {
-         AddVariable(IamConst.Messages.Variables.Name, name);
+         AddVariable(IamConst.Message.Variable.Name, name);
       }
    }
 

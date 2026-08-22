@@ -59,6 +59,17 @@ public static partial class CourierConst
       }
    }
 
+   public static class Message
+   {
+      public static class Variable
+      {
+         public const string Module = "module";
+         public const string Key = "key";
+         public const string Language = "language";
+         public const string Placeholder = "placeholder";
+      }
+   }
+
    public static class Redis
    {
       public const string MessageRequestsStream = "courier-message-requests";

@@ -51,9 +51,9 @@ public static partial class IamConst
       }
    }
 
-   public static class Messages
+   public static class Message
    {
-      public static class Variables
+      public static class Variable
       {
          public const string Code = "code";
          public const string Email = "email";
