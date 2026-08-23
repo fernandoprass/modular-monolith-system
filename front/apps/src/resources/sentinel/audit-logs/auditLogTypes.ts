@@ -23,14 +23,14 @@ export const AUDIT_LOG_MODULE_OPTIONS = [
 ] as const
 
 export const AUDIT_LOG_FEATURE_OPTIONS = [
-  { labelKey: 'features.sentinel.auditLogs.features.authentication', value: 'authentication' },
-  { labelKey: 'features.sentinel.auditLogs.features.emails', value: 'emails' },
-  { labelKey: 'features.sentinel.auditLogs.features.organizations', value: 'organizations' },
-  { labelKey: 'features.sentinel.auditLogs.features.parameters', value: 'parameters' },
-  { labelKey: 'features.sentinel.auditLogs.features.permissions', value: 'permissions' },
-  { labelKey: 'features.sentinel.auditLogs.features.roles', value: 'roles' },
-  { labelKey: 'features.sentinel.auditLogs.features.security', value: 'security' },
-  { labelKey: 'features.sentinel.auditLogs.features.users', value: 'users' },
+  { labelKey: 'shared.featureLabels.authentication', value: 'authentication' },
+  { labelKey: 'shared.featureLabels.emails', value: 'emails' },
+  { labelKey: 'shared.featureLabels.organizations', value: 'organizations' },
+  { labelKey: 'shared.featureLabels.parameters', value: 'parameters' },
+  { labelKey: 'shared.featureLabels.permissions', value: 'permissions' },
+  { labelKey: 'shared.featureLabels.roles', value: 'roles' },
+  { labelKey: 'shared.featureLabels.security', value: 'security' },
+  { labelKey: 'shared.featureLabels.users', value: 'users' },
 ] as const
 
 export const AUDIT_PRIVACY_LEVELS = {

@@ -38,25 +38,25 @@ export const PARAMETER_MODULE_OPTIONS = [
 ] as const
 
 export const PARAMETER_TYPE_OPTIONS = [
-  { labelKey: 'resources.iam.parameterTypes.boolean', value: '1' },
-  { labelKey: 'resources.iam.parameterTypes.integer', value: '2' },
-  { labelKey: 'resources.iam.parameterTypes.decimal', value: '3' },
-  { labelKey: 'resources.iam.parameterTypes.dateTime', value: '4' },
-  { labelKey: 'resources.iam.parameterTypes.date', value: '5' },
-  { labelKey: 'resources.iam.parameterTypes.time', value: '6' },
-  { labelKey: 'resources.iam.parameterTypes.character', value: '7' },
-  { labelKey: 'resources.iam.parameterTypes.string', value: '8' },
-  { labelKey: 'resources.iam.parameterTypes.text', value: '9' },
-  { labelKey: 'resources.iam.parameterTypes.richText', value: '10' },
-  { labelKey: 'resources.iam.parameterTypes.uuid', value: '11' },
-  { labelKey: 'resources.iam.parameterTypes.list', value: '12' },
-  { labelKey: 'resources.iam.parameterTypes.referenceId', value: '13' },
+  { labelKey: 'shared.enums.parameterType.boolean', value: '1' },
+  { labelKey: 'shared.enums.parameterType.integer', value: '2' },
+  { labelKey: 'shared.enums.parameterType.decimal', value: '3' },
+  { labelKey: 'shared.enums.parameterType.dateTime', value: '4' },
+  { labelKey: 'shared.enums.parameterType.date', value: '5' },
+  { labelKey: 'shared.enums.parameterType.time', value: '6' },
+  { labelKey: 'shared.enums.parameterType.character', value: '7' },
+  { labelKey: 'shared.enums.parameterType.string', value: '8' },
+  { labelKey: 'shared.enums.parameterType.text', value: '9' },
+  { labelKey: 'shared.enums.parameterType.richText', value: '10' },
+  { labelKey: 'shared.enums.parameterType.uuid', value: '11' },
+  { labelKey: 'shared.enums.parameterType.list', value: '12' },
+  { labelKey: 'shared.enums.parameterType.referenceId', value: '13' },
 ] as const
 
 export const PARAMETER_OVERRIDE_TYPE_OPTIONS = [
-  { labelKey: 'resources.iam.parameterOverrideTypes.none', value: '0' },
-  { labelKey: 'resources.iam.parameterOverrideTypes.organizationId', value: '1' },
-  { labelKey: 'resources.iam.parameterOverrideTypes.userId', value: '2' },
+  { labelKey: 'shared.enums.parameterOverrideType.none', value: '0' },
+  { labelKey: 'shared.enums.parameterOverrideType.organizationId', value: '1' },
+  { labelKey: 'shared.enums.parameterOverrideType.userId', value: '2' },
 ] as const
 
 export const PARAMETER_TYPE_VALUES = {
