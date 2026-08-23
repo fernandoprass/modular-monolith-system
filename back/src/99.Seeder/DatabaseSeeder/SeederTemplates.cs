@@ -1,6 +1,5 @@
 using Courier.Domain.Interfaces.Repositories;
 using Courier.Infrastructure;
-using DatabaseSeeder.Templates;
 
 namespace DatabaseSeeder;
 

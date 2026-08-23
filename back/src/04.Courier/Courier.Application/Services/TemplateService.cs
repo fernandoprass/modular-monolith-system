@@ -11,18 +11,19 @@ using Myce.Response;
 using Shared.Application.Contracts;
 using Shared.Domain.DTOs.Responses;
 using Shared.Domain.Messages;
-using System.Text.RegularExpressions;
 
 namespace Courier.Application.Services;
 
-public partial class TemplateService(
+public class TemplateService(
    ITemplateWriteRepository templateRepository,
    ITemplateValidator templateValidator,
-   IUserContext userContext) : ITemplateService
+   IUserContext userContext,
+   IHtmlSanitizer htmlSanitizer) : ITemplateService
 {
    private readonly ITemplateWriteRepository _templateRepository = templateRepository;
    private readonly ITemplateValidator _templateValidator = templateValidator;
    private readonly IUserContext _userContext = userContext;
+   private readonly IHtmlSanitizer _htmlSanitizer = htmlSanitizer;
 
    public async Task<Result<PagedResultDto<TemplateLiteDto>>> GetAsync(
       TemplateSearchRequest request,
@@ -193,13 +194,13 @@ public partial class TemplateService(
       return Result.Success(new SuccessInfo());
    }
 
-   private static TemplateTranslation ToTranslation(TemplateTranslationRequest request)
+   private TemplateTranslation ToTranslation(TemplateTranslationRequest request)
    {
       var email = request.Email == null
          ? null
          : TemplateTranslationEmail.Create(
             request.Email.Subject,
-            SanitizeTemplateBody(request.Email.Body));
+            _htmlSanitizer.Sanitize(request.Email.Body));
       var notification = request.Notification == null
          ? null
          : TemplateTranslationNotification.Create(
@@ -209,50 +210,4 @@ public partial class TemplateService(
 
       return TemplateTranslation.Create(request.Language, request.Name, email, notification);
    }
-
-   private static string SanitizeTemplateBody(string body)
-   {
-      var sanitized = DangerousElementRegex().Replace(body, string.Empty);
-      sanitized = EventAttributeRegex().Replace(sanitized, string.Empty);
-      sanitized = UnsafeUrlAttributeRegex().Replace(sanitized, match =>
-      {
-         var attribute = match.Groups["attribute"].Value;
-         var quote = match.Groups["quote"].Value;
-         var url = match.Groups["url"].Value.Trim();
-
-         return IsSafeUrl(url)
-            ? $"{attribute}={quote}{url}{quote}"
-            : string.Empty;
-      });
-
-      return sanitized;
-   }
-
-   private static bool IsSafeUrl(string url)
-   {
-      if (string.IsNullOrWhiteSpace(url))
-      {
-         return false;
-      }
-
-      var normalizedUrl = url.Trim().ToLowerInvariant();
-
-      return normalizedUrl.StartsWith("http://", StringComparison.Ordinal)
-         || normalizedUrl.StartsWith("https://", StringComparison.Ordinal)
-         || normalizedUrl.StartsWith("mailto:", StringComparison.Ordinal)
-         || normalizedUrl.StartsWith("tel:", StringComparison.Ordinal)
-         || normalizedUrl.StartsWith("cid:", StringComparison.Ordinal)
-         || normalizedUrl.StartsWith("/", StringComparison.Ordinal)
-         || normalizedUrl.StartsWith("#", StringComparison.Ordinal)
-         || normalizedUrl.StartsWith("data:image/", StringComparison.Ordinal);
-   }
-
-   [GeneratedRegex(@"<\s*(script|style|iframe|object|embed|svg|math|form|input|button|textarea|select|link|meta|base)\b[^>]*>.*?<\s*/\s*\1\s*>|<\s*(script|style|iframe|object|embed|svg|math|form|input|button|textarea|select|link|meta|base)\b[^>]*\/?>", RegexOptions.IgnoreCase | RegexOptions.Singleline)]
-   private static partial Regex DangerousElementRegex();
-
-   [GeneratedRegex(@"\s+on[a-z]+\s*=\s*(""[^""]*""|'[^']*'|[^\s>]+)", RegexOptions.IgnoreCase)]
-   private static partial Regex EventAttributeRegex();
-
-   [GeneratedRegex(@"\s+(?<attribute>href|src|action|formaction|xlink:href)\s*=\s*(?<quote>[""'])(?<url>.*?)(\k<quote>)", RegexOptions.IgnoreCase | RegexOptions.Singleline)]
-   private static partial Regex UnsafeUrlAttributeRegex();
 }

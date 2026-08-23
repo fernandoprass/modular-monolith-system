@@ -1,7 +1,6 @@
 using Courier.Domain.DTOs.Requests;
 using Courier.Domain.DTOs.Responses;
 using Courier.Domain.Entities;
-using Courier.Domain.Enums;
 using Courier.Domain.Interfaces.Repositories;
 using Courier.Domain.Mappers;
 using Courier.Domain.ValueObjects;

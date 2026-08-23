@@ -19,11 +19,13 @@ public class TemplateServiceTests
    private readonly ITemplateWriteRepository _templateRepository = Substitute.For<ITemplateWriteRepository>();
    private readonly ITemplateValidator _templateValidator = Substitute.For<ITemplateValidator>();
    private readonly IUserContext _userContext = Substitute.For<IUserContext>();
+   private readonly IHtmlSanitizer _htmlSanitizer = Substitute.For<IHtmlSanitizer>();
    private readonly TemplateService _service;
 
    public TemplateServiceTests()
    {
-      _service = new TemplateService(_templateRepository, _templateValidator, _userContext);
+      _htmlSanitizer.Sanitize(Arg.Any<string>()).Returns(call => call.Arg<string>());
+      _service = new TemplateService(_templateRepository, _templateValidator, _userContext, _htmlSanitizer);
    }
 
    [Fact]
@@ -110,6 +112,8 @@ public class TemplateServiceTests
             "Welcome user",
             """<p onclick="evil()">Hi</p><script>alert(1)</script><img src="https://example.com/a.png">""")
       };
+      _htmlSanitizer.Sanitize(request.Email.Body)
+         .Returns("""<p>Hi</p><img src="https://example.com/a.png">""");
       _templateRepository.GetByIdAsync(id, Arg.Any<CancellationToken>()).Returns(template);
       _templateValidator.ValidateTranslation(request, templateExists: true).Returns(Result.Success());
 
@@ -121,6 +125,7 @@ public class TemplateServiceTests
       translation.Email!.Body.ToLowerInvariant().Should().NotContain("script");
       translation.Email.Body.ToLowerInvariant().Should().NotContain("onclick");
       translation.Email.Body.Should().Contain("https://example.com/a.png");
+      _htmlSanitizer.Received(1).Sanitize(request.Email.Body);
       translation.Notification.Should().NotBeNull();
    }
 
