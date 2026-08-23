@@ -4,30 +4,44 @@ namespace IAM.Domain.Messages
 {
    public class RoleDuplicateNameError : ErrorMessage
    {
-      public RoleDuplicateNameError(string name) 
-         : base("RoleDuplicateNameError", "A role with the name '{name}' already exists.")
+      public RoleDuplicateNameError(string name)
+         : base(
+            IamTranslatedMessagesProvider.RoleDuplicateNameError,
+            IamTranslatedMessagesProvider.Instance.GetTranslations(IamTranslatedMessagesProvider.RoleDuplicateNameError))
       {
-         AddVariable("name", name);
+         AddVariable(IamConst.Message.Variable.Name, name);
       }
    }
 
    public class RolesCannotBeAssignedError : ErrorMessage
    {
-      public RolesCannotBeAssignedError() : base("RolesCannotBeAssignedError", "Roles cannot be assigned. One or more roles added to the list are inactive or belong to another organization.") { }
+      public RolesCannotBeAssignedError()
+         : base(
+            IamTranslatedMessagesProvider.RolesCannotBeAssignedError,
+            IamTranslatedMessagesProvider.Instance.GetTranslations(IamTranslatedMessagesProvider.RolesCannotBeAssignedError)) { }
    }
 
    public class RolesCannotBeUnassignedError : ErrorMessage
    {
-      public RolesCannotBeUnassignedError() : base("RolesCannotBeUnassignedError", "Roles cannot be unassigned. One or more roles are not assigned to the user.") { }
+      public RolesCannotBeUnassignedError()
+         : base(
+            IamTranslatedMessagesProvider.RolesCannotBeUnassignedError,
+            IamTranslatedMessagesProvider.Instance.GetTranslations(IamTranslatedMessagesProvider.RolesCannotBeUnassignedError)) { }
    }
 
-   public class RolesInvalidStartDateError: ErrorMessage
+   public class RolesInvalidStartDateError : ErrorMessage
    {
-      public RolesInvalidStartDateError() : base("RolesInvalidStartDateError", "Start date should be today or in the future.") { }
+      public RolesInvalidStartDateError()
+         : base(
+            IamTranslatedMessagesProvider.RolesInvalidStartDateError,
+            IamTranslatedMessagesProvider.Instance.GetTranslations(IamTranslatedMessagesProvider.RolesInvalidStartDateError)) { }
    }
 
    public class RolesInvalidExpirationError : ErrorMessage
    {
-      public RolesInvalidExpirationError() : base("RolesInvalidExpirationError", "Expire date should be in the future.") { }
+      public RolesInvalidExpirationError()
+         : base(
+            IamTranslatedMessagesProvider.RolesInvalidExpirationError,
+            IamTranslatedMessagesProvider.Instance.GetTranslations(IamTranslatedMessagesProvider.RolesInvalidExpirationError)) { }
    }
 }

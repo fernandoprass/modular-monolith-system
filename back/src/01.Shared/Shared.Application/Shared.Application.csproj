@@ -4,7 +4,7 @@
   </ItemGroup>
 
 	<ItemGroup>
-		<packageReference Include="Myce.FluentValidator" Version="1.8.2" />
+		<packageReference Include="Myce.FluentValidator" Version="2.0.3" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -19,6 +19,10 @@
 		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
 			<_Parameter1>DynamicProxyGenAssembly2</_Parameter1>
 		</AssemblyAttribute>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="HtmlSanitizer" Version="9.2.995" />
 	</ItemGroup>
 
   <PropertyGroup>

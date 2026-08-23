@@ -11,10 +11,7 @@ import { Card, CardContent } from '../../../components/ui/card'
 import { Field, FieldGroup, FieldLabel } from '../../../components/ui/form'
 import { Input } from '../../../components/ui/input'
 import { Select } from '../../../components/ui/select'
-import { IAM_PERMISSIONS } from '../../../shared/iamConstants'
 import { LANGUAGE_OPTIONS } from '../../../shared/languages'
-import { hasPermissionCode } from '../../../shared/permissions'
-import { OrganizationSelect } from '../organizations/OrganizationSelect'
 import { getCurrentUser, updateCurrentUser } from './userApi'
 import { UserAccessTabs } from './UserAccessTabs'
 import { USER_REQUEST_FIELDS, type UserDto } from './userTypes'
@@ -37,12 +34,10 @@ function toForm(user: UserDto): UserProfileForm {
   }
 }
 
-export function UserProfilePage() {
+export function UserProfileSection() {
   const t = useTranslate()
   const notifyError = useNotifyError()
-  const { permissions } = useAuth()
   const [user, setUser] = useState<UserDto | null>(null)
-  const canViewAccess = hasPermissionCode(permissions, IAM_PERMISSIONS.userProfile.viewAccess)
 
   const loadUser = useCallback(async () => {
     try {
@@ -58,10 +53,7 @@ export function UserProfilePage() {
   }, [loadUser])
 
   return (
-    <main className="page">
-      <div className="page-header">
-        <h1 className="page-title">{t('features.iam.users.pages.profile')}</h1>
-      </div>
+    <>
       <Card>
         <CardContent>
           {user === null ? (
@@ -71,9 +63,17 @@ export function UserProfilePage() {
           )}
         </CardContent>
       </Card>
-      {user !== null && canViewAccess && <UserAccessTabs userId={user.id} />}
-    </main>
+    </>
   )
+}
+
+export function UserSecuritySection() {
+  const t = useTranslate()
+  const { user } = useAuth()
+
+  return user === null
+    ? <p className="page-subtitle">{t('shared.common.loading')}</p>
+    : <UserAccessTabs userId={user.id} />
 }
 
 type UserProfileFormPanelProps = {
@@ -116,15 +116,6 @@ function UserProfileFormPanel({ onSaved, user }: UserProfileFormPanelProps) {
   return (
     <form className="edit-form" onSubmit={handleSubmit(handleSave)}>
       <FieldGroup>
-        <Field data-disabled>
-          <FieldLabel>{t('shared.fields.organizationId')}</FieldLabel>
-          <OrganizationSelect
-            disabled
-            includeInactive
-            onValueChange={() => undefined}
-            value={user.organizationId}
-          />
-        </Field>
         <Field data-disabled>
           <FieldLabel>{t('shared.fields.email')}</FieldLabel>
           <Input disabled value={user.email} />

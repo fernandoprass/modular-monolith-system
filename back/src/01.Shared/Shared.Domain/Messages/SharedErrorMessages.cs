@@ -1,32 +1,46 @@
-﻿using Myce.Response.Messages;
+using Myce.Response.Messages;
 
 namespace Shared.Domain.Messages;
 
 public class FailedToRecordDataError : ErrorMessage
 {
-   public FailedToRecordDataError() : base("FailedToRecordDataError", "Failed to record data.") { }
+   public FailedToRecordDataError()
+      : base(
+         SharedTranslatedMessagesProvider.FailedToRecordDataError,
+         SharedTranslatedMessagesProvider.Instance.GetTranslations(SharedTranslatedMessagesProvider.FailedToRecordDataError)) { }
 }
 
 public class NotFoundError : ErrorMessage
 {
-   public NotFoundError() : base("NotFoundError", "The requested resource was not found.") { }
+   public NotFoundError()
+      : base(
+         SharedTranslatedMessagesProvider.NotFoundError,
+         SharedTranslatedMessagesProvider.Instance.GetTranslations(SharedTranslatedMessagesProvider.NotFoundError)) { }
 
-   public NotFoundError(string entity) : base("NotFoundDetailedError", "{entity} not found.")
+   public NotFoundError(string entity)
+      : base(
+         SharedTranslatedMessagesProvider.NotFoundDetailedError,
+         SharedTranslatedMessagesProvider.Instance.GetTranslations(SharedTranslatedMessagesProvider.NotFoundDetailedError))
    {
-      AddVariable("entity", entity);
+      AddVariable(SharedConst.Message.Variable.Entity, entity);
    }
 }
 
 public class UnauthorizedAccessError : ErrorMessage
 {
-   public UnauthorizedAccessError() : base("UnauthorizedAccessError", "You do not have permission to access this resource.") { }
+   public UnauthorizedAccessError()
+      : base(
+         SharedTranslatedMessagesProvider.UnauthorizedAccessError,
+         SharedTranslatedMessagesProvider.Instance.GetTranslations(SharedTranslatedMessagesProvider.UnauthorizedAccessError)) { }
 }
 
 public class InvalidLanguageError : ErrorMessage
 {
    public InvalidLanguageError(string language)
-     : base("InvalidLanguageError", "The language '{language}' is not supported.")
+     : base(
+        SharedTranslatedMessagesProvider.InvalidLanguageError,
+        SharedTranslatedMessagesProvider.Instance.GetTranslations(SharedTranslatedMessagesProvider.InvalidLanguageError))
    {
-      AddVariable("language", language);
+      AddVariable(SharedConst.Message.Variable.Language, language);
    }
 }

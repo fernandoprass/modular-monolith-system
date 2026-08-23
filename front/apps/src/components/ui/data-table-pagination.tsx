@@ -1,3 +1,5 @@
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react'
+
 import { useTranslate } from '../../app/i18n/i18n'
 import { PAGE_SIZE_OPTIONS } from '../../shared/pagination'
 import { Button } from './button'
@@ -74,17 +76,45 @@ export function DataTablePagination({
       </span>
       <div className="pagination-actions">
         <span>{t('shared.pagination.summary', { page: displayPageNumber, pages: safeTotalPages })}</span>
-        <Button disabled={!canGoPrevious} onClick={() => onPageChange(1)} type="button" variant="outline">
-          {t('shared.actions.firstPage')}
+        <Button
+          aria-label={t('shared.pagination.firstPage')}
+          disabled={!canGoPrevious}
+          onClick={() => onPageChange(1)}
+          size="icon"
+          type="button"
+          variant="outline"
+        >
+          <ChevronsLeft aria-hidden="true" />
         </Button>
-        <Button disabled={!canGoPrevious} onClick={() => onPageChange(displayPageNumber - 1)} type="button" variant="outline">
-          {t('shared.actions.previousPage')}
+        <Button
+          aria-label={t('shared.pagination.previousPage')}
+          disabled={!canGoPrevious}
+          onClick={() => onPageChange(displayPageNumber - 1)}
+          size="icon"
+          type="button"
+          variant="outline"
+        >
+          <ChevronLeft aria-hidden="true" />
         </Button>
-        <Button disabled={!canGoNext} onClick={() => onPageChange(displayPageNumber + 1)} type="button" variant="outline">
-          {t('shared.actions.nextPage')}
+        <Button
+          aria-label={t('shared.pagination.nextPage')}
+          disabled={!canGoNext}
+          onClick={() => onPageChange(displayPageNumber + 1)}
+          size="icon"
+          type="button"
+          variant="outline"
+        >
+          <ChevronRight aria-hidden="true" />
         </Button>
-        <Button disabled={!canGoNext} onClick={() => onPageChange(safeTotalPages)} type="button" variant="outline">
-          {t('shared.actions.lastPage')}
+        <Button
+          aria-label={t('shared.pagination.lastPage')}
+          disabled={!canGoNext}
+          onClick={() => onPageChange(safeTotalPages)}
+          size="icon"
+          type="button"
+          variant="outline"
+        >
+          <ChevronsRight aria-hidden="true" />
         </Button>
       </div>
     </div>

@@ -34,6 +34,86 @@ public static partial class SharedConst
       }
    }
 
+   public static class Message
+   {
+      public static class Variable
+      {
+         public const string Entity = "entity";
+         public const string Group = "group";
+         public const string Language = "language";
+         public const string Module = "module";
+         public const string Name = "name";
+         public const string TypeName = "typeName";
+      }
+   }
+
+   public static class HtmlSanitizer
+   {
+      // Stricter than the HtmlSanitizer package defaults.
+      // Used for email templates and user-visible HTML.
+      public static readonly IReadOnlyCollection<string> AllowedTags =
+      [
+         "a",
+         "b",
+         "blockquote",
+         "br",
+         "div",
+         "em",
+         "h1",
+         "h2",
+         "h3",
+         "h4",
+         "h5",
+         "h6",
+         "hr",
+         "i",
+         "img",
+         "li",
+         "ol",
+         "p",
+         "span",
+         "strong",
+         "table",
+         "tbody",
+         "td",
+         "th",
+         "thead",
+         "tr",
+         "u",
+         "ul"
+      ];
+
+      public static readonly IReadOnlyCollection<string> AllowedAttributes =
+      [
+         "alt",
+         "colspan",
+         "height",
+         "href",
+         "rel",
+         "rowspan",
+         "src",
+         "style",
+         "target",
+         "title",
+         "width"
+      ];
+
+      public static readonly IReadOnlyCollection<string> AllowedSchemes =
+      [
+         "http",
+         "https",
+         "mailto",
+         "tel",
+         "cid"
+      ];
+
+      public static readonly IReadOnlyCollection<string> UriAttributes =
+      [
+         "href",
+         "src"
+      ];
+   }
+
    public static class Logger
    {
       public static class Feature
@@ -88,6 +168,6 @@ public static partial class SharedConst
    public static class System
    {
       public const string ModuleName = "Shared";
-      public const string DefaultLanguage = "en";
+      public const string DefaultLanguage = "en-US";
    }
 }

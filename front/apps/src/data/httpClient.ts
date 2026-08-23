@@ -104,6 +104,10 @@ export function putCourierJson(path: string, body: unknown): Promise<unknown> {
   return request(path, { baseUrl: CONFIG.apiBaseUrls.courier, body, method: 'PUT' })
 }
 
+export function patchCourierJson(path: string, body: unknown): Promise<unknown> {
+  return request(path, { baseUrl: CONFIG.apiBaseUrls.courier, body, method: 'PATCH' })
+}
+
 export function deleteCourierJson(path: string): Promise<unknown> {
   return request(path, { baseUrl: CONFIG.apiBaseUrls.courier, method: 'DELETE' })
 }

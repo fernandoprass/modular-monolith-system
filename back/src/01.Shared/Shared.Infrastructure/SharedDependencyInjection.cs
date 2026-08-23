@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.Application.Contracts;
+using Shared.Application.Security;
 using Shared.Application.Services;
 using Shared.Application.Validators;
 using Shared.Domain;
@@ -37,6 +38,7 @@ public static class SharedDependencyInjection
 
       services.AddScoped<IParameterService, ParameterService>();
       services.AddScoped<IParameterValidator, ParameterValidator>();
+      services.AddScoped<IHtmlSanitizer, HtmlSanitizerService>();
 
       ConfigureRedis(services, configuration);
       RegisterParameterValueCache(services, configuration);

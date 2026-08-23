@@ -1,37 +1,48 @@
 using Myce.Response.Messages;
 
 namespace Shared.Domain.Messages;
+
 public class ParameterDuplicatedError : ErrorMessage
 {
    public ParameterDuplicatedError(string module, string group, string name)
-      : base("ParameterDuplicatedError", "A parameter with Module '{module}', Group '{group}' and Name '{name}' already exists.")
+      : base(
+         SharedTranslatedMessagesProvider.ParameterDuplicatedError,
+         SharedTranslatedMessagesProvider.Instance.GetTranslations(SharedTranslatedMessagesProvider.ParameterDuplicatedError))
    {
-      AddVariable(nameof(module), module);
-      AddVariable(nameof(group), group);
-      AddVariable(nameof(name), name);
+      AddVariable(SharedConst.Message.Variable.Module, module);
+      AddVariable(SharedConst.Message.Variable.Group, group);
+      AddVariable(SharedConst.Message.Variable.Name, name);
    }
 }
 
 public class ParameterNotOwnerEditableError : ErrorMessage
 {
    public ParameterNotOwnerEditableError()
-      : base("ParameterNotOwnerEditableError", "This parameter is not editable by owners.") { }
+      : base(
+         SharedTranslatedMessagesProvider.ParameterNotOwnerEditableError,
+         SharedTranslatedMessagesProvider.Instance.GetTranslations(SharedTranslatedMessagesProvider.ParameterNotOwnerEditableError)) { }
 }
 
 public class ParameterInvalidValueFormatError : ErrorMessage
 {
    public ParameterInvalidValueFormatError(string typeName)
-      : base("ParameterInvalidValueFormatError", "The value provided is not in a valid format for type '{typeName}'.")
+      : base(
+         SharedTranslatedMessagesProvider.ParameterInvalidValueFormatError,
+         SharedTranslatedMessagesProvider.Instance.GetTranslations(SharedTranslatedMessagesProvider.ParameterInvalidValueFormatError))
    {
-      AddVariable(nameof(typeName), typeName);
+      AddVariable(SharedConst.Message.Variable.TypeName, typeName);
    }
 }
-public class ParameterInvalidValueError(string message) : ErrorMessage("ParameterInvalidValueError", message) { }
+
+public class ParameterInvalidValueError(string message)
+   : ErrorMessage(SharedTranslatedMessagesProvider.ParameterInvalidValueError, message)
+{
+}
 
 public class ParameterInvalidKeyFormatError : ErrorMessage
 {
    public ParameterInvalidKeyFormatError()
-      : base("ParameterInvalidKeyFormatError", "Invalid Parameter Key format. The key must follow the pattern 'Module.Group.Name', where each segment contains at least 2 alphanumeric characters.") { }
+      : base(
+         SharedTranslatedMessagesProvider.ParameterInvalidKeyFormatError,
+         SharedTranslatedMessagesProvider.Instance.GetTranslations(SharedTranslatedMessagesProvider.ParameterInvalidKeyFormatError)) { }
 }
-
-

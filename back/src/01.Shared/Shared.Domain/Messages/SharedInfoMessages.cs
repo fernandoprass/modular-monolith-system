@@ -4,5 +4,8 @@ namespace Shared.Domain.Messages;
 
 public class SuccessInfo : InformationMessage
 {
-   public SuccessInfo() : base("SUCCESS", "Operation completed successfully.") { }
+   public SuccessInfo()
+      : base(
+         SharedTranslatedMessagesProvider.SuccessInfo,
+         SharedTranslatedMessagesProvider.Instance.GetTranslations(SharedTranslatedMessagesProvider.SuccessInfo)) { }
 }

@@ -45,6 +45,9 @@ public class CourierDbContext
 
    internal IMongoCollection<Template> Templates => _database.GetCollection<Template>(CourierConst.Database.Collection.Templates);
 
+   internal IMongoCollection<UserPreference> UserPreferences =>
+      _database.GetCollection<UserPreference>(CourierConst.Database.Collection.UserPreferences);
+
    public async Task ConfigureIndexesAsync(CancellationToken cancellationToken = default)
    {
       await ConfigureIndexesForEmailAsync(cancellationToken);
@@ -52,6 +55,20 @@ public class CourierDbContext
       await ConfigureIndexesForNotificationAsync(cancellationToken);
 
       await ConfigureIndexesForTemplateAsync(cancellationToken);
+
+      await ConfigureIndexesForUserPreferenceAsync(cancellationToken);
+   }
+
+   private async Task ConfigureIndexesForUserPreferenceAsync(CancellationToken cancellationToken)
+   {
+      var preferenceIndexes = new[]
+      {
+         new CreateIndexModel<UserPreference>(
+            Builders<UserPreference>.IndexKeys.Ascending(p => p.UserId),
+            new CreateIndexOptions { Unique = true, Name = "ux_user_preferences_user_id" })
+      };
+
+      await UserPreferences.Indexes.CreateManyAsync(preferenceIndexes, cancellationToken);
    }
 
    private async Task ConfigureIndexesForNotificationAsync(CancellationToken cancellationToken)
@@ -116,6 +133,26 @@ public class CourierDbContext
 
       TryRegisterGuidSerializer();
 
+      if (!BsonClassMap.IsClassMapRegistered(typeof(Email)))
+      {
+         BsonClassMap.RegisterClassMap<Email>(cm =>
+         {
+            cm.AutoMap();
+            cm.MapMember(e => e.Status)
+               .SetSerializer(new EnumSerializer<EmailStatus>(BsonType.String));
+         });
+      }
+
+      if (!BsonClassMap.IsClassMapRegistered(typeof(Notification)))
+      {
+         BsonClassMap.RegisterClassMap<Notification>(cm =>
+         {
+            cm.AutoMap();
+            cm.MapMember(n => n.Status)
+               .SetSerializer(new EnumSerializer<NotificationStatus>(BsonType.String));
+         });
+      }
+
       if (!BsonClassMap.IsClassMapRegistered(typeof(Template)))
       {
          BsonClassMap.RegisterClassMap<Template>(cm =>
@@ -166,6 +203,33 @@ public class CourierDbContext
             cm.MapMember(t => t.Title).SetElementName("title");
             cm.MapMember(t => t.Message).SetElementName("message");
             cm.MapMember(t => t.ActionLink).SetElementName("actionLink");
+         });
+      }
+
+      if (!BsonClassMap.IsClassMapRegistered(typeof(UserPreference)))
+      {
+         BsonClassMap.RegisterClassMap<UserPreference>(cm =>
+         {
+            cm.AutoMap();
+            cm.MapMember(p => p.UserId).SetElementName("userId");
+            cm.MapMember(p => p.IsGlobalEmailEnabled).SetElementName("isGlobalEmailEnabled");
+            cm.MapMember(p => p.IsGlobalNotificationEnabled).SetElementName("isGlobalNotificationEnabled");
+            cm.MapMember(p => p.CreatedAt).SetElementName("createdAt");
+            cm.MapMember(p => p.UpdatedAt).SetElementName("updatedAt");
+            cm.MapField("_disabledEmailTemplates").SetElementName("disabledEmailTemplates");
+            cm.MapField("_disabledNotificationTemplates").SetElementName("disabledNotificationTemplates");
+            cm.UnmapMember(p => p.DisabledEmailTemplates);
+            cm.UnmapMember(p => p.DisabledNotificationTemplates);
+         });
+      }
+
+      if (!BsonClassMap.IsClassMapRegistered(typeof(UserPreferenceTemplate)))
+      {
+         BsonClassMap.RegisterClassMap<UserPreferenceTemplate>(cm =>
+         {
+            cm.AutoMap();
+            cm.MapMember(p => p.Module).SetElementName("module");
+            cm.MapMember(p => p.TemplateKey).SetElementName("templateKey");
          });
       }
    }

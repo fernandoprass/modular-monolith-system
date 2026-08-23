@@ -5,6 +5,7 @@ using IAM.Domain.Enums;
 using IAM.Domain.Messages;
 using Myce.FluentValidator;
 using Myce.Response;
+using Myce.Response.Messages;
 using Shared.Domain;
 using Shared.Domain.Messages;
 
@@ -18,13 +19,13 @@ public class OrganizationValidator : IOrganizationValidator
    public Result ValidateCreate(OrganizationCreateRequest request, bool newCodeExists)
    {
       var validator = new FluentValidator<OrganizationCreateRequest>()
-          .RuleFor(x => x.Type).IsInEnum(new OrganizationInvalidTypeError())
+          .RuleFor(x => x.Type).IsInEnum( OrganizationErrorMessages.InvalidType())
           .RuleFor(x => x.Name).ApplyTemplate(ValidatorTemplates.NameRules)
           .RuleFor(x => x.Code).If(x => x.Type.Equals(OrganizationType.Company), x => x.ApplyTemplate(CodeRules))
           .RuleFor(x => x.User).IsNotNull() //just to ensure the user object is provided, validation is done in UserValidator
           .RuleFor(x => x.DefaultLanguage).IsRequired()
           .RuleForValue(LanguageOptions.IsSupported(request.DefaultLanguage)).IsTrue(new InvalidLanguageError(request.DefaultLanguage!))
-          .RuleForValue(newCodeExists).IsFalse(new OrganizationDuplicateCodeError(request.Code));
+          .RuleForValue(newCodeExists).IsFalse(OrganizationErrorMessages.DuplicateCode(request.Code));
 
       var isValid = validator.Validate(request);
 
@@ -48,7 +49,7 @@ public class OrganizationValidator : IOrganizationValidator
    {
       var validator = new FluentValidator<OrganizationUpdateCodeRequest>()
           .RuleFor(x => x.Code).ApplyTemplate(CodeRules)
-          .RuleForValue(newCodeExists).IsFalse(new OrganizationDuplicateCodeError(request.Code));
+          .RuleForValue(newCodeExists).IsFalse(OrganizationErrorMessages.DuplicateCode(request.Code));
 
       var isValid = validator.Validate(request);
 

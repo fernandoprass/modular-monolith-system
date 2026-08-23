@@ -303,9 +303,9 @@ Example:
 
 ```ts
 export const LANGUAGE_CODES = {
-  english: 'en',
+  english: 'en-US',
   portugueseBrazil: 'pt-BR',
-  spanish: 'es',
+  spanish: 'es-ES',
 } as const
 ```
 
@@ -688,13 +688,14 @@ The frontend must support internationalization.
 Default language is:
 
 ```text
-en
+en-US
 ```
 
 The app should be ready to add:
 
 ```text
 pt-BR
+es-ES
 ```
 
 Do not hardcode user-facing text in components.

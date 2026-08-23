@@ -11,6 +11,7 @@ public static partial class CourierConst
          public const string Emails = "emails";
          public const string Notifications = "notifications";
          public const string Templates = "templates";
+         public const string UserPreferences = "userPreferences";
       }
    }
 
@@ -40,6 +41,7 @@ public static partial class CourierConst
       public const string Email = nameof(Entities.Email);
       public const string Notification = nameof(Entities.Notification);
       public const string Template = nameof(Entities.Template);
+      public const string UserPreference = nameof(Entities.UserPreference);
    }
 
    public static class System
@@ -54,6 +56,17 @@ public static partial class CourierConst
       public static class Name
       {
          public const string MessageRequested = "courier.message.requested";
+      }
+   }
+
+   public static class Message
+   {
+      public static class Variable
+      {
+         public const string Module = "module";
+         public const string Key = "key";
+         public const string Language = "language";
+         public const string Placeholder = "placeholder";
       }
    }
 

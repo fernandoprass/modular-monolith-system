@@ -156,6 +156,71 @@ public class CourierRepositoryFilterTests
       Assert.NotNull(hydratedTemplate.Translations.Single().Notification);
    }
 
+   [Fact]
+   public void EmailSerialization_ShouldStoreStatusAsString()
+   {
+      var email = Email.Create(
+         Guid.NewGuid(),
+         Guid.NewGuid(),
+         "iam",
+         "users",
+         "user-welcome",
+         "person@example.com",
+         "Welcome",
+         "Welcome body",
+         false,
+         RetentionPolicy.Standard);
+
+      var document = email.ToBsonDocument();
+
+      Assert.Equal("Pending", document["Status"].AsString);
+
+      var hydratedEmail = BsonSerializer.Deserialize<Email>(document);
+
+      Assert.Equal(EmailStatus.Pending, hydratedEmail.Status);
+   }
+
+   [Fact]
+   public void NotificationSerialization_ShouldStoreStatusAsString()
+   {
+      var notification = Notification.Create(
+         Guid.NewGuid(),
+         Guid.NewGuid(),
+         "iam",
+         "users",
+         "user-welcome",
+         "Welcome",
+         "Your account is ready.",
+         "/profile",
+         RetentionPolicy.Standard);
+
+      var document = notification.ToBsonDocument();
+
+      Assert.Equal("Unread", document["Status"].AsString);
+
+      var hydratedNotification = BsonSerializer.Deserialize<Notification>(document);
+
+      Assert.Equal(NotificationStatus.Unread, hydratedNotification.Status);
+   }
+
+   [Fact]
+   public void UserPreferenceSerialization_ShouldHydrateDisabledTemplateCollections()
+   {
+      var preference = UserPreference.CreateDefault(Guid.NewGuid());
+      preference.DisableEmailTemplatePreference("iam", "user-welcome");
+      preference.DisableNotificationTemplatePreference("iam", "user-password-updated");
+
+      var document = preference.ToBsonDocument();
+      var hydratedPreference = BsonSerializer.Deserialize<UserPreference>(document);
+
+      Assert.Contains(
+         hydratedPreference.DisabledEmailTemplates,
+         template => template.Module == "iam" && template.TemplateKey == "user-welcome");
+      Assert.Contains(
+         hydratedPreference.DisabledNotificationTemplates,
+         template => template.Module == "iam" && template.TemplateKey == "user-password-updated");
+   }
+
    private static FilterDefinition<TEntity> InvokeFilter<TEntity, TRequest>(
       Type repositoryType,
       TRequest request,

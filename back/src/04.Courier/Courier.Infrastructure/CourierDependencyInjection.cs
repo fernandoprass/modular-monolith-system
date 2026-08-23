@@ -27,8 +27,10 @@ public static class CourierDependencyInjection
       services.AddScoped<INotificationRepository, NotificationRepository>();
       services.AddScoped<ITemplateRepository, TemplateRepository>();
       services.AddScoped<ITemplateWriteRepository, TemplateRepository>();
+      services.AddScoped<IUserPreferenceRepository, UserPreferenceRepository>();
       services.AddScoped<IEmailService, EmailService>();
       services.AddScoped<INotificationService, NotificationService>();
+      services.AddScoped<IUserPreferenceService, UserPreferenceService>();
       services.AddScoped<IEmailValidator, EmailValidator>();
       services.AddScoped<INotificationValidator, NotificationValidator>();
       services.AddScoped<ITemplateService, TemplateService>();

@@ -35,15 +35,15 @@ export const PERMISSION_RESOURCE_OPTIONS = [
   { labelKey: 'resources.iam.users', value: 'users' },
   { labelKey: 'resources.iam.parameters', value: 'parameters' },
   { labelKey: 'resources.iam.organizations', value: 'organizations' },
-  { labelKey: 'resources.iam.organizationprofile', value: 'organizationprofile' },
+  { labelKey: 'resources.iam.organizationProfile', value: 'organizationprofile' },
   { labelKey: 'resources.iam.permissions', value: 'permissions' },
-  { labelKey: 'resources.sentinel.auditlogs', value: 'auditlogs' },
-  { labelKey: 'resources.sentinel.systemlogs', value: 'systemlogs' },
+  { labelKey: 'resources.sentinel.auditLogs', value: 'auditlogs' },
+  { labelKey: 'resources.sentinel.systemLogs', value: 'systemlogs' },
   { labelKey: 'resources.courier.emails', value: 'emails' },
-  { labelKey: 'resources.courier.emailtemplates', value: 'emailtemplates' },
+  { labelKey: 'resources.courier.emailTemplates', value: 'emailtemplates' },
   { labelKey: 'resources.courier.templates', value: 'templates' },
   { labelKey: 'resources.iam.roles', value: 'roles' },
-  { labelKey: 'resources.iam.userprofile', value: 'userprofile' },
+  { labelKey: 'resources.iam.userProfile', value: 'userprofile' },
 ] as const
 
 export const PERMISSION_ACTION_OPTIONS = [

@@ -2,7 +2,9 @@ export const COURIER_MODULE = 'courier'
 
 export const COURIER_RESOURCES = {
   emails: 'emails',
+  notifications: 'notifications',
   templates: 'templates',
+  userPreferences: 'userpreferences',
 } as const
 
 export const COURIER_ACTIONS = {
@@ -19,8 +21,16 @@ export const COURIER_PERMISSIONS = {
     read: permission(COURIER_RESOURCES.emails, COURIER_ACTIONS.read),
     write: permission(COURIER_RESOURCES.emails, COURIER_ACTIONS.write),
   },
+  notifications: {
+    read: permission(COURIER_RESOURCES.notifications, COURIER_ACTIONS.read),
+    write: permission(COURIER_RESOURCES.notifications, COURIER_ACTIONS.write),
+  },
   templates: {
     read: permission(COURIER_RESOURCES.templates, COURIER_ACTIONS.read),
     write: permission(COURIER_RESOURCES.templates, COURIER_ACTIONS.write),
+  },
+  userPreferences: {
+    read: permission(COURIER_RESOURCES.userPreferences, COURIER_ACTIONS.read),
+    write: permission(COURIER_RESOURCES.userPreferences, COURIER_ACTIONS.write),
   },
 } as const

@@ -1,3 +1,125 @@
+const MODULE_LABELS = {
+  courier: 'Courier',
+  iam: 'IAM',
+  sentinel: 'Sentinel',
+  shared: 'Shared',
+} as const
+
+const CORE_FEATURE_LABELS = {
+  authentication: 'Authentication',
+  emails: 'Emails',
+  organizations: 'Organizations',
+  parameters: 'Parameters',
+  permissions: 'Permissions',
+  roles: 'Roles',
+  security: 'Security',
+  users: 'Users',
+} as const
+
+const NOTIFICATION_SEVERITY_LABELS = {
+  critical: 'Critical',
+  information: 'Information',
+  warning: 'Warning',
+} as const
+
+const RETENTION_POLICY_LABELS = {
+  compliance: 'Compliance',
+  extended: 'Extended',
+  longTerm: 'Long term',
+  operational: 'Operational',
+  standard: 'Standard',
+} as const
+
+const EMAIL_STATUS_LABELS = {
+  failed: 'Failed',
+  pending: 'Pending',
+  processing: 'Processing',
+  sent: 'Sent',
+} as const
+
+const NOTIFICATION_STATUS_LABELS = {
+  read: 'Read',
+  unread: 'Unread',
+} as const
+
+const AUDIT_PRIVACY_LEVEL_LABELS = {
+  confidential: 'Confidential',
+  high: 'High',
+  low: 'Low',
+  medium: 'Medium',
+  unknown: 'Unknown',
+} as const
+
+const SYSTEM_LOG_LEVEL_LABELS = {
+  critical: NOTIFICATION_SEVERITY_LABELS.critical,
+  debug: 'Debug',
+  error: 'Error',
+  information: NOTIFICATION_SEVERITY_LABELS.information,
+  unknown: 'Unknown',
+  warning: NOTIFICATION_SEVERITY_LABELS.warning,
+} as const
+
+const SYSTEM_LOG_STATUS_LABELS = {
+  failure: 'Failure',
+  success: 'Success',
+  unauthorized: 'Unauthorized',
+  unknown: 'Unknown',
+} as const
+
+const ORGANIZATION_TYPE_LABELS = {
+  company: 'Company',
+  individual: 'Individual',
+} as const
+
+const PARAMETER_OVERRIDE_TYPE_LABELS = {
+  none: 'None',
+  organizationId: 'Organization',
+  userId: 'User',
+} as const
+
+const PARAMETER_TYPE_LABELS = {
+  boolean: 'Boolean',
+  character: 'Character',
+  date: 'Date',
+  dateTime: 'Date time',
+  decimal: 'Decimal',
+  integer: 'Integer',
+  list: 'List',
+  referenceId: 'Reference ID',
+  richText: 'Rich text',
+  string: 'String',
+  text: 'Text',
+  time: 'Time',
+  uuid: 'UUID',
+} as const
+
+const RESOURCE_LABELS = {
+  courier: {
+    emailTemplates: 'Email templates',
+    emails: 'Emails',
+    notifications: 'Notifications',
+    templates: 'Templates',
+    userPreferences: 'Preferences',
+  },
+  sentinel: {
+    auditLogs: 'Audit logs',
+    systemLogs: 'System logs',
+  },
+  iam: {
+    organization: 'Organization',
+    organizationProfile: 'Organization profile',
+    organizations: 'Organizations',
+    parameter: 'Parameter',
+    parameters: 'Parameters',
+    permission: 'Permission',
+    permissions: 'Permissions',
+    role: 'Role',
+    roles: 'Roles',
+    userProfile: 'User profile',
+    users: 'Users',
+  },
+} as const
+
 export const enMessages = {
   app: {
     dashboard: {
@@ -28,9 +150,9 @@ export const enMessages = {
     toggleSidebar: 'Toggle sidebar',
     groups: {
       authorization: 'Authorization',
-      courier: 'Courier',
-      iam: 'IAM',
-      sentinel: 'Sentinel',
+      courier: MODULE_LABELS.courier,
+      iam: MODULE_LABELS.iam,
+      sentinel: MODULE_LABELS.sentinel,
     },
   },
   public: {
@@ -61,37 +183,65 @@ export const enMessages = {
         actions: {
           create: 'Create email',
         },
-        features: {
-          authentication: 'Authentication',
-          emails: 'Emails',
-          organizations: 'Organizations',
-          parameters: 'Parameters',
-          permissions: 'Permissions',
-          roles: 'Roles',
-          security: 'Security',
-          users: 'Users',
-        },
         messages: {
           empty: 'No emails found.',
           noAttempts: 'No delivery attempts recorded.',
         },
-        name: 'Emails',
+        name: RESOURCE_LABELS.courier.emails,
         notifications: {
           created: 'Email created.',
         },
         pages: {
           create: 'Create email',
-          list: 'Emails',
+          list: RESOURCE_LABELS.courier.emails,
           show: 'Email details',
         },
         sections: {
           attempts: 'Delivery attempts',
         },
-        statuses: {
-          failed: 'Failed',
-          pending: 'Pending',
-          processing: 'Processing',
-          sent: 'Sent',
+        statuses: EMAIL_STATUS_LABELS,
+      },
+      notifications: {
+        actions: {
+          markRead: 'Mark as read',
+          openLink: 'Open link',
+        },
+        messages: {
+          deleteConfirm: 'Delete this notification?',
+          deleteTitle: 'Delete notification',
+          empty: 'No notifications found.',
+        },
+        name: RESOURCE_LABELS.courier.notifications,
+        notifications: {
+          deleted: 'Notification deleted.',
+          markedRead: 'Notification marked as read.',
+        },
+        pages: {
+          list: RESOURCE_LABELS.courier.notifications,
+        },
+        statuses: NOTIFICATION_STATUS_LABELS,
+      },
+      userPreferences: {
+        fields: {
+          enableAllEmail: 'Receive email for all templates',
+          enableAllNotification: 'Receive notifications for all templates',
+          enableEmail: 'Receive email',
+          enableNotification: 'Receive notification',
+          communications: 'Communications',
+        },
+        messages: {
+          empty: 'No opt-out templates found.',
+          communicationsHelp: 'Disable the communications you do not want to receive.',
+        },
+        name: RESOURCE_LABELS.courier.userPreferences,
+        notifications: {
+          updated: 'Preferences updated.',
+        },
+        pages: {
+          edit: RESOURCE_LABELS.courier.userPreferences,
+        },
+        sections: {
+          templates: 'Templates',
         },
       },
       templates: {
@@ -121,7 +271,7 @@ export const enMessages = {
           empty: 'No templates found.',
           noTranslations: 'No translations found.',
         },
-        name: 'Templates',
+        name: RESOURCE_LABELS.courier.templates,
         notifications: {
           created: 'Template created.',
           deleted: 'Template deleted.',
@@ -133,25 +283,13 @@ export const enMessages = {
         pages: {
           create: 'Create template',
           edit: 'Edit template',
-          list: 'Templates',
+          list: RESOURCE_LABELS.courier.templates,
         },
         placeholders: {
           language: 'Select language',
         },
-        retentionPolicies: {
-          compliance: 'Compliance',
-          extended: 'Extended',
-          longTerm: 'Long term',
-          operational: 'Operational',
-          standard: 'Standard',
-        },
         sections: {
           translations: 'Translations',
-        },
-        severities: {
-          critical: 'Critical',
-          information: 'Information',
-          warning: 'Warning',
         },
         types: {
           comment: 'Comment',
@@ -176,7 +314,7 @@ export const enMessages = {
           deleteConfirm: 'Delete this organization?',
           empty: 'No organizations found.',
         },
-        name: 'Organizations',
+        name: RESOURCE_LABELS.iam.organizations,
         notifications: {
           codeUpdated: 'Organization code updated.',
           deleted: 'Organization deleted.',
@@ -184,20 +322,17 @@ export const enMessages = {
         },
         pages: {
           edit: 'Edit organization',
-          list: 'Organizations',
-          profile: 'Organization profile',
+          list: RESOURCE_LABELS.iam.organizations,
+          profile: RESOURCE_LABELS.iam.organizationProfile,
           show: 'Organization details',
         },
         placeholders: {
           search: 'Search organization',
         },
-        types: {
-          company: 'Company',
-          individual: 'Individual',
-        },
+        types: ORGANIZATION_TYPE_LABELS,
       },
       parameters: {
-        name: 'Parameters',
+        name: RESOURCE_LABELS.iam.parameters,
         messages: {
           empty: 'No parameters found.',
         },
@@ -208,7 +343,7 @@ export const enMessages = {
         },
         pages: {
           edit: 'Edit parameter',
-          list: 'Parameters',
+          list: RESOURCE_LABELS.iam.parameters,
           organizationSettings: 'Settings',
           userSettings: 'Settings',
         },
@@ -217,12 +352,12 @@ export const enMessages = {
         messages: {
           empty: 'No permissions found.',
         },
-        name: 'Permissions',
+        name: RESOURCE_LABELS.iam.permissions,
         notifications: {
           updated: 'Permission updated.',
         },
         pages: {
-          list: 'Permissions',
+          list: RESOURCE_LABELS.iam.permissions,
         },
       },
       roles: {
@@ -234,7 +369,7 @@ export const enMessages = {
           deleteConfirm: 'Delete this role?',
           empty: 'No roles found.',
         },
-        name: 'Roles',
+        name: RESOURCE_LABELS.iam.roles,
         notifications: {
           created: 'Role created.',
           deleted: 'Role deleted.',
@@ -245,10 +380,17 @@ export const enMessages = {
         pages: {
           create: 'Create role',
           edit: 'Edit role',
-          list: 'Roles',
+          list: RESOURCE_LABELS.iam.roles,
         },
       },
       users: {
+        account: {
+          communication: 'Communication',
+          profile: 'Profile',
+          security: 'Security',
+          settings: 'Settings',
+          title: 'User profile',
+        },
         messages: {
           deleteConfirm: 'Delete this user?',
           empty: 'No users found.',
@@ -257,7 +399,7 @@ export const enMessages = {
           organizationRequired: 'Select an organization.',
           passwordsDoNotMatch: 'Passwords do not match.',
         },
-        name: 'Users',
+        name: RESOURCE_LABELS.iam.users,
         notifications: {
           created: 'User created.',
           deleted: 'User deleted.',
@@ -269,8 +411,8 @@ export const enMessages = {
           changePassword: 'Change password',
           create: 'Create user',
           edit: 'Edit user',
-          list: 'Users',
-          profile: 'User profile',
+          list: RESOURCE_LABELS.iam.users,
+          profile: RESOURCE_LABELS.iam.userProfile,
           show: 'User details',
         },
         placeholders: {
@@ -302,55 +444,26 @@ export const enMessages = {
     },
     sentinel: {
       auditLogs: {
-        features: {
-          authentication: 'Authentication',
-          emails: 'Emails',
-          organizations: 'Organizations',
-          parameters: 'Parameters',
-          permissions: 'Permissions',
-          roles: 'Roles',
-          security: 'Security',
-          users: 'Users',
-        },
         messages: {
           empty: 'No audit logs found.',
         },
-        name: 'Audit logs',
+        name: RESOURCE_LABELS.sentinel.auditLogs,
         pages: {
-          list: 'Audit logs',
+          list: RESOURCE_LABELS.sentinel.auditLogs,
           show: 'Audit log details',
-        },
-        privacyLevels: {
-          confidential: 'Confidential',
-          high: 'High',
-          low: 'Low',
-          medium: 'Medium',
-          unknown: 'Unknown',
         },
       },
       systemLogs: {
-        levels: {
-          critical: 'Critical',
-          debug: 'Debug',
-          error: 'Error',
-          information: 'Information',
-          unknown: 'Unknown',
-          warning: 'Warning',
-        },
+        levels: SYSTEM_LOG_LEVEL_LABELS,
         messages: {
           empty: 'No system logs found.',
         },
-        name: 'System logs',
+        name: RESOURCE_LABELS.sentinel.systemLogs,
         pages: {
-          list: 'System logs',
+          list: RESOURCE_LABELS.sentinel.systemLogs,
           show: 'System log details',
         },
-        statuses: {
-          failure: 'Failure',
-          success: 'Success',
-          unauthorized: 'Unauthorized',
-          unknown: 'Unknown',
-        },
+        statuses: SYSTEM_LOG_STATUS_LABELS,
       },
     },
   },
@@ -366,11 +479,7 @@ export const enMessages = {
       edit: 'Edit',
       editCode: 'Edit code',
       filter: 'Filter',
-      firstPage: '<<', 
-      lastPage: '>>', 
       list: 'List',
-      nextPage: '>',
-      previousPage: '<',
       read: 'Read',
       remove: 'Remove',
       removeOverride: 'Remove override',
@@ -434,6 +543,7 @@ export const enMessages = {
       message: 'Message',
       module: 'Module',
       name: 'Name',
+      notification: 'Notification',
       newPassword: 'New password',
       nextAttemptAt: 'Next attempt at',
       organization: 'Organization',
@@ -446,6 +556,7 @@ export const enMessages = {
       resource: 'Resource',
       requestId: 'Request ID',
       recipient: 'Recipient',
+      readAt: 'Read at',
       retentionPolicy: 'Retention policy',
       severity: 'Severity',
       retryCount: 'Retry count',
@@ -474,62 +585,31 @@ export const enMessages = {
     },
     pagination: {
       pageSize: 'Rows per page',
+      firstPage: 'First page',
+      lastPage: 'Last page',
+      nextPage: 'Next page',
+      previousPage: 'Previous page',
       summary: 'Page {{page}} of {{pages}}',
       visibleRows: 'Showing {{start}}-{{end}} of {{total}}',
     },
+    enums: {
+      auditPrivacyLevel: AUDIT_PRIVACY_LEVEL_LABELS,
+      emailStatus: EMAIL_STATUS_LABELS,
+      notificationSeverity: NOTIFICATION_SEVERITY_LABELS,
+      notificationStatus: NOTIFICATION_STATUS_LABELS,
+      organizationType: ORGANIZATION_TYPE_LABELS,
+      parameterOverrideType: PARAMETER_OVERRIDE_TYPE_LABELS,
+      parameterType: PARAMETER_TYPE_LABELS,
+      retentionPolicy: RETENTION_POLICY_LABELS,
+      systemLogLevel: SYSTEM_LOG_LEVEL_LABELS,
+      systemLogStatus: SYSTEM_LOG_STATUS_LABELS,
+    },
+    featureLabels: CORE_FEATURE_LABELS,
     status: {
       active: 'Active',
       inactive: 'Inactive',
     },
   },
-  modules: {
-    courier:  'Courier',
-    iam:  'IAM',
-    sentinel: 'Sentinel',
-    shared:  'Shared',
-  },
-  resources: {
-    courier: {
-      emailtemplates: 'Email templates',
-      emails: 'Emails',
-      templates: 'Templates',       
-    },
-    sentinel: {
-      auditlogs: 'Audit logs',
-      systemlogs: 'System logs',
-    },
-    iam : {
-      organization: 'Organization',
-      organizationprofile: 'Organization profile',
-      organizations: 'Organizations',
-      parameter: 'Parameter',
-      parameterOverrideTypes: {
-        none: 'None',
-        organizationId: 'Organization',
-        userId: 'User',
-      },
-      parameterTypes: {
-        boolean: 'Boolean',
-        character: 'Character',
-        date: 'Date',
-        dateTime: 'Date time',
-        decimal: 'Decimal',
-        integer: 'Integer',
-        list: 'List',
-        referenceId: 'Reference ID',
-        richText: 'Rich text',
-        string: 'String',
-        text: 'Text',
-        time: 'Time',
-        uuid: 'UUID',
-      },
-      parameters: 'Parameters',
-      permission: 'Permission',
-      permissions: 'Permissions',
-      role: 'Role',
-      roles: 'Roles',
-      userprofile: 'User profile',
-      users: 'Users',
-    }
-  }
+  modules: MODULE_LABELS,
+  resources: RESOURCE_LABELS,
 } as const

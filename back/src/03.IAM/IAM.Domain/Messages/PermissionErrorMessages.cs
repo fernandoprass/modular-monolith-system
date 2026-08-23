@@ -2,23 +2,29 @@ using Myce.Response.Messages;
 
 namespace IAM.Domain.Messages;
 
-public class PermissionDuplicateCodeError : ErrorMessage
+public class PermissionDuplicateError : ErrorMessage
 {
-   public PermissionDuplicateCodeError(string code)
-      : base("PermissionDuplicateCodeError", "The permission code '{code}' already exists.")
+   public PermissionDuplicateError(string code)
+      : base(
+         IamTranslatedMessagesProvider.PermissionDuplicateError,
+         IamTranslatedMessagesProvider.Instance.GetTranslations(IamTranslatedMessagesProvider.PermissionDuplicateError))
    {
-      AddVariable("code", "code");
+      AddVariable(IamConst.Message.Variable.Code, code);
    }
 }
 
 public class PermissionNotFoundInAssignmentError : ErrorMessage
 {
    public PermissionNotFoundInAssignmentError()
-      : base("PermissionNotFoundInAssignmentError", "One or more permissions do not exist.") { }
+      : base(
+         IamTranslatedMessagesProvider.PermissionNotFoundInAssignmentError,
+         IamTranslatedMessagesProvider.Instance.GetTranslations(IamTranslatedMessagesProvider.PermissionNotFoundInAssignmentError)) { }
 }
 
 public class PermissionsCannotBeUnassignedError : ErrorMessage
 {
    public PermissionsCannotBeUnassignedError()
-      : base("PermissionsCannotBeUnassignedError", "Permissions cannot be unassigned. One or more permissions are not assigned to the role.") { }
+      : base(
+         IamTranslatedMessagesProvider.PermissionsCannotBeUnassignedError,
+         IamTranslatedMessagesProvider.Instance.GetTranslations(IamTranslatedMessagesProvider.PermissionsCannotBeUnassignedError)) { }
 }

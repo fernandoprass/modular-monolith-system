@@ -1,4 +1,5 @@
 import {
+  Bell,
   Building2,
   ChevronDown,
   ChevronRight,
@@ -20,7 +21,7 @@ import {
   Users,
 } from 'lucide-react'
 import type { ReactNode } from 'react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom'
 
 import { useAuth } from '../auth/AuthProvider'
@@ -33,6 +34,8 @@ import {
   DropdownMenuTrigger,
 } from '../components/ui/dropdown-menu'
 import { cn } from '../lib/utils'
+import { getUnreadNotificationCount } from '../resources/courier/notifications/notificationApi'
+import { UserPasswordEditDialog } from '../resources/iam/users/UserPasswordEditDialog'
 import { COURIER_PERMISSIONS } from '../shared/courierConstants'
 import { IAM_PERMISSIONS, IAM_RESOURCES } from '../shared/iamConstants'
 import { hasPermissionCode, hasResourceAccess } from '../shared/permissions'
@@ -40,7 +43,6 @@ import { SENTINEL_PERMISSIONS } from '../shared/sentinelConstants'
 import { APP_CONSTANTS } from './appConstants'
 import { useTranslate } from './i18n/i18n'
 import { APP_ROUTES } from './routes'
-import { UserPasswordEditDialog } from '../resources/iam/users/UserPasswordEditDialog'
 
 export function AppLayout() {
   const t = useTranslate()
@@ -53,6 +55,7 @@ export function AppLayout() {
   const [isIamOpen, setIsIamOpen] = useState(true)
   const [isSentinelOpen, setIsSentinelOpen] = useState(true)
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false)
+  const [unreadNotificationCount, setUnreadNotificationCount] = useState(0)
   const { isAuthenticated, logout, permissions, user } = useAuth()
   const canOpenOrganizations = hasResourceAccess(permissions, IAM_RESOURCES.organizations)
   const canOpenUsers = hasResourceAccess(permissions, IAM_RESOURCES.users)
@@ -61,18 +64,35 @@ export function AppLayout() {
   const canOpenPermissions = hasResourceAccess(permissions, IAM_RESOURCES.permissions)
   const canOpenUserAccess = hasPermissionCode(permissions, IAM_PERMISSIONS.roles.assign)
   const canOpenOrganizationSettings = hasPermissionCode(permissions, IAM_PERMISSIONS.organizationProfile.parameters)
-  const canOpenUserSettings = hasPermissionCode(permissions, IAM_PERMISSIONS.userProfile.parameters)
   const canOpenAuditLogs = hasPermissionCode(permissions, SENTINEL_PERMISSIONS.auditLogs.read)
   const canOpenSystemLogs = hasPermissionCode(permissions, SENTINEL_PERMISSIONS.systemLogs.read)
   const canOpenEmails = hasPermissionCode(permissions, COURIER_PERMISSIONS.emails.read)
+  const canOpenNotifications = hasPermissionCode(permissions, COURIER_PERMISSIONS.notifications.read)
   const canOpenTemplates = hasPermissionCode(permissions, COURIER_PERMISSIONS.templates.read)
   const canOpenAuthorization = canOpenRoles || canOpenPermissions || canOpenUserAccess
   const canOpenIam = canOpenOrganizations || canOpenUsers || canOpenParameters || canOpenAuthorization
-  const canOpenCourier = canOpenEmails || canOpenTemplates
+  const canOpenCourier = canOpenEmails || canOpenNotifications || canOpenTemplates
   const canOpenSentinel = canOpenAuditLogs || canOpenSystemLogs
   const organizationName = user?.organizationName || APP_CONSTANTS.appName
   const canOpenOrganizationProfile = user?.isOrganizationAdmin === true
   const canOpenOrganizationMenu = canOpenOrganizationProfile || canOpenOrganizationSettings
+
+  useEffect(() => {
+    if (!isAuthenticated || !canOpenNotifications) {
+      setUnreadNotificationCount(0)
+      return
+    }
+
+    async function loadUnreadNotificationCount() {
+      try {
+        setUnreadNotificationCount(await getUnreadNotificationCount())
+      } catch {
+        setUnreadNotificationCount(0)
+      }
+    }
+
+    void loadUnreadNotificationCount()
+  }, [canOpenNotifications, isAuthenticated, location.pathname])
 
   if (!isAuthenticated) {
     return <Navigate to={APP_ROUTES.login} replace />
@@ -93,10 +113,6 @@ export function AppLayout() {
 
   function handleUserProfile() {
     navigate(APP_ROUTES.userProfile)
-  }
-
-  function handleUserSettings() {
-    navigate(APP_ROUTES.userSettings)
   }
 
   return (
@@ -231,6 +247,14 @@ export function AppLayout() {
                   to={APP_ROUTES.emails}
                 />
               )}
+              {canOpenNotifications && (
+                <NavItem
+                  active={location.pathname.startsWith(APP_ROUTES.notifications)}
+                  icon={<Bell data-icon="inline-start" />}
+                  label={t('features.courier.notifications.name')}
+                  to={APP_ROUTES.notifications}
+                />
+              )}
               {canOpenTemplates && (
                 <NavItem
                   active={location.pathname.startsWith(APP_ROUTES.templates)}
@@ -295,6 +319,23 @@ export function AppLayout() {
             <span className="shell-current-section">{APP_CONSTANTS.appName}</span>
           </div>
           <div className="header-right">
+            {canOpenNotifications && (
+              <Button
+                aria-label={t('features.courier.notifications.pages.list')}
+                className="notification-bell-button"
+                onClick={() => navigate(APP_ROUTES.notifications)}
+                size="icon"
+                type="button"
+                variant="ghost"
+              >
+                <Bell data-icon="inline-start" />
+                {unreadNotificationCount > 0 && (
+                  <span className="notification-count-badge">
+                    {unreadNotificationCount > 99 ? '99+' : unreadNotificationCount}
+                  </span>
+                )}
+              </Button>
+            )}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button className="sidebar-user-button" variant="ghost">
@@ -313,12 +354,6 @@ export function AppLayout() {
                     <LockKeyhole data-icon="inline-start" />
                     {t('features.iam.users.pages.changePassword')}
                   </DropdownMenuItem>
-                  {canOpenUserSettings && (
-                    <DropdownMenuItem onClick={handleUserSettings}>
-                      <Settings data-icon="inline-start" />
-                      {t('navigation.settings')}
-                    </DropdownMenuItem>
-                  )}
                   <DropdownMenuItem onClick={handleLogout}>
                     <LogOut data-icon="inline-start" />
                     {t('auth.userMenu.logout')}

@@ -5,9 +5,9 @@ namespace Shared.Domain;
 /// </summary>
 public static class LanguageOptions
 {
-   public const string English = "en";
+   public const string English = "en-US";
    public const string PortugueseBrazil = "pt-BR";
-   public const string Spanish = "es";
+   public const string Spanish = "es-ES";
 
    public static readonly IReadOnlyList<string> AllowedLanguages =
    [

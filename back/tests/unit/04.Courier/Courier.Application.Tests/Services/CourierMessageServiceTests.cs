@@ -19,6 +19,7 @@ public class CourierMessageServiceTests
    private readonly IEmailRepository _emailRepository = Substitute.For<IEmailRepository>();
    private readonly INotificationRepository _notificationRepository = Substitute.For<INotificationRepository>();
    private readonly ITemplateRepository _templateRepository = Substitute.For<ITemplateRepository>();
+   private readonly IUserPreferenceRepository _userPreferenceRepository = Substitute.For<IUserPreferenceRepository>();
    private readonly CourierMessageService _service;
 
    public CourierMessageServiceTests()
@@ -27,6 +28,7 @@ public class CourierMessageServiceTests
          _emailRepository,
          _notificationRepository,
          _templateRepository,
+         _userPreferenceRepository,
          new SimpleEmailTemplateRenderer(),
          new EmailValidator());
    }
@@ -91,6 +93,24 @@ public class CourierMessageServiceTests
       result.HasError.Should().BeFalse();
       await _emailRepository.Received(1).AddAsync(Arg.Any<Email>(), Arg.Any<CancellationToken>());
       await _notificationRepository.DidNotReceive().AddAsync(Arg.Any<Notification>(), Arg.Any<CancellationToken>());
+   }
+
+   [Fact]
+   public async Task QueueAsync_ShouldSkipDisabledEmailTemplate_AndStillCreateNotification()
+   {
+      var request = CreateRequest();
+      var template = CreateTemplate(request.Module, request.TemplateKey, request.Language, includeEmail: true, includeNotification: true);
+      var preference = UserPreference.CreateDefault(request.UserId);
+
+      preference.DisableEmailTemplatePreference(request.Module, request.TemplateKey);
+      _templateRepository.GetByModuleAndKeyAsync(request.Module, request.TemplateKey, Arg.Any<CancellationToken>()).Returns(template);
+      _userPreferenceRepository.GetByUserIdAsync(request.UserId, Arg.Any<CancellationToken>()).Returns(preference);
+
+      var result = await _service.QueueAsync(request, TestContext.Current.CancellationToken);
+
+      result.HasError.Should().BeFalse();
+      await _emailRepository.DidNotReceive().AddAsync(Arg.Any<Email>(), Arg.Any<CancellationToken>());
+      await _notificationRepository.Received(1).AddAsync(Arg.Any<Notification>(), Arg.Any<CancellationToken>());
    }
 
    [Fact]

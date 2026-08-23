@@ -12,17 +12,17 @@ type TemplateOption = {
 }
 
 const NOTIFICATION_SEVERITY_LABEL_KEYS: Record<NotificationSeverity, string> = {
-  [NOTIFICATION_SEVERITIES.information]: 'features.courier.templates.severities.information',
-  [NOTIFICATION_SEVERITIES.warning]: 'features.courier.templates.severities.warning',
-  [NOTIFICATION_SEVERITIES.critical]: 'features.courier.templates.severities.critical',
+  [NOTIFICATION_SEVERITIES.information]: 'shared.enums.notificationSeverity.information',
+  [NOTIFICATION_SEVERITIES.warning]: 'shared.enums.notificationSeverity.warning',
+  [NOTIFICATION_SEVERITIES.critical]: 'shared.enums.notificationSeverity.critical',
 }
 
 const RETENTION_POLICY_LABEL_KEYS: Record<RetentionPolicy, string> = {
-  [RETENTION_POLICIES.operational]: 'features.courier.templates.retentionPolicies.operational',
-  [RETENTION_POLICIES.standard]: 'features.courier.templates.retentionPolicies.standard',
-  [RETENTION_POLICIES.extended]: 'features.courier.templates.retentionPolicies.extended',
-  [RETENTION_POLICIES.compliance]: 'features.courier.templates.retentionPolicies.compliance',
-  [RETENTION_POLICIES.longTerm]: 'features.courier.templates.retentionPolicies.longTerm',
+  [RETENTION_POLICIES.operational]: 'shared.enums.retentionPolicy.operational',
+  [RETENTION_POLICIES.standard]: 'shared.enums.retentionPolicy.standard',
+  [RETENTION_POLICIES.extended]: 'shared.enums.retentionPolicy.extended',
+  [RETENTION_POLICIES.compliance]: 'shared.enums.retentionPolicy.compliance',
+  [RETENTION_POLICIES.longTerm]: 'shared.enums.retentionPolicy.longTerm',
 }
 
 export function getNotificationSeverityLabel(value: NotificationSeverity, t: Translate): string {

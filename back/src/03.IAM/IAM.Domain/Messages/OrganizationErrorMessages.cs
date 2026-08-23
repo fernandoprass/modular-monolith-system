@@ -2,28 +2,27 @@ using Myce.Response.Messages;
 
 namespace IAM.Domain.Messages;
 
-public class OrganizationDuplicateCodeError : ErrorMessage
+public static class OrganizationErrorMessages
 {
-   public OrganizationDuplicateCodeError(string code)
-       : base("OrganizationDuplicateCodeError", "The organization code '{code}' already exists.")
+   public static ErrorMessage DuplicateCode(string code)
    {
-      AddVariable("code", code);
+      var error = IamTranslatedMessagesProvider.Instance.Error(IamTranslatedMessagesProvider.OrganizationDuplicateError);
+      error.AddVariable(IamConst.Message.Variable.Code, code);
+      return error;
    }
-}
 
-public class OrganizationForbiddenError : ErrorMessage
-{
-   public OrganizationForbiddenError() : base("OrganizationForbiddenError", "The informing organization is different from the logged-in organization.") { }
-}
+   public static ErrorMessage Forbidden()
+   {
+      return IamTranslatedMessagesProvider.Instance.Error(IamTranslatedMessagesProvider.OrganizationForbiddenError);
+   }
 
-public class OrganizationInvalidCodeFormatError : ErrorMessage
-{
-   public OrganizationInvalidCodeFormatError()
-       : base("OrganizationInvalidCodeFormatError", "Code must contain only letters and number.") { }
-}
+   public static ErrorMessage InvalidCodeFormat()
+   {
+      return IamTranslatedMessagesProvider.Instance.Error(IamTranslatedMessagesProvider.OrganizationInvalidCodeFormatError);
+   }
 
-public class OrganizationInvalidTypeError : ErrorMessage
-{
-   public OrganizationInvalidTypeError()
-       : base("OrganizationInvalidTypeError", "Invalid Type, inform 1 for a Company and 2 for an Individual.") { }
+   public static ErrorMessage InvalidType()
+   {
+      return IamTranslatedMessagesProvider.Instance.Error(IamTranslatedMessagesProvider.OrganizationInvalidTypeError);
+   }
 }

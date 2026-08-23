@@ -27,4 +27,12 @@ public static class CourierPermission
       public const string Read = $"{Module}.{Resource}.read";
       public const string Write = $"{Module}.{Resource}.write";
    }
+
+   public static class UserPreferences
+   {
+      private const string Resource = "userpreferences";
+
+      public const string Read = $"{Module}.{Resource}.read";
+      public const string Write = $"{Module}.{Resource}.write";
+   }
 }

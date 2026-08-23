@@ -84,6 +84,8 @@ public class SeederPermissions(
 
       await AddPermissionAsync(CourierPermission.Templates.Read, "Read Templates", "Allows reading templates.", cancellationToken);
       await AddPermissionAsync(CourierPermission.Templates.Write, "Edit Templates", "Allows creating, updating, and deleting templates.", cancellationToken);
+      await AddPermissionAsync(CourierPermission.UserPreferences.Read, "Read User Preferences", "Allows reading own Courier user preferences.", cancellationToken);
+      await AddPermissionAsync(CourierPermission.UserPreferences.Write, "Edit User Preferences", "Allows updating own Courier user preferences.", cancellationToken);
    }
 
    private async Task AddPermissionAsync(string code, string title, string description, CancellationToken cancellationToken)

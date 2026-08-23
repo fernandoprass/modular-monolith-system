@@ -35,14 +35,14 @@ export const EMAIL_MODULE_OPTIONS = [
 ] as const
 
 export const EMAIL_FEATURE_OPTIONS = [
-  { labelKey: 'features.courier.emails.features.authentication', value: 'authentication' },
-  { labelKey: 'features.courier.emails.features.emails', value: 'emails' },
-  { labelKey: 'features.courier.emails.features.organizations', value: 'organizations' },
-  { labelKey: 'features.courier.emails.features.parameters', value: 'parameters' },
-  { labelKey: 'features.courier.emails.features.permissions', value: 'permissions' },
-  { labelKey: 'features.courier.emails.features.roles', value: 'roles' },
-  { labelKey: 'features.courier.emails.features.security', value: 'security' },
-  { labelKey: 'features.courier.emails.features.users', value: 'users' },
+  { labelKey: 'shared.featureLabels.authentication', value: 'authentication' },
+  { labelKey: 'shared.featureLabels.emails', value: 'emails' },
+  { labelKey: 'shared.featureLabels.organizations', value: 'organizations' },
+  { labelKey: 'shared.featureLabels.parameters', value: 'parameters' },
+  { labelKey: 'shared.featureLabels.permissions', value: 'permissions' },
+  { labelKey: 'shared.featureLabels.roles', value: 'roles' },
+  { labelKey: 'shared.featureLabels.security', value: 'security' },
+  { labelKey: 'shared.featureLabels.users', value: 'users' },
 ] as const
 
 export const EMAIL_STATUSES = {

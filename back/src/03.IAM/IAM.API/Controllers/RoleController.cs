@@ -4,6 +4,7 @@ using IAM.Domain;
 using IAM.Domain.DTOs.Requests;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Shared.Application.Contracts;
 using Shared.Infrastructure.Authorization;
 
 namespace IAM.API.Controllers;
@@ -13,7 +14,8 @@ namespace IAM.API.Controllers;
 [Authorize]
 public class RoleController(
    IRoleService roleService,
-   IPermissionService permissionService) : BaseController
+   IPermissionService permissionService,
+   IUserContext userContext) : BaseController(userContext)
 {
    private readonly IRoleService _roleService = roleService;
    private readonly IPermissionService _permissionService = permissionService;

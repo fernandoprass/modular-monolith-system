@@ -25,6 +25,10 @@ textarea {
   font: inherit;
 }
 
+h2 {
+  padding-bottom: 10px;
+}
+
 .shell {
   min-height: 100vh;
   background: #ffffff;
@@ -56,6 +60,7 @@ textarea {
 }
 
 .header-left,
+.header-right,
 .btn,
 .dropdown-item,
 .nav-item,
@@ -69,6 +74,10 @@ textarea {
 .checkbox-row {
   display: flex;
   align-items: center;
+}
+
+.header-right {
+  gap: 6px;
 }
 
 .brand {
@@ -772,6 +781,16 @@ textarea {
   min-width: 0;
 }
 
+.user-account-tabs > .tabs-list {
+  width: 100%;
+  justify-content: flex-start;
+  overflow-x: auto;
+}
+
+.user-account-tabs > .tabs-content {
+  min-width: 0;
+}
+
 .access-table-wrap {
   overflow: hidden;
   border: 1px solid #e5e7eb;
@@ -956,13 +975,8 @@ textarea {
   justify-content: flex-end;
 }
 
-.courier-email-page {
-  max-width: 1600px;
-}
-
 .courier-template-page {
   display: grid;
-  max-width: 1400px;
   gap: 14px;
 }
 
@@ -990,6 +1004,38 @@ textarea {
   color: #b91c1c;
 }
 
+.notification-status-unread {
+  border-color: #bfdbfe;
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.notification-status-read {
+  border-color: #cbd5e1;
+  background: #f1f5f9;
+  color: #02a102;
+}
+
+.notification-bell-button {
+  position: relative;
+}
+
+.notification-count-badge {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  min-width: 17px;
+  height: 17px;
+  border: 2px solid #fff;
+  border-radius: 999px;
+  background: #dc2626;
+  color: #fff;
+  font-size: 0.62rem;
+  font-weight: 800;
+  line-height: 13px;
+  padding: 0 4px;
+}
+
 .email-body,
 .email-body-input {
   min-height: 180px;
@@ -1003,6 +1049,28 @@ textarea {
 .email-attempts {
   display: grid;
   gap: 12px;
+}
+
+.user-preference-form {
+  display: grid;
+  gap: 14px;
+}
+
+.user-preference-table-wrap {
+  margin-top: 12px;
+}
+
+.user-preference-table td:nth-child(3),
+.user-preference-table td:nth-child(4),
+.user-preference-table th:nth-child(3),
+.user-preference-table th:nth-child(4) {
+  width: 170px;
+}
+
+.user-preference-column-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .detail-section-title {
@@ -1187,7 +1255,8 @@ textarea {
   padding: 0;
 }
 
-.checkbox[data-state='checked'] {
+.checkbox[data-state='checked'],
+.checkbox[data-state='indeterminate'] {
   border-color: #2563eb;
   background: #2563eb;
   color: #fff;

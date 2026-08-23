@@ -1,30 +1,40 @@
-﻿using Myce.Response.Messages;
+using Myce.Response.Messages;
 
 namespace IAM.Domain.Messages;
 
 public class EmailAlreadyExistError : ErrorMessage
 {
    public EmailAlreadyExistError(string email)
-     : base("EmailAlreadyExistError", "The email '{email}' already exist.")
+      : base(
+         IamTranslatedMessagesProvider.EmailAlreadyExistError,
+         IamTranslatedMessagesProvider.Instance.GetTranslations(IamTranslatedMessagesProvider.EmailAlreadyExistError))
    {
-      AddVariable("email", email);
+      AddVariable(IamConst.Message.Variable.Email, email);
    }
 }
 
 public class UnauthorizedAccessError : ErrorMessage
 {
-   public UnauthorizedAccessError() : base("UnauthorizedAccessError", "Unauthorized access.") { }
+   public UnauthorizedAccessError()
+      : base(
+         IamTranslatedMessagesProvider.UnauthorizedAccessError,
+         IamTranslatedMessagesProvider.Instance.GetTranslations(IamTranslatedMessagesProvider.UnauthorizedAccessError)) { }
 }
 
 public class InvalidEmailPasswordError : ErrorMessage
 {
-   public InvalidEmailPasswordError() : base("InvalidEmailPasswordError", "Invalid email or password.") { }
+   public InvalidEmailPasswordError()
+      : base(
+         IamTranslatedMessagesProvider.InvalidEmailPasswordError,
+         IamTranslatedMessagesProvider.Instance.GetTranslations(IamTranslatedMessagesProvider.InvalidEmailPasswordError)) { }
 }
 
 public class AccountLockedError : ErrorMessage
 {
-   public AccountLockedError(int minutesRemaining) :
-      base("AccountLockedError", "Account is locked due to too many failed login attempts. Try again in {MinutesRemaining} minute(s).")
+   public AccountLockedError(int minutesRemaining)
+      : base(
+         IamTranslatedMessagesProvider.AccountLockedError,
+         IamTranslatedMessagesProvider.Instance.GetTranslations(IamTranslatedMessagesProvider.AccountLockedError))
    {
       AddVariable("MinutesRemaining", minutesRemaining.ToString());
    }
@@ -32,30 +42,48 @@ public class AccountLockedError : ErrorMessage
 
 public class PasswordNotValidError : ErrorMessage
 {
-   public PasswordNotValidError() : base("EmailAlreadyExistError", "The password is not valid.") { }
+   public PasswordNotValidError()
+      : base(
+         IamTranslatedMessagesProvider.PasswordNotValidError,
+         IamTranslatedMessagesProvider.Instance.GetTranslations(IamTranslatedMessagesProvider.PasswordNotValidError)) { }
 }
 
 public class PasswordMinLengthError : ErrorMessage
 {
-   public PasswordMinLengthError() : base("PasswordMinLengthError", "Password must contain at least eight letters.") { }
+   public PasswordMinLengthError()
+      : base(
+         IamTranslatedMessagesProvider.PasswordMinLengthError,
+         IamTranslatedMessagesProvider.Instance.GetTranslations(IamTranslatedMessagesProvider.PasswordMinLengthError)) { }
 }
 
 public class PasswordMissingUppercaseError : ErrorMessage
 {
-   public PasswordMissingUppercaseError() : base("PasswordMissingUppercaseError", "Password must contain at least one uppercase letter.") { }
+   public PasswordMissingUppercaseError()
+      : base(
+         IamTranslatedMessagesProvider.PasswordMissingUppercaseError,
+         IamTranslatedMessagesProvider.Instance.GetTranslations(IamTranslatedMessagesProvider.PasswordMissingUppercaseError)) { }
 }
 
 public class PasswordMissingLowercaseError : ErrorMessage
 {
-   public PasswordMissingLowercaseError() : base("PasswordMissingLowercaseError", "Password must contain at least one lowercase letter.") { }
+   public PasswordMissingLowercaseError()
+      : base(
+         IamTranslatedMessagesProvider.PasswordMissingLowercaseError,
+         IamTranslatedMessagesProvider.Instance.GetTranslations(IamTranslatedMessagesProvider.PasswordMissingLowercaseError)) { }
 }
 
 public class PasswordMissingDigitError : ErrorMessage
 {
-   public PasswordMissingDigitError() : base("PasswordMissingDigitError", "Password must contain at least one digit.") { }
+   public PasswordMissingDigitError()
+      : base(
+         IamTranslatedMessagesProvider.PasswordMissingDigitError,
+         IamTranslatedMessagesProvider.Instance.GetTranslations(IamTranslatedMessagesProvider.PasswordMissingDigitError)) { }
 }
 
 public class PasswordMissingSpecialError : ErrorMessage
 {
-   public PasswordMissingSpecialError() : base("PasswordMissingSpecialError", "Password must contain at least one special character (#?!@$%^&*-_.).") { }
+   public PasswordMissingSpecialError()
+      : base(
+         IamTranslatedMessagesProvider.PasswordMissingSpecialError,
+         IamTranslatedMessagesProvider.Instance.GetTranslations(IamTranslatedMessagesProvider.PasswordMissingSpecialError)) { }
 }

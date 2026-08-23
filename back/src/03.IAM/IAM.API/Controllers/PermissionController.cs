@@ -5,13 +5,16 @@ using IAM.Domain;
 using IAM.Domain.DTOs.Requests;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Shared.Application.Contracts;
 
 namespace IAM.API.Controllers;
 
 [ApiVersion(1)]
 [Route("api/v{version:apiVersion}/iam/permissions")]
 [Authorize]
-public class PermissionController(IPermissionService permissionService) : BaseController
+public class PermissionController(
+   IPermissionService permissionService,
+   IUserContext userContext) : BaseController(userContext)
 {
    private readonly IPermissionService _permissionService = permissionService;
 
