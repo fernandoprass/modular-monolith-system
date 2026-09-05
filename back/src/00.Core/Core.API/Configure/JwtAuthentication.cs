@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using Shared.Domain;
+using Shared.Domain.Security;
 using System.Text;
 
 namespace Core.API.Configure;
@@ -10,11 +11,7 @@ internal static class JwtAuthentication
 {
    public static void Configure(WebApplicationBuilder builder)
    {
-      var jwtSecret = builder.Configuration["Jwt:Secret"];
-      if (string.IsNullOrWhiteSpace(jwtSecret))
-      {
-         throw new InvalidOperationException("JWT secret is required.");
-      }
+      var jwtSecret = JwtConfiguration.GetRequiredSecret(builder.Configuration["Jwt:Secret"]);
       var key = Encoding.UTF8.GetBytes(jwtSecret);
 
       builder.Services.AddAuthorization();

@@ -4,6 +4,7 @@ using Sentinel.API.Configure;
 using Sentinel.API.Middlewares;
 using Sentinel.Domain;
 using Shared.Domain;
+using Shared.Domain.Security;
 using System.Text;
 using System.Text.Json.Serialization;
 
@@ -23,11 +24,7 @@ builder.Services.AddAuthorization();
 
 ApiVersioning.Configure(builder);
 
-var jwtSecret = builder.Configuration["Jwt:Secret"];
-if (string.IsNullOrWhiteSpace(jwtSecret))
-{
-   throw new InvalidOperationException("JWT secret is required.");
-}
+var jwtSecret = JwtConfiguration.GetRequiredSecret(builder.Configuration["Jwt:Secret"]);
 var key = Encoding.UTF8.GetBytes(jwtSecret);
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

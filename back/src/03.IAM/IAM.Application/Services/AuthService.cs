@@ -13,6 +13,7 @@ using Myce.Response;
 using Shared.Application.Contracts;
 using Shared.Domain;
 using Shared.Domain.Enums;
+using Shared.Domain.Security;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -33,7 +34,7 @@ public class AuthService(
    private readonly IParameterService _parameterService = parameterService;
    private readonly SharedPermissionService _permissionService = permissionService;
    private readonly IIamEventPublisher _eventPublisher = eventPublisher;
-   private readonly string _jwtSecret = GetJwtSecret(configuration);
+   private readonly string _jwtSecret = JwtConfiguration.GetRequiredSecret(configuration["Jwt:Secret"]);
 
    public async Task<Result<LoginResponse?>> LoginAsync(UserLoginRequest request, CancellationToken cancellationToken = default)
    {
@@ -186,14 +187,4 @@ public class AuthService(
       return expiresAt;
    }
 
-   private static string GetJwtSecret(IConfiguration configuration)
-   {
-      var jwtSecret = configuration["Jwt:Secret"];
-      if (string.IsNullOrWhiteSpace(jwtSecret))
-      {
-         throw new InvalidOperationException("JWT secret is required.");
-      }
-
-      return jwtSecret;
-   }
 }

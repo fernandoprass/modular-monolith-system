@@ -5,6 +5,7 @@ using Courier.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Shared.Domain;
+using Shared.Domain.Security;
 using StackExchange.Redis;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -25,11 +26,7 @@ builder.Services.AddAuthorization();
 
 ApiVersioning.Configure(builder);
 
-var jwtSecret = builder.Configuration["Jwt:Secret"];
-if (string.IsNullOrWhiteSpace(jwtSecret))
-{
-   throw new InvalidOperationException("JWT secret is required.");
-}
+var jwtSecret = JwtConfiguration.GetRequiredSecret(builder.Configuration["Jwt:Secret"]);
 var key = Encoding.UTF8.GetBytes(jwtSecret);
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
