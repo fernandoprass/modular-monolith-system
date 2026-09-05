@@ -67,7 +67,7 @@ public class UserValidator : IUserValidator
       var validator = new FluentValidator<UserUpdatePasswordRequest>()
          .RuleForValue(user).IsNotNull(new NotFoundError(IamConst.Entity.User))
          .RuleFor(x => x.PasswordOld).IsRequired()
-         .RuleForValue(isOldPasswordCorrect).IsTrue(new PasswordNotValidError())
+         .RuleForValue(isOldPasswordCorrect).IsTrue(new CurrentPasswordNotValidError())
          .RuleFor(x => x.PasswordNew).ApplyTemplate(ValidatorTemplates.PasswordRules);
 
       var isValid = validator.Validate(request);

@@ -125,7 +125,7 @@ public class RegisterOrchestratorTests
       var request = CreateOrganizationRequest();
 
       _organizationService.ValidateCreateOrganizationAsync(request, Arg.Any<CancellationToken>())
-         .Returns(Result.Failure(new OrganizationDuplicateCodeError(request.Code)));
+         .Returns(Result.Failure(OrganizationErrorMessages.DuplicateCode(request.Code)));
       _userService.ValidateUserForNewOrganizationAsync(request.User, Arg.Any<CancellationToken>())
          .Returns(Result.Success());
 

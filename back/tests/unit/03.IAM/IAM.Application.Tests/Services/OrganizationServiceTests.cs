@@ -66,7 +66,7 @@ public class OrganizationServiceTests
       var request = GetOrganizationCreateRequest(OrganizationType.Company, "Organization Name", "Code1");
 
       _organizationQueryRepository.ExistsByCodeAsync(request.Code, Arg.Any<CancellationToken>()).Returns(true);
-      _organizationValidator.ValidateCreate(request, true).Returns(Result.Failure(new OrganizationDuplicateCodeError(request.Code)));
+      _organizationValidator.ValidateCreate(request, true).Returns(Result.Failure(OrganizationErrorMessages.DuplicateCode(request.Code)));
 
       var result = await _service.ValidateCreateOrganizationAsync(request, TestContext.Current.CancellationToken);
 
@@ -219,7 +219,7 @@ public class OrganizationServiceTests
 
       _userContext.OrganizationId.Returns(id);
       _organizationRepository.GetByCodeAsync(request.Code, Arg.Any<CancellationToken>()).Returns(existingOrganization);
-      _organizationValidator.ValidateUpdateCode(request, true).Returns(Result.Failure(new OrganizationDuplicateCodeError(request.Code)));
+      _organizationValidator.ValidateUpdateCode(request, true).Returns(Result.Failure(OrganizationErrorMessages.DuplicateCode(request.Code)));
 
       var result = await _service.UpdateCodeAsync(id, request, TestContext.Current.CancellationToken);
 

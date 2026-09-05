@@ -1,5 +1,7 @@
-﻿using FluentAssertions;
+﻿using AngleSharp.Dom;
+using FluentAssertions;
 using IAM.Application.Validators;
+using IAM.Domain;
 using IAM.Domain.DTOs.Requests;
 using IAM.Domain.Messages;
 using Myce.FluentValidator.ErrorMessages;
@@ -11,7 +13,7 @@ namespace IAM.Application.Tests.Validators;
 
 public class RoleValidatorTests
 {
-   private readonly IUserContext _userContextMock  ;
+   private readonly IUserContext _userContextMock;
    private readonly RoleValidator _validator;
 
    public RoleValidatorTests()
@@ -41,7 +43,7 @@ public class RoleValidatorTests
       var result = _validator.ValidateCreate(request, nameAlreadyExists: true);
 
       result.IsSuccess.Should().BeFalse();
-      result.Messages.Should().Contain(e => e is RoleDuplicateNameError);
+      result.Messages.Should().Contain(e => e.Code.Equals(IamTranslatedMessagesProvider.RoleDuplicateNameError));
    }
 
    [Fact]
@@ -53,7 +55,7 @@ public class RoleValidatorTests
       var result = _validator.ValidateCreate(request, nameAlreadyExists: false);
 
       result.IsSuccess.Should().BeFalse();
-      result.Messages.Should().Contain(e => e is OrganizationForbiddenError);
+      result.Messages.Should().Contain(e => e.Code.Equals(IamTranslatedMessagesProvider.OrganizationForbiddenError));
    }
 
    #endregion
@@ -68,12 +70,30 @@ public class RoleValidatorTests
       var result = _validator.ValidateUpdate(request, roleExists: false);
 
       result.IsSuccess.Should().BeFalse();
-      result.Messages.Should().Contain(e => e is NotFoundError);
+      result.Messages.Should().Contain(e => e.Code.Equals(SharedTranslatedMessagesProvider.NotFoundDetailedError));
+      result.Messages.Should().Contain(e => e.Variables.First().Value.Equals(IamConst.Entity.Role));
    }
 
    #endregion
 
    #region ValidateAssign Tests
+   [Fact]
+   public void ValidateAssign_ShouldReturnFailure_WhenHasDuplicateRoles()
+   {
+      var roleId = Guid.NewGuid();
+      var request = new RoleAssignRequest(
+          UserId: Guid.NewGuid(),
+          StartsAt: DateTime.UtcNow,
+          ExpiresAt: null,
+          RoleIds: [roleId, roleId]
+      );
+
+      var result = _validator.ValidateAssign(request, userExists: true, allRolesAvailable: true);
+
+      result.IsSuccess.Should().BeFalse();
+      result.Messages.Should().Contain(e => e.Code.Equals(CollectionErrorMessages.ContainsDuplicateItemsError));
+   }
+
 
    [Fact]
    public void ValidateAssign_ShouldReturnFailure_WhenRolesAreMissingInSystem()
@@ -88,24 +108,7 @@ public class RoleValidatorTests
       var result = _validator.ValidateAssign(request, userExists: true, allRolesAvailable: false);
 
       result.IsSuccess.Should().BeFalse();
-      result.Messages.Should().Contain(e => e is RolesCannotBeAssignedError);
-   }
-
-   [Fact]
-   public void ValidateAssign_ShouldReturnFailure_WhenHasDuplicateRoles()
-   {
-      var roleId = Guid.NewGuid();
-      var request = new RoleAssignRequest(
-          UserId: Guid.NewGuid(), 
-          StartsAt: DateTime.UtcNow, 
-          ExpiresAt: null,
-          RoleIds: [roleId, roleId]
-      );
-
-      var result = _validator.ValidateAssign(request, userExists: true, allRolesAvailable: true);
-
-      result.IsSuccess.Should().BeFalse();
-      result.Messages.Should().Contain(e => e is ContainsDuplicateItemsError);
+      result.Messages.Should().Contain(e => e.Code.Equals(IamTranslatedMessagesProvider.RolesCannotBeAssignedError));
    }
 
    [Fact]
@@ -121,7 +124,7 @@ public class RoleValidatorTests
       var result = _validator.ValidateAssign(request, userExists: true, allRolesAvailable: true);
 
       result.IsSuccess.Should().BeFalse();
-      result.Messages.Should().Contain(e => e is RolesInvalidStartDateError);
+      result.Messages.Should().Contain(e => e.Code.Equals(IamTranslatedMessagesProvider.RolesInvalidStartDateError));
    }
 
    [Fact]
@@ -137,7 +140,7 @@ public class RoleValidatorTests
       var result = _validator.ValidateAssign(request, userExists: true, allRolesAvailable: true);
 
       result.IsSuccess.Should().BeFalse();
-      result.Messages.Should().Contain(e => e is RolesInvalidExpirationError);
+      result.Messages.Should().Contain(e => e.Code.Equals(IamTranslatedMessagesProvider.RolesInvalidExpirationError));
    }
 
    #endregion
@@ -162,7 +165,7 @@ public class RoleValidatorTests
       var result = _validator.ValidateUnassign(request, userExists: true, userHasAllRoles: false);
 
       result.IsSuccess.Should().BeFalse();
-      result.Messages.Should().Contain(e => e is RolesCannotBeUnassignedError);
+      result.Messages.Should().Contain(e => e.Code.Equals(IamTranslatedMessagesProvider.RolesCannotBeUnassignedError));
    }
 
    #endregion

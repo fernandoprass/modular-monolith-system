@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using NSubstitute;
+using Shared.Application.Contracts;
 
 namespace IAM.API.Tests.Controllers;
 
@@ -26,10 +27,10 @@ public class AuthorizationControllerTests
    [Fact]
    public async Task CheckPermission_WhenRoleHasPermission_ReturnsAllowed()
    {
-      var permissionAuthorizationService = Substitute.For<IPermissionAuthorizationService>();
-      var controller = CreateController("valid-key", permissionAuthorizationService);
+      var permissionAuthorizationServiceMock = Substitute.For<IPermissionAuthorizationService>();
+      var controller = CreateController("valid-key", permissionAuthorizationServiceMock);
       controller.ControllerContext.HttpContext.Request.Headers["X-Internal-Api-Key"] = "valid-key";
-      permissionAuthorizationService.CheckPermissionAsync(Arg.Any<PermissionCheckRequest>(), Arg.Any<CancellationToken>())
+      permissionAuthorizationServiceMock.CheckPermissionAsync(Arg.Any<PermissionCheckRequest>(), Arg.Any<CancellationToken>())
          .Returns(new PermissionCheckResponse(true));
 
       var result = await controller.CheckPermission(new PermissionCheckRequest(IamPermission.Users.Read), CancellationToken.None);
@@ -52,7 +53,8 @@ public class AuthorizationControllerTests
 
       return new AuthorizationController(
          permissionAuthorizationService ?? Substitute.For<IPermissionAuthorizationService>(),
-         configuration)
+         configuration,
+         Substitute.For<IUserContext>())
       {
          ControllerContext = new ControllerContext
          {

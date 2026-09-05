@@ -6,7 +6,7 @@ public static class OrganizationErrorMessages
 {
    public static ErrorMessage DuplicateCode(string code)
    {
-      var error = IamTranslatedMessagesProvider.Instance.Error(IamTranslatedMessagesProvider.OrganizationDuplicateError);
+      var error = IamTranslatedMessagesProvider.Instance.Error(IamTranslatedMessagesProvider.OrganizationDuplicateCodeError);
       error.AddVariable(IamConst.Message.Variable.Code, code);
       return error;
    }

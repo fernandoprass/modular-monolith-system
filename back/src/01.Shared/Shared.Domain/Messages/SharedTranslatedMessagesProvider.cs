@@ -1,6 +1,6 @@
 namespace Shared.Domain.Messages;
 
-internal sealed class SharedTranslatedMessagesProvider : BaseTranslatedMessagesProvider
+public sealed class SharedTranslatedMessagesProvider : BaseTranslatedMessagesProvider
 {
    public const string FailedToRecordDataError = nameof(FailedToRecordDataError);
    public const string NotFoundError = nameof(NotFoundError);

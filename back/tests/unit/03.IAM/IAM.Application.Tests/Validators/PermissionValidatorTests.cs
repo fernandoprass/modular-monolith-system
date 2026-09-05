@@ -1,5 +1,6 @@
 using FluentAssertions;
 using IAM.Application.Validators;
+using IAM.Domain;
 using IAM.Domain.DTOs.Requests;
 using IAM.Domain.Messages;
 using Myce.FluentValidator.ErrorMessages;
@@ -31,7 +32,7 @@ public class PermissionValidatorTests
       var result = _validator.ValidateCreate(request, codeAlreadyExists: true);
 
       result.IsSuccess.Should().BeFalse();
-      result.Messages.Should().Contain(e => e is PermissionDuplicateError);
+      result.Messages.Should().Contain(e => e.Code.Equals(IamTranslatedMessagesProvider.PermissionDuplicateCodeError));
    }
 
    [Fact]
@@ -67,7 +68,8 @@ public class PermissionValidatorTests
       var result = _validator.ValidateUpdate(request, codeAlreadyExists: false, permissionExists: false);
 
       result.IsSuccess.Should().BeFalse();
-      result.Messages.Should().Contain(e => e is NotFoundError);
+      result.Messages.Should().Contain(e => e.Code.Equals(SharedTranslatedMessagesProvider.NotFoundDetailedError));
+      result.Messages.Should().Contain(e => e.Variables.First().Value.Equals(IamConst.Entity.Permission));
    }
 
    [Fact]
@@ -78,7 +80,7 @@ public class PermissionValidatorTests
       var result = _validator.ValidateUpdate(request, codeAlreadyExists: true, permissionExists: true);
 
       result.IsSuccess.Should().BeFalse();
-      result.Messages.Should().Contain(e => e is PermissionDuplicateError);
+      result.Messages.Should().Contain(e => e.Code.Equals(IamTranslatedMessagesProvider.PermissionDuplicateCodeError));
    }
 
    #endregion
@@ -103,7 +105,8 @@ public class PermissionValidatorTests
       var result = _validator.ValidateAssign(request, roleExists: false, allPermissionsExist: true);
 
       result.IsSuccess.Should().BeFalse();
-      result.Messages.Should().Contain(e => e is NotFoundError);
+      result.Messages.Should().Contain(e => e.Code.Equals(SharedTranslatedMessagesProvider.NotFoundDetailedError));
+      result.Messages.Should().Contain(e => e.Variables.First().Value.Equals(IamConst.Entity.Role));
    }
 
    [Fact]
@@ -114,7 +117,7 @@ public class PermissionValidatorTests
       var result = _validator.ValidateAssign(request, roleExists: true, allPermissionsExist: false);
 
       result.IsSuccess.Should().BeFalse();
-      result.Messages.Should().Contain(e => e is PermissionNotFoundInAssignmentError);
+      result.Messages.Should().Contain(e => e.Code.Equals(IamTranslatedMessagesProvider.PermissionNotFoundInAssignmentError));
    }
 
    [Fact]
@@ -126,7 +129,7 @@ public class PermissionValidatorTests
       var result = _validator.ValidateAssign(request, roleExists: true, allPermissionsExist: true);
 
       result.IsSuccess.Should().BeFalse();
-      result.Messages.Should().Contain(e => e is ContainsDuplicateItemsError);
+      result.Messages.Should().Contain(e => e.Code.Equals(CollectionErrorMessages.ContainsDuplicateItemsError));
    }
 
    #endregion
@@ -151,7 +154,7 @@ public class PermissionValidatorTests
       var result = _validator.ValidateUnassign(request, roleExists: true, roleHasAllPermissions: false);
 
       result.IsSuccess.Should().BeFalse();
-      result.Messages.Should().Contain(e => e is PermissionsCannotBeUnassignedError);
+      result.Messages.Should().Contain(e => e.Code.Equals(IamTranslatedMessagesProvider.PermissionsCannotBeUnassignedError));
    }
 
    [Fact]
@@ -163,7 +166,7 @@ public class PermissionValidatorTests
       var result = _validator.ValidateUnassign(request, roleExists: true, roleHasAllPermissions: true);
 
       result.IsSuccess.Should().BeFalse();
-      result.Messages.Should().Contain(e => e is ContainsDuplicateItemsError);
+      result.Messages.Should().Contain(e => e.Code.Equals(CollectionErrorMessages.ContainsDuplicateItemsError));
    }
 
    #endregion
