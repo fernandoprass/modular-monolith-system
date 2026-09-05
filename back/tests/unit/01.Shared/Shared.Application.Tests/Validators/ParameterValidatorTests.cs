@@ -1,5 +1,6 @@
 ﻿using FluentAssertions;
 using Shared.Application.Validators;
+using Shared.Domain;
 using Shared.Domain.DTOs.Requests;
 using Shared.Domain.Entities;
 using Shared.Domain.Enums;
@@ -34,7 +35,7 @@ public class ParameterValidatorTests
       var result = _validator.ValidateCreate(request, keyExists: true);
 
       result.IsSuccess.Should().BeFalse();
-      result.Messages.Should().Contain(m => m is ParameterDuplicatedError);
+      result.Messages.Should().Contain(m => m.Code.Equals(SharedTranslatedMessagesProvider.ParameterDuplicatedError));
    }
 
    [Fact]
@@ -45,7 +46,7 @@ public class ParameterValidatorTests
       var result = _validator.ValidateCreate(request, keyExists: false);
 
       result.IsSuccess.Should().BeFalse();
-      result.Messages.Should().Contain(m => m is ParameterInvalidValueError);
+      result.Messages.Should().Contain(m => m.Code.Equals(SharedTranslatedMessagesProvider.ParameterInvalidValueError));
    }
 
    [Fact]
@@ -66,7 +67,8 @@ public class ParameterValidatorTests
       var result = _validator.ValidateUpdate(parameterExists: false, keyExists: false, request);
 
       result.IsSuccess.Should().BeFalse();
-      result.Messages.Should().Contain(m => m is NotFoundError);
+      result.Messages.Should().Contain(m => m.Code.Equals(SharedTranslatedMessagesProvider.NotFoundDetailedError));
+      result.Messages.Should().Contain(m => m.Variables.First().Value.Equals(SharedConst.Entity.Parameter));
    }
 
    [Fact]
@@ -77,7 +79,7 @@ public class ParameterValidatorTests
       var result = _validator.ValidateUpdate(parameterExists: true, keyExists: true, request);
 
       result.IsSuccess.Should().BeFalse();
-      result.Messages.Should().Contain(m => m is ParameterDuplicatedError);
+      result.Messages.Should().Contain(m => m.Code.Equals(SharedTranslatedMessagesProvider.ParameterDuplicatedError));
    }
 
    [Fact]
@@ -99,7 +101,8 @@ public class ParameterValidatorTests
       var result = _validator.ValidateOwnerUpdate(null, request);
 
       result.IsSuccess.Should().BeFalse();
-      result.Messages.Should().Contain(m => m is NotFoundError);
+      result.Messages.Should().Contain(m => m.Code.Equals(SharedTranslatedMessagesProvider.NotFoundDetailedError));
+      result.Messages.Should().Contain(m => m.Variables.First().Value.Equals(SharedConst.Entity.Parameter));
    }
 
    [Fact]
@@ -111,7 +114,7 @@ public class ParameterValidatorTests
       var result = _validator.ValidateOwnerUpdate(parameter, request);
 
       result.IsSuccess.Should().BeFalse();
-      result.Messages.Should().Contain(m => m is ParameterNotOwnerEditableError);
+      result.Messages.Should().Contain(m => m.Code.Equals(SharedTranslatedMessagesProvider.ParameterNotOwnerEditableError));
    }
 
    [Fact]
@@ -123,7 +126,7 @@ public class ParameterValidatorTests
       var result = _validator.ValidateOwnerUpdate(parameter, request);
 
       result.IsSuccess.Should().BeFalse();
-      result.Messages.Should().Contain(m => m is ParameterInvalidValueError);
+      result.Messages.Should().Contain(m => m.Code.Equals(SharedTranslatedMessagesProvider.ParameterInvalidValueError));
    }
 
    [Theory]
