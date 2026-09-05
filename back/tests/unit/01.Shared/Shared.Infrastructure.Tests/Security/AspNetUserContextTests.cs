@@ -24,6 +24,7 @@ public class AspNetUserContextTests
          new Claim(SharedConst.Security.Claim.IsSystemAdmin, "true"),
          new Claim(SharedConst.Security.Claim.IsOrganizationAdmin, "true"),
          new Claim(SharedConst.Security.Claim.Language, "es"),
+         new Claim("email", "person@example.com"),
          new Claim(SharedConst.Security.Claim.Role, "admin"),
          new Claim(SharedConst.Security.Claim.Role, "manager")
       ]);
@@ -37,6 +38,7 @@ public class AspNetUserContextTests
       userContext.OrganizationId.Should().Be(organizationId);
       userContext.IsSystemAdmin.Should().BeTrue();
       userContext.IsOrganizationAdmin.Should().BeTrue();
+      userContext.UserEmail.Should().Be("person@example.com");
       userContext.Language.Should().Be("es");
       userContext.Roles.Should().BeEquivalentTo(["admin", "manager"]);
       userContext.IpAddress.Should().Be("127.0.0.1");

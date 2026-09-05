@@ -133,6 +133,12 @@ public class OrganizationService(
          }
 
          organization = await _organizationRepository.GetByIdAsync(id, ct);
+
+         if (organization == null)
+         {
+            return Result.Failure(new NotFoundError(IamConst.Entity.Organization));
+         }
+
          organization.Update(request.Code);
 
          var result = await CommitUpdateAsync(organization, ct);

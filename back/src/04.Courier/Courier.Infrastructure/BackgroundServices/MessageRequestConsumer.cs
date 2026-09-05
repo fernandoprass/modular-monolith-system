@@ -19,6 +19,7 @@ public class MessageRequestConsumer(
    private readonly IDatabase _database = redis.GetDatabase();
    private readonly IServiceProvider _serviceProvider = serviceProvider;
    private readonly ILogger<MessageRequestConsumer> _logger = logger;
+   private const string PendingMessagesStreamPosition = "0";
 
    private static readonly JsonSerializerOptions JsonOptions = new()
    {
@@ -35,12 +36,7 @@ public class MessageRequestConsumer(
       {
          try
          {
-            var entries = await _database.StreamReadGroupAsync(
-               CourierConst.Redis.MessageRequestsStream,
-               CourierConst.Redis.MessageRequestConsumerGroup,
-               GetConsumerName(),
-               CourierConst.Redis.NewMessagesStreamPosition,
-               count: CourierConst.Redis.ReadBatchSize);
+            var entries = await ReadNextEntriesAsync();
 
             foreach (var entry in entries)
             {
@@ -81,6 +77,29 @@ public class MessageRequestConsumer(
       {
          _logger.LogDebug("Consumer group {ConsumerGroup} already exists", CourierConst.Redis.MessageRequestConsumerGroup);
       }
+   }
+
+   private async Task<StreamEntry[]> ReadNextEntriesAsync()
+   {
+      var consumerName = GetConsumerName();
+      var entries = await _database.StreamReadGroupAsync(
+         CourierConst.Redis.MessageRequestsStream,
+         CourierConst.Redis.MessageRequestConsumerGroup,
+         consumerName,
+         CourierConst.Redis.NewMessagesStreamPosition,
+         count: CourierConst.Redis.ReadBatchSize);
+
+      if (entries.Length > 0)
+      {
+         return entries;
+      }
+
+      return await _database.StreamReadGroupAsync(
+         CourierConst.Redis.MessageRequestsStream,
+         CourierConst.Redis.MessageRequestConsumerGroup,
+         consumerName,
+         PendingMessagesStreamPosition,
+         count: CourierConst.Redis.ReadBatchSize);
    }
 
    internal async Task ProcessEntryAsync(StreamEntry entry, CancellationToken cancellationToken)

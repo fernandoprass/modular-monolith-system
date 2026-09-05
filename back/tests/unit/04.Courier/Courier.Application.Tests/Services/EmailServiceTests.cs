@@ -111,6 +111,7 @@ public class EmailServiceTests
    {
       var request = CreateRequest();
       var id = Guid.NewGuid();
+      _userContext.OrganizationId.Returns(request.OrganizationId);
       _emailValidator.ValidateCreate(request).Returns(Result.Success());
       _templateRepository.GetRetentionPolicyByModuleAndKeyAsync(request.Module, request.TemplateKey, Arg.Any<CancellationToken>())
          .Returns(RetentionPolicy.Standard);
@@ -129,6 +130,20 @@ public class EmailServiceTests
             e.Subject == request.Subject &&
             e.Body == request.Body),
          Arg.Any<CancellationToken>());
+   }
+
+   [Fact]
+   public async Task CreateAsync_ShouldReturnUnauthorized_WhenUserDoesNotOwnOrganization()
+   {
+      var request = CreateRequest();
+      _userContext.IsSystemAdmin.Returns(false);
+      _userContext.OrganizationId.Returns(Guid.NewGuid());
+
+      var result = await _service.CreateAsync(request, TestContext.Current.CancellationToken);
+
+      result.HasError.Should().BeTrue();
+      result.Messages.Should().ContainSingle(message => message is UnauthorizedAccessError);
+      await _emailRepository.DidNotReceive().AddAsync(Arg.Any<Email>(), Arg.Any<CancellationToken>());
    }
 
    private static EmailCreateRequest CreateRequest()

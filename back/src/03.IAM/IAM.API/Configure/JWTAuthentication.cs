@@ -10,7 +10,11 @@ namespace IAM.API.Configure
    {
       public static void Configure(WebApplicationBuilder builder)
       {
-         var jwtSecret = builder.Configuration["Jwt:Secret"] ?? "your-super-secret-jwt-key-here-make-it-long-and-secure";
+         var jwtSecret = builder.Configuration["Jwt:Secret"];
+         if (string.IsNullOrWhiteSpace(jwtSecret))
+         {
+            throw new InvalidOperationException("JWT secret is required.");
+         }
          var key = Encoding.UTF8.GetBytes(jwtSecret);
 
          builder.Services.AddAuthorization();

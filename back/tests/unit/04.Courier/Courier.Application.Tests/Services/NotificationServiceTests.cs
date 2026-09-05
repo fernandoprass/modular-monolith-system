@@ -63,6 +63,7 @@ public class NotificationServiceTests
    {
       var notification = CreateNotification(Guid.NewGuid());
       _userContext.OrganizationId.Returns(Guid.NewGuid());
+      _userContext.UserId.Returns(notification.UserId);
       _notificationRepository.GetByIdAsync(notification.Id, Arg.Any<CancellationToken>())
          .Returns(notification);
 
@@ -73,11 +74,28 @@ public class NotificationServiceTests
    }
 
    [Fact]
-   public async Task MarkAsReadAsync_ShouldPersistReadStatus_WhenUserOwnsOrganization()
+   public async Task GetByIdAsync_ShouldReturnUnauthorized_WhenUserDoesNotOwnNotification()
    {
       var organizationId = Guid.NewGuid();
       var notification = CreateNotification(organizationId);
       _userContext.OrganizationId.Returns(organizationId);
+      _userContext.UserId.Returns(Guid.NewGuid());
+      _notificationRepository.GetByIdAsync(notification.Id, Arg.Any<CancellationToken>())
+         .Returns(notification);
+
+      var result = await _service.GetByIdAsync(notification.Id, TestContext.Current.CancellationToken);
+
+      result.HasError.Should().BeTrue();
+      result.Messages.Should().ContainSingle(message => message is UnauthorizedAccessError);
+   }
+
+   [Fact]
+   public async Task MarkAsReadAsync_ShouldPersistReadStatus_WhenUserOwnsNotification()
+   {
+      var organizationId = Guid.NewGuid();
+      var notification = CreateNotification(organizationId);
+      _userContext.OrganizationId.Returns(organizationId);
+      _userContext.UserId.Returns(notification.UserId);
       _notificationRepository.GetByIdAsync(notification.Id, Arg.Any<CancellationToken>())
          .Returns(notification);
 
@@ -108,11 +126,29 @@ public class NotificationServiceTests
    }
 
    [Fact]
-   public async Task DeleteAsync_ShouldDeleteNotification_WhenUserOwnsOrganization()
+   public async Task MarkAsReadAsync_ShouldReturnUnauthorized_WhenUserDoesNotOwnNotification()
    {
       var organizationId = Guid.NewGuid();
       var notification = CreateNotification(organizationId);
       _userContext.OrganizationId.Returns(organizationId);
+      _userContext.UserId.Returns(Guid.NewGuid());
+      _notificationRepository.GetByIdAsync(notification.Id, Arg.Any<CancellationToken>())
+         .Returns(notification);
+
+      var result = await _service.MarkAsReadAsync(notification.Id, TestContext.Current.CancellationToken);
+
+      result.HasError.Should().BeTrue();
+      result.Messages.Should().ContainSingle(message => message is UnauthorizedAccessError);
+      await _notificationRepository.DidNotReceive().UpdateAsync(notification, Arg.Any<CancellationToken>());
+   }
+
+   [Fact]
+   public async Task DeleteAsync_ShouldDeleteNotification_WhenUserOwnsNotification()
+   {
+      var organizationId = Guid.NewGuid();
+      var notification = CreateNotification(organizationId);
+      _userContext.OrganizationId.Returns(organizationId);
+      _userContext.UserId.Returns(notification.UserId);
       _notificationRepository.GetByIdAsync(notification.Id, Arg.Any<CancellationToken>())
          .Returns(notification);
 
@@ -120,6 +156,23 @@ public class NotificationServiceTests
 
       result.HasError.Should().BeFalse();
       await _notificationRepository.Received(1).DeleteAsync(notification.Id, Arg.Any<CancellationToken>());
+   }
+
+   [Fact]
+   public async Task DeleteAsync_ShouldReturnUnauthorized_WhenUserDoesNotOwnNotification()
+   {
+      var organizationId = Guid.NewGuid();
+      var notification = CreateNotification(organizationId);
+      _userContext.OrganizationId.Returns(organizationId);
+      _userContext.UserId.Returns(Guid.NewGuid());
+      _notificationRepository.GetByIdAsync(notification.Id, Arg.Any<CancellationToken>())
+         .Returns(notification);
+
+      var result = await _service.DeleteAsync(notification.Id, TestContext.Current.CancellationToken);
+
+      result.HasError.Should().BeTrue();
+      result.Messages.Should().ContainSingle(message => message is UnauthorizedAccessError);
+      await _notificationRepository.DidNotReceive().DeleteAsync(notification.Id, Arg.Any<CancellationToken>());
    }
 
    private static NotificationSearchRequest CreateSearchRequest(Guid? organizationId)

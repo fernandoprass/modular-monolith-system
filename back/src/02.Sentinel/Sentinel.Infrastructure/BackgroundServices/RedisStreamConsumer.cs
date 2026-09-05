@@ -23,6 +23,8 @@ public abstract class RedisStreamConsumer<TEvent>(
    protected abstract string ExpectedEventName { get; }
    protected virtual int ExpectedEventVersion => SharedConst.Event.Version;
    protected abstract Task ProcessEventAsync(TEvent eventData, CancellationToken cancellationToken);
+   private const string NewMessagesStreamPosition = ">";
+   private const string PendingMessagesStreamPosition = "0";
 
    protected virtual JsonSerializerOptions JsonOptions { get; } = new()
    {
@@ -39,12 +41,7 @@ public abstract class RedisStreamConsumer<TEvent>(
       {
          try
          {
-            var entries = await _database.StreamReadGroupAsync(
-               StreamName,
-               ConsumerGroup,
-               GetConsumerName(),
-               ">",
-               count: SentinelConst.Redis.ReadBatchSize);
+            var entries = await ReadNextEntriesAsync();
 
             foreach (var entry in entries)
             {
@@ -84,6 +81,29 @@ public abstract class RedisStreamConsumer<TEvent>(
       {
          _logger.LogDebug("Consumer group {ConsumerGroup} already exists", ConsumerGroup);
       }
+   }
+
+   private async Task<StreamEntry[]> ReadNextEntriesAsync()
+   {
+      var consumerName = GetConsumerName();
+      var entries = await _database.StreamReadGroupAsync(
+         StreamName,
+         ConsumerGroup,
+         consumerName,
+         NewMessagesStreamPosition,
+         count: SentinelConst.Redis.ReadBatchSize);
+
+      if (entries.Length > 0)
+      {
+         return entries;
+      }
+
+      return await _database.StreamReadGroupAsync(
+         StreamName,
+         ConsumerGroup,
+         consumerName,
+         PendingMessagesStreamPosition,
+         count: SentinelConst.Redis.ReadBatchSize);
    }
 
    private async Task ProcessEntryAsync(StreamEntry entry, CancellationToken cancellationToken)

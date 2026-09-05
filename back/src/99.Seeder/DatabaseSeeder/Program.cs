@@ -17,12 +17,12 @@ using Shared.Infrastructure;
 var connectionString =
    Environment.GetEnvironmentVariable("ConnectionStrings__IamDb")
    ?? Environment.GetEnvironmentVariable("IAM_DB_CONNECTION")
-   ?? "Host=127.0.0.1;Port=5432;Database=iam;Username=admin;Password=cmsadmin123";
+   ?? throw new InvalidOperationException("IAM database connection string is required.");
 
 var courierConnectionString =
    Environment.GetEnvironmentVariable("ConnectionStrings__CourierDb")
    ?? Environment.GetEnvironmentVariable("COURIER_DB_CONNECTION")
-   ?? "mongodb://admin:cmsadmin123@localhost:27017/?authSource=admin";
+   ?? throw new InvalidOperationException("Courier database connection string is required.");
 
 var courierDatabaseName =
    Environment.GetEnvironmentVariable("Courier__DatabaseName")

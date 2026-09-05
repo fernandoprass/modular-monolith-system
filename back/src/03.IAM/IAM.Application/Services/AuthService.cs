@@ -33,17 +33,18 @@ public class AuthService(
    private readonly IParameterService _parameterService = parameterService;
    private readonly SharedPermissionService _permissionService = permissionService;
    private readonly IIamEventPublisher _eventPublisher = eventPublisher;
-   private readonly string _jwtSecret = configuration["Jwt:Secret"] ?? "your-super-secret-jwt-key-here-make-it-long-and-secure";
+   private readonly string _jwtSecret = GetJwtSecret(configuration);
 
    public async Task<Result<LoginResponse?>> LoginAsync(UserLoginRequest request, CancellationToken cancellationToken = default)
    {
-      var user = await _userService.GetByEmailWithPasswordAsync(request.Email, cancellationToken);
+      var normalizedEmail = request.Email.ToLowerInvariant().Trim();
+      var user = await _userService.GetByEmailWithPasswordAsync(normalizedEmail, cancellationToken);
 
       var result = await Validate(user, request.Password, cancellationToken);
 
       if (!result.IsSuccess)
       {
-         await PublishLoginAuditLogAsync(false, request.Email, user, result, cancellationToken);
+         await PublishLoginAuditLogAsync(false, normalizedEmail, user, result, cancellationToken);
          return Result<LoginResponse?>.Failure(result.Messages);
       }
 
@@ -55,7 +56,7 @@ public class AuthService(
 
       var response = new LoginResponse(token, expiresAt, user.ToUserDto());
 
-      await PublishLoginAuditLogAsync(true, request.Email, user, result, cancellationToken);
+      await PublishLoginAuditLogAsync(true, normalizedEmail, user, result, cancellationToken);
 
       return Result<LoginResponse?>.Success(response);
    }
@@ -183,5 +184,16 @@ public class AuthService(
       int _jwtExpirationHours = await _parameterService.GetIntAsync(IamParam.Security.JwtExpirationInHours);
       var expiresAt = DateTime.UtcNow.AddHours(_jwtExpirationHours);
       return expiresAt;
+   }
+
+   private static string GetJwtSecret(IConfiguration configuration)
+   {
+      var jwtSecret = configuration["Jwt:Secret"];
+      if (string.IsNullOrWhiteSpace(jwtSecret))
+      {
+         throw new InvalidOperationException("JWT secret is required.");
+      }
+
+      return jwtSecret;
    }
 }
