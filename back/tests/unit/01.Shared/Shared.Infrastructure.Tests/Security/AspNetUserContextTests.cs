@@ -24,7 +24,7 @@ public class AspNetUserContextTests
          new Claim(SharedConst.Security.Claim.IsSystemAdmin, "true"),
          new Claim(SharedConst.Security.Claim.IsOrganizationAdmin, "true"),
          new Claim(SharedConst.Security.Claim.Language, "es"),
-         new Claim("email", "person@example.com"),
+         new Claim(ClaimTypes.Email, "person@example.com"),
          new Claim(SharedConst.Security.Claim.Role, "admin"),
          new Claim(SharedConst.Security.Claim.Role, "manager")
       ]);

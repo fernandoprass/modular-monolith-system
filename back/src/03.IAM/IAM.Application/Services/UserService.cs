@@ -6,6 +6,7 @@ using IAM.Domain.DTOs.Responses;
 using IAM.Domain.Entities;
 using IAM.Domain.Interfaces;
 using IAM.Domain.Mappers;
+using IAM.Domain.Messages;
 using IAM.Domain.QueryRepositories;
 using Isopoh.Cryptography.Argon2;
 using Myce.Response;
@@ -97,7 +98,7 @@ public class UserService(
 
          return new Result<UserDto>(
             user.ToUserDto(),
-            [new CrudSuccessInfo(CrudOperation.Created, IamConst.Message.Variable.User)]);
+            [IamTranslatedMessagesProvider.Instance.CreatedSuccess(IamConst.Message.Variable.User)]);
       }, cancellationToken);
    }
 
@@ -294,7 +295,7 @@ public class UserService(
             BuildUserTemplateValues(user),
             ct);
 
-         return Result.Success(new CrudSuccessInfo(CrudOperation.Deleted, IamConst.Message.Variable.User));
+         return Result.Success(IamTranslatedMessagesProvider.Instance.DeletedSuccess(IamConst.Message.Variable.User));
       }, cancellationToken);
    }
 
@@ -371,7 +372,7 @@ public class UserService(
       await _iamUnitOfWork.SaveChangesAsync(cancellationToken);
 
       return includeSuccessMessage
-         ? Result.Success(new CrudSuccessInfo(CrudOperation.Updated, IamConst.Message.Variable.User))
+         ? Result.Success(IamTranslatedMessagesProvider.Instance.UpdatedSuccess(IamConst.Message.Variable.User))
          : Result.Success();
    }
 

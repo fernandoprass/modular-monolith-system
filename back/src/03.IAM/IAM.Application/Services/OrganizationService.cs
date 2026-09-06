@@ -3,6 +3,7 @@ using IAM.Domain;
 using IAM.Domain.DTOs.Requests;
 using IAM.Domain.DTOs.Responses;
 using IAM.Domain.Interfaces;
+using IAM.Domain.Messages;
 using IAM.Domain.QueryRepositories;
 using IAM.Domain.Repositories;
 using Myce.Response;
@@ -165,6 +166,6 @@ public class OrganizationService(
       _iamUnitOfWork.Organizations.Update(organization);
       await _iamUnitOfWork.SaveChangesAsync(cancellationToken);
 
-      return Result.Success(new SuccessInfo());
+      return Result.Success(IamTranslatedMessagesProvider.Instance.UpdatedSuccess(IamConst.Message.Variable.Organization));
    }
 }

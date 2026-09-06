@@ -5,6 +5,7 @@ using IAM.Domain.DTOs.Responses;
 using IAM.Domain.Entities;
 using IAM.Domain.Interfaces;
 using IAM.Domain.Mappers;
+using IAM.Domain.Messages;
 using IAM.Domain.QueryRepositories;
 using Myce.Response;
 using Shared.Application.Contracts;
@@ -44,7 +45,9 @@ public class PermissionService(
       await _iamUnitOfWork.Permissions.AddAsync(permission, cancellationToken);
       await _iamUnitOfWork.SaveChangesAsync(cancellationToken);
 
-      return Result<PermissionDto>.Success(permission.ToPermissionDto());
+      return new Result<PermissionDto>(
+         permission.ToPermissionDto(),
+         [IamTranslatedMessagesProvider.Instance.CreatedSuccess(IamConst.Message.Variable.Permission)]);
    }
 
    public async Task<Result> UpdateAsync(Guid id, PermissionUpdateRequest request, CancellationToken cancellationToken = default)
@@ -60,7 +63,7 @@ public class PermissionService(
       _iamUnitOfWork.Permissions.Update(permission);
       await _iamUnitOfWork.SaveChangesAsync(cancellationToken);
 
-      return Result.Success(new SuccessInfo());
+      return Result.Success(IamTranslatedMessagesProvider.Instance.UpdatedSuccess(IamConst.Message.Variable.Permission));
    }
 
    public async Task<Result> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
@@ -72,7 +75,7 @@ public class PermissionService(
       await _iamUnitOfWork.Permissions.DeleteAsync(id, cancellationToken);
       await _iamUnitOfWork.SaveChangesAsync(cancellationToken);
 
-      return Result.Success(new SuccessInfo());
+      return Result.Success(IamTranslatedMessagesProvider.Instance.DeletedSuccess(IamConst.Message.Variable.Permission));
    }
 
    public async Task<PagedResultDto<PermissionDto>> GetByParams(PermissionSearchRequest request, CancellationToken cancellationToken = default)

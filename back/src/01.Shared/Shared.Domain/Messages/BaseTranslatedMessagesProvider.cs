@@ -74,5 +74,20 @@ namespace Shared.Domain.Messages
       {
          return new WarningMessage(code, GetTranslations(code));
       }
+
+      public CreatedSuccessInfo CreatedSuccess(string entityKey)
+      {
+         return new CreatedSuccessInfo(GetVariableTranslations(entityKey));
+      }
+
+      public UpdatedSuccessInfo UpdatedSuccess(string entityKey)
+      {
+         return new UpdatedSuccessInfo(GetVariableTranslations(entityKey));
+      }
+
+      public DeletedSuccessInfo DeletedSuccess(string entityKey)
+      {
+         return new DeletedSuccessInfo(GetVariableTranslations(entityKey));
+      }
    }
 }

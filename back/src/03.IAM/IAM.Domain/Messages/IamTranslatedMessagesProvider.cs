@@ -3,7 +3,7 @@ using Shared.Domain.Messages;
 
 namespace IAM.Domain.Messages
 {
-   internal sealed class IamTranslatedMessagesProvider : BaseTranslatedMessagesProvider
+   public sealed class IamTranslatedMessagesProvider : BaseTranslatedMessagesProvider
    {
       public const string OrganizationDuplicateCodeError = nameof(OrganizationDuplicateCodeError);
       public const string OrganizationForbiddenError = nameof(OrganizationForbiddenError);

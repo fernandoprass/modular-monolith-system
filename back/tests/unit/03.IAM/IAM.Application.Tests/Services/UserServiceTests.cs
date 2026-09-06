@@ -107,7 +107,7 @@ public class UserServiceTests
       var result = await _userService.CreateUserAsync(request, true, TestContext.Current.CancellationToken);
 
       result.IsSuccess.Should().BeTrue();
-      AssertCrudSuccess(result.Messages, SharedTranslatedMessagesProvider.CrudCreatedSuccess, "User created successfully.", "Sucesso ao criar usuário.");
+      AssertCrudSuccess(result.Messages, SharedTranslatedMessagesProvider.CrudCreatedSuccessInfo, "User created successfully.", "Usuário criado(a) com sucesso.");
 
       await _unitOfWorkMock.Users.Received(1).AddAsync(Arg.Any<User>(), Arg.Any<CancellationToken>());
       await _unitOfWorkMock.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
@@ -162,7 +162,7 @@ public class UserServiceTests
       var result = await _userService.DeleteAsync(user.Id, TestContext.Current.CancellationToken);
 
       result.IsSuccess.Should().BeTrue();
-      AssertCrudSuccess(result.Messages, SharedTranslatedMessagesProvider.CrudDeletedSuccess, "User deleted successfully.", "Sucesso ao remover usuário.");
+      AssertCrudSuccess(result.Messages, SharedTranslatedMessagesProvider.CrudDeletedSuccessInfo, "User deleted successfully.", "Usuário removido(a) com sucesso.");
       await _unitOfWorkMock.Users.Received(1).DeleteAsync(user.Id, Arg.Any<CancellationToken>());
       await _unitOfWorkMock.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
    }
@@ -228,7 +228,7 @@ public class UserServiceTests
       var result = await _userService.UpdateAsync(user.Id, request, TestContext.Current.CancellationToken);
 
       result.IsSuccess.Should().BeTrue();
-      AssertCrudSuccess(result.Messages, SharedTranslatedMessagesProvider.CrudUpdatedSuccess, "User updated successfully.", "Sucesso ao atualizar usuário.");
+      AssertCrudSuccess(result.Messages, SharedTranslatedMessagesProvider.CrudUpdatedSuccessInfo, "User updated successfully.", "Usuário atualizado(a) com sucesso.");
       user.Name.Should().Be("Updated Name");
       user.IsActive.Should().BeFalse();
       user.Language.Should().Be(LanguageOptions.PortugueseBrazil);
