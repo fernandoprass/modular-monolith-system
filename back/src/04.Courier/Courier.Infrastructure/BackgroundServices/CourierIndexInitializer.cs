@@ -1,18 +1,56 @@
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using MongoDB.Driver;
 
 namespace Courier.Infrastructure.BackgroundServices;
 
-public class CourierIndexInitializer(CourierDbContext dbContext) : IHostedService
+public class CourierIndexInitializer(
+   CourierDbContext dbContext,
+   ILogger<CourierIndexInitializer> logger) : BackgroundService
 {
    private readonly CourierDbContext _dbContext = dbContext;
+   private readonly ILogger<CourierIndexInitializer> _logger = logger;
 
-   public async Task StartAsync(CancellationToken cancellationToken)
+   protected override async Task ExecuteAsync(CancellationToken stoppingToken)
    {
-      await _dbContext.ConfigureIndexesAsync(cancellationToken);
+      while (!stoppingToken.IsCancellationRequested)
+      {
+         try
+         {
+            await _dbContext.ConfigureIndexesAsync(stoppingToken);
+            _logger.LogInformation("Courier MongoDB indexes configured");
+            return;
+         }
+         catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+         {
+            return;
+         }
+         catch (Exception ex) when (IsRetryableMongoException(ex))
+         {
+            _logger.LogWarning(
+               "Courier MongoDB is unavailable while configuring indexes; retrying. {ErrorMessage}",
+               ex.Message);
+            await DelayAsync(stoppingToken);
+         }
+      }
    }
 
-   public Task StopAsync(CancellationToken cancellationToken)
+   private static bool IsRetryableMongoException(Exception exception)
    {
-      return Task.CompletedTask;
+      return exception is TimeoutException
+         || exception is MongoConnectionException
+         || exception is MongoExecutionTimeoutException
+         || (exception.InnerException != null && IsRetryableMongoException(exception.InnerException));
+   }
+
+   private static async Task DelayAsync(CancellationToken cancellationToken)
+   {
+      try
+      {
+         await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
+      }
+      catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+      {
+      }
    }
 }

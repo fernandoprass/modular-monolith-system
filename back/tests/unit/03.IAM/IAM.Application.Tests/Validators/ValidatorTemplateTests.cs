@@ -52,17 +52,17 @@ public class ValidatorTemplateTests
    #region PasswordRules Tests
 
    [Theory]
-   [InlineData("Pass123!", true, null)]// Valid: Meets all 5 criteria   
-   [InlineData("P1s!", false, typeof(PasswordMinLengthError))]            // Invalid: Too short (< 8)  
-   [InlineData("pass123!", false, typeof(PasswordMissingUppercaseError))] // Invalid: Missing Uppercase  
-   [InlineData("PASS123!", false, typeof(PasswordMissingLowercaseError))] // Invalid: Missing Lowercase  
-   [InlineData("Password!", false, typeof(PasswordMissingDigitError))]    // Invalid: Missing Digit  
-   [InlineData("Password123", false, typeof(PasswordMissingSpecialError))]// Invalid: Missing Special Char   
-   [InlineData("", false, null)]                                          // Invalid: Null or Empty
+   [InlineData("Pass123!", true, "")]// Valid: Meets all 5 criteria   
+   [InlineData("P1s!", false, IamTranslatedMessagesProvider.PasswordMinLengthError)]            // Invalid: Too short (< 8)  
+   [InlineData("pass123!", false, IamTranslatedMessagesProvider.PasswordMissingUppercaseError)] // Invalid: Missing Uppercase  
+   [InlineData("PASS123!", false, IamTranslatedMessagesProvider.PasswordMissingLowercaseError)] // Invalid: Missing Lowercase  
+   [InlineData("Password!", false, IamTranslatedMessagesProvider.PasswordMissingDigitError)]    // Invalid: Missing Digit  
+   [InlineData("Password123", false, IamTranslatedMessagesProvider.PasswordMissingSpecialError)]// Invalid: Missing Special Char   
+   [InlineData("", false, "")]                                          // Invalid: Null or Empty
    public void PasswordRules_ShouldValidateComplexRequirements(
        string input,
        bool expectedSuccess,
-       Type expectedErrorType)
+       string expectedErrorCode)
    {
       var validator = new FluentValidator<Dummy>()
           .RuleFor(x => x.Value).ApplyTemplate(ValidatorTemplates.PasswordRules);
@@ -71,9 +71,9 @@ public class ValidatorTemplateTests
 
       isValid.Should().Be(expectedSuccess);
 
-      if (!expectedSuccess && expectedErrorType != null)
+      if (!expectedSuccess && expectedErrorCode != string.Empty)
       {
-         validator.Messages.Should().Contain(m => m.GetType() == expectedErrorType);
+         validator.Messages.Should().Contain(m => m.Code.Equals(expectedErrorCode));
       }
    }
 

@@ -117,7 +117,7 @@ public class CourierMessageServiceTests
    public async Task QueueAsync_ShouldUseDefaultLanguage_WhenRequestedLanguageDoesNotExist()
    {
       var request = CreateRequest() with { Language = "pt-BR" };
-      var template = CreateTemplate(request.Module, request.TemplateKey, "en", includeEmail: false, includeNotification: true);
+      var template = CreateTemplate(request.Module, request.TemplateKey, "en-US", includeEmail: false, includeNotification: true);
       _templateRepository.GetByModuleAndKeyAsync(request.Module, request.TemplateKey, Arg.Any<CancellationToken>()).Returns(template);
 
       var result = await _service.QueueAsync(request, TestContext.Current.CancellationToken);

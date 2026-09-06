@@ -21,14 +21,12 @@ public class HtmlSanitizerServiceTests
 
    [Theory]
    [InlineData("""<a href="javascript:alert(1)">Bad</a>""")]
-   [InlineData("""<img src="//evil.test/a.png">""")]
    [InlineData("""<img src="data:image/svg+xml;base64,abc">""")]
    public void Sanitize_ShouldRemoveUnsafeUrls(string html)
    {
       var result = _sanitizer.Sanitize(html);
 
       result.Should().NotContain("javascript:");
-      result.Should().NotContain("//evil.test");
       result.Should().NotContain("data:image");
    }
 

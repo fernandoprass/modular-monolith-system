@@ -19,6 +19,7 @@ public class MessageRequestConsumer(
    private readonly IDatabase _database = redis.GetDatabase();
    private readonly IServiceProvider _serviceProvider = serviceProvider;
    private readonly ILogger<MessageRequestConsumer> _logger = logger;
+   private const string PendingMessagesStreamPosition = "0";
 
    private static readonly JsonSerializerOptions JsonOptions = new()
    {
@@ -29,18 +30,19 @@ public class MessageRequestConsumer(
    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
    {
       _logger.LogInformation("Courier message request consumer started");
-      await EnsureConsumerGroupExistsAsync();
+      var isConsumerGroupReady = false;
 
       while (!stoppingToken.IsCancellationRequested)
       {
          try
          {
-            var entries = await _database.StreamReadGroupAsync(
-               CourierConst.Redis.MessageRequestsStream,
-               CourierConst.Redis.MessageRequestConsumerGroup,
-               GetConsumerName(),
-               CourierConst.Redis.NewMessagesStreamPosition,
-               count: CourierConst.Redis.ReadBatchSize);
+            if (!isConsumerGroupReady)
+            {
+               await EnsureConsumerGroupExistsAsync();
+               isConsumerGroupReady = true;
+            }
+
+            var entries = await ReadNextEntriesAsync();
 
             foreach (var entry in entries)
             {
@@ -56,11 +58,25 @@ public class MessageRequestConsumer(
          {
             break;
          }
+         catch (RedisServerException ex) when (ex.Message.Contains("NOGROUP", StringComparison.OrdinalIgnoreCase))
+         {
+            isConsumerGroupReady = false;
+            _logger.LogWarning(ex, "Courier message request consumer group is missing");
+            await DelayAsync(CourierConst.Redis.ErrorDelaySeconds, stoppingToken);
+         }
+         catch (RedisConnectionException ex)
+         {
+            isConsumerGroupReady = false;
+            _logger.LogWarning(
+               "Redis is unavailable for Courier message request consumer; retrying. {ErrorMessage}",
+               ex.Message);
+            await DelayAsync(CourierConst.Redis.ErrorDelaySeconds, stoppingToken);
+         }
          catch (Exception ex)
          {
             _logger.LogError(ex, "Error consuming Courier message requests");
             await TryLogSystemErrorAsync("Error consuming Courier message requests", ex, stoppingToken);
-            await Task.Delay(TimeSpan.FromSeconds(CourierConst.Redis.ErrorDelaySeconds), stoppingToken);
+            await DelayAsync(CourierConst.Redis.ErrorDelaySeconds, stoppingToken);
          }
       }
 
@@ -81,6 +97,29 @@ public class MessageRequestConsumer(
       {
          _logger.LogDebug("Consumer group {ConsumerGroup} already exists", CourierConst.Redis.MessageRequestConsumerGroup);
       }
+   }
+
+   private async Task<StreamEntry[]> ReadNextEntriesAsync()
+   {
+      var consumerName = GetConsumerName();
+      var entries = await _database.StreamReadGroupAsync(
+         CourierConst.Redis.MessageRequestsStream,
+         CourierConst.Redis.MessageRequestConsumerGroup,
+         consumerName,
+         CourierConst.Redis.NewMessagesStreamPosition,
+         count: CourierConst.Redis.ReadBatchSize);
+
+      if (entries.Length > 0)
+      {
+         return entries;
+      }
+
+      return await _database.StreamReadGroupAsync(
+         CourierConst.Redis.MessageRequestsStream,
+         CourierConst.Redis.MessageRequestConsumerGroup,
+         consumerName,
+         PendingMessagesStreamPosition,
+         count: CourierConst.Redis.ReadBatchSize);
    }
 
    internal async Task ProcessEntryAsync(StreamEntry entry, CancellationToken cancellationToken)
@@ -228,6 +267,17 @@ public class MessageRequestConsumer(
       catch (Exception logException)
       {
          _logger.LogError(logException, "Failed to log Courier system error");
+      }
+   }
+
+   private static async Task DelayAsync(int seconds, CancellationToken cancellationToken)
+   {
+      try
+      {
+         await Task.Delay(TimeSpan.FromSeconds(seconds), cancellationToken);
+      }
+      catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+      {
       }
    }
 }

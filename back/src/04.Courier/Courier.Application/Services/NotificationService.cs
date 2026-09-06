@@ -2,6 +2,7 @@ using Courier.Application.Contracts;
 using Courier.Domain;
 using Courier.Domain.DTOs.Requests;
 using Courier.Domain.DTOs.Responses;
+using Courier.Domain.Entities;
 using Courier.Domain.Interfaces.Repositories;
 using Courier.Domain.Mappers;
 using Myce.Response;
@@ -50,10 +51,12 @@ public class NotificationService(
          return Result<NotificationDto>.Failure(new NotFoundError(CourierConst.Entity.Notification));
       }
 
-      return await ExecuteIfUserOwnsAsync(
-         notification.OrganizationId,
-         _ => Task.FromResult(Result<NotificationDto>.Success(notification.ToNotificationDto())),
-         cancellationToken);
+      if (!CanAccessNotification(notification))
+      {
+         return Result<NotificationDto>.Failure(new UnauthorizedAccessError());
+      }
+
+      return Result<NotificationDto>.Success(notification.ToNotificationDto());
    }
 
    public async Task<Result<int>> GetUnreadCountAsync(CancellationToken cancellationToken = default)
@@ -75,15 +78,14 @@ public class NotificationService(
          return Result.Failure(new NotFoundError(CourierConst.Entity.Notification));
       }
 
-      return await ExecuteIfUserOwnsAsync(
-         notification.OrganizationId,
-         async (ct) =>
-         {
-            notification.MarkAsRead();
-            await _notificationRepository.UpdateAsync(notification, ct);
-            return Result.Success(new SuccessInfo());
-         },
-         cancellationToken);
+      if (!CanAccessNotification(notification))
+      {
+         return Result.Failure(new UnauthorizedAccessError());
+      }
+
+      notification.MarkAsRead();
+      await _notificationRepository.UpdateAsync(notification, cancellationToken);
+      return Result.Success(new SuccessInfo());
    }
 
    public async Task<Result> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
@@ -95,13 +97,19 @@ public class NotificationService(
          return Result.Failure(new NotFoundError(CourierConst.Entity.Notification));
       }
 
-      return await ExecuteIfUserOwnsAsync(
-         notification.OrganizationId,
-         async (ct) =>
-         {
-            await _notificationRepository.DeleteAsync(id, ct);
-            return Result.Success(new SuccessInfo());
-         },
-         cancellationToken);
+      if (!CanAccessNotification(notification))
+      {
+         return Result.Failure(new UnauthorizedAccessError());
+      }
+
+      await _notificationRepository.DeleteAsync(id, cancellationToken);
+      return Result.Success(new SuccessInfo());
+   }
+
+   private bool CanAccessNotification(Notification notification)
+   {
+      return _userContext.IsSystemAdmin ||
+         (notification.OrganizationId == _userContext.OrganizationId &&
+          notification.UserId == _userContext.UserId);
    }
 }

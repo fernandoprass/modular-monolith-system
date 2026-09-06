@@ -1,4 +1,5 @@
 using Courier.Application.Validators;
+using Courier.Domain;
 using Courier.Domain.DTOs.Requests;
 using Courier.Domain.Enums;
 using Courier.Domain.Messages;
@@ -26,7 +27,7 @@ public class TemplateValidatorTests
       var result = _validator.ValidateCreate(CreateRequest(), keyExists: true);
 
       result.HasError.Should().BeTrue();
-      result.Messages.Should().ContainSingle(message => message is TemplateDuplicateKeyError);
+      result.Messages.Should().ContainSingle(message => message.Code.Equals(CourierTranslatedMessagesProvider.TemplateDuplicateKeyError));
    }
 
    [Fact]
@@ -42,7 +43,8 @@ public class TemplateValidatorTests
       var result = _validator.ValidateUpdate(request, templateExists: false, keyExists: false);
 
       result.HasError.Should().BeTrue();
-      result.Messages.Should().Contain(message => message is NotFoundError);
+      result.Messages.Should().Contain(message => message.Code.Equals(SharedTranslatedMessagesProvider.NotFoundDetailedError));
+      result.Messages.Should().Contain(message => message.Variables.First().Value.Equals(CourierConst.Entity.Template));
    }
 
    [Fact]
@@ -61,7 +63,7 @@ public class TemplateValidatorTests
       var result = _validator.ValidateTranslation(request, templateExists: true);
 
       result.HasError.Should().BeTrue();
-      result.Messages.Should().Contain(message => message is InvalidLanguageError);
+      result.Messages.Should().Contain(message => message.Code.Equals(SharedTranslatedMessagesProvider.InvalidLanguageError));
    }
 
    [Fact]
@@ -72,7 +74,7 @@ public class TemplateValidatorTests
       var result = _validator.ValidateTranslation(request, templateExists: true);
 
       result.HasError.Should().BeTrue();
-      result.Messages.Should().Contain(message => message is TemplateChannelRequiredError);
+      result.Messages.Should().Contain(message => message.Code.Equals(CourierTranslatedMessagesProvider.TemplateChannelRequiredError));
    }
 
    [Fact]
@@ -114,7 +116,7 @@ public class TemplateValidatorTests
    private static TemplateTranslationRequest CreateTranslationRequest()
    {
       return new TemplateTranslationRequest(
-         "en",
+         "en-US",
          "User welcome",
          new TemplateTranslationEmailRequest("Welcome user", "<p>Welcome</p>"),
          new TemplateTranslationNotificationRequest("Account created", "Open your profile", "/profile"));

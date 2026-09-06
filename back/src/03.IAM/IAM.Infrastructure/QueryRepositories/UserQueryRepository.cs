@@ -28,28 +28,34 @@ public class UserQueryRepository(IamDbContext dbContext, IUserContext userContex
 
    public async Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
    {
+      string normalizedEmail = NormalizeEmail(email);
+
       return await _dbContext.Users
           .AsNoTracking()
           .Include(u => u.Organization)
-          .Where(u => u.Email == email)
+          .Where(u => u.Email == normalizedEmail)
           .Select(u => u)
           .SingleOrDefaultAsync(cancellationToken);
    }
 
    public Task<Guid> GetIdByEmailAsync(string email, CancellationToken cancellationToken = default)
    {
+      string normalizedEmail = NormalizeEmail(email);
+
       return _dbContext.Users
           .AsNoTracking()
-          .Where(u => u.Email == email)
+          .Where(u => u.Email == normalizedEmail)
           .Select(u => u.Id)
           .SingleOrDefaultAsync(cancellationToken);
    }
 
    public async Task<UserPasswordDto?> GetByEmailWithPasswordAsync(string email, CancellationToken cancellationToken = default)
    {
+      string normalizedEmail = NormalizeEmail(email);
+
       return await _dbContext.Users
           .AsNoTracking()
-          .Where(u => u.Email == email)
+          .Where(u => u.Email == normalizedEmail)
           .Select(u => new UserPasswordDto
           {
              Id = u.Id,
@@ -161,6 +167,11 @@ public class UserQueryRepository(IamDbContext dbContext, IUserContext userContex
       query = query.Where(u => u.OrganizationId == organizationId);
 
       return query;
+   }
+
+   private static string NormalizeEmail(string email)
+   {
+      return email.ToLowerInvariant().Trim();
    }
 
 }

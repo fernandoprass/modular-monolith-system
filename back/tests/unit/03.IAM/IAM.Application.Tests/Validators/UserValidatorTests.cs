@@ -40,7 +40,7 @@ public class UserValidatorTests
       var result = _validator.ValidateCreate(request, emailAlreadyExists: true, organizationExists: true);
 
       Assert.False(result.IsSuccess);
-      Assert.Contains(result.Messages, m => m is EmailAlreadyExistError);
+      Assert.Contains(result.Messages, m => m.Code.Equals(IamTranslatedMessagesProvider.EmailAlreadyExistError));
    }
 
    [Fact]
@@ -51,7 +51,8 @@ public class UserValidatorTests
       var result = _validator.ValidateCreate(request, emailAlreadyExists: false, organizationExists: false);
 
       Assert.False(result.IsSuccess);
-      Assert.Contains(result.Messages, m => m is NotFoundError && m.Show().Contains(IamConst.Entity.Organization));
+      Assert.Contains(result.Messages, m => m.Code.Equals(SharedTranslatedMessagesProvider.NotFoundDetailedError));
+      result.Messages.Should().Contain(e => e.Variables.First().Value.Equals(IamConst.Entity.Organization));
    }
 
    [Theory]
@@ -75,7 +76,7 @@ public class UserValidatorTests
       if (!expectedSuccess && emailAlreadyExists)
       {
          // Verify if the specific "Already Exists" error is returned
-         result.Messages.Should().Contain(m => m is EmailAlreadyExistError);
+         result.Messages.Should().Contain(m => m.Code.Equals(IamTranslatedMessagesProvider.EmailAlreadyExistError));
       }
    }
 
@@ -88,8 +89,7 @@ public class UserValidatorTests
       var result = _validator.ValidateCreateForNewOrganization(request, emailAlreadyExists: true);
 
       result.IsSuccess.Should().BeFalse();
-      var error = result.Messages.OfType<EmailAlreadyExistError>().FirstOrDefault();
-      error.Should().NotBeNull();
+      Assert.Contains(result.Messages, m => m.Code.Equals(IamTranslatedMessagesProvider.EmailAlreadyExistError));
       // Ensuring the error message contains the specific email passed in the request
       result.Messages.First().Show().Should().Contain(email);
    }
@@ -105,7 +105,8 @@ public class UserValidatorTests
       var result = _validator.ValidateUpdate(null, request);
 
       Assert.False(result.IsSuccess);
-      Assert.Contains(result.Messages, m => m is NotFoundError);
+      Assert.Contains(result.Messages, m => m.Code.Equals(SharedTranslatedMessagesProvider.NotFoundDetailedError));
+      Assert.Contains(result.Messages, m => m.Variables.First().Value.Equals(IamConst.Entity.User));
    }
 
    [Fact]
@@ -122,7 +123,7 @@ public class UserValidatorTests
    }
 
    [Fact]
-   public void ValidateUpdatePassword_ShouldHaveError_WhenOldPasswordIsIncorrect()
+   public void ValidateUpdatePassword_ShouldHaveError_WhenCurrentPasswordIsIncorrect()
    {
       var user = User.Create("User Test", "test@email.com", Argon2.Hash("Correct#123"), DateTime.UtcNow.AddDays(30), LanguageOptions.English, Guid.NewGuid());
       var request = new UserUpdatePasswordRequest("Wrong#123", "New#StrongPass88");
@@ -130,7 +131,7 @@ public class UserValidatorTests
       var result = _validator.ValidateUpdatePassword(user, request);
 
       Assert.False(result.IsSuccess);
-      Assert.Contains(result.Messages, m => m is PasswordNotValidError);
+      Assert.Contains(result.Messages, m => m.Code.Equals(IamTranslatedMessagesProvider.CurrentPasswordNotValidError));
    }
 
    [Fact]
@@ -167,7 +168,8 @@ public class UserValidatorTests
       var result = _validator.ValidateUpdateOrganizationAdmin(null, userContext, request);
 
       result.IsSuccess.Should().BeFalse();
-      result.Messages.Should().Contain(m => m is NotFoundError);
+      result.Messages.Should().Contain(m => m.Code.Equals(SharedTranslatedMessagesProvider.NotFoundDetailedError));
+      result.Messages.Should().Contain(m => m.Variables.First().Value.Equals(IamConst.Entity.User));
    }
 
    [Fact]
@@ -180,7 +182,7 @@ public class UserValidatorTests
       var result = _validator.ValidateUpdateOrganizationAdmin(user, userContext, request);
 
       result.IsSuccess.Should().BeFalse();
-      result.Messages.Should().Contain(m => m is Domain.Messages.UnauthorizedAccessError);
+      result.Messages.Should().Contain(m => m.Code.Equals(SharedTranslatedMessagesProvider.UnauthorizedAccessError));
    }
 
    [Fact]
@@ -193,7 +195,7 @@ public class UserValidatorTests
       var result = _validator.ValidateUpdateOrganizationAdmin(user, userContext, request);
 
       result.IsSuccess.Should().BeFalse();
-      result.Messages.Should().Contain(m => m is Domain.Messages.UnauthorizedAccessError);
+      result.Messages.Should().Contain(m => m.Code.Equals(SharedTranslatedMessagesProvider.UnauthorizedAccessError));
    }
 
    [Fact]
@@ -231,7 +233,8 @@ public class UserValidatorTests
       var result = _validator.ValidateUpdateSupportUser(null, userContext, request);
 
       result.IsSuccess.Should().BeFalse();
-      result.Messages.Should().Contain(m => m is NotFoundError);
+      result.Messages.Should().Contain(m => m.Code.Equals(SharedTranslatedMessagesProvider.NotFoundDetailedError));
+      result.Messages.Should().Contain(e => e.Variables.First().Value.Equals(IamConst.Entity.User));
    }
 
    [Fact]
@@ -244,7 +247,7 @@ public class UserValidatorTests
       var result = _validator.ValidateUpdateSupportUser(user, userContext, request);
 
       result.IsSuccess.Should().BeFalse();
-      result.Messages.Should().Contain(m => m is Domain.Messages.UnauthorizedAccessError);
+      result.Messages.Should().Contain(m => m.Code.Equals(SharedTranslatedMessagesProvider.UnauthorizedAccessError));
    }
 
    [Fact]
@@ -257,7 +260,7 @@ public class UserValidatorTests
       var result = _validator.ValidateUpdateSupportUser(user, userContext, request);
 
       result.IsSuccess.Should().BeFalse();
-      result.Messages.Should().Contain(m => m is Domain.Messages.UnauthorizedAccessError);
+      result.Messages.Should().Contain(m => m.Code.Equals(SharedTranslatedMessagesProvider.UnauthorizedAccessError));
    }
    #endregion
 

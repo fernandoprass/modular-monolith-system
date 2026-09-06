@@ -32,11 +32,12 @@ public class LanguageOptionsTests
    }
 
    [Theory]
-   [InlineData("EN", true)]          // Uppercase should normalize to "en"
-   [InlineData("  en  ", true)]      // With spaces should normalize
+   [InlineData("EN", false)]         // Uppercase should normalize to "en"
+   [InlineData("  en  ", false)]     // With spaces should normalize
    [InlineData("pt-br", true)]       // Lowercase variant should normalize to "pt-BR"
    [InlineData("PT-BR", true)]       // Uppercase variant should normalize
-   [InlineData("  es  ", true)]      // Spanish with spaces
+   [InlineData("  pT-bR  ", true)]   // Uppercase variant should normalize
+   [InlineData("  es  ", false)]     // Spanish with spaces
    public void IsSupported_WithCaseVariations_ShouldNormalize(string language, bool expected)
    {
       var result = LanguageOptions.IsSupported(language);
@@ -46,13 +47,13 @@ public class LanguageOptionsTests
 
    [Theory]
    [InlineData(LanguageOptions.English, LanguageOptions.English)]
-   [InlineData("EN", LanguageOptions.English)]
-   [InlineData("  en  ", LanguageOptions.English)]
+   [InlineData("EN", "en")]
+   [InlineData("  en  ", "en")]
    [InlineData(LanguageOptions.PortugueseBrazil, LanguageOptions.PortugueseBrazil)]
    [InlineData("PT-BR", LanguageOptions.PortugueseBrazil)]
    [InlineData("pt-br", LanguageOptions.PortugueseBrazil)]
    [InlineData(LanguageOptions.Spanish, LanguageOptions.Spanish)]
-   [InlineData("ES", LanguageOptions.Spanish)]
+   [InlineData("ES", "es")]
    public void Normalize_WithVariousFormats_ShouldNormalizeCorrectly(string language, string expected)
    {
       var result = LanguageOptions.Normalize(language);
@@ -85,7 +86,7 @@ public class LanguageOptionsTests
    [Fact]
    public void English_Constant_ShouldBeCorrectValue()
    {
-      LanguageOptions.English.Should().Be("en");
+      LanguageOptions.English.Should().Be("en-US");
    }
 
    [Fact]
@@ -97,6 +98,6 @@ public class LanguageOptionsTests
    [Fact]
    public void Spanish_Constant_ShouldBeCorrectValue()
    {
-      LanguageOptions.Spanish.Should().Be("es");
+      LanguageOptions.Spanish.Should().Be("es-ES");
    }
 }

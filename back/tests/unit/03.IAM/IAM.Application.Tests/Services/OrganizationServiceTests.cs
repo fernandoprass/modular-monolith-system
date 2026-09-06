@@ -66,7 +66,7 @@ public class OrganizationServiceTests
       var request = GetOrganizationCreateRequest(OrganizationType.Company, "Organization Name", "Code1");
 
       _organizationQueryRepository.ExistsByCodeAsync(request.Code, Arg.Any<CancellationToken>()).Returns(true);
-      _organizationValidator.ValidateCreate(request, true).Returns(Result.Failure(new OrganizationDuplicateCodeError(request.Code)));
+      _organizationValidator.ValidateCreate(request, true).Returns(Result.Failure(OrganizationErrorMessages.DuplicateCode(request.Code)));
 
       var result = await _service.ValidateCreateOrganizationAsync(request, TestContext.Current.CancellationToken);
 
@@ -219,11 +219,29 @@ public class OrganizationServiceTests
 
       _userContext.OrganizationId.Returns(id);
       _organizationRepository.GetByCodeAsync(request.Code, Arg.Any<CancellationToken>()).Returns(existingOrganization);
-      _organizationValidator.ValidateUpdateCode(request, true).Returns(Result.Failure(new OrganizationDuplicateCodeError(request.Code)));
+      _organizationValidator.ValidateUpdateCode(request, true).Returns(Result.Failure(OrganizationErrorMessages.DuplicateCode(request.Code)));
 
       var result = await _service.UpdateCodeAsync(id, request, TestContext.Current.CancellationToken);
 
       Assert.False(result.IsSuccess);
+   }
+
+   [Fact]
+   public async Task UpdateCodeAsync_WhenOrganizationDoesNotExist_ReturnsNotFound()
+   {
+      var id = Guid.NewGuid();
+      var request = new OrganizationUpdateCodeRequest("NEWCODE");
+
+      _userContext.OrganizationId.Returns(id);
+      _organizationRepository.GetByCodeAsync(request.Code, Arg.Any<CancellationToken>()).Returns((Organization)null);
+      _organizationValidator.ValidateUpdateCode(request, false).Returns(Result.Success());
+      _organizationRepository.GetByIdAsync(id, Arg.Any<CancellationToken>()).Returns((Organization)null);
+
+      var result = await _service.UpdateCodeAsync(id, request, TestContext.Current.CancellationToken);
+
+      Assert.False(result.IsSuccess);
+      Assert.Contains(result.Messages, message => message is NotFoundError);
+      _unitOfWork.Organizations.DidNotReceive().Update(Arg.Any<Organization>());
    }
 
    private static OrganizationCreateRequest GetOrganizationCreateRequest(OrganizationType type, string name, string code)

@@ -40,6 +40,15 @@ public class AccountLockedError : ErrorMessage
    }
 }
 
+public class CurrentPasswordNotValidError : ErrorMessage
+{
+   public CurrentPasswordNotValidError()
+      : base(
+         IamTranslatedMessagesProvider.CurrentPasswordNotValidError,
+         IamTranslatedMessagesProvider.Instance.GetTranslations(IamTranslatedMessagesProvider.CurrentPasswordNotValidError))
+   { }
+}
+
 public class PasswordNotValidError : ErrorMessage
 {
    public PasswordNotValidError()

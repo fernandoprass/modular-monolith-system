@@ -4,6 +4,7 @@ using Sentinel.API.Configure;
 using Sentinel.API.Middlewares;
 using Sentinel.Domain;
 using Shared.Domain;
+using Shared.Domain.Security;
 using System.Text;
 using System.Text.Json.Serialization;
 
@@ -23,7 +24,7 @@ builder.Services.AddAuthorization();
 
 ApiVersioning.Configure(builder);
 
-var jwtSecret = builder.Configuration["Jwt:Secret"] ?? "your-super-secret-jwt-key-here-make-it-long-and-secure";
+var jwtSecret = JwtConfiguration.GetRequiredSecret(builder.Configuration["Jwt:Secret"]);
 var key = Encoding.UTF8.GetBytes(jwtSecret);
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

@@ -5,11 +5,11 @@ namespace IAM.Domain.Messages
 {
    internal sealed class IamTranslatedMessagesProvider : BaseTranslatedMessagesProvider
    {
-      public const string OrganizationDuplicateError = nameof(OrganizationDuplicateError);
+      public const string OrganizationDuplicateCodeError = nameof(OrganizationDuplicateCodeError);
       public const string OrganizationForbiddenError = nameof(OrganizationForbiddenError);
       public const string OrganizationInvalidCodeFormatError = nameof(OrganizationInvalidCodeFormatError);
       public const string OrganizationInvalidTypeError = nameof(OrganizationInvalidTypeError);
-      public const string PermissionDuplicateError = nameof(PermissionDuplicateError);
+      public const string PermissionDuplicateCodeError = nameof(PermissionDuplicateCodeError);
       public const string PermissionNotFoundInAssignmentError = nameof(PermissionNotFoundInAssignmentError);
       public const string PermissionsCannotBeUnassignedError = nameof(PermissionsCannotBeUnassignedError);
       public const string RoleDuplicateNameError = nameof(RoleDuplicateNameError);
@@ -21,6 +21,7 @@ namespace IAM.Domain.Messages
       public const string UnauthorizedAccessError = nameof(UnauthorizedAccessError);
       public const string InvalidEmailPasswordError = nameof(InvalidEmailPasswordError);
       public const string AccountLockedError = nameof(AccountLockedError);
+      public const string CurrentPasswordNotValidError = nameof(CurrentPasswordNotValidError);
       public const string PasswordNotValidError = nameof(PasswordNotValidError);
       public const string PasswordMinLengthError = nameof(PasswordMinLengthError);
       public const string PasswordMissingUppercaseError = nameof(PasswordMissingUppercaseError);
@@ -32,9 +33,9 @@ namespace IAM.Domain.Messages
 
       private IamTranslatedMessagesProvider()
       {
-         AddTranslation(OrganizationDuplicateError, LanguageOptions.English, "The organization code '{code}' already exists.");
-         AddTranslation(OrganizationDuplicateError, LanguageOptions.Spanish, "El código de organización '{code}' ya existe.");
-         AddTranslation(OrganizationDuplicateError, LanguageOptions.PortugueseBrazil, "O código de organização '{code}' já existe.");
+         AddTranslation(OrganizationDuplicateCodeError, LanguageOptions.English, "The organization code '{code}' already exists.");
+         AddTranslation(OrganizationDuplicateCodeError, LanguageOptions.Spanish, "El código de organización '{code}' ya existe.");
+         AddTranslation(OrganizationDuplicateCodeError, LanguageOptions.PortugueseBrazil, "O código de organização '{code}' já existe.");
          AddTranslation(OrganizationForbiddenError, LanguageOptions.English, "The informing organization is different from the logged-in organization.");
          AddTranslation(OrganizationForbiddenError, LanguageOptions.Spanish, "La organización informada es diferente de la organización del usuario conectado.");
          AddTranslation(OrganizationForbiddenError, LanguageOptions.PortugueseBrazil, "A organização informada é diferente da organização do usuário logado.");
@@ -45,9 +46,9 @@ namespace IAM.Domain.Messages
          AddTranslation(OrganizationInvalidTypeError, LanguageOptions.Spanish, "Tipo inválido. Informe 1 para Empresa y 2 para Persona física.");
          AddTranslation(OrganizationInvalidTypeError, LanguageOptions.PortugueseBrazil, "Tipo inválido. Informe 1 para Pessoa Jurídica e 2 para Pessoa Física.");
 
-         AddTranslation(PermissionDuplicateError, LanguageOptions.English, "The permission code '{code}' already exists.");
-         AddTranslation(PermissionDuplicateError, LanguageOptions.Spanish, "El código de permiso '{code}' ya existe.");
-         AddTranslation(PermissionDuplicateError, LanguageOptions.PortugueseBrazil, "O código de permissão '{code}' já existe.");
+         AddTranslation(PermissionDuplicateCodeError, LanguageOptions.English, "The permission code '{code}' already exists.");
+         AddTranslation(PermissionDuplicateCodeError, LanguageOptions.Spanish, "El código de permiso '{code}' ya existe.");
+         AddTranslation(PermissionDuplicateCodeError, LanguageOptions.PortugueseBrazil, "O código de permissão '{code}' já existe.");
          AddTranslation(PermissionNotFoundInAssignmentError, LanguageOptions.English, "One or more permissions do not exist.");
          AddTranslation(PermissionNotFoundInAssignmentError, LanguageOptions.Spanish, "Uno o más permisos no existen.");
          AddTranslation(PermissionNotFoundInAssignmentError, LanguageOptions.PortugueseBrazil, "Uma ou mais permissões não existem.");
@@ -83,6 +84,10 @@ namespace IAM.Domain.Messages
          AddTranslation(AccountLockedError, LanguageOptions.English, "Account is locked due to too many failed login attempts. Try again in {MinutesRemaining} minute(s).");
          AddTranslation(AccountLockedError, LanguageOptions.Spanish, "La cuenta está bloqueada debido a demasiados intentos de inicio de sesión fallidos. Intente de nuevo en {MinutesRemaining} minuto(s).");
          AddTranslation(AccountLockedError, LanguageOptions.PortugueseBrazil, "A conta está bloqueada devido a muitas tentativas de login inválidas. Tente novamente em {MinutesRemaining} minuto(s).");
+
+         AddTranslation(CurrentPasswordNotValidError, LanguageOptions.English, "The current password is not valid.");
+         AddTranslation(CurrentPasswordNotValidError, LanguageOptions.Spanish, "La contraseña actual no es válida.");
+         AddTranslation(CurrentPasswordNotValidError, LanguageOptions.PortugueseBrazil, "A senha atual não é válida.");
          AddTranslation(PasswordNotValidError, LanguageOptions.English, "The password is not valid.");
          AddTranslation(PasswordNotValidError, LanguageOptions.Spanish, "La contraseña no es válida.");
          AddTranslation(PasswordNotValidError, LanguageOptions.PortugueseBrazil, "A senha não é válida.");
@@ -101,6 +106,27 @@ namespace IAM.Domain.Messages
          AddTranslation(PasswordMissingSpecialError, LanguageOptions.English, "Password must contain at least one special character (#?!@$%^&*-_.).");
          AddTranslation(PasswordMissingSpecialError, LanguageOptions.Spanish, "La contraseña debe contener al menos un carácter especial (#?!@$%^&*-_.).");
          AddTranslation(PasswordMissingSpecialError, LanguageOptions.PortugueseBrazil, "A senha deve conter pelo menos um caractere especial (#?!@$%^&*-_.).");
+
+         AddVariableTranslations();
+      }
+
+      private void AddVariableTranslations()
+      {
+         AddVariableTranslation(IamConst.Message.Variable.Organization, LanguageOptions.English, "Organization");
+         AddVariableTranslation(IamConst.Message.Variable.Organization, LanguageOptions.Spanish, "organización");
+         AddVariableTranslation(IamConst.Message.Variable.Organization, LanguageOptions.PortugueseBrazil, "Organização");
+
+         AddVariableTranslation(IamConst.Message.Variable.Permission, LanguageOptions.English, "Permission");
+         AddVariableTranslation(IamConst.Message.Variable.Permission, LanguageOptions.Spanish, "permiso");
+         AddVariableTranslation(IamConst.Message.Variable.Permission, LanguageOptions.PortugueseBrazil, "Permissão");
+
+         AddVariableTranslation(IamConst.Message.Variable.Role, LanguageOptions.English, "Role");
+         AddVariableTranslation(IamConst.Message.Variable.Role, LanguageOptions.Spanish, "rol");
+         AddVariableTranslation(IamConst.Message.Variable.Role, LanguageOptions.PortugueseBrazil, "Função");
+
+         AddVariableTranslation(IamConst.Message.Variable.User, LanguageOptions.English, "User");
+         AddVariableTranslation(IamConst.Message.Variable.User, LanguageOptions.Spanish, "usuario");
+         AddVariableTranslation(IamConst.Message.Variable.User, LanguageOptions.PortugueseBrazil, "Usuário");
       }
    }
 }

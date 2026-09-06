@@ -55,37 +55,40 @@ public class EmailService(
 
    public async Task<Result<EmailCreateDto>> CreateAsync(EmailCreateRequest request, CancellationToken cancellationToken = default)
    {
-      var validation = _emailValidator.ValidateCreate(request);
-
-      if (validation.HasError)
+      return await ExecuteIfUserOwnsAsync(request.OrganizationId, async (ct) =>
       {
-         return Result<EmailCreateDto>.Failure(validation.Messages);
-      }
+         var validation = _emailValidator.ValidateCreate(request);
 
-      var retentionPolicy = await _templateRepository.GetRetentionPolicyByModuleAndKeyAsync(
-         request.Module,
-         request.TemplateKey,
-         cancellationToken);
+         if (validation.HasError)
+         {
+            return Result<EmailCreateDto>.Failure(validation.Messages);
+         }
 
-      if (retentionPolicy == null)
-      {
-         return Result<EmailCreateDto>.Failure(new NotFoundError(CourierConst.Entity.Template));
-      }
+         var retentionPolicy = await _templateRepository.GetRetentionPolicyByModuleAndKeyAsync(
+            request.Module,
+            request.TemplateKey,
+            ct);
 
-      var email = Email.Create(
-         request.OrganizationId,
-         request.UserId,
-         request.Module,
-         request.Feature,
-         request.TemplateKey,
-         request.Recipient,
-         request.Subject,
-         request.Body,
-         request.IsHtml,
-         retentionPolicy.Value);
+         if (retentionPolicy == null)
+         {
+            return Result<EmailCreateDto>.Failure(new NotFoundError(CourierConst.Entity.Template));
+         }
 
-      var id = await _emailRepository.AddAsync(email, cancellationToken);
+         var email = Email.Create(
+            request.OrganizationId,
+            request.UserId,
+            request.Module,
+            request.Feature,
+            request.TemplateKey,
+            request.Recipient,
+            request.Subject,
+            request.Body,
+            request.IsHtml,
+            retentionPolicy.Value);
 
-      return Result<EmailCreateDto>.Success(new EmailCreateDto(id));
+         var id = await _emailRepository.AddAsync(email, ct);
+
+         return Result<EmailCreateDto>.Success(new EmailCreateDto(id));
+      }, cancellationToken);
    }
 }
