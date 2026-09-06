@@ -13,6 +13,7 @@ using NSubstitute;
 using Shared.Application.Contracts;
 using Shared.Domain;
 using Shared.Domain.Enums;
+using Shared.Domain.Messages;
 
 namespace IAM.Application.Tests.Services;
 
@@ -106,6 +107,7 @@ public class UserServiceTests
       var result = await _userService.CreateUserAsync(request, true, TestContext.Current.CancellationToken);
 
       result.IsSuccess.Should().BeTrue();
+      AssertCrudSuccess(result.Messages, SharedTranslatedMessagesProvider.CrudCreatedSuccess, "User created successfully.", "Sucesso ao criar usuário.");
 
       await _unitOfWorkMock.Users.Received(1).AddAsync(Arg.Any<User>(), Arg.Any<CancellationToken>());
       await _unitOfWorkMock.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
@@ -148,6 +150,21 @@ public class UserServiceTests
 
       await _unitOfWorkMock.Users.DidNotReceive().DeleteAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>());
       await _unitOfWorkMock.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
+   }
+
+   [Fact]
+   public async Task DeleteAsync_ShouldReturnDeletedSuccessMessage_WhenRequestIsValid()
+   {
+      var user = User.Create("Name", "test@test.com", "hash", DateTime.UtcNow, LanguageOptions.English, _userContextMock.OrganizationId);
+
+      _userRepositoryMock.GetByIdAsync(user.Id, Arg.Any<CancellationToken>()).Returns(user);
+
+      var result = await _userService.DeleteAsync(user.Id, TestContext.Current.CancellationToken);
+
+      result.IsSuccess.Should().BeTrue();
+      AssertCrudSuccess(result.Messages, SharedTranslatedMessagesProvider.CrudDeletedSuccess, "User deleted successfully.", "Sucesso ao remover usuário.");
+      await _unitOfWorkMock.Users.Received(1).DeleteAsync(user.Id, Arg.Any<CancellationToken>());
+      await _unitOfWorkMock.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
    }
 
    [Fact]
@@ -211,6 +228,7 @@ public class UserServiceTests
       var result = await _userService.UpdateAsync(user.Id, request, TestContext.Current.CancellationToken);
 
       result.IsSuccess.Should().BeTrue();
+      AssertCrudSuccess(result.Messages, SharedTranslatedMessagesProvider.CrudUpdatedSuccess, "User updated successfully.", "Sucesso ao atualizar usuário.");
       user.Name.Should().Be("Updated Name");
       user.IsActive.Should().BeFalse();
       user.Language.Should().Be(LanguageOptions.PortugueseBrazil);
@@ -387,5 +405,17 @@ public class UserServiceTests
 
       result.IsSuccess.Should().BeFalse();
       result.Messages.Should().ContainSingle(m => m is EmailAlreadyExistError);
+   }
+
+   private static void AssertCrudSuccess(
+      IEnumerable<Myce.Response.Messages.Message> messages,
+      string expectedCode,
+      string expectedEnglish,
+      string expectedPortuguese)
+   {
+      var message = messages.Should().ContainSingle(m => m.Code == expectedCode).Subject;
+
+      message.Show(LanguageOptions.English).Should().Be(expectedEnglish);
+      message.Show(LanguageOptions.PortugueseBrazil).Should().Be(expectedPortuguese);
    }
 }

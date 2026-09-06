@@ -95,7 +95,9 @@ public class UserService(
             BuildUserTemplateValues(user),
             ct);
 
-         return Result<UserDto>.Success(user.ToUserDto());
+         return new Result<UserDto>(
+            user.ToUserDto(),
+            [new CrudSuccessInfo(CrudOperation.Created, IamConst.Message.Variable.User)]);
       }, cancellationToken);
    }
 
@@ -126,7 +128,7 @@ public class UserService(
 
          user!.Update(request.Name, request.IsActive, request.Language);
 
-         var result = await CommitUpdateAsync(user, ct);
+         var result = await CommitUpdateAsync(user, ct, includeSuccessMessage: true);
 
          if (result.IsSuccess)
          {
@@ -164,7 +166,7 @@ public class UserService(
 
       user!.UpdatePassword(Argon2.Hash(request.PasswordNew), passwordExpiresAt);
 
-      var result = await CommitUpdateAsync(user, cancellationToken);
+      var result = await CommitUpdateAsync(user, cancellationToken, includeSuccessMessage: true);
 
       if (result.IsSuccess)
       {
@@ -203,7 +205,7 @@ public class UserService(
 
       user!.UpdateOrganizationAdmin(request.IsOrganizationAdmin);
 
-      var result = await CommitUpdateAsync(user, cancellationToken);
+      var result = await CommitUpdateAsync(user, cancellationToken, includeSuccessMessage: true);
 
       if (result.IsSuccess)
       {
@@ -233,7 +235,7 @@ public class UserService(
 
       user!.UpdateSupportUser(request.IsSupportUser);
 
-      var result = await CommitUpdateAsync(user, cancellationToken);
+      var result = await CommitUpdateAsync(user, cancellationToken, includeSuccessMessage: true);
 
       if (result.IsSuccess)
       {
@@ -292,7 +294,7 @@ public class UserService(
             BuildUserTemplateValues(user),
             ct);
 
-         return Result.Success(new SuccessInfo());
+         return Result.Success(new CrudSuccessInfo(CrudOperation.Deleted, IamConst.Message.Variable.User));
       }, cancellationToken);
    }
 
@@ -360,12 +362,17 @@ public class UserService(
       return emailExists;
    }
 
-   private async Task<Result> CommitUpdateAsync(User user, CancellationToken cancellationToken)
+   private async Task<Result> CommitUpdateAsync(
+      User user,
+      CancellationToken cancellationToken,
+      bool includeSuccessMessage = false)
    {
       _iamUnitOfWork.Users.Update(user);
       await _iamUnitOfWork.SaveChangesAsync(cancellationToken);
 
-      return Result.Success(new SuccessInfo());
+      return includeSuccessMessage
+         ? Result.Success(new CrudSuccessInfo(CrudOperation.Updated, IamConst.Message.Variable.User))
+         : Result.Success();
    }
 
    private static Dictionary<string, string> BuildUserTemplateValues(User user)

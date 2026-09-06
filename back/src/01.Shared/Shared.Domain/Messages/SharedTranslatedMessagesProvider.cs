@@ -13,6 +13,9 @@ public sealed class SharedTranslatedMessagesProvider : BaseTranslatedMessagesPro
    public const string ParameterInvalidValueError = nameof(ParameterInvalidValueError);
    public const string ParameterInvalidKeyFormatError = nameof(ParameterInvalidKeyFormatError);
    public const string SuccessInfo = "Success";
+   public const string CrudCreatedSuccess = nameof(CrudCreatedSuccess);
+   public const string CrudUpdatedSuccess = nameof(CrudUpdatedSuccess);
+   public const string CrudDeletedSuccess = nameof(CrudDeletedSuccess);
 
    public static SharedTranslatedMessagesProvider Instance { get; } = new();
 
@@ -28,7 +31,7 @@ public sealed class SharedTranslatedMessagesProvider : BaseTranslatedMessagesPro
 
       AddTranslation(NotFoundDetailedError, LanguageOptions.English, "{entity} not found.");
       AddTranslation(NotFoundDetailedError, LanguageOptions.Spanish, "{entity} no encontrado.");
-      AddTranslation(NotFoundDetailedError, LanguageOptions.PortugueseBrazil, "{entity} não encontrado.");
+      AddTranslation(NotFoundDetailedError, LanguageOptions.PortugueseBrazil, "{entity} não encontrado(a).");
 
       AddTranslation(UnauthorizedAccessError, LanguageOptions.English, "You do not have permission to access this resource.");
       AddTranslation(UnauthorizedAccessError, LanguageOptions.Spanish, "No tiene permiso para acceder a este recurso.");
@@ -53,6 +56,18 @@ public sealed class SharedTranslatedMessagesProvider : BaseTranslatedMessagesPro
       AddTranslation(ParameterInvalidKeyFormatError, LanguageOptions.English, "Invalid Parameter Key format. The key must follow the pattern 'Module.Group.Name', where each segment contains at least 2 alphanumeric characters.");
       AddTranslation(ParameterInvalidKeyFormatError, LanguageOptions.Spanish, "Formato de clave de parámetro inválido. La clave debe seguir el patrón 'Module.Group.Name', donde cada segmento contiene al menos 2 caracteres alfanuméricos.");
       AddTranslation(ParameterInvalidKeyFormatError, LanguageOptions.PortugueseBrazil, "Formato de chave de parâmetro inválido. A chave deve seguir o padrão 'Module.Group.Name', onde cada segmento contém pelo menos 2 caracteres alfanuméricos.");
+ 
+      AddTranslation(CrudCreatedSuccess, LanguageOptions.English, "{entity} created successfully.");
+      AddTranslation(CrudCreatedSuccess, LanguageOptions.Spanish, "Operación de creación completada para {entity}.");
+      AddTranslation(CrudCreatedSuccess, LanguageOptions.PortugueseBrazil, "{entity} criado(a) com sucesso.");
+
+      AddTranslation(CrudUpdatedSuccess, LanguageOptions.English, "{entity} updated successfully.");
+      AddTranslation(CrudUpdatedSuccess, LanguageOptions.Spanish, "Operación de actualización completada para {entity}.");
+      AddTranslation(CrudUpdatedSuccess, LanguageOptions.PortugueseBrazil, "{entity} atualizado(a) com sucesso.");
+
+      AddTranslation(CrudDeletedSuccess, LanguageOptions.English, "{entity} deleted successfully.");
+      AddTranslation(CrudDeletedSuccess, LanguageOptions.Spanish, "Operación de eliminación completada para {entity}.");
+      AddTranslation(CrudDeletedSuccess, LanguageOptions.PortugueseBrazil, "{entity} removido(a) com sucesso.");
 
       AddTranslation(SuccessInfo, LanguageOptions.English, "Operation completed successfully.");
       AddTranslation(SuccessInfo, LanguageOptions.Spanish, "Operación completada correctamente.");

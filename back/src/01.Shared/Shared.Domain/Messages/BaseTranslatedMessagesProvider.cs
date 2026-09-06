@@ -22,6 +22,16 @@ namespace Shared.Domain.Messages
          _variableTranslations[name][LanguageOptions.Normalize(language)] = value;
       }
 
+      public Dictionary<string, string> GetVariableTranslations(string name)
+      {
+         if (_variableTranslations.TryGetValue(name, out var translations))
+         {
+            return new Dictionary<string, string>(translations);
+         }
+
+         throw new KeyNotFoundException($"Variable translation '{name}' was not found.");
+      }
+
       public string GetTranslation(string code, string language)
       {
          if (!_textTranslations.TryGetValue(code, out var translations))
