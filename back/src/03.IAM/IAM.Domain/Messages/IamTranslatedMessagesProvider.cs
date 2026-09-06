@@ -106,6 +106,27 @@ namespace IAM.Domain.Messages
          AddTranslation(PasswordMissingSpecialError, LanguageOptions.English, "Password must contain at least one special character (#?!@$%^&*-_.).");
          AddTranslation(PasswordMissingSpecialError, LanguageOptions.Spanish, "La contraseña debe contener al menos un carácter especial (#?!@$%^&*-_.).");
          AddTranslation(PasswordMissingSpecialError, LanguageOptions.PortugueseBrazil, "A senha deve conter pelo menos um caractere especial (#?!@$%^&*-_.).");
+
+         AddVariableTranslations();
+      }
+
+      private void AddVariableTranslations()
+      {
+         AddVariableTranslation(IamConst.Message.Variable.Organization, LanguageOptions.English, "Organization");
+         AddVariableTranslation(IamConst.Message.Variable.Organization, LanguageOptions.Spanish, "organización");
+         AddVariableTranslation(IamConst.Message.Variable.Organization, LanguageOptions.PortugueseBrazil, "Organização");
+
+         AddVariableTranslation(IamConst.Message.Variable.Permission, LanguageOptions.English, "Permission");
+         AddVariableTranslation(IamConst.Message.Variable.Permission, LanguageOptions.Spanish, "permiso");
+         AddVariableTranslation(IamConst.Message.Variable.Permission, LanguageOptions.PortugueseBrazil, "Permissão");
+
+         AddVariableTranslation(IamConst.Message.Variable.Role, LanguageOptions.English, "Role");
+         AddVariableTranslation(IamConst.Message.Variable.Role, LanguageOptions.Spanish, "rol");
+         AddVariableTranslation(IamConst.Message.Variable.Role, LanguageOptions.PortugueseBrazil, "Função");
+
+         AddVariableTranslation(IamConst.Message.Variable.User, LanguageOptions.English, "User");
+         AddVariableTranslation(IamConst.Message.Variable.User, LanguageOptions.Spanish, "usuario");
+         AddVariableTranslation(IamConst.Message.Variable.User, LanguageOptions.PortugueseBrazil, "Usuário");
       }
    }
 }

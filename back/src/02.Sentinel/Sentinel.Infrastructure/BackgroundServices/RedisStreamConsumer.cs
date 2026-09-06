@@ -35,12 +35,18 @@ public abstract class RedisStreamConsumer<TEvent>(
    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
    {
       _logger.LogInformation("{ConsumerDisplayName} started", ConsumerDisplayName);
-      await EnsureConsumerGroupExistsAsync();
+      var isConsumerGroupReady = false;
 
       while (!stoppingToken.IsCancellationRequested)
       {
          try
          {
+            if (!isConsumerGroupReady)
+            {
+               await EnsureConsumerGroupExistsAsync();
+               isConsumerGroupReady = true;
+            }
+
             var entries = await ReadNextEntriesAsync();
 
             foreach (var entry in entries)
@@ -57,10 +63,25 @@ public abstract class RedisStreamConsumer<TEvent>(
          {
             break;
          }
+         catch (RedisServerException ex) when (ex.Message.Contains("NOGROUP", StringComparison.OrdinalIgnoreCase))
+         {
+            isConsumerGroupReady = false;
+            _logger.LogWarning(ex, "Consumer group {ConsumerGroup} is missing for {ConsumerDisplayName}", ConsumerGroup, ConsumerDisplayName);
+            await DelayAsync(SentinelConst.Redis.ErrorDelaySeconds, stoppingToken);
+         }
+         catch (RedisConnectionException ex)
+         {
+            isConsumerGroupReady = false;
+            _logger.LogWarning(
+               "Redis is unavailable for {ConsumerDisplayName}; retrying. {ErrorMessage}",
+               ConsumerDisplayName,
+               ex.Message);
+            await DelayAsync(SentinelConst.Redis.ErrorDelaySeconds, stoppingToken);
+         }
          catch (Exception ex)
          {
             _logger.LogError(ex, "Error consuming {ConsumerDisplayName}", ConsumerDisplayName);
-            await Task.Delay(TimeSpan.FromSeconds(SentinelConst.Redis.ErrorDelaySeconds), stoppingToken);
+            await DelayAsync(SentinelConst.Redis.ErrorDelaySeconds, stoppingToken);
          }
       }
 
@@ -154,5 +175,16 @@ public abstract class RedisStreamConsumer<TEvent>(
    private string GetConsumerName()
    {
       return $"{ConsumerNamePrefix}-{Environment.MachineName}";
+   }
+
+   private static async Task DelayAsync(int seconds, CancellationToken cancellationToken)
+   {
+      try
+      {
+         await Task.Delay(TimeSpan.FromSeconds(seconds), cancellationToken);
+      }
+      catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+      {
+      }
    }
 }

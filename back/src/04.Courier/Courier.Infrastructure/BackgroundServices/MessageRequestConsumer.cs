@@ -30,12 +30,18 @@ public class MessageRequestConsumer(
    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
    {
       _logger.LogInformation("Courier message request consumer started");
-      await EnsureConsumerGroupExistsAsync();
+      var isConsumerGroupReady = false;
 
       while (!stoppingToken.IsCancellationRequested)
       {
          try
          {
+            if (!isConsumerGroupReady)
+            {
+               await EnsureConsumerGroupExistsAsync();
+               isConsumerGroupReady = true;
+            }
+
             var entries = await ReadNextEntriesAsync();
 
             foreach (var entry in entries)
@@ -52,11 +58,25 @@ public class MessageRequestConsumer(
          {
             break;
          }
+         catch (RedisServerException ex) when (ex.Message.Contains("NOGROUP", StringComparison.OrdinalIgnoreCase))
+         {
+            isConsumerGroupReady = false;
+            _logger.LogWarning(ex, "Courier message request consumer group is missing");
+            await DelayAsync(CourierConst.Redis.ErrorDelaySeconds, stoppingToken);
+         }
+         catch (RedisConnectionException ex)
+         {
+            isConsumerGroupReady = false;
+            _logger.LogWarning(
+               "Redis is unavailable for Courier message request consumer; retrying. {ErrorMessage}",
+               ex.Message);
+            await DelayAsync(CourierConst.Redis.ErrorDelaySeconds, stoppingToken);
+         }
          catch (Exception ex)
          {
             _logger.LogError(ex, "Error consuming Courier message requests");
             await TryLogSystemErrorAsync("Error consuming Courier message requests", ex, stoppingToken);
-            await Task.Delay(TimeSpan.FromSeconds(CourierConst.Redis.ErrorDelaySeconds), stoppingToken);
+            await DelayAsync(CourierConst.Redis.ErrorDelaySeconds, stoppingToken);
          }
       }
 
@@ -247,6 +267,17 @@ public class MessageRequestConsumer(
       catch (Exception logException)
       {
          _logger.LogError(logException, "Failed to log Courier system error");
+      }
+   }
+
+   private static async Task DelayAsync(int seconds, CancellationToken cancellationToken)
+   {
+      try
+      {
+         await Task.Delay(TimeSpan.FromSeconds(seconds), cancellationToken);
+      }
+      catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+      {
       }
    }
 }

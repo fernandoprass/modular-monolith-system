@@ -58,6 +58,11 @@ public static partial class IamConst
          public const string Code = "code";
          public const string Email = "email";
          public const string Name = "name";
+
+         public const string Organization = "organization";
+         public const string User = "user";
+         public const string Role = "role";
+         public const string Permission = "permission";
       }
    }
 

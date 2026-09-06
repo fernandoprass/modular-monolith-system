@@ -3,6 +3,7 @@ using Courier.Domain;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using MongoDB.Driver;
 using Shared.Domain.Enums;
 
 namespace Courier.Infrastructure.BackgroundServices;
@@ -35,11 +36,18 @@ public class EmailDeliveryWorker(
          {
             break;
          }
+         catch (Exception ex) when (IsRetryableMongoException(ex))
+         {
+            _logger.LogWarning(
+               "Courier MongoDB is unavailable for email delivery worker; retrying. {ErrorMessage}",
+               ex.Message);
+            await DelayAsync(CourierConst.Worker.EmailDeliveryErrorDelaySeconds, stoppingToken);
+         }
          catch (Exception ex)
          {
             _logger.LogError(ex, "Courier email delivery worker failed");
             await TryLogSystemErrorAsync(ex, stoppingToken);
-            await Task.Delay(TimeSpan.FromSeconds(CourierConst.Worker.EmailDeliveryErrorDelaySeconds), stoppingToken);
+            await DelayAsync(CourierConst.Worker.EmailDeliveryErrorDelaySeconds, stoppingToken);
          }
       }
 
@@ -81,6 +89,25 @@ public class EmailDeliveryWorker(
       catch (Exception logException)
       {
          _logger.LogError(logException, "Failed to log Courier email delivery worker error");
+      }
+   }
+
+   private static bool IsRetryableMongoException(Exception exception)
+   {
+      return exception is TimeoutException
+         || exception is MongoConnectionException
+         || exception is MongoExecutionTimeoutException
+         || (exception.InnerException != null && IsRetryableMongoException(exception.InnerException));
+   }
+
+   private static async Task DelayAsync(int seconds, CancellationToken cancellationToken)
+   {
+      try
+      {
+         await Task.Delay(TimeSpan.FromSeconds(seconds), cancellationToken);
+      }
+      catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+      {
       }
    }
 }

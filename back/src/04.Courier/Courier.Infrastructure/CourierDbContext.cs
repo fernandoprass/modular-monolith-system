@@ -110,6 +110,7 @@ public class CourierDbContext
       };
 
       await Emails.Indexes.CreateManyAsync(emailIndexes, cancellationToken);
+
    }
 
    private async Task ConfigureIndexesForTemplateAsync(CancellationToken cancellationToken)
