@@ -7,7 +7,7 @@ import {
   postIamJson,
   putIamJson,
 } from '../../../data/httpClient'
-import { ensureResultSuccess, unwrapResult } from '../../../data/result'
+import { getApiSuccessText, type ApiMutationResult, unwrapResult } from '../../../data/result'
 import { normalizeLanguageCode } from '../../../shared/languages'
 import type { PagedResultDto } from '../../../shared/pagination'
 import type { PermissionDto } from '../../../shared/permissions'
@@ -166,32 +166,32 @@ export async function getUserPermissions(userId: string): Promise<PermissionDto[
   return unwrapResult<PermissionDto[]>(response)
 }
 
-export async function createUser(data: UserCreateForm): Promise<UserDto> {
+export async function createUser(data: UserCreateForm): Promise<ApiMutationResult<UserDto>> {
   const response = await postIamJson(API_PATHS.iam.users.list, toUserCreateRequest(data))
 
-  return unwrapResult<UserDto>(response)
+  return { data: unwrapResult<UserDto>(response), message: getApiSuccessText(response) }
 }
 
-export async function updateUser(id: string, request: UserUpdateRequest): Promise<void> {
+export async function updateUser(id: string, request: UserUpdateRequest): Promise<string> {
   const response = await putIamJson(API_PATHS.iam.users.byId(id), request)
 
-  ensureResultSuccess(response)
+  return getApiSuccessText(response)
 }
 
-export async function updateCurrentUser(request: UserUpdateRequest): Promise<void> {
+export async function updateCurrentUser(request: UserUpdateRequest): Promise<string> {
   const response = await putIamJson(API_PATHS.iam.users.profile, request)
 
-  ensureResultSuccess(response)
+  return getApiSuccessText(response)
 }
 
-export async function updateCurrentUserPassword(request: UserPasswordUpdateRequest): Promise<void> {
+export async function updateCurrentUserPassword(request: UserPasswordUpdateRequest): Promise<string> {
   const response = await patchIamJson(API_PATHS.iam.users.password, request)
 
-  ensureResultSuccess(response)
+  return getApiSuccessText(response)
 }
 
-export async function deleteUser(id: string): Promise<void> {
+export async function deleteUser(id: string): Promise<string> {
   const response = await deleteIamJson(API_PATHS.iam.users.byId(id))
 
-  ensureResultSuccess(response)
+  return getApiSuccessText(response)
 }

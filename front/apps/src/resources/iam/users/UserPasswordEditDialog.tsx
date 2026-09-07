@@ -59,11 +59,11 @@ export function UserPasswordEditDialog({ isOpen, onClose }: UserPasswordEditDial
     setIsSaving(true)
 
     try {
-      await updateCurrentUserPassword({
+      const message = await updateCurrentUserPassword({
         [USER_REQUEST_FIELDS.passwordNew]: value.passwordNew,
         [USER_REQUEST_FIELDS.passwordOld]: value.passwordOld,
       })
-      showSuccess(t('features.iam.users.notifications.passwordUpdated'))
+      showSuccess(message)
       onClose()
     } catch (error) {
       notifyError(error, t('shared.errors.generic'))

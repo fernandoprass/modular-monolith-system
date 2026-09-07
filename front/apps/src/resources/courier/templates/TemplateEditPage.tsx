@@ -146,13 +146,13 @@ function TemplateDetailsForm({ onSaved, template }: TemplateDetailsFormProps) {
 
     try {
       if (template === null) {
-        const created = await createTemplate(value)
+        const { data: created, message } = await createTemplate(value)
 
-        showSuccess(t('features.courier.templates.notifications.created'))
+        showSuccess(message)
         navigate(APP_ROUTES.templateEdit(created.id))
       } else {
-        await updateTemplate(template.id, value)
-        showSuccess(t('features.courier.templates.notifications.updated'))
+        const message = await updateTemplate(template.id, value)
+        showSuccess(message)
         await onSaved()
       }
     } catch (error) {
@@ -281,8 +281,8 @@ function TemplateTranslations({ onChanged, template }: TemplateTranslationsProps
     }
 
     try {
-      await deleteTemplateTranslation(template.id, translationToDelete.language)
-      showSuccess(t('features.courier.templates.notifications.translationDeleted'))
+      const message = await deleteTemplateTranslation(template.id, translationToDelete.language)
+      showSuccess(message)
       setTranslationToDelete(null)
       await onChanged()
     } catch (error) {

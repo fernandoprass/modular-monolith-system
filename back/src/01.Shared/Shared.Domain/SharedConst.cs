@@ -44,6 +44,8 @@ public static partial class SharedConst
          public const string Module = "module";
          public const string Name = "name";
          public const string TypeName = "typeName";
+         public const string Parameter = "parameter";
+
       }
    }
 

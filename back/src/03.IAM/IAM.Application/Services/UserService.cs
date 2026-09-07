@@ -9,6 +9,7 @@ using IAM.Domain.Mappers;
 using IAM.Domain.Messages;
 using IAM.Domain.QueryRepositories;
 using Isopoh.Cryptography.Argon2;
+using Myce.Extensions;
 using Myce.Response;
 using Shared.Application.Contracts;
 using Shared.Application.Services;
@@ -129,7 +130,7 @@ public class UserService(
 
          user!.Update(request.Name, request.IsActive, request.Language);
 
-         var result = await CommitUpdateAsync(user, ct, includeSuccessMessage: true);
+         var result = await CommitUpdateAsync(user, IamConst.Message.Variable.User, ct);
 
          if (result.IsSuccess)
          {
@@ -167,7 +168,7 @@ public class UserService(
 
       user!.UpdatePassword(Argon2.Hash(request.PasswordNew), passwordExpiresAt);
 
-      var result = await CommitUpdateAsync(user, cancellationToken, includeSuccessMessage: true);
+      var result = await CommitUpdateAsync(user, IamConst.Message.Variable.Password, cancellationToken);
 
       if (result.IsSuccess)
       {
@@ -206,7 +207,7 @@ public class UserService(
 
       user!.UpdateOrganizationAdmin(request.IsOrganizationAdmin);
 
-      var result = await CommitUpdateAsync(user, cancellationToken, includeSuccessMessage: true);
+      var result = await CommitUpdateAsync(user, IamConst.Message.Variable.User, cancellationToken);
 
       if (result.IsSuccess)
       {
@@ -236,7 +237,7 @@ public class UserService(
 
       user!.UpdateSupportUser(request.IsSupportUser);
 
-      var result = await CommitUpdateAsync(user, cancellationToken, includeSuccessMessage: true);
+      var result = await CommitUpdateAsync(user, IamConst.Message.Variable.User, cancellationToken);
 
       if (result.IsSuccess)
       {
@@ -312,7 +313,7 @@ public class UserService(
 
       user.RegisterLastSuccessfullyLogin();
 
-      return await CommitUpdateAsync(user, cancellationToken);
+      return await CommitUpdateAsync(user, string.Empty, cancellationToken);
    }
 
    public async Task<Result> UpdateFailedLoginAsync(Guid id, CancellationToken cancellationToken = default)
@@ -329,7 +330,7 @@ public class UserService(
       
       user.RegisterFailedLoginAttempt(maxFailedAttempts, lockedOutMinutes);
 
-      var result = await CommitUpdateAsync(user, cancellationToken);
+      var result = await CommitUpdateAsync(user, string.Empty, cancellationToken);
 
       if (result.IsSuccess && !wasLocked && user.LockedOutUntil.HasValue)
       {
@@ -365,14 +366,14 @@ public class UserService(
 
    private async Task<Result> CommitUpdateAsync(
       User user,
-      CancellationToken cancellationToken,
-      bool includeSuccessMessage = false)
+      string entityForMessage,
+      CancellationToken cancellationToken)
    {
       _iamUnitOfWork.Users.Update(user);
       await _iamUnitOfWork.SaveChangesAsync(cancellationToken);
 
-      return includeSuccessMessage
-         ? Result.Success(IamTranslatedMessagesProvider.Instance.UpdatedSuccess(IamConst.Message.Variable.User))
+      return !entityForMessage.IsNullOrEmpty()
+         ? Result.Success(IamTranslatedMessagesProvider.Instance.UpdatedSuccess(entityForMessage))
          : Result.Success();
    }
 

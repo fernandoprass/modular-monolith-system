@@ -246,8 +246,8 @@ export function RoleEditPage() {
     setIsPermissionSaving(true)
 
     try {
-      await assignRolePermissions(id, permissionIds)
-      showSuccess(t('features.iam.roles.notifications.permissionsAssigned'))
+      const message = await assignRolePermissions(id, permissionIds)
+      showSuccess(message)
       await loadPermissions()
     } catch (error) {
       notifyError(error, t('shared.errors.generic'))
@@ -270,8 +270,8 @@ export function RoleEditPage() {
     setIsPermissionSaving(true)
 
     try {
-      await unassignRolePermissions(id, permissionIds)
-      showSuccess(t('features.iam.roles.notifications.permissionsUnassigned'))
+      const message = await unassignRolePermissions(id, permissionIds)
+      showSuccess(message)
       await loadPermissions()
     } catch (error) {
       notifyError(error, t('shared.errors.generic'))
@@ -411,12 +411,12 @@ function RoleEditForm({
 
     try {
       if (isCreate) {
-        const created = await createRole(value)
-        showSuccess(t('features.iam.roles.notifications.created'))
+        const { data: created, message } = await createRole(value)
+        showSuccess(message)
         onCreated(created)
       } else if (role !== null) {
-        await updateRole(role.id, value)
-        showSuccess(t('features.iam.roles.notifications.updated'))
+        const message = await updateRole(role.id, value)
+        showSuccess(message)
         await onSaved()
       }
     } catch (error) {

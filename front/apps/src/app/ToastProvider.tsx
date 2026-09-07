@@ -27,6 +27,10 @@ export function ToastProvider({ children }: PropsWithChildren) {
   }, [])
 
   const showToast = useCallback((message: string, type: Toast['type']) => {
+    if (message.trim().length === 0) {
+      return
+    }
+
     const id = Date.now()
     setToasts((current) => [...current, { id, message, type }])
     window.setTimeout(() => removeToast(id), 4000)

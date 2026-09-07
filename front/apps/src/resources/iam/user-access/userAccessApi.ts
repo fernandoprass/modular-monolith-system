@@ -1,6 +1,6 @@
 import { API_PATHS } from '../../../data/apiPaths'
 import { deleteIamJsonWithBody, getIamJson, postIamJson } from '../../../data/httpClient'
-import { ensureResultSuccess, unwrapResult } from '../../../data/result'
+import { getApiSuccessText, unwrapResult } from '../../../data/result'
 import type { RoleDto } from '../roles/roleTypes'
 import type { UserRoleDto } from '../users/userTypes'
 
@@ -21,7 +21,7 @@ export async function assignUserRoles(
   startsAt: string,
   expiresAt: string | null,
   roleIds: string[],
-): Promise<void> {
+): Promise<string> {
   const response = await postIamJson(API_PATHS.iam.userAccess.roleAssign, {
     ExpiresAt: expiresAt,
     RoleIds: roleIds,
@@ -29,14 +29,14 @@ export async function assignUserRoles(
     UserId: userId,
   })
 
-  ensureResultSuccess(response)
+  return getApiSuccessText(response)
 }
 
-export async function unassignUserRoles(userId: string, roleIds: string[]): Promise<void> {
+export async function unassignUserRoles(userId: string, roleIds: string[]): Promise<string> {
   const response = await deleteIamJsonWithBody(API_PATHS.iam.userAccess.roleUnassign, {
     RoleIds: roleIds,
     UserId: userId,
   })
 
-  ensureResultSuccess(response)
+  return getApiSuccessText(response)
 }

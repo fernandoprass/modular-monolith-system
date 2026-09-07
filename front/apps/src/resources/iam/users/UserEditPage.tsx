@@ -159,20 +159,20 @@ function UserEditFormPanel({
 
     try {
       if (isCreate) {
-        const created = await createUser(value)
-        showSuccess(t('features.iam.users.notifications.created'))
+        const { data: created, message } = await createUser(value)
+        showSuccess(message)
         navigate(APP_ROUTES.userView(created.id))
       } else {
         if (user === null) {
           return
         }
 
-        await updateUser(user.id, {
+        const message = await updateUser(user.id, {
           [USER_REQUEST_FIELDS.name]: value.name,
           [USER_REQUEST_FIELDS.isActive]: value.isActive,
           [USER_REQUEST_FIELDS.language]: value.language,
         })
-        showSuccess(t('features.iam.users.notifications.updated'))
+        showSuccess(message)
         await onReload()
       }
     } catch (error) {

@@ -87,8 +87,8 @@ export function RoleListPage() {
     }
 
     try {
-      await deleteRole(deleteTarget.id)
-      showSuccess(t('features.iam.roles.notifications.deleted'))
+      const message = await deleteRole(deleteTarget.id)
+      showSuccess(message)
       setDeleteTarget(null)
       await loadRoles()
     } catch (error) {

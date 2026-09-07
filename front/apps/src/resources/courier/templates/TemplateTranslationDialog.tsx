@@ -150,11 +150,11 @@ export function TemplateTranslationDialog({
 
     try {
       if (translation === null) {
-        await addTemplateTranslation(templateId, value)
-        showSuccess(t('features.courier.templates.notifications.translationAdded'))
+        const message = await addTemplateTranslation(templateId, value)
+        showSuccess(message)
       } else {
-        await updateTemplateTranslation(templateId, translation.language, value)
-        showSuccess(t('features.courier.templates.notifications.translationUpdated'))
+        const message = await updateTemplateTranslation(templateId, translation.language, value)
+        showSuccess(message)
       }
 
       await onSaved()

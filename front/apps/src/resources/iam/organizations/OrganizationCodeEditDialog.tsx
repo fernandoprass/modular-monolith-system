@@ -59,10 +59,10 @@ export function OrganizationCodeEditDialog({
     setIsSaving(true)
 
     try {
-      await updateOrganizationCode(organization.id, {
+      const message = await updateOrganizationCode(organization.id, {
         [ORGANIZATION_REQUEST_FIELDS.code]: value.code,
       })
-      showSuccess(t('features.iam.organizations.notifications.codeUpdated'))
+      showSuccess(message)
       await onSaved()
       onClose()
     } catch (error) {

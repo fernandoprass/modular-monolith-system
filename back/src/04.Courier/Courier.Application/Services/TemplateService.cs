@@ -77,7 +77,9 @@ public class TemplateService(
 
       await _templateRepository.AddAsync(template, cancellationToken);
 
-      return Result<TemplateDto>.Success(template.ToTemplateDto());
+      return new Result<TemplateDto>(
+         template.ToTemplateDto(),
+         [CourierTranslatedMessagesProvider.Instance.CreatedSuccess(CourierConst.Message.Variable.Template)]);
    }
 
    public async Task<Result> UpdateAsync(
@@ -107,7 +109,7 @@ public class TemplateService(
          _userContext.UserId);
       await _templateRepository.UpdateAsync(template, cancellationToken);
 
-      return Result.Success(new SuccessInfo());
+      return Result.Success(CourierTranslatedMessagesProvider.Instance.UpdatedSuccess(CourierConst.Message.Variable.Template));
    }
 
    public async Task<Result> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
@@ -120,7 +122,7 @@ public class TemplateService(
       }
 
       await _templateRepository.DeleteAsync(id, cancellationToken);
-      return Result.Success(new SuccessInfo());
+      return Result.Success(CourierTranslatedMessagesProvider.Instance.DeletedSuccess(CourierConst.Message.Variable.Template));
    }
 
    public async Task<Result> AddTranslationAsync(
@@ -144,7 +146,7 @@ public class TemplateService(
       }
 
       await _templateRepository.UpdateAsync(template, cancellationToken);
-      return Result.Success(new SuccessInfo());
+      return Result.Success(CourierTranslatedMessagesProvider.Instance.CreatedSuccess(CourierConst.Message.Variable.TemplateTranslation));
    }
 
    public async Task<Result> UpdateTranslationAsync(
@@ -170,7 +172,7 @@ public class TemplateService(
       }
 
       await _templateRepository.UpdateAsync(template, cancellationToken);
-      return Result.Success(new SuccessInfo());
+      return Result.Success(CourierTranslatedMessagesProvider.Instance.UpdatedSuccess(CourierConst.Message.Variable.TemplateTranslation));
    }
 
    public async Task<Result> RemoveTranslationAsync(
@@ -191,7 +193,7 @@ public class TemplateService(
       }
 
       await _templateRepository.UpdateAsync(template, cancellationToken);
-      return Result.Success(new SuccessInfo());
+      return Result.Success(CourierTranslatedMessagesProvider.Instance.DeletedSuccess(CourierConst.Message.Variable.TemplateTranslation));
    }
 
    private TemplateTranslation ToTranslation(TemplateTranslationRequest request)

@@ -93,8 +93,8 @@ export function NotificationListPage() {
 
   const handleMarkRead = useCallback(async (notification: NotificationLiteDto) => {
     try {
-      await markNotificationAsRead(notification.id)
-      showSuccess(t('features.courier.notifications.notifications.markedRead'))
+      const message = await markNotificationAsRead(notification.id)
+      showSuccess(message)
       await loadNotifications(pageNumber)
     } catch (error) {
       notifyError(error, t('shared.errors.generic'))
@@ -150,8 +150,8 @@ export function NotificationListPage() {
     }
 
     try {
-      await deleteNotification(notificationToDelete.id)
-      showSuccess(t('features.courier.notifications.notifications.deleted'))
+      const message = await deleteNotification(notificationToDelete.id)
+      showSuccess(message)
       setNotificationToDelete(null)
       await loadNotifications(pageNumber)
     } catch (error) {

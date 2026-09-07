@@ -99,12 +99,12 @@ function UserProfileFormPanel({ onSaved, user }: UserProfileFormPanelProps) {
     setIsSaving(true)
 
     try {
-      await updateCurrentUser({
+      const message = await updateCurrentUser({
         [USER_REQUEST_FIELDS.name]: value.name,
         [USER_REQUEST_FIELDS.isActive]: user.isActive,
         [USER_REQUEST_FIELDS.language]: value.language,
       })
-      showSuccess(t('features.iam.users.notifications.profileUpdated'))
+      showSuccess(message)
       await onSaved()
     } catch (error) {
       notifyError(error, t('shared.errors.generic'))

@@ -111,8 +111,8 @@ export function OrganizationListPage() {
     }
 
     try {
-      await deleteOrganization(deleteTarget.id)
-      showSuccess(t('features.iam.organizations.notifications.deleted'))
+      const message = await deleteOrganization(deleteTarget.id)
+      showSuccess(message)
       setDeleteTarget(null)
       await loadOrganizations(pageNumber)
     } catch (error) {

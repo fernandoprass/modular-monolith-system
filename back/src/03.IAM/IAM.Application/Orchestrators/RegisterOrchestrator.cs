@@ -6,6 +6,7 @@ using IAM.Domain.Entities;
 using IAM.Domain.Enums;
 using IAM.Domain.Interfaces;
 using IAM.Domain.Mappers;
+using IAM.Domain.Messages;
 using IAM.Domain.QueryRepositories;
 using IAM.Domain.Repositories;
 using Isopoh.Cryptography.Argon2;
@@ -121,7 +122,7 @@ public class RegisterOrchestrator(
          BuildOrganizationTemplateValues(organization, user),
          cancellationToken);
 
-      return Result<OrganizationDto>.Success(organization.ToOrganizationDto());
+      return new Result<OrganizationDto>(IamTranslatedMessagesProvider.Instance.CreatedSuccess(IamConst.Message.Variable.Organization));
    }
 
    public async Task<Result> DeleteOrganizationAsync(Guid id, CancellationToken cancellationToken = default)
@@ -166,7 +167,7 @@ public class RegisterOrchestrator(
                ct);
          }
 
-         return Result.Success(new SuccessInfo());
+         return Result.Success(IamTranslatedMessagesProvider.Instance.DeletedSuccess(IamConst.Message.Variable.User));
       }, cancellationToken);
    }
 

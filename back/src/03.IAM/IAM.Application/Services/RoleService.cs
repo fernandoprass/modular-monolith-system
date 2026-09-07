@@ -154,7 +154,7 @@ public class RoleService(
             request,
             ct);
 
-         return Result.Success(new SuccessInfo());
+         return Result.Success(new RoleAssignedInfo());
       }, cancellationToken);
    }
 
@@ -203,7 +203,7 @@ public class RoleService(
             request,
             ct);
 
-         return Result.Success(new SuccessInfo());
+         return Result.Success(new RoleUnassignedInfo());
       }, cancellationToken);
    }
 

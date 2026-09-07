@@ -5,6 +5,13 @@ namespace IAM.Domain.Messages
 {
    public sealed class IamTranslatedMessagesProvider : BaseTranslatedMessagesProvider
    {
+      //info messages
+      public const string PermissionAssignedSuccess = nameof(PermissionAssignedSuccess);
+      public const string PermissionUnassignedSuccess = nameof(PermissionUnassignedSuccess);
+      public const string RoleAssignedSuccess = nameof(RoleAssignedSuccess);
+      public const string RoleUnassignedSuccess = nameof(RoleUnassignedSuccess);
+
+      //error messages
       public const string OrganizationDuplicateCodeError = nameof(OrganizationDuplicateCodeError);
       public const string OrganizationForbiddenError = nameof(OrganizationForbiddenError);
       public const string OrganizationInvalidCodeFormatError = nameof(OrganizationInvalidCodeFormatError);
@@ -33,6 +40,34 @@ namespace IAM.Domain.Messages
 
       private IamTranslatedMessagesProvider()
       {
+         AddInfoMessagesTranslations();
+
+         AddErrorMessagesTranslations();
+
+         AddVariableTranslations();
+      }
+
+      private void AddInfoMessagesTranslations()
+      {
+         AddTranslation(PermissionAssignedSuccess, LanguageOptions.English, "Permission assigned successfully.");
+         AddTranslation(PermissionAssignedSuccess, LanguageOptions.Spanish, "Permiso asignado con éxito.");
+         AddTranslation(PermissionAssignedSuccess, LanguageOptions.PortugueseBrazil, "Permissão atribuída com sucesso.");
+
+         AddTranslation(PermissionUnassignedSuccess, LanguageOptions.English, "Permission unassigned successfully.");
+         AddTranslation(PermissionUnassignedSuccess, LanguageOptions.Spanish, "Permiso desasignado con éxito.");
+         AddTranslation(PermissionUnassignedSuccess, LanguageOptions.PortugueseBrazil, "Permissão removida com sucesso.");
+
+         AddTranslation(RoleAssignedSuccess, LanguageOptions.English, "Role assigned successfully.");
+         AddTranslation(RoleAssignedSuccess, LanguageOptions.Spanish, "Rol asignado con éxito.");
+         AddTranslation(RoleAssignedSuccess, LanguageOptions.PortugueseBrazil, "Função foi atribuída com sucesso.");
+
+         AddTranslation(RoleUnassignedSuccess, LanguageOptions.English, "Role unassigned successfully.");
+         AddTranslation(RoleUnassignedSuccess, LanguageOptions.Spanish, "Rol desasignado con éxito.");
+         AddTranslation(RoleUnassignedSuccess, LanguageOptions.PortugueseBrazil, "Função removida com sucesso.");
+      }
+
+      private void AddErrorMessagesTranslations()
+      {
          AddTranslation(OrganizationDuplicateCodeError, LanguageOptions.English, "The organization code '{code}' already exists.");
          AddTranslation(OrganizationDuplicateCodeError, LanguageOptions.Spanish, "El código de organización '{code}' ya existe.");
          AddTranslation(OrganizationDuplicateCodeError, LanguageOptions.PortugueseBrazil, "O código de organização '{code}' já existe.");
@@ -54,17 +89,17 @@ namespace IAM.Domain.Messages
          AddTranslation(PermissionNotFoundInAssignmentError, LanguageOptions.PortugueseBrazil, "Uma ou mais permissões não existem.");
          AddTranslation(PermissionsCannotBeUnassignedError, LanguageOptions.English, "Permissions cannot be unassigned. One or more permissions are not assigned to the role.");
          AddTranslation(PermissionsCannotBeUnassignedError, LanguageOptions.Spanish, "Los permisos no se pueden desasignar. Uno o más permisos no están asignados al perfil.");
-         AddTranslation(PermissionsCannotBeUnassignedError, LanguageOptions.PortugueseBrazil, "As permissões não podem ser desatribuídas. Uma ou mais permissões não estão atribuídas ao perfil.");
+         AddTranslation(PermissionsCannotBeUnassignedError, LanguageOptions.PortugueseBrazil, "As permissões não podem ser removidas. Uma ou mais permissões não estão atribuídas ao perfil.");
 
          AddTranslation(RoleDuplicateNameError, LanguageOptions.English, "A role with the name '{name}' already exists.");
          AddTranslation(RoleDuplicateNameError, LanguageOptions.Spanish, "Un perfil con el nombre '{name}' ya existe.");
-         AddTranslation(RoleDuplicateNameError, LanguageOptions.PortugueseBrazil, "Um perfil com o nome '{name}' já existe.");
+         AddTranslation(RoleDuplicateNameError, LanguageOptions.PortugueseBrazil, "Uma função com o nome '{name}' já existe.");
          AddTranslation(RolesCannotBeAssignedError, LanguageOptions.English, "Roles cannot be assigned. One or more roles added to the list are inactive or belong to another organization.");
          AddTranslation(RolesCannotBeAssignedError, LanguageOptions.Spanish, "Los perfiles no se pueden asignar. Uno o más perfiles agregados a la lista están inactivos o pertenecen a otra organización.");
-         AddTranslation(RolesCannotBeAssignedError, LanguageOptions.PortugueseBrazil, "Os perfis não podem ser atribuídos. Um ou mais perfis adicionados à lista estão inativos ou pertencem a outra organização.");
+         AddTranslation(RolesCannotBeAssignedError, LanguageOptions.PortugueseBrazil, "As funções não podem ser atribuídas. Uma ou mais funções adicionadas à lista estão inativas ou pertencem a outra organização.");
          AddTranslation(RolesCannotBeUnassignedError, LanguageOptions.English, "Roles cannot be unassigned. One or more roles are not assigned to the user.");
          AddTranslation(RolesCannotBeUnassignedError, LanguageOptions.Spanish, "Los perfiles no se pueden desasignar. Uno o más perfiles no están asignados al usuario.");
-         AddTranslation(RolesCannotBeUnassignedError, LanguageOptions.PortugueseBrazil, "Os perfis não podem ser desatribuídos. Um ou mais perfis não estão atribuídos ao usuário.");
+         AddTranslation(RolesCannotBeUnassignedError, LanguageOptions.PortugueseBrazil, "As funções não podem ser removidas. Uma ou mais funções não estão atribuídas ao usuário.");
          AddTranslation(RolesInvalidStartDateError, LanguageOptions.English, "Start date should be today or in the future.");
          AddTranslation(RolesInvalidStartDateError, LanguageOptions.Spanish, "La fecha inicial debe ser hoy o una fecha futura.");
          AddTranslation(RolesInvalidStartDateError, LanguageOptions.PortugueseBrazil, "A data inicial deve ser hoje ou uma data futura.");
@@ -106,26 +141,28 @@ namespace IAM.Domain.Messages
          AddTranslation(PasswordMissingSpecialError, LanguageOptions.English, "Password must contain at least one special character (#?!@$%^&*-_.).");
          AddTranslation(PasswordMissingSpecialError, LanguageOptions.Spanish, "La contraseña debe contener al menos un carácter especial (#?!@$%^&*-_.).");
          AddTranslation(PasswordMissingSpecialError, LanguageOptions.PortugueseBrazil, "A senha deve conter pelo menos um caractere especial (#?!@$%^&*-_.).");
-
-         AddVariableTranslations();
       }
 
       private void AddVariableTranslations()
       {
          AddVariableTranslation(IamConst.Message.Variable.Organization, LanguageOptions.English, "Organization");
-         AddVariableTranslation(IamConst.Message.Variable.Organization, LanguageOptions.Spanish, "organización");
+         AddVariableTranslation(IamConst.Message.Variable.Organization, LanguageOptions.Spanish, "Organización");
          AddVariableTranslation(IamConst.Message.Variable.Organization, LanguageOptions.PortugueseBrazil, "Organização");
 
+         AddVariableTranslation(IamConst.Message.Variable.Password, LanguageOptions.English, "Password");
+         AddVariableTranslation(IamConst.Message.Variable.Password, LanguageOptions.Spanish, "Contraseña");
+         AddVariableTranslation(IamConst.Message.Variable.Password, LanguageOptions.PortugueseBrazil, "Senha");
+
          AddVariableTranslation(IamConst.Message.Variable.Permission, LanguageOptions.English, "Permission");
-         AddVariableTranslation(IamConst.Message.Variable.Permission, LanguageOptions.Spanish, "permiso");
+         AddVariableTranslation(IamConst.Message.Variable.Permission, LanguageOptions.Spanish, "Permiso");
          AddVariableTranslation(IamConst.Message.Variable.Permission, LanguageOptions.PortugueseBrazil, "Permissão");
 
          AddVariableTranslation(IamConst.Message.Variable.Role, LanguageOptions.English, "Role");
-         AddVariableTranslation(IamConst.Message.Variable.Role, LanguageOptions.Spanish, "rol");
+         AddVariableTranslation(IamConst.Message.Variable.Role, LanguageOptions.Spanish, "Rol");
          AddVariableTranslation(IamConst.Message.Variable.Role, LanguageOptions.PortugueseBrazil, "Função");
 
          AddVariableTranslation(IamConst.Message.Variable.User, LanguageOptions.English, "User");
-         AddVariableTranslation(IamConst.Message.Variable.User, LanguageOptions.Spanish, "usuario");
+         AddVariableTranslation(IamConst.Message.Variable.User, LanguageOptions.Spanish, "Usuario");
          AddVariableTranslation(IamConst.Message.Variable.User, LanguageOptions.PortugueseBrazil, "Usuário");
       }
    }

@@ -5,6 +5,7 @@ using Courier.Domain.DTOs.Responses;
 using Courier.Domain.Entities;
 using Courier.Domain.Interfaces.Repositories;
 using Courier.Domain.Mappers;
+using Courier.Domain.Messages;
 using Myce.Response;
 using Shared.Application.Contracts;
 using Shared.Application.Services;
@@ -88,7 +89,9 @@ public class EmailService(
 
          var id = await _emailRepository.AddAsync(email, ct);
 
-         return Result<EmailCreateDto>.Success(new EmailCreateDto(id));
+         return new Result<EmailCreateDto>(
+            new EmailCreateDto(id),
+            [CourierTranslatedMessagesProvider.Instance.CreatedSuccess(CourierConst.Message.Variable.Email)]);
       }, cancellationToken);
    }
 }

@@ -36,7 +36,7 @@ export function PublicOrganizationCreatePage() {
   const notifyError = useNotifyError()
   const { showSuccess } = useToast()
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isSuccess, setIsSuccess] = useState(false)
+  const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const {
     control,
     handleSubmit,
@@ -61,9 +61,9 @@ export function PublicOrganizationCreatePage() {
     setIsSubmitting(true)
 
     try {
-      await createOrganization(value)
-      setIsSuccess(true)
-      showSuccess(t('public.organizationRegistration.messages.success'))
+      const { message } = await createOrganization(value)
+      setSuccessMessage(message)
+      showSuccess(message)
     } catch (error) {
       notifyError(error, t('shared.errors.generic'))
     } finally {
@@ -80,9 +80,9 @@ export function PublicOrganizationCreatePage() {
         </CardHeader>
         <CardContent>
           <div className="form-stack">
-            {isSuccess ? (
+            {successMessage !== null ? (
               <>
-                <p className="success-text">{t('public.organizationRegistration.messages.success')}</p>
+                <p className="success-text">{successMessage}</p>
                 <Link className="text-link" to={APP_ROUTES.login}>
                   {t('public.organizationRegistration.actions.signIn')}
                 </Link>

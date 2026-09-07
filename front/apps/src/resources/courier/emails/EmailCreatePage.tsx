@@ -64,9 +64,9 @@ export function EmailCreatePage() {
     setIsSaving(true)
 
     try {
-      const created = await createEmail(value)
+      const { data: created, message } = await createEmail(value)
 
-      showSuccess(t('features.courier.emails.notifications.created'))
+      showSuccess(message)
       navigate(APP_ROUTES.emailView(created.id))
     } catch (error) {
       notifyError(error, t('shared.errors.generic'))

@@ -154,8 +154,8 @@ function ParameterEditForm({ onSaved, parameter }: ParameterEditFormProps) {
     setIsSaving(true)
 
     try {
-      await updateParameter(parameter.id, toSubmitForm(value))
-      showSuccess(t('features.iam.parameters.notifications.updated'))
+      const message = await updateParameter(parameter.id, toSubmitForm(value))
+      showSuccess(message)
       await onSaved()
     } catch (error) {
       notifyError(error, t('shared.errors.generic'))

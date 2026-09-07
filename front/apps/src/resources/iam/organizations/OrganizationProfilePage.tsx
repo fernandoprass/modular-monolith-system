@@ -106,13 +106,13 @@ function OrganizationProfileFormPanel({
     setIsSaving(true)
 
     try {
-      await updateOwnOrganization({
+      const message = await updateOwnOrganization({
         [ORGANIZATION_REQUEST_FIELDS.name]: value.name,
         [ORGANIZATION_REQUEST_FIELDS.description]: value.description,
         [ORGANIZATION_REQUEST_FIELDS.isActive]: value.isActive,
         [ORGANIZATION_REQUEST_FIELDS.defaultLanguage]: value.defaultLanguage,
       })
-      showSuccess(t('features.iam.organizations.notifications.updated'))
+      showSuccess(message)
       await onSaved()
     } catch (error) {
       notifyError(error, t('shared.errors.generic'))

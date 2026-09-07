@@ -171,9 +171,6 @@ export const enMessages = {
         name: 'Name',
         type: 'Type',
       },
-      messages: {
-        success: 'Organization created. You can sign in now.',
-      },
       title: 'Create organization',
     },
   },
@@ -188,9 +185,6 @@ export const enMessages = {
           noAttempts: 'No delivery attempts recorded.',
         },
         name: RESOURCE_LABELS.courier.emails,
-        notifications: {
-          created: 'Email created.',
-        },
         pages: {
           create: 'Create email',
           list: RESOURCE_LABELS.courier.emails,
@@ -212,10 +206,6 @@ export const enMessages = {
           empty: 'No notifications found.',
         },
         name: RESOURCE_LABELS.courier.notifications,
-        notifications: {
-          deleted: 'Notification deleted.',
-          markedRead: 'Notification marked as read.',
-        },
         pages: {
           list: RESOURCE_LABELS.courier.notifications,
         },
@@ -234,9 +224,6 @@ export const enMessages = {
           communicationsHelp: 'Disable the communications you do not want to receive.',
         },
         name: RESOURCE_LABELS.courier.userPreferences,
-        notifications: {
-          updated: 'Preferences updated.',
-        },
         pages: {
           edit: RESOURCE_LABELS.courier.userPreferences,
         },
@@ -272,14 +259,6 @@ export const enMessages = {
           noTranslations: 'No translations found.',
         },
         name: RESOURCE_LABELS.courier.templates,
-        notifications: {
-          created: 'Template created.',
-          deleted: 'Template deleted.',
-          translationAdded: 'Translation added.',
-          translationDeleted: 'Translation deleted.',
-          translationUpdated: 'Translation updated.',
-          updated: 'Template updated.',
-        },
         pages: {
           create: 'Create template',
           edit: 'Edit template',
@@ -315,11 +294,6 @@ export const enMessages = {
           empty: 'No organizations found.',
         },
         name: RESOURCE_LABELS.iam.organizations,
-        notifications: {
-          codeUpdated: 'Organization code updated.',
-          deleted: 'Organization deleted.',
-          updated: 'Organization updated.',
-        },
         pages: {
           edit: 'Edit organization',
           list: RESOURCE_LABELS.iam.organizations,
@@ -336,11 +310,6 @@ export const enMessages = {
         messages: {
           empty: 'No parameters found.',
         },
-        notifications: {
-          overrideRemoved: 'Override removed.',
-          overrideSaved: 'Override saved.',
-          updated: 'Parameter updated.',
-        },
         pages: {
           edit: 'Edit parameter',
           list: RESOURCE_LABELS.iam.parameters,
@@ -353,9 +322,6 @@ export const enMessages = {
           empty: 'No permissions found.',
         },
         name: RESOURCE_LABELS.iam.permissions,
-        notifications: {
-          updated: 'Permission updated.',
-        },
         pages: {
           list: RESOURCE_LABELS.iam.permissions,
         },
@@ -370,13 +336,6 @@ export const enMessages = {
           empty: 'No roles found.',
         },
         name: RESOURCE_LABELS.iam.roles,
-        notifications: {
-          created: 'Role created.',
-          deleted: 'Role deleted.',
-          permissionsAssigned: 'Permissions assigned.',
-          permissionsUnassigned: 'Permissions removed.',
-          updated: 'Role updated.',
-        },
         pages: {
           create: 'Create role',
           edit: 'Edit role',
@@ -400,13 +359,6 @@ export const enMessages = {
           passwordsDoNotMatch: 'Passwords do not match.',
         },
         name: RESOURCE_LABELS.iam.users,
-        notifications: {
-          created: 'User created.',
-          deleted: 'User deleted.',
-          passwordUpdated: 'Password updated.',
-          profileUpdated: 'Profile updated.',
-          updated: 'User updated.',
-        },
         pages: {
           changePassword: 'Change password',
           create: 'Create user',
@@ -433,10 +385,6 @@ export const enMessages = {
           noRoles: 'No roles found.',
         },
         name: 'User Access',
-        notifications: {
-          rolesAssigned: 'Roles assigned.',
-          rolesUnassigned: 'Roles removed.',
-        },
         pages: {
           list: 'User Access',
         },

@@ -167,7 +167,9 @@ internal class ParameterService(
       await _unitOfWork.Parameters.AddAsync(parameter, cancellationToken);
       await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-      return Result<ParameterDto>.Success(parameter.ToParameterDto());
+      return new Result<ParameterDto>(
+         parameter.ToParameterDto(),
+         [SharedTranslatedMessagesProvider.Instance.CreatedSuccess(SharedConst.Message.Variable.Parameter)]);
    }
 
    public async Task<Result> UpdateAsync(Guid id, ParameterUpdateRequest request, CancellationToken cancellationToken = default)
@@ -210,7 +212,7 @@ internal class ParameterService(
          _userContext,
          cancellationToken);
 
-      return Result.Success(new SuccessInfo());
+      return Result.Success(SharedTranslatedMessagesProvider.Instance.UpdatedSuccess(SharedConst.Message.Variable.Parameter));
    }
 
    public async Task<ParameterDto?> GetByKeyAsync(string key, CancellationToken cancellationToken = default)
@@ -229,7 +231,7 @@ internal class ParameterService(
       await _unitOfWork.SaveChangesAsync(cancellationToken);
       await _parameterValueCache.RemoveAsync(parameter.Key, cancellationToken);
 
-      return Result.Success(new SuccessInfo());
+      return Result.Success(SharedTranslatedMessagesProvider.Instance.DeletedSuccess(SharedConst.Message.Variable.Parameter));
    }
 
    public Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken = default)

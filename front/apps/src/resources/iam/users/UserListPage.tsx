@@ -113,8 +113,8 @@ export function UserListPage() {
     }
 
     try {
-      await deleteUser(deleteTarget.id)
-      showSuccess(t('features.iam.users.notifications.deleted'))
+      const message = await deleteUser(deleteTarget.id)
+      showSuccess(message)
       setDeleteTarget(null)
       await loadUsers(pageNumber)
     } catch (error) {

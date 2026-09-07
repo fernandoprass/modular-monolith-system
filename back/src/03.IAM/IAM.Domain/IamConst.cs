@@ -62,6 +62,7 @@ public static partial class IamConst
          public const string Organization = "organization";
          public const string User = "user";
          public const string Role = "role";
+         public const string Password = "password";
          public const string Permission = "permission";
       }
    }

@@ -68,8 +68,8 @@ export function PermissionEditDialog({
     setIsSaving(true)
 
     try {
-      await updatePermission(permission.id, value)
-      showSuccess(t('features.iam.permissions.notifications.updated'))
+      const message = await updatePermission(permission.id, value)
+      showSuccess(message)
       await onSaved()
       onClose()
     } catch (error) {

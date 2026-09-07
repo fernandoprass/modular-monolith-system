@@ -1,6 +1,6 @@
 import { API_PATHS } from '../../../data/apiPaths'
 import { getCourierJson, getCourierJsonWithQuery, postCourierJson } from '../../../data/httpClient'
-import { unwrapResult } from '../../../data/result'
+import { getApiSuccessText, type ApiMutationResult, unwrapResult } from '../../../data/result'
 import type { PagedResultDto } from '../../../shared/pagination'
 import {
   EMAIL_FILTER_VALUES,
@@ -199,10 +199,10 @@ export async function getEmail(id: string): Promise<EmailDto> {
   return normalizeEmailDto(unwrapResult<unknown>(response))
 }
 
-export async function createEmail(request: EmailCreateForm): Promise<EmailCreateDto> {
+export async function createEmail(request: EmailCreateForm): Promise<ApiMutationResult<EmailCreateDto>> {
   const response = await postCourierJson(API_PATHS.courier.emails.list, toEmailCreateRequest(request))
   const result = unwrapResult<unknown>(response)
   const source = unwrapEmailSource(result)
 
-  return { id: readString(source, 'id', 'Id') }
+  return { data: { id: readString(source, 'id', 'Id') }, message: getApiSuccessText(response) }
 }

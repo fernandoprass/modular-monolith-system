@@ -152,13 +152,13 @@ export function UserAccessPage() {
     setIsSaving(true)
 
     try {
-      await assignUserRoles(
+      const message = await assignUserRoles(
         userId,
         dateTimeLocalToUtcIso(startsAt),
         expiresAt.length === 0 ? null : dateTimeLocalToUtcIso(expiresAt),
         roleIds,
       )
-      showSuccess(t('features.iam.userAccess.notifications.rolesAssigned'))
+      showSuccess(message)
       await loadUserAccess()
     } catch (error) {
       notifyError(error, t('shared.errors.generic'))
@@ -177,8 +177,8 @@ export function UserAccessPage() {
     setIsSaving(true)
 
     try {
-      await unassignUserRoles(userId, roleIds)
-      showSuccess(t('features.iam.userAccess.notifications.rolesUnassigned'))
+      const message = await unassignUserRoles(userId, roleIds)
+      showSuccess(message)
       await loadUserAccess()
     } catch (error) {
       notifyError(error, t('shared.errors.generic'))

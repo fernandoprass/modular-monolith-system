@@ -1,6 +1,6 @@
 import { API_PATHS } from '../../../data/apiPaths'
 import { getCourierJson, putCourierJson } from '../../../data/httpClient'
-import { unwrapResult } from '../../../data/result'
+import { getApiSuccessText, unwrapResult } from '../../../data/result'
 import {
   USER_PREFERENCE_REQUEST_FIELDS,
   type UserPreferenceForm,
@@ -66,6 +66,8 @@ export async function getUserPreference(): Promise<UserPreferenceTemplateOptionD
   return Array.isArray(result) ? result.map(normalizeTemplateOption) : []
 }
 
-export async function updateUserPreference(form: UserPreferenceForm): Promise<void> {
-  await putCourierJson(API_PATHS.courier.userPreferences.list, toUpdateRequest(form))
+export async function updateUserPreference(form: UserPreferenceForm): Promise<string> {
+  const response = await putCourierJson(API_PATHS.courier.userPreferences.list, toUpdateRequest(form))
+
+  return getApiSuccessText(response)
 }

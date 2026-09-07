@@ -116,8 +116,8 @@ export function ParameterSettingsPage({ embedded = false, owner }: ParameterSett
     setParameterSaving(parameter.id, true)
 
     try {
-      await saveParameterOverride(parameter.id, value)
-      showSuccess(t('features.iam.parameters.notifications.overrideSaved'))
+      const message = await saveParameterOverride(parameter.id, value)
+      showSuccess(message)
       await loadParameters()
     } catch (error) {
       notifyError(error, t('shared.errors.generic'))
@@ -134,8 +134,8 @@ export function ParameterSettingsPage({ embedded = false, owner }: ParameterSett
     setParameterSaving(parameter.id, true)
 
     try {
-      await deleteParameterOverride(parameter.parameterOverrideId)
-      showSuccess(t('features.iam.parameters.notifications.overrideRemoved'))
+      const message = await deleteParameterOverride(parameter.parameterOverrideId)
+      showSuccess(message)
       await loadParameters()
     } catch (error) {
       notifyError(error, t('shared.errors.generic'))

@@ -106,8 +106,8 @@ function UserPreferenceFormPanel({ templates: initialTemplates, onSaved }: UserP
     setIsSaving(true)
 
     try {
-      await updateUserPreference(value)
-      showSuccess(t('features.courier.userPreferences.notifications.updated'))
+      const message = await updateUserPreference(value)
+      showSuccess(message)
       await onSaved()
     } catch (error) {
       notifyError(error, t('shared.errors.generic'))

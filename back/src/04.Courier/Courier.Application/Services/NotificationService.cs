@@ -5,6 +5,7 @@ using Courier.Domain.DTOs.Responses;
 using Courier.Domain.Entities;
 using Courier.Domain.Interfaces.Repositories;
 using Courier.Domain.Mappers;
+using Courier.Domain.Messages;
 using Myce.Response;
 using Shared.Application.Contracts;
 using Shared.Application.Services;
@@ -85,7 +86,7 @@ public class NotificationService(
 
       notification.MarkAsRead();
       await _notificationRepository.UpdateAsync(notification, cancellationToken);
-      return Result.Success(new SuccessInfo());
+      return Result.Success(CourierTranslatedMessagesProvider.Instance.UpdatedSuccess(CourierConst.Message.Variable.Notification));
    }
 
    public async Task<Result> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
@@ -103,7 +104,7 @@ public class NotificationService(
       }
 
       await _notificationRepository.DeleteAsync(id, cancellationToken);
-      return Result.Success(new SuccessInfo());
+      return Result.Success(CourierTranslatedMessagesProvider.Instance.DeletedSuccess(CourierConst.Message.Variable.Notification));
    }
 
    private bool CanAccessNotification(Notification notification)

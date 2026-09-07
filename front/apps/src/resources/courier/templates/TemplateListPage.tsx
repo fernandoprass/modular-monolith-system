@@ -104,8 +104,8 @@ export function TemplateListPage() {
     }
 
     try {
-      await deleteTemplate(templateToDelete.id)
-      showSuccess(t('features.courier.templates.notifications.deleted'))
+      const message = await deleteTemplate(templateToDelete.id)
+      showSuccess(message)
       setTemplateToDelete(null)
       await loadTemplates(pageNumber)
     } catch (error) {

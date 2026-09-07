@@ -133,7 +133,7 @@ public class PermissionService(
             request,
             ct);
 
-         return Result.Success(new SuccessInfo());
+         return Result.Success(new PermissionAssignedInfo());
       }, cancellationToken);
    }
 
@@ -170,7 +170,7 @@ public class PermissionService(
             request,
             ct);
 
-         return Result.Success(new SuccessInfo());
+         return Result.Success(new PermissionUnassignedInfo());
       }, cancellationToken);
    }
 

@@ -1,6 +1,6 @@
 import { API_PATHS } from '../../../data/apiPaths'
 import { getIamJsonWithQuery, putIamJson } from '../../../data/httpClient'
-import { ensureResultSuccess, unwrapResult } from '../../../data/result'
+import { getApiSuccessText, unwrapResult } from '../../../data/result'
 import type { PagedResultDto } from '../../../shared/pagination'
 import type { PermissionDto } from '../../../shared/permissions'
 import {
@@ -62,8 +62,8 @@ export async function getPermissions(request: PermissionListQuery): Promise<Page
   return unwrapResult<PagedResultDto<PermissionDto>>(response)
 }
 
-export async function updatePermission(id: string, request: PermissionUpdateForm): Promise<void> {
+export async function updatePermission(id: string, request: PermissionUpdateForm): Promise<string> {
   const response = await putIamJson(API_PATHS.iam.permissions.byId(id), toPermissionUpdateRequest(request))
 
-  ensureResultSuccess(response)
+  return getApiSuccessText(response)
 }
