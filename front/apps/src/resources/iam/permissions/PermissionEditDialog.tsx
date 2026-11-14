@@ -1,3 +1,4 @@
+import { toTranslatedOptions } from '../../../shared/translatedOptions'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { createValidationErrorMap } from '../../../shared/validation'
 import { useEffect, useState } from 'react'
@@ -10,7 +11,7 @@ import { useNotifyError } from '../../../auth/AuthProvider'
 import { Button } from '../../../components/ui/button'
 import { Checkbox } from '../../../components/ui/checkbox'
 import { Dialog } from '../../../components/ui/dialog-confirm'
-import { Field, FieldGroup, FieldLabel } from '../../../components/ui/form'
+import { Field, FieldError, FieldGroup, FieldLabel } from '../../../components/ui/form'
 import { Input } from '../../../components/ui/input'
 import { Select } from '../../../components/ui/select'
 import { Textarea } from '../../../components/ui/textarea'
@@ -21,7 +22,6 @@ import {
   PERMISSION_RESOURCE_OPTIONS,
   type PermissionUpdateForm,
 } from './permissionTypes'
-import { toTranslatedOptions } from './permissionUi'
 
 type PermissionEditDialogProps = {
   isOpen: boolean
@@ -50,6 +50,7 @@ export function PermissionEditDialog({
   const { showSuccess } = useToast()
   const [isSaving, setIsSaving] = useState(false)
   const {
+    formState: { errors },
     control,
     handleSubmit,
     register,
@@ -87,20 +88,26 @@ export function PermissionEditDialog({
       open={isOpen}
       title={t('common.actions.edit')}
     >
-      <form onSubmit={handleSubmit(handleSave)}>
+      <form noValidate onSubmit={handleSubmit(handleSave)}>
         <div className="dialog-body">
           <FieldGroup>
             <Controller
               control={control}
               name="module"
               render={({ field }) => (
-                <Field>
-                  <FieldLabel>{t('common.fields.module')}</FieldLabel>
+                <Field data-invalid={errors.module !== undefined}>
+                  <FieldLabel htmlFor="PermissionEditDialog-module">{t('common.fields.module')}</FieldLabel>
                   <Select
+                    onBlur={field.onBlur}
+                    ref={field.ref}
+                    aria-invalid={errors.module !== undefined}
+                    aria-describedby={errors.module ? 'PermissionEditDialog-module-error' : undefined}
+                    id="PermissionEditDialog-module"
                     onValueChange={field.onChange}
                     options={toTranslatedOptions(PERMISSION_MODULE_OPTIONS, t)}
                     value={field.value}
                   />
+                  <FieldError id="PermissionEditDialog-module-error">{errors.module?.message}</FieldError>
                 </Field>
               )}
             />
@@ -108,27 +115,54 @@ export function PermissionEditDialog({
               control={control}
               name="resource"
               render={({ field }) => (
-                <Field>
-                  <FieldLabel>{t('common.fields.resource')}</FieldLabel>
+                <Field data-invalid={errors.resource !== undefined}>
+                  <FieldLabel htmlFor="PermissionEditDialog-resource">{t('common.fields.resource')}</FieldLabel>
                   <Select
+                    onBlur={field.onBlur}
+                    ref={field.ref}
+                    aria-invalid={errors.resource !== undefined}
+                    aria-describedby={errors.resource ? 'PermissionEditDialog-resource-error' : undefined}
+                    id="PermissionEditDialog-resource"
                     onValueChange={field.onChange}
                     options={toTranslatedOptions(PERMISSION_RESOURCE_OPTIONS, t)}
                     value={field.value}
                   />
+                  <FieldError id="PermissionEditDialog-resource-error">{errors.resource?.message}</FieldError>
                 </Field>
               )}
             />
-            <Field>
+            <Field data-invalid={errors.action !== undefined}>
               <FieldLabel htmlFor="action">{t('common.fields.action')}</FieldLabel>
-              <Input id="action" required {...register('action')} />
+              <Input
+                aria-invalid={errors.action !== undefined}
+                aria-describedby={errors.action ? 'PermissionEditDialog-action-error' : undefined}
+                id="action"
+                required
+                {...register('action')}
+              />
+              <FieldError id="PermissionEditDialog-action-error">{errors.action?.message}</FieldError>
             </Field>
-            <Field>
+            <Field data-invalid={errors.title !== undefined}>
               <FieldLabel htmlFor="title">{t('common.fields.title')}</FieldLabel>
-              <Input id="title" required {...register('title')} />
+              <Input
+                aria-invalid={errors.title !== undefined}
+                aria-describedby={errors.title ? 'PermissionEditDialog-title-error' : undefined}
+                id="title"
+                required
+                {...register('title')}
+              />
+              <FieldError id="PermissionEditDialog-title-error">{errors.title?.message}</FieldError>
             </Field>
-            <Field>
+            <Field data-invalid={errors.description !== undefined}>
               <FieldLabel htmlFor="description">{t('common.fields.description')}</FieldLabel>
-              <Textarea id="description" required {...register('description')} />
+              <Textarea
+                aria-invalid={errors.description !== undefined}
+                aria-describedby={errors.description ? 'PermissionEditDialog-description-error' : undefined}
+                id="description"
+                required
+                {...register('description')}
+              />
+              <FieldError id="PermissionEditDialog-description-error">{errors.description?.message}</FieldError>
             </Field>
             <Controller
               control={control}

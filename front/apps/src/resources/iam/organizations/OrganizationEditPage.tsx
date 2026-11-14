@@ -1,3 +1,4 @@
+import { toTranslatedOptions } from '../../../shared/translatedOptions'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { createValidationErrorMap } from '../../../shared/validation'
 import { ArrowLeft, Edit } from 'lucide-react'
@@ -13,7 +14,7 @@ import { useNotifyError } from '../../../auth/AuthProvider'
 import { Button } from '../../../components/ui/button'
 import { Card, CardContent } from '../../../components/ui/card'
 import { Checkbox } from '../../../components/ui/checkbox'
-import { Field, FieldGroup, FieldLabel } from '../../../components/ui/form'
+import { Field, FieldError, FieldGroup, FieldLabel } from '../../../components/ui/form'
 import { Input } from '../../../components/ui/input'
 import { Select } from '../../../components/ui/select'
 import { Textarea } from '../../../components/ui/textarea'
@@ -21,7 +22,6 @@ import { LANGUAGE_OPTIONS } from '../../../shared/languages'
 import { OrganizationCodeEditDialog } from './OrganizationCodeEditDialog'
 import { getOrganization, updateOrganization } from './organizationApi'
 import { ORGANIZATION_REQUEST_FIELDS, type OrganizationDto } from './organizationTypes'
-import { toTranslatedOptions } from './organizationUi'
 
 type OrganizationEditForm = {
   defaultLanguage: string
@@ -83,7 +83,7 @@ export function OrganizationEditPage() {
       <Card>
         <CardContent>
           {organization === null ? (
-            <p className="page-subtitle">{t('common.common.loading')}</p>
+            <p className="page-subtitle">{t('common.states.loading')}</p>
           ) : (
             <OrganizationEditForm
               key={organization.id}
@@ -122,6 +122,7 @@ function OrganizationEditForm({
   const { showSuccess } = useToast()
   const [isSaving, setIsSaving] = useState(false)
   const {
+    formState: { errors },
     control,
     handleSubmit,
     register,
@@ -150,7 +151,7 @@ function OrganizationEditForm({
   }
 
   return (
-    <form className="edit-form" onSubmit={handleSubmit(handleSave)}>
+    <form noValidate className="edit-form" onSubmit={handleSubmit(handleSave)}>
       <FieldGroup>
         <Field className="code-row" data-disabled>
           <div className="grow-field">
@@ -162,25 +163,45 @@ function OrganizationEditForm({
             {t('common.actions.editCode')}
           </Button>
         </Field>
-        <Field>
+        <Field data-invalid={errors.name !== undefined}>
           <FieldLabel htmlFor="name">{t('common.fields.name')}</FieldLabel>
-          <Input id="name" required {...register('name')} />
+          <Input
+            aria-invalid={errors.name !== undefined}
+            aria-describedby={errors.name ? 'OrganizationEditPage-name-error' : undefined}
+            id="name"
+            required
+            {...register('name')}
+          />
+          <FieldError id="OrganizationEditPage-name-error">{errors.name?.message}</FieldError>
         </Field>
-        <Field>
+        <Field data-invalid={errors.description !== undefined}>
           <FieldLabel htmlFor="description">{t('common.fields.description')}</FieldLabel>
-          <Textarea id="description" required {...register('description')} />
+          <Textarea
+            aria-invalid={errors.description !== undefined}
+            aria-describedby={errors.description ? 'OrganizationEditPage-description-error' : undefined}
+            id="description"
+            required
+            {...register('description')}
+          />
+          <FieldError id="OrganizationEditPage-description-error">{errors.description?.message}</FieldError>
         </Field>
         <Controller
           control={control}
           name="defaultLanguage"
           render={({ field }) => (
-            <Field>
-              <FieldLabel>{t('common.fields.defaultLanguage')}</FieldLabel>
+            <Field data-invalid={errors.defaultLanguage !== undefined}>
+              <FieldLabel htmlFor="OrganizationEditPage-defaultLanguage">{t('common.fields.defaultLanguage')}</FieldLabel>
               <Select
+                onBlur={field.onBlur}
+                ref={field.ref}
+                aria-invalid={errors.defaultLanguage !== undefined}
+                aria-describedby={errors.defaultLanguage ? 'OrganizationEditPage-defaultLanguage-error' : undefined}
+                id="OrganizationEditPage-defaultLanguage"
                 onValueChange={field.onChange}
                 options={toTranslatedOptions(LANGUAGE_OPTIONS, t)}
                 value={field.value}
               />
+              <FieldError id="OrganizationEditPage-defaultLanguage-error">{errors.defaultLanguage?.message}</FieldError>
             </Field>
           )}
         />

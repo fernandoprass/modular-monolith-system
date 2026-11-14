@@ -1,3 +1,4 @@
+import { getLanguageLabel } from '../../../shared/translatedOptions'
 import { ArrowLeft } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
@@ -12,7 +13,6 @@ import { Card, CardContent } from '../../../components/ui/card'
 import { UserAccessTabs } from './UserAccessTabs'
 import { getUser } from './userApi'
 import type { UserDto } from './userTypes'
-import { getLanguageLabel } from './userUi'
 
 export function UserViewPage() {
   const t = useTranslate()
@@ -51,7 +51,7 @@ export function UserViewPage() {
       <Card>
         <CardContent>
           {user === null ? (
-            <p className="page-subtitle">{t('common.common.loading')}</p>
+            <p className="page-subtitle">{t('common.states.loading')}</p>
           ) : (
             <div className="detail-stack">
                 <div className="detail-grid-two-columns">
@@ -60,10 +60,10 @@ export function UserViewPage() {
                   <Field label={t('common.fields.name')}>{user.name}</Field>
                   <Field label={t('common.fields.email')}>{user.email}</Field>
                   <Field label={t('common.fields.isSystemAdmin')}>
-                    {user.isSystemAdmin ? t('common.common.yes') : t('common.common.no')}
+                    {user.isSystemAdmin ? t('common.states.yes') : t('common.states.no')}
                   </Field>
                   <Field label={t('common.fields.isOrganizationAdmin')}>
-                    {user.isOrganizationAdmin ? t('common.common.yes') : t('common.common.no')}
+                    {user.isOrganizationAdmin ? t('common.states.yes') : t('common.states.no')}
                   </Field>
                   <Field label={t('common.fields.isActive')}>
                     <Badge variant={user.isActive ? 'active' : 'inactive'}>

@@ -1,3 +1,4 @@
+import { getLanguageLabel } from '../../../shared/translatedOptions'
 import type { ColumnDef } from '@tanstack/react-table'
 import type { NavigateFunction } from 'react-router-dom'
 
@@ -6,7 +7,7 @@ import { APP_ROUTES } from '../../../app/routes'
 import { Badge } from '../../../components/ui/badge'
 import { DATA_TABLE_ROW_ACTION_KINDS, DataTableRowActions } from '../../../components/ui/data-table-row-actions'
 import type { OrganizationDto } from './organizationTypes'
-import { getLanguageLabel, getOrganizationTypeEnum } from './organizationUi'
+import { getOrganizationTypeEnum } from './organizationUi'
 
 type OrganizationTableColumnsOptions = {
   canDelete: boolean

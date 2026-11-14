@@ -132,7 +132,7 @@ export function RoleListPage() {
         data={roles}
         emptyText={t('features.iam.roles.messages.empty')}
         isLoading={isLoading}
-        loadingText={t('common.common.loading')}
+        loadingText={t('common.states.loading')}
         onSortingChange={setSorting}
         sorting={sorting}
       />

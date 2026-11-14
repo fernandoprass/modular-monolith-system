@@ -9,7 +9,7 @@ import { useTranslate } from '../../../app/i18n/i18n'
 import { useNotifyError } from '../../../auth/AuthProvider'
 import { Button } from '../../../components/ui/button'
 import { Dialog } from '../../../components/ui/dialog-confirm'
-import { Field, FieldGroup, FieldLabel } from '../../../components/ui/form'
+import { Field, FieldError, FieldGroup, FieldLabel } from '../../../components/ui/form'
 import { Input } from '../../../components/ui/input'
 import { ORGANIZATION_REQUEST_FIELDS, type OrganizationDto } from './organizationTypes'
 import { updateOrganizationCode } from './organizationApi'
@@ -40,6 +40,7 @@ export function OrganizationCodeEditDialog({
   const { showSuccess } = useToast()
   const [isSaving, setIsSaving] = useState(false)
   const {
+    formState: { errors },
     handleSubmit,
     register,
     reset,
@@ -80,12 +81,20 @@ export function OrganizationCodeEditDialog({
       open={isOpen}
       title={t('common.actions.editCode')}
     >
-      <form onSubmit={handleSubmit(handleSave)}>
+      <form noValidate onSubmit={handleSubmit(handleSave)}>
         <div className="dialog-body">
           <FieldGroup>
-            <Field>
+            <Field data-invalid={errors.code !== undefined}>
               <FieldLabel htmlFor="code">{t('common.fields.code')}</FieldLabel>
-              <Input autoFocus id="code" required {...register('code')} />
+              <Input
+                aria-invalid={errors.code !== undefined}
+                aria-describedby={errors.code ? 'OrganizationCodeEditDialog-code-error' : undefined}
+                autoFocus
+                id="code"
+                required
+                {...register('code')}
+              />
+              <FieldError id="OrganizationCodeEditDialog-code-error">{errors.code?.message}</FieldError>
             </Field>
           </FieldGroup>
         </div>

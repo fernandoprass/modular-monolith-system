@@ -1,9 +1,10 @@
+import { toTranslatedOptions } from '../../../shared/translatedOptions'
 import type { SortingState } from '@tanstack/react-table'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 
-import { useTranslate } from '../../../app/i18n/i18n'
+import { useLocale, useTranslate } from '../../../app/i18n/i18n'
 import { useToast } from '../../../app/ToastProvider'
 import { useAuth, useNotifyError } from '../../../auth/AuthProvider'
 import { DataTable } from '../../../components/ui/data-table'
@@ -29,7 +30,6 @@ import {
   type NotificationLiteDto,
   type NotificationSearchForm,
 } from './notificationTypes'
-import { toTranslatedNotificationOptions } from './notificationUi'
 
 function toDateTimeLocalValue(date: Date): string {
   const offsetMs = date.getTimezoneOffset() * 60_000
@@ -55,6 +55,7 @@ function getDefaultNotificationSearch(): NotificationSearchForm {
 
 export function NotificationListPage() {
   const t = useTranslate()
+  const locale = useLocale()
   const navigate = useNavigate()
   const notifyError = useNotifyError()
   const { showSuccess } = useToast()
@@ -115,12 +116,12 @@ export function NotificationListPage() {
   const columns = useMemo(() => createNotificationTableColumns({
     canDelete: canWrite,
     canMarkRead: canWrite,
-    language: user?.language,
+    language: locale,
     onDelete: setNotificationToDelete,
     onMarkRead: (notification) => void handleMarkRead(notification),
     onOpenLink: handleOpenLink,
     t,
-  }), [canWrite, handleMarkRead, handleOpenLink, t, user?.language])
+  }), [canWrite, handleMarkRead, handleOpenLink, t, locale])
 
   useEffect(() => {
     void loadNotifications(pageNumber)
@@ -177,7 +178,7 @@ export function NotificationListPage() {
                 onValueChange={field.onChange}
                 options={[
                   { label: t('common.filters.all'), value: NOTIFICATION_FILTER_VALUES.all },
-                  ...toTranslatedNotificationOptions(NOTIFICATION_MODULE_OPTIONS, t),
+                  ...toTranslatedOptions(NOTIFICATION_MODULE_OPTIONS, t),
                 ]}
                 value={field.value}
               />
@@ -226,7 +227,7 @@ export function NotificationListPage() {
         data={result?.items ?? []}
         emptyText={t('features.courier.notifications.messages.empty')}
         isLoading={isLoading}
-        loadingText={t('common.common.loading')}
+        loadingText={t('common.states.loading')}
         onSortingChange={setSorting}
         sorting={sorting}
       />

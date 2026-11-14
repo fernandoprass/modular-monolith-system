@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useMemo, useState } from 'react'
+import { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react'
 import type { PropsWithChildren } from 'react'
 
 import { useToast } from '../app/ToastProvider'
@@ -7,7 +7,7 @@ import { getIamJson, postIamJson } from '../data/httpClient'
 import { getApiErrorText, unwrapResult } from '../data/result'
 import { normalizeLanguageCode } from '../shared/languages'
 import type { PermissionCode } from '../shared/permissions'
-import { tokenStorage, type StoredUser } from './tokenStorage'
+import { tokenStorage, type AuthSession, type StoredUser } from './tokenStorage'
 
 type LoginResponse = {
   token: string
@@ -34,7 +34,7 @@ type AuthContextValue = {
   login: (request: LoginRequest) => Promise<void>
   logout: () => void
   permissions: PermissionCode[]
-  updateProfile: (userId: string, profile: Pick<StoredUser, 'fullName' | 'language'>) => void
+  updateProfile: (userId: string, profile: Pick<StoredUser, 'fullName' | 'language'>, session: AuthSession) => boolean
   user: StoredUser | null
 }
 
@@ -54,16 +54,24 @@ function toStoredUser(response: LoginResponse): StoredUser {
 }
 
 export function AuthProvider({ children }: PropsWithChildren) {
+  const loginAttempt = useRef(0)
   const [user, setUser] = useState<StoredUser | null>(() => tokenStorage.getUser())
   const [permissions, setPermissions] = useState<PermissionCode[]>(() => tokenStorage.getPermissions())
 
   const logout = useCallback(() => {
+    loginAttempt.current += 1
     tokenStorage.clearAll()
     setUser(null)
     setPermissions([])
   }, [])
 
   const login = useCallback(async (request: LoginRequest) => {
+    const attempt = ++loginAttempt.current
+    tokenStorage.clearAll()
+    setUser(null)
+    setPermissions([])
+    let session = tokenStorage.getSession()
+
     try {
       const loginResponse = unwrapResult<LoginResponse>(
         await postIamJson(API_PATHS.iam.authentication.login, {
@@ -71,19 +79,24 @@ export function AuthProvider({ children }: PropsWithChildren) {
           password: request.password,
         }),
       )
+      if (!tokenStorage.isCurrentSession(session)) return
       const storedUser = toStoredUser(loginResponse)
 
       tokenStorage.setToken(loginResponse.token)
+      session = tokenStorage.getSession()
 
       const loadedPermissions = unwrapResult<PermissionCode[]>(
         await getIamJson(API_PATHS.iam.userAccess.userPermissionCodes(storedUser.id)),
       )
 
+      if (!tokenStorage.isCurrentSession(session)) return
       tokenStorage.setUser(storedUser)
       tokenStorage.setPermissions(loadedPermissions)
       setUser(storedUser)
       setPermissions(loadedPermissions)
     } catch (error) {
+      if (attempt !== loginAttempt.current) return
+      if (tokenStorage.getToken() !== null && !tokenStorage.isCurrentSession(session)) return
       tokenStorage.clearAll()
       setUser(null)
       setPermissions([])
@@ -91,20 +104,13 @@ export function AuthProvider({ children }: PropsWithChildren) {
     }
   }, [])
 
-  const updateProfile = useCallback((userId: string, profile: Pick<StoredUser, 'fullName' | 'language'>) => {
-    if (user === null || user.id !== userId || tokenStorage.getToken() === null) {
-      return
-    }
+  const updateProfile = useCallback((userId: string, profile: Pick<StoredUser, 'fullName' | 'language'>, session: AuthSession) => {
+    const updatedUser = tokenStorage.updateProfile(userId, profile, session)
+    if (updatedUser === null) return false
 
-    const updatedUser = {
-      ...user,
-      fullName: profile.fullName,
-      language: normalizeLanguageCode(profile.language),
-    }
-
-    tokenStorage.setUser(updatedUser)
     setUser(updatedUser)
-  }, [user])
+    return true
+  }, [])
 
   const value = useMemo<AuthContextValue>(() => ({
     isAuthenticated: user !== null && tokenStorage.getToken() !== null,

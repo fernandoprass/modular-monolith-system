@@ -1,3 +1,4 @@
+import { toTranslatedOptions } from '../../../shared/translatedOptions'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { createValidationErrorMap } from '../../../shared/validation'
 import { useEffect, useMemo, useState } from 'react'
@@ -17,7 +18,6 @@ import { Textarea } from '../../../components/ui/textarea'
 import { LANGUAGE_OPTIONS, normalizeLanguageCode } from '../../../shared/languages'
 import { addTemplateTranslation, updateTemplateTranslation } from './templateApi'
 import type { TemplateTranslationDto, TemplateTranslationForm } from './templateTypes'
-import { toTranslatedTemplateOptions } from './templateUi'
 
 type TemplateTranslationDialogProps = {
   isOpen: boolean
@@ -177,28 +177,41 @@ export function TemplateTranslationDialog({
         ? t('features.courier.templates.actions.addTranslation')
         : t('features.courier.templates.actions.editTranslation')}
     >
-      <form onSubmit={form.handleSubmit(handleSave)}>
+      <form noValidate onSubmit={form.handleSubmit(handleSave)}>
         <div className="dialog-body template-translation-dialog-body">
           <div className="template-translation-identity">
             <Controller
               control={form.control}
               name="language"
               render={({ field }) => (
-                <Field>
-                  <FieldLabel>{t('common.fields.language')}</FieldLabel>
+                <Field data-invalid={form.formState.errors.language !== undefined}>
+                  <FieldLabel htmlFor="TemplateTranslationDialog-language">{t('common.fields.language')}</FieldLabel>
                   <Select
+                    onBlur={field.onBlur}
+                    ref={field.ref}
+                    aria-invalid={form.formState.errors.language !== undefined}
+                    aria-describedby={form.formState.errors.language ? 'TemplateTranslationDialog-language-error' : undefined}
+                    id="TemplateTranslationDialog-language"
                     disabled={translation !== null}
                     onValueChange={field.onChange}
-                    options={toTranslatedTemplateOptions(languageOptions, t)}
+                    options={toTranslatedOptions(languageOptions, t)}
                     placeholder={t('features.courier.templates.placeholders.language')}
                     value={field.value}
                   />
+                  <FieldError id="TemplateTranslationDialog-language-error">{form.formState.errors.language?.message}</FieldError>
                 </Field>
               )}
             />
-            <Field>
+            <Field data-invalid={form.formState.errors.name !== undefined}>
               <FieldLabel htmlFor="template-translation-name">{t('common.fields.name')}</FieldLabel>
-              <Input id="template-translation-name" required {...form.register('name')} />
+              <Input
+                aria-invalid={form.formState.errors.name !== undefined}
+                aria-describedby={form.formState.errors.name ? 'TemplateTranslationDialog-name-error' : undefined}
+                id="template-translation-name"
+                required
+                {...form.register('name')}
+              />
+              <FieldError id="TemplateTranslationDialog-name-error">{form.formState.errors.name?.message}</FieldError>
             </Field>
           </div>
 
@@ -209,32 +222,38 @@ export function TemplateTranslationDialog({
                 name="emailEnabled"
                 render={({ field }) => (
                   <Checkbox
+                    aria-invalid={form.formState.errors.emailEnabled !== undefined}
+                    aria-describedby={form.formState.errors.emailEnabled ? 'template-email-enabled-error' : undefined}
                     checked={field.value}
                     label={t('common.fields.email')}
                     onCheckedChange={field.onChange}
                   />
                 )}
               />
-              <FieldError>{form.formState.errors.emailEnabled?.message}</FieldError>
+              <FieldError id="template-email-enabled-error">{form.formState.errors.emailEnabled?.message}</FieldError>
               <FieldGroup>
-                <Field>
+                <Field data-invalid={form.formState.errors.emailSubject !== undefined}>
                   <FieldLabel htmlFor="template-email-subject">{t('common.fields.subject')}</FieldLabel>
                   <Input
+                    aria-invalid={form.formState.errors.emailSubject !== undefined}
+                    aria-describedby={form.formState.errors.emailSubject ? 'TemplateTranslationDialog-emailSubject-error' : undefined}
                     disabled={!emailEnabled}
                     id="template-email-subject"
                     {...form.register('emailSubject')}
                   />
-                  <FieldError>{form.formState.errors.emailSubject?.message}</FieldError>
+                  <FieldError id="TemplateTranslationDialog-emailSubject-error">{form.formState.errors.emailSubject?.message}</FieldError>
                 </Field>
-                <Field>
+                <Field data-invalid={form.formState.errors.emailBody !== undefined}>
                   <FieldLabel htmlFor="template-email-body">{t('common.fields.body')}</FieldLabel>
                   <Textarea
+                    aria-invalid={form.formState.errors.emailBody !== undefined}
+                    aria-describedby={form.formState.errors.emailBody ? 'TemplateTranslationDialog-emailBody-error' : undefined}
                     className="template-translation-body-input"
                     disabled={!emailEnabled}
                     id="template-email-body"
                     {...form.register('emailBody')}
                   />
-                  <FieldError>{form.formState.errors.emailBody?.message}</FieldError>
+                  <FieldError id="TemplateTranslationDialog-emailBody-error">{form.formState.errors.emailBody?.message}</FieldError>
                 </Field>
                 <div className="template-preview-panel">
                   <span className="detail-label">{t('common.fields.preview')}</span>
@@ -261,34 +280,41 @@ export function TemplateTranslationDialog({
                 )}
               />
               <FieldGroup>
-                <Field>
+                <Field data-invalid={form.formState.errors.notificationTitle !== undefined}>
                   <FieldLabel htmlFor="template-notification-title">{t('common.fields.title')}</FieldLabel>
                   <Input
+                    aria-invalid={form.formState.errors.notificationTitle !== undefined}
+                    aria-describedby={form.formState.errors.notificationTitle ? 'TemplateTranslationDialog-notificationTitle-error' : undefined}
                     disabled={!notificationEnabled}
                     id="template-notification-title"
                     {...form.register('notificationTitle')}
                   />
-                  <FieldError>{form.formState.errors.notificationTitle?.message}</FieldError>
+                  <FieldError id="TemplateTranslationDialog-notificationTitle-error">{form.formState.errors.notificationTitle?.message}</FieldError>
                 </Field>
-                <Field>
+                <Field data-invalid={form.formState.errors.notificationMessage !== undefined}>
                   <FieldLabel htmlFor="template-notification-message">{t('common.fields.message')}</FieldLabel>
                   <Textarea
+                    aria-invalid={form.formState.errors.notificationMessage !== undefined}
+                    aria-describedby={form.formState.errors.notificationMessage ? 'TemplateTranslationDialog-notificationMessage-error' : undefined}
                     className="template-notification-message-input"
                     disabled={!notificationEnabled}
                     id="template-notification-message"
                     {...form.register('notificationMessage')}
                   />
-                  <FieldError>{form.formState.errors.notificationMessage?.message}</FieldError>
+                  <FieldError id="TemplateTranslationDialog-notificationMessage-error">{form.formState.errors.notificationMessage?.message}</FieldError>
                 </Field>
-                <Field>
+                <Field data-invalid={form.formState.errors.notificationActionLink !== undefined}>
                   <FieldLabel htmlFor="template-notification-action-link">
                     {t('features.courier.templates.fields.actionLink')}
                   </FieldLabel>
                   <Input
+                    aria-invalid={form.formState.errors.notificationActionLink !== undefined}
+                    aria-describedby={form.formState.errors.notificationActionLink ? 'TemplateTranslationDialog-notificationActionLink-error' : undefined}
                     disabled={!notificationEnabled}
                     id="template-notification-action-link"
                     {...form.register('notificationActionLink')}
                   />
+                  <FieldError id="TemplateTranslationDialog-notificationActionLink-error">{form.formState.errors.notificationActionLink?.message}</FieldError>
                 </Field>
               </FieldGroup>
             </section>

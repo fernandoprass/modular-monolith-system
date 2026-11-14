@@ -1,4 +1,4 @@
-import { resolveLocale } from '../app/i18n/i18n'
+import { resolveLocale } from '../app/i18n/messages'
 
 const USER_DATE_TIME_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
   day: '2-digit',

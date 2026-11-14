@@ -1,10 +1,11 @@
+import { toTranslatedOptions } from '../../../shared/translatedOptions'
 import type { SortingState } from '@tanstack/react-table'
 import { Plus } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 
-import { useTranslate } from '../../../app/i18n/i18n'
+import { useLocale, useTranslate } from '../../../app/i18n/i18n'
 import { APP_ROUTES } from '../../../app/routes'
 import { useAuth, useNotifyError } from '../../../auth/AuthProvider'
 import { Button } from '../../../components/ui/button'
@@ -28,7 +29,6 @@ import {
   type EmailLiteDto,
   type EmailSearchForm,
 } from './emailTypes'
-import { toTranslatedEmailOptions } from './emailUi'
 
 function toDateTimeLocalValue(date: Date): string {
   const offsetMs = date.getTimezoneOffset() * 60_000
@@ -57,9 +57,10 @@ function getDefaultEmailSearch(): EmailSearchForm {
 
 export function EmailListPage() {
   const t = useTranslate()
+  const locale = useLocale()
   const navigate = useNavigate()
   const notifyError = useNotifyError()
-  const { permissions, user } = useAuth()
+  const { permissions } = useAuth()
   const [appliedFilters, setAppliedFilters] = useState<EmailSearchForm>(() => getDefaultEmailSearch())
   const [pageNumber, setPageNumber] = useState<number>(DEFAULT_PAGINATION.pageNumber)
   const [pageSize, setPageSize] = useState<number>(DEFAULT_PAGINATION.pageSize)
@@ -71,10 +72,10 @@ export function EmailListPage() {
     defaultValues: appliedFilters,
   })
   const columns = useMemo(() => createEmailTableColumns({
-    language: user?.language,
+    language: locale,
     onView: (email) => navigate(APP_ROUTES.emailView(email.id)),
     t,
-  }), [navigate, t, user?.language])
+  }), [navigate, t, locale])
 
   const loadEmails = useCallback(async (targetPage: number) => {
     setIsLoading(true)
@@ -158,7 +159,7 @@ export function EmailListPage() {
                 onValueChange={field.onChange}
                 options={[
                   { label: t('common.filters.all'), value: EMAIL_FILTER_VALUES.all },
-                  ...toTranslatedEmailOptions(EMAIL_MODULE_OPTIONS, t),
+                  ...toTranslatedOptions(EMAIL_MODULE_OPTIONS, t),
                 ]}
                 value={field.value}
               />
@@ -175,7 +176,7 @@ export function EmailListPage() {
                 onValueChange={field.onChange}
                 options={[
                   { label: t('common.filters.all'), value: EMAIL_FILTER_VALUES.all },
-                  ...toTranslatedEmailOptions(EMAIL_FEATURE_OPTIONS, t),
+                  ...toTranslatedOptions(EMAIL_FEATURE_OPTIONS, t),
                 ]}
                 value={field.value}
               />
@@ -204,7 +205,7 @@ export function EmailListPage() {
         data={result?.items ?? []}
         emptyText={t('features.courier.emails.messages.empty')}
         isLoading={isLoading}
-        loadingText={t('common.common.loading')}
+        loadingText={t('common.states.loading')}
         onSortingChange={setSorting}
         sorting={sorting}
       />

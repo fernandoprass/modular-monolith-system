@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ComponentProps } from 'react'
 
 import { useTranslate } from '../../../app/i18n/i18n'
 import { useNotifyError } from '../../../auth/AuthProvider'
@@ -9,7 +9,7 @@ import {
 import type { SelectOption } from '../../../types'
 import { getUserLookup } from './userApi'
 
-type UserSelectProps = {
+type UserSelectProps = Pick<ComponentProps<'button'>, 'id' | 'aria-invalid' | 'aria-describedby' | 'onBlur' | 'ref'> & {
   clearable?: boolean
   disabled?: boolean
   includeInactive?: boolean
@@ -23,6 +23,7 @@ export function UserSelect({
   includeInactive = false,
   onValueChange,
   value,
+  ...triggerProps
 }: UserSelectProps) {
   const t = useTranslate()
   const notifyError = useNotifyError()
@@ -70,7 +71,7 @@ export function UserSelect({
       searchValue={search}
       value={value}
     >
-      {(selectProps) => <InputSelectTrigger {...selectProps} />}
+      {(selectProps) => <InputSelectTrigger {...selectProps} {...triggerProps} />}
     </InputSelect>
   )
 }

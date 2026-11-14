@@ -1,3 +1,4 @@
+import { toTranslatedOptions } from '../../../shared/translatedOptions'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { createValidationErrorMap } from '../../../shared/validation'
 import { useCallback, useEffect, useState } from 'react'
@@ -9,14 +10,13 @@ import { useTranslate } from '../../../app/i18n/i18n'
 import { useNotifyError } from '../../../auth/AuthProvider'
 import { Button } from '../../../components/ui/button'
 import { Card, CardContent } from '../../../components/ui/card'
-import { Field, FieldGroup, FieldLabel } from '../../../components/ui/form'
+import { Field, FieldError, FieldGroup, FieldLabel } from '../../../components/ui/form'
 import { Input } from '../../../components/ui/input'
 import { Select } from '../../../components/ui/select'
 import { Textarea } from '../../../components/ui/textarea'
 import { LANGUAGE_OPTIONS } from '../../../shared/languages'
 import { getOwnOrganization, updateOwnOrganization } from './organizationApi'
 import { ORGANIZATION_REQUEST_FIELDS, type OrganizationDto } from './organizationTypes'
-import { toTranslatedOptions } from './organizationUi'
 
 type OrganizationProfileForm = {
   defaultLanguage: string
@@ -67,7 +67,7 @@ export function OrganizationProfilePage() {
       <Card>
         <CardContent>
           {organization === null ? (
-            <p className="page-subtitle">{t('common.common.loading')}</p>
+            <p className="page-subtitle">{t('common.states.loading')}</p>
           ) : (
             <OrganizationProfileFormPanel
               key={organization.id}
@@ -95,6 +95,7 @@ function OrganizationProfileFormPanel({
   const { showSuccess } = useToast()
   const [isSaving, setIsSaving] = useState(false)
   const {
+    formState: { errors },
     control,
     handleSubmit,
     register,
@@ -123,31 +124,51 @@ function OrganizationProfileFormPanel({
   }
 
   return (
-    <form className="edit-form" onSubmit={handleSubmit(handleSave)}>
+    <form noValidate className="edit-form" onSubmit={handleSubmit(handleSave)}>
       <FieldGroup>
         <Field data-disabled>
           <FieldLabel>{t('common.fields.code')}</FieldLabel>
           <Input disabled value={organization.code} />
         </Field>
-        <Field>
+        <Field data-invalid={errors.name !== undefined}>
           <FieldLabel htmlFor="name">{t('common.fields.name')}</FieldLabel>
-          <Input id="name" required {...register('name')} />
+          <Input
+            aria-invalid={errors.name !== undefined}
+            aria-describedby={errors.name ? 'OrganizationProfilePage-name-error' : undefined}
+            id="name"
+            required
+            {...register('name')}
+          />
+          <FieldError id="OrganizationProfilePage-name-error">{errors.name?.message}</FieldError>
         </Field>
-        <Field>
+        <Field data-invalid={errors.description !== undefined}>
           <FieldLabel htmlFor="description">{t('common.fields.description')}</FieldLabel>
-          <Textarea id="description" required {...register('description')} />
+          <Textarea
+            aria-invalid={errors.description !== undefined}
+            aria-describedby={errors.description ? 'OrganizationProfilePage-description-error' : undefined}
+            id="description"
+            required
+            {...register('description')}
+          />
+          <FieldError id="OrganizationProfilePage-description-error">{errors.description?.message}</FieldError>
         </Field>
         <Controller
           control={control}
           name="defaultLanguage"
           render={({ field }) => (
-            <Field>
-              <FieldLabel>{t('common.fields.defaultLanguage')}</FieldLabel>
+            <Field data-invalid={errors.defaultLanguage !== undefined}>
+              <FieldLabel htmlFor="OrganizationProfilePage-defaultLanguage">{t('common.fields.defaultLanguage')}</FieldLabel>
               <Select
+                onBlur={field.onBlur}
+                ref={field.ref}
+                aria-invalid={errors.defaultLanguage !== undefined}
+                aria-describedby={errors.defaultLanguage ? 'OrganizationProfilePage-defaultLanguage-error' : undefined}
+                id="OrganizationProfilePage-defaultLanguage"
                 onValueChange={field.onChange}
                 options={toTranslatedOptions(LANGUAGE_OPTIONS, t)}
                 value={field.value}
               />
+              <FieldError id="OrganizationProfilePage-defaultLanguage-error">{errors.defaultLanguage?.message}</FieldError>
             </Field>
           )}
         />

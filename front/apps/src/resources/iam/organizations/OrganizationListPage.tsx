@@ -1,3 +1,4 @@
+import { toTranslatedOptions } from '../../../shared/translatedOptions'
 import type { SortingState } from '@tanstack/react-table'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
@@ -19,7 +20,6 @@ import { hasPermissionCode } from '../../../shared/permissions'
 import { deleteOrganization, getOrganizations } from './organizationApi'
 import { createOrganizationTableColumns } from './OrganizationListPageColumns'
 import { ORGANIZATION_TYPE_OPTIONS, type OrganizationDto } from './organizationTypes'
-import { toTranslatedOptions } from './organizationUi'
 
 const ORGANIZATION_FILTER_VALUES = {
   all: 'all',
@@ -175,7 +175,7 @@ export function OrganizationListPage() {
         data={result?.items ?? []}
         emptyText={t('features.iam.organizations.messages.empty')}
         isLoading={isLoading}
-        loadingText={t('common.common.loading')}
+        loadingText={t('common.states.loading')}
         onSortingChange={setSorting}
         sorting={sorting}
       />

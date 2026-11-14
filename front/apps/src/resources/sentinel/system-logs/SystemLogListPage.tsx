@@ -1,9 +1,10 @@
+import { toTranslatedOptions } from '../../../shared/translatedOptions'
 import type { SortingState } from '@tanstack/react-table'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 
-import { useLocale, useTranslate, type PlainTranslationKey, type Translate } from '../../../app/i18n/i18n'
+import { useLocale, useTranslate } from '../../../app/i18n/i18n'
 import { APP_ROUTES } from '../../../app/routes'
 import { useNotifyError } from '../../../auth/AuthProvider'
 import { DataTable } from '../../../components/ui/data-table'
@@ -24,11 +25,6 @@ import {
   type SystemLogLiteDto,
   type SystemLogSearchForm,
 } from './systemLogTypes'
-
-type SystemLogOption = {
-  labelKey: PlainTranslationKey
-  value: string
-}
 
 function toDateTimeLocalValue(date: Date): string {
   const offsetMs = date.getTimezoneOffset() * 60_000
@@ -52,13 +48,6 @@ function getDefaultSystemLogSearch(): SystemLogSearchForm {
     to: toDateTimeLocalValue(now),
     userId: '',
   }
-}
-
-function toTranslatedOptions(options: readonly SystemLogOption[], t: Translate) {
-  return options.map((option) => ({
-    label: t(option.labelKey),
-    value: option.value,
-  }))
 }
 
 export function SystemLogListPage() {
@@ -203,7 +192,7 @@ export function SystemLogListPage() {
         data={result?.items ?? []}
         emptyText={t('features.sentinel.systemLogs.messages.empty')}
         isLoading={isLoading}
-        loadingText={t('common.common.loading')}
+        loadingText={t('common.states.loading')}
         onSortingChange={setSorting}
         sorting={sorting}
       />

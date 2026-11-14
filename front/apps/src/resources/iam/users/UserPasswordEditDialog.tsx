@@ -9,7 +9,7 @@ import { useTranslate } from '../../../app/i18n/i18n'
 import { useNotifyError } from '../../../auth/AuthProvider'
 import { Button } from '../../../components/ui/button'
 import { Dialog } from '../../../components/ui/dialog-confirm'
-import { Field, FieldGroup, FieldLabel } from '../../../components/ui/form'
+import { Field, FieldError, FieldGroup, FieldLabel } from '../../../components/ui/form'
 import { Input } from '../../../components/ui/input'
 import { USER_REQUEST_FIELDS, type UserPasswordUpdateForm } from './userTypes'
 import { updateCurrentUserPassword } from './userApi'
@@ -37,6 +37,7 @@ export function UserPasswordEditDialog({ isOpen, onClose }: UserPasswordEditDial
   const { showError, showSuccess } = useToast()
   const [isSaving, setIsSaving] = useState(false)
   const {
+    formState: { errors },
     handleSubmit,
     register,
     reset,
@@ -80,20 +81,48 @@ export function UserPasswordEditDialog({ isOpen, onClose }: UserPasswordEditDial
       open={isOpen}
       title={t('features.iam.users.pages.changePassword')}
     >
-      <form onSubmit={handleSubmit(handleSave)}>
+      <form noValidate onSubmit={handleSubmit(handleSave)}>
         <div className="dialog-body">
           <FieldGroup>
-            <Field>
+            <Field data-invalid={errors.passwordOld !== undefined}>
               <FieldLabel htmlFor="passwordOld">{t('common.fields.currentPassword')}</FieldLabel>
-              <Input autoComplete="current-password" autoFocus id="passwordOld" required type="password" {...register('passwordOld')} />
+              <Input
+                aria-invalid={errors.passwordOld !== undefined}
+                aria-describedby={errors.passwordOld ? 'UserPasswordEditDialog-passwordOld-error' : undefined}
+                autoComplete="current-password"
+                autoFocus
+                id="passwordOld"
+                required
+                type="password"
+                {...register('passwordOld')}
+              />
+              <FieldError id="UserPasswordEditDialog-passwordOld-error">{errors.passwordOld?.message}</FieldError>
             </Field>
-            <Field>
+            <Field data-invalid={errors.passwordNew !== undefined}>
               <FieldLabel htmlFor="passwordNew">{t('common.fields.newPassword')}</FieldLabel>
-              <Input autoComplete="new-password" id="passwordNew" required type="password" {...register('passwordNew')} />
+              <Input
+                aria-invalid={errors.passwordNew !== undefined}
+                aria-describedby={errors.passwordNew ? 'UserPasswordEditDialog-passwordNew-error' : undefined}
+                autoComplete="new-password"
+                id="passwordNew"
+                required
+                type="password"
+                {...register('passwordNew')}
+              />
+              <FieldError id="UserPasswordEditDialog-passwordNew-error">{errors.passwordNew?.message}</FieldError>
             </Field>
-            <Field>
+            <Field data-invalid={errors.passwordConfirm !== undefined}>
               <FieldLabel htmlFor="passwordConfirm">{t('common.fields.confirmPassword')}</FieldLabel>
-              <Input autoComplete="new-password" id="passwordConfirm" required type="password" {...register('passwordConfirm')} />
+              <Input
+                aria-invalid={errors.passwordConfirm !== undefined}
+                aria-describedby={errors.passwordConfirm ? 'UserPasswordEditDialog-passwordConfirm-error' : undefined}
+                autoComplete="new-password"
+                id="passwordConfirm"
+                required
+                type="password"
+                {...register('passwordConfirm')}
+              />
+              <FieldError id="UserPasswordEditDialog-passwordConfirm-error">{errors.passwordConfirm?.message}</FieldError>
             </Field>
           </FieldGroup>
         </div>

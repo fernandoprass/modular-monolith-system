@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 
-import { useTranslate } from '../../../app/i18n/i18n'
-import { useAuth, useNotifyError } from '../../../auth/AuthProvider'
+import { useLocale, useTranslate } from '../../../app/i18n/i18n'
+import { useNotifyError } from '../../../auth/AuthProvider'
 import { Badge } from '../../../components/ui/badge'
 import { Empty, EmptyDescription } from '../../../components/ui/empty'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../components/ui/tabs'
@@ -96,10 +96,10 @@ type RoleListProps = {
 
 function RoleList({ isLoading, roles }: RoleListProps) {
   const t = useTranslate()
-  const { user } = useAuth()
+  const locale = useLocale()
 
   if (isLoading) {
-    return <p className="page-subtitle">{t('common.common.loading')}</p>
+    return <p className="page-subtitle">{t('common.states.loading')}</p>
   }
 
   if (roles.length === 0) {
@@ -128,10 +128,10 @@ function RoleList({ isLoading, roles }: RoleListProps) {
           {roles.map((role) => (
             <tr key={role.id}>
               <td>{role.name}</td>
-              <td>{formatUserDateTime(role.startsAt, user?.language)}</td>
-              <td>{role.expiresAt ? formatUserDateTime(role.expiresAt, user?.language) : '-'}</td>
-              <td>{formatUserDateTime(role.assignedBy, user?.language)}</td>
-              <td>{formatUserDateTime(role.assignedAt, user?.language)}</td>
+              <td>{formatUserDateTime(role.startsAt, locale)}</td>
+              <td>{role.expiresAt ? formatUserDateTime(role.expiresAt, locale) : '-'}</td>
+              <td>{role.assignedBy}</td>
+              <td>{formatUserDateTime(role.assignedAt, locale)}</td>
               <td>
                 <Badge variant={role.isActive ? 'active' : 'inactive'}>
                   {role.isActive ? t('common.status.active') : t('common.status.inactive')}
@@ -139,7 +139,7 @@ function RoleList({ isLoading, roles }: RoleListProps) {
               </td>
               <td>
                 <Badge variant={role.isDefault ? 'active' : 'inactive'}>
-                  {role.isDefault ? t('common.common.yes') : t('common.common.no')}
+                  {role.isDefault ? t('common.states.yes') : t('common.states.no')}
                 </Badge>
               </td>
             </tr>
@@ -159,7 +159,7 @@ function PermissionList({ isLoading, permissions }: PermissionListProps) {
   const t = useTranslate()
 
   if (isLoading) {
-    return <p className="page-subtitle">{t('common.common.loading')}</p>
+    return <p className="page-subtitle">{t('common.states.loading')}</p>
   }
 
   if (permissions.length === 0) {

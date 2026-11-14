@@ -169,7 +169,7 @@ export function UserListPage() {
         data={result?.items ?? []}
         emptyText={t('features.iam.users.messages.empty')}
         isLoading={isLoading}
-        loadingText={t('common.common.loading')}
+        loadingText={t('common.states.loading')}
         onSortingChange={setSorting}
         sorting={sorting}
       />

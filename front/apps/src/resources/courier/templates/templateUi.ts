@@ -6,11 +6,6 @@ import {
   type RetentionPolicy,
 } from './templateTypes'
 
-type TemplateOption = {
-  labelKey: PlainTranslationKey
-  value: string
-}
-
 const NOTIFICATION_SEVERITY_ENUM_KEYS: Record<NotificationSeverity, PlainTranslationKey> = {
   [NOTIFICATION_SEVERITIES.information]: 'common.enums.notificationSeverity.information',
   [NOTIFICATION_SEVERITIES.warning]: 'common.enums.notificationSeverity.warning',
@@ -31,11 +26,4 @@ export function getNotificationSeverityEnum(value: NotificationSeverity, t: Tran
 
 export function getRetentionPolicyEnum(value: RetentionPolicy, t: Translate): string {
   return t(RETENTION_POLICY_ENUM_KEYS[value])
-}
-
-export function toTranslatedTemplateOptions(options: readonly TemplateOption[], t: Translate) {
-  return options.map((option) => ({
-    label: t(option.labelKey),
-    value: option.value,
-  }))
 }

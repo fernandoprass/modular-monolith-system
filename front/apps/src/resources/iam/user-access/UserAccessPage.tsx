@@ -3,8 +3,8 @@ import { Minus, Plus } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { useToast } from '../../../app/ToastProvider'
-import { useTranslate } from '../../../app/i18n/i18n'
-import { useAuth, useNotifyError } from '../../../auth/AuthProvider'
+import { useLocale, useTranslate } from '../../../app/i18n/i18n'
+import { useNotifyError } from '../../../auth/AuthProvider'
 import { Badge } from '../../../components/ui/badge'
 import { Button } from '../../../components/ui/button'
 import { Card, CardContent } from '../../../components/ui/card'
@@ -47,10 +47,9 @@ function getSelectedIds(selection: RowSelectionState): string[] {
 
 export function UserAccessPage() {
   const t = useTranslate()
+  const locale = useLocale()
   const notifyError = useNotifyError()
   const { showSuccess } = useToast()
-  const { user } = useAuth()
-  const userLanguage = user?.language
   const [userId, setUserId] = useState('')
   const [availableRoles, setAvailableRoles] = useState<RoleDto[]>([])
   const [assignedRoles, setAssignedRoles] = useState<UserRoleDto[]>([])
@@ -80,7 +79,7 @@ export function UserAccessPage() {
       accessorKey: 'isDefault',
       cell: ({ row }) => (
         <Badge variant={row.original.isDefault ? 'active' : 'inactive'}>
-          {row.original.isDefault ? t('common.common.yes') : t('common.common.no')}
+          {row.original.isDefault ? t('common.states.yes') : t('common.states.no')}
         </Badge>
       ),
       header: t('common.fields.isDefault'),
@@ -93,12 +92,12 @@ export function UserAccessPage() {
     },
     {
       accessorKey: 'startsAt',
-      cell: ({ row }) => formatUserDateTime(row.original.startsAt, userLanguage),
+      cell: ({ row }) => formatUserDateTime(row.original.startsAt, locale),
       header: t('common.fields.startsAt'),
     },
     {
       accessorKey: 'expiresAt',
-      cell: ({ row }) => row.original.expiresAt ? formatUserDateTime(row.original.expiresAt, userLanguage) : '-',
+      cell: ({ row }) => row.original.expiresAt ? formatUserDateTime(row.original.expiresAt, locale) : '-',
       header: t('common.fields.expiresAt'),
     },
     {
@@ -110,7 +109,7 @@ export function UserAccessPage() {
       ),
       header: t('common.fields.isActive'),
     },
-  ], [t, userLanguage])
+  ], [t, locale])
 
   const loadUserAccess = useCallback(async () => {
     if (userId.length === 0) {
@@ -220,7 +219,7 @@ export function UserAccessPage() {
                   emptyText={t('features.iam.userAccess.messages.noRoles')}
                   getRowId={(role) => role.id}
                   isLoading={isLoading}
-                  loadingText={t('common.common.loading')}
+                  loadingText={t('common.states.loading')}
                   onRowSelectionChange={setAvailableSelection}
                   onSortingChange={setAvailableSorting}
                   rowSelection={availableSelection}
@@ -262,7 +261,7 @@ export function UserAccessPage() {
                   emptyText={t('features.iam.userAccess.messages.noRoles')}
                   getRowId={(role) => role.roleId}
                   isLoading={isLoading}
-                  loadingText={t('common.common.loading')}
+                  loadingText={t('common.states.loading')}
                   onRowSelectionChange={setAssignedSelection}
                   onSortingChange={setAssignedSorting}
                   rowSelection={assignedSelection}

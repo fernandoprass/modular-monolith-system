@@ -49,7 +49,7 @@ export function UserPreferencePage({ embedded = false }: UserPreferencePageProps
         </div>
       )}
       {templates === null ? (
-        <p className="page-subtitle">{t('common.common.loading')}</p>
+        <p className="page-subtitle">{t('common.states.loading')}</p>
       ) : (
         <UserPreferenceFormPanel
           key={templates

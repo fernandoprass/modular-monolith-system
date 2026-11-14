@@ -154,7 +154,7 @@ export function ParameterSettingsPage({ embedded = false, owner }: ParameterSett
   const content = (
     <>
       {!embedded && <h1 className="page-title">{t(getPageTitleKey(owner))}</h1>}
-      {isLoading && <p className="page-subtitle">{t('common.common.loading')}</p>}
+      {isLoading && <p className="page-subtitle">{t('common.states.loading')}</p>}
       {!isLoading && parameters.length === 0 && (
         <p className="page-subtitle">{t('features.iam.parameters.messages.empty')}</p>
       )}

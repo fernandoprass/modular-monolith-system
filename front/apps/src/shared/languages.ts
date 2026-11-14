@@ -7,8 +7,8 @@ export const LANGUAGE_CODES = {
 
 export type LanguageCode = typeof LANGUAGE_CODES[keyof typeof LANGUAGE_CODES]
 
-/** Languages for user/organization preferences and template content, regardless of UI availability. */
-export const LANGUAGE_OPTIONS = [
+/** Known and planned languages, including those not yet accepted by the backend. */
+export const ALL_LANGUAGE_OPTIONS = [
   {
     labelKey: 'common.languages.en',
     value: LANGUAGE_CODES.english,
@@ -26,6 +26,9 @@ export const LANGUAGE_OPTIONS = [
     value: LANGUAGE_CODES.spanish,
   },
 ] as const
+
+/** Preference/content languages accepted by Shared.Domain.LanguageOptions. */
+export const LANGUAGE_OPTIONS = ALL_LANGUAGE_OPTIONS.filter(option => option.value !== LANGUAGE_CODES.french)
 
 export function normalizeLanguageCode(language: string): string {
   const [languageCode = '', ...subtags] = language.trim().split('-')

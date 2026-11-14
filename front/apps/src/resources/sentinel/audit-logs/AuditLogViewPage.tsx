@@ -63,7 +63,7 @@ export function AuditLogViewPage() {
       <Card>
         <CardContent>
           {auditLog === null ? (
-            <p className="page-subtitle">{t('common.common.loading')}</p>
+            <p className="page-subtitle">{t('common.states.loading')}</p>
           ) : (
             <div className="detail-grid-one-column">
               <div className="detail-grid-two-columns">

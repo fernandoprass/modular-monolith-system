@@ -2,9 +2,9 @@ import { ArrowLeft } from 'lucide-react'
 import { useEffect, useState, type ReactNode } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
-import { useTranslate } from '../../../app/i18n/i18n'
+import { useLocale, useTranslate } from '../../../app/i18n/i18n'
 import { APP_ROUTES } from '../../../app/routes'
-import { useAuth, useNotifyError } from '../../../auth/AuthProvider'
+import { useNotifyError } from '../../../auth/AuthProvider'
 import { Badge } from '../../../components/ui/badge'
 import { Button } from '../../../components/ui/button'
 import { Card, CardContent } from '../../../components/ui/card'
@@ -21,7 +21,7 @@ export function EmailViewPage() {
   const t = useTranslate()
   const navigate = useNavigate()
   const notifyError = useNotifyError()
-  const { user } = useAuth()
+  const locale = useLocale()
   const { id } = useParams()
   const [email, setEmail] = useState<EmailDto | null>(null)
 
@@ -55,7 +55,7 @@ export function EmailViewPage() {
       <Card>
         <CardContent>
           {email === null ? (
-            <p className="page-subtitle">{t('common.common.loading')}</p>
+            <p className="page-subtitle">{t('common.states.loading')}</p>
           ) : (
             <div className="detail-grid-one-column">
               <div className="detail-grid-two-columns">
@@ -71,12 +71,12 @@ export function EmailViewPage() {
                 <DetailField label={t('common.fields.feature')}>{email.feature}</DetailField>
                 <DetailField label={t('common.fields.templateKey')}>{email.templateKey}</DetailField>
                 <DetailField label={t('common.fields.recipient')}>{email.recipient}</DetailField>
-                <DetailField label={t('common.fields.createdAt')}>{formatUserDateTime(email.createdAt, user?.language)}</DetailField>
-                <DetailField label={t('common.fields.sentAt')}>{formatOptionalDate(email.sentAt, user?.language)}</DetailField>
-                <DetailField label={t('common.fields.expiresAt')}>{formatUserDateTime(email.expiresAt, user?.language)}</DetailField>
-                <DetailField label={t('common.fields.nextAttemptAt')}>{formatOptionalDate(email.nextAttemptAt, user?.language)}</DetailField>
+                <DetailField label={t('common.fields.createdAt')}>{formatUserDateTime(email.createdAt, locale)}</DetailField>
+                <DetailField label={t('common.fields.sentAt')}>{formatOptionalDate(email.sentAt, locale)}</DetailField>
+                <DetailField label={t('common.fields.expiresAt')}>{formatUserDateTime(email.expiresAt, locale)}</DetailField>
+                <DetailField label={t('common.fields.nextAttemptAt')}>{formatOptionalDate(email.nextAttemptAt, locale)}</DetailField>
                 <DetailField label={t('common.fields.retryCount')}>{email.retryCount}</DetailField>
-                <DetailField label={t('common.fields.isHtml')}>{email.isHtml ? t('common.common.yes') : t('common.common.no')}</DetailField>
+                <DetailField label={t('common.fields.isHtml')}>{email.isHtml ? t('common.states.yes') : t('common.states.no')}</DetailField>
               </div>
               <DetailField label={t('common.fields.subject')}>{email.subject}</DetailField>
               <DetailField label={t('common.fields.body')}>
@@ -91,7 +91,7 @@ export function EmailViewPage() {
                     <CardContent>
                       <div className="detail-grid-one-column">
                         <DetailField label={t('common.fields.attemptedAt')}>
-                          {formatUserDateTime(attempt.attemptedAt, user?.language)}
+                          {formatUserDateTime(attempt.attemptedAt, locale)}
                         </DetailField>
                         <DetailField label={t('common.fields.errorMessage')}>{attempt.errorMessage}</DetailField>
                         {attempt.stackTrace !== null && (

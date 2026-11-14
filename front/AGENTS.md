@@ -37,7 +37,7 @@ Prefer shadcn MCP examples before guessing component usage.
 
 ## SKILLS
 
-Read `.agents/skill` if it exists.
+Read `.agents/skills/` if it exists.
 
 If it does not exist, say so briefly and continue.
 
@@ -268,6 +268,9 @@ Pass `createValidationErrorMap(t)` from `shared/validation.ts` to every Zod reso
 Use the active `t` from `useTranslate()`.
 Keep resource-specific validation messages in that resource's translation keys.
 Backend business errors must retain the messages returned by the API.
+Use `noValidate` on Zod-owned forms, render `FieldError`, and connect errors with `aria-describedby`.
+Set `data-invalid` on the field and `aria-invalid` on its control.
+Required and conditional rules must be enforced by the schema, not just native input attributes.
 
 Use `Controller` for controlled shadcn/Radix/custom inputs:
 - `Select`
@@ -375,7 +378,7 @@ useEffect(() => {
 }, [loadRole])
 
 return role === null
-  ? <p>{t('common.common.loading')}</p>
+  ? <p>{t('common.states.loading')}</p>
   : <RoleEditForm key={role.id} role={role} />
 ```
 
@@ -786,12 +789,15 @@ Translation keys and required interpolation variables are derived from English.
 Do not bypass these checks with arbitrary strings or type assertions.
 
 New dictionaries must satisfy `MessageDictionary` and be registered in `LOCALE_DICTIONARIES`.
+Run `npm run check:i18n` to validate dictionary keys and interpolation placeholders; the build also runs this check.
+Run `npm test` for the frontend regression checks.
 English is currently the only registered UI dictionary.
 Unsupported locales and missing translations fall back to English.
 Missing keys warn once per locale/key in development.
 
 Use `LANGUAGE_CODES` and `LanguageCode` from `shared/languages.ts`.
-`LANGUAGE_OPTIONS` lists languages for user/organization preferences and template content.
+`LANGUAGE_OPTIONS` lists backend-supported languages for user/organization preferences and template content.
+`ALL_LANGUAGE_OPTIONS` also includes planned languages such as French.
 `UI_LANGUAGE_OPTIONS` includes only languages with registered UI dictionaries.
 Adding a preference language does not make its UI translation available.
 

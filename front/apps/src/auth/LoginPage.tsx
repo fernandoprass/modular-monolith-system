@@ -10,7 +10,7 @@ import { useTranslate } from '../app/i18n/i18n'
 import { APP_ROUTES } from '../app/routes'
 import { Button } from '../components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
-import { Field, FieldGroup, FieldLabel } from '../components/ui/form'
+import { Field, FieldError, FieldGroup, FieldLabel } from '../components/ui/form'
 import { Input } from '../components/ui/input'
 import { useAuth, useNotifyError } from './AuthProvider'
 
@@ -31,6 +31,7 @@ export function LoginPage() {
   const { isAuthenticated, login } = useAuth()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const {
+    formState: { errors },
     handleSubmit,
     register,
   } = useForm<LoginForm>({
@@ -66,27 +67,33 @@ export function LoginPage() {
           <CardDescription>{t('auth.login.title')}</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit(handleLogin)}>
+          <form noValidate onSubmit={handleSubmit(handleLogin)}>
             <FieldGroup>
-              <Field>
+              <Field data-invalid={errors.email !== undefined}>
                 <FieldLabel htmlFor="email">{t('auth.login.email')}</FieldLabel>
                 <Input
+                  aria-invalid={errors.email !== undefined}
+                  aria-describedby={errors.email ? 'LoginPage-email-error' : undefined}
                   autoComplete="email"
                   id="email"
                   required
                   type="email"
                   {...register('email')}
                 />
+                <FieldError id="LoginPage-email-error">{errors.email?.message}</FieldError>
               </Field>
-              <Field>
+              <Field data-invalid={errors.password !== undefined}>
                 <FieldLabel htmlFor="password">{t('auth.login.password')}</FieldLabel>
                 <Input
+                  aria-invalid={errors.password !== undefined}
+                  aria-describedby={errors.password ? 'LoginPage-password-error' : undefined}
                   autoComplete="current-password"
                   id="password"
                   required
                   type="password"
                   {...register('password')}
                 />
+                <FieldError id="LoginPage-password-error">{errors.password?.message}</FieldError>
               </Field>
               <Button disabled={isSubmitting} type="submit">
                 {t('auth.login.submit')}

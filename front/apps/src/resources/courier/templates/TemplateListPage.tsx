@@ -1,3 +1,4 @@
+import { toTranslatedOptions } from '../../../shared/translatedOptions'
 import type { SortingState } from '@tanstack/react-table'
 import { Plus } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -28,7 +29,6 @@ import {
   type TemplateLiteDto,
   type TemplateSearchForm,
 } from './templateTypes'
-import { toTranslatedTemplateOptions } from './templateUi'
 
 const EMPTY_TEMPLATE_SEARCH: TemplateSearchForm = {
   key: '',
@@ -137,7 +137,7 @@ export function TemplateListPage() {
                 onValueChange={field.onChange}
                 options={[
                   { label: t('common.filters.all'), value: TEMPLATE_FILTER_VALUES.all },
-                  ...toTranslatedTemplateOptions(TEMPLATE_MODULE_OPTIONS, t),
+                  ...toTranslatedOptions(TEMPLATE_MODULE_OPTIONS, t),
                 ]}
                 value={field.value}
               />
@@ -162,7 +162,7 @@ export function TemplateListPage() {
                 onValueChange={field.onChange}
                 options={[
                   { label: t('common.filters.all'), value: TEMPLATE_FILTER_VALUES.all },
-                  ...toTranslatedTemplateOptions(NOTIFICATION_SEVERITY_OPTIONS, t),
+                  ...toTranslatedOptions(NOTIFICATION_SEVERITY_OPTIONS, t),
                 ]}
                 value={field.value}
               />
@@ -175,7 +175,7 @@ export function TemplateListPage() {
         data={result?.items ?? []}
         emptyText={t('features.courier.templates.messages.empty')}
         isLoading={isLoading}
-        loadingText={t('common.common.loading')}
+        loadingText={t('common.states.loading')}
         onSortingChange={setSorting}
         sorting={sorting}
       />

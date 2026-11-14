@@ -144,7 +144,7 @@ InputSelect.displayName = "InputSelect";
 
 export const InputSelectTrigger = React.forwardRef<
   HTMLButtonElement,
-  InputSelectProvided & {
+  InputSelectProvided & Pick<React.ComponentProps<"button">, "id" | "aria-invalid" | "aria-describedby" | "onBlur"> & {
     className?: string;
     children?: (v: SelectOption) => React.ReactNode;
     style?: React.CSSProperties;
@@ -162,6 +162,10 @@ export const InputSelectTrigger = React.forwardRef<
       className,
       style,
       children,
+      id,
+      'aria-invalid': ariaInvalid,
+      'aria-describedby': ariaDescribedBy,
+      onBlur,
     },
     ref,
   ) => {
@@ -171,6 +175,10 @@ export const InputSelectTrigger = React.forwardRef<
 
     return (
       <Button
+        id={id}
+        aria-invalid={ariaInvalid}
+        aria-describedby={ariaDescribedBy}
+        onBlur={onBlur}
         ref={ref}
         onClick={onTogglePopover}
         variant="outline"

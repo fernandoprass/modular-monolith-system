@@ -1,3 +1,4 @@
+import { toTranslatedOptions } from '../../../shared/translatedOptions'
 import type { SortingState } from '@tanstack/react-table'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
@@ -23,7 +24,6 @@ import {
   PERMISSION_RESOURCE_OPTIONS,
   type PermissionSearchForm,
 } from './permissionTypes'
-import { toTranslatedOptions } from './permissionUi'
 
 const EMPTY_PERMISSION_SEARCH: PermissionSearchForm = {
   action: '',
@@ -144,7 +144,7 @@ export function PermissionListPage() {
         data={result?.items ?? []}
         emptyText={t('features.iam.permissions.messages.empty')}
         isLoading={isLoading}
-        loadingText={t('common.common.loading')}
+        loadingText={t('common.states.loading')}
         onSortingChange={setSorting}
         sorting={sorting}
       />

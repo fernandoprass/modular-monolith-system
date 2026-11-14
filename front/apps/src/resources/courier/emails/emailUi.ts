@@ -1,11 +1,6 @@
 import type { PlainTranslationKey, Translate } from '../../../app/i18n/i18n'
 import { EMAIL_STATUSES, type EmailStatus } from './emailTypes'
 
-type EmailOption = {
-  labelKey: PlainTranslationKey
-  value: string
-}
-
 const EMAIL_STATUS_ENUM_KEYS: Record<EmailStatus, PlainTranslationKey> = {
   [EMAIL_STATUSES.pending]: 'features.courier.emails.statuses.pending',
   [EMAIL_STATUSES.processing]: 'features.courier.emails.statuses.processing',
@@ -31,11 +26,4 @@ export function getEmailStatusClassName(value: EmailStatus): string {
   }
 
   return 'email-status-pending'
-}
-
-export function toTranslatedEmailOptions(options: readonly EmailOption[], t: Translate) {
-  return options.map((option) => ({
-    label: t(option.labelKey),
-    value: option.value,
-  }))
 }

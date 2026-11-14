@@ -1,9 +1,10 @@
+import { toTranslatedOptions } from '../../../shared/translatedOptions'
 import type { SortingState } from '@tanstack/react-table'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 
-import { useLocale, useTranslate, type PlainTranslationKey, type Translate } from '../../../app/i18n/i18n'
+import { useLocale, useTranslate } from '../../../app/i18n/i18n'
 import { APP_ROUTES } from '../../../app/routes'
 import { useAuth, useNotifyError } from '../../../auth/AuthProvider'
 import { DataTable } from '../../../components/ui/data-table'
@@ -23,11 +24,6 @@ import {
   type AuditLogLiteDto,
   type AuditLogSearchForm,
 } from './auditLogTypes'
-
-type AuditLogOption = {
-  labelKey: PlainTranslationKey
-  value: string
-}
 
 function toDateTimeLocalValue(date: Date): string {
   const offsetMs = date.getTimezoneOffset() * 60_000
@@ -51,13 +47,6 @@ function getDefaultAuditLogSearch(): AuditLogSearchForm {
     to: toDateTimeLocalValue(now),
     userId: '',
   }
-}
-
-function toTranslatedOptions(options: readonly AuditLogOption[], t: Translate) {
-  return options.map((option) => ({
-    label: t(option.labelKey),
-    value: option.value,
-  }))
 }
 
 export function AuditLogListPage() {
@@ -194,7 +183,7 @@ export function AuditLogListPage() {
         data={result?.items ?? []}
         emptyText={t('features.sentinel.auditLogs.messages.empty')}
         isLoading={isLoading}
-        loadingText={t('common.common.loading')}
+        loadingText={t('common.states.loading')}
         onSortingChange={setSorting}
         sorting={sorting}
       />

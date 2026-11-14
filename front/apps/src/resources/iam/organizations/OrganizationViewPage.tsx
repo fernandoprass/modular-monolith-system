@@ -1,3 +1,4 @@
+import { getLanguageLabel } from '../../../shared/translatedOptions'
 import { ArrowLeft } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
@@ -11,7 +12,7 @@ import { Button } from '../../../components/ui/button'
 import { Card, CardContent } from '../../../components/ui/card'
 import { getOrganization } from './organizationApi'
 import type { OrganizationDto } from './organizationTypes'
-import { getLanguageLabel, getOrganizationTypeEnum } from './organizationUi'
+import { getOrganizationTypeEnum } from './organizationUi'
 
 export function OrganizationViewPage() {
   const t = useTranslate()
@@ -50,7 +51,7 @@ export function OrganizationViewPage() {
       <Card>
         <CardContent>
           {organization === null ? (
-            <p className="page-subtitle">{t('common.common.loading')}</p>
+            <p className="page-subtitle">{t('common.states.loading')}</p>
           ) : (
             <div className="detail-grid-two-columns">
               <Field label={t('common.fields.type')}>

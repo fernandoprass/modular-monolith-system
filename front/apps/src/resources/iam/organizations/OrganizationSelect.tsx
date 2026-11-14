@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ComponentProps } from 'react'
 
 import { useTranslate } from '../../../app/i18n/i18n'
 import { useAuth, useNotifyError } from '../../../auth/AuthProvider'
@@ -9,7 +9,7 @@ import {
 import type { SelectOption } from '../../../types'
 import { getOrganizationLookup } from './organizationApi'
 
-type OrganizationSelectProps = {
+type OrganizationSelectProps = Pick<ComponentProps<'button'>, 'id' | 'aria-invalid' | 'aria-describedby' | 'onBlur' | 'ref'> & {
   clearable?: boolean
   disabled?: boolean
   includeInactive?: boolean
@@ -23,6 +23,7 @@ export function OrganizationSelect({
   includeInactive = false,
   onValueChange,
   value,
+  ...triggerProps
 }: OrganizationSelectProps) {
   const t = useTranslate()
   const { user } = useAuth()
@@ -79,7 +80,7 @@ export function OrganizationSelect({
       searchValue={search}
       value={effectiveValue}
     >
-      {(selectProps) => <InputSelectTrigger {...selectProps} />}
+      {(selectProps) => <InputSelectTrigger {...selectProps} {...triggerProps} />}
     </InputSelect>
   )
 }

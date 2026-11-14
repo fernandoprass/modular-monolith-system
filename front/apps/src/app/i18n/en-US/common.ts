@@ -29,7 +29,7 @@ export const commonMessages = {
     viewPermissions: 'View permissions',
     write: 'Write',
   },
-  common: {
+  states: {
     false: 'False',
     loading: 'Loading...',
     no: 'No',

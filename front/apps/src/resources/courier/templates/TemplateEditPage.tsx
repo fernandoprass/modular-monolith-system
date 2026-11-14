@@ -1,3 +1,4 @@
+import { toTranslatedOptions } from '../../../shared/translatedOptions'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { createValidationErrorMap } from '../../../shared/validation'
 import type { SortingState } from '@tanstack/react-table'
@@ -16,7 +17,7 @@ import { Card, CardContent } from '../../../components/ui/card'
 import { Checkbox } from '../../../components/ui/checkbox'
 import { DataTable } from '../../../components/ui/data-table'
 import { ConfirmDialog } from '../../../components/ui/dialog-confirm'
-import { Field, FieldGroup, FieldLabel } from '../../../components/ui/form'
+import { Field, FieldError, FieldGroup, FieldLabel } from '../../../components/ui/form'
 import { Input } from '../../../components/ui/input'
 import { Select } from '../../../components/ui/select'
 import { COURIER_PERMISSIONS } from '../../../shared/courierConstants'
@@ -38,7 +39,6 @@ import {
   type TemplateForm,
   type TemplateTranslationDto,
 } from './templateTypes'
-import { toTranslatedTemplateOptions } from './templateUi'
 
 const EMPTY_TEMPLATE_FORM: TemplateForm = {
   isAllowingOptOut: false,
@@ -113,7 +113,7 @@ export function TemplateEditPage() {
       <Card>
         <CardContent>
           {!isCreate && template === null ? (
-            <p className="page-subtitle">{t('common.common.loading')}</p>
+            <p className="page-subtitle">{t('common.states.loading')}</p>
           ) : (
             <TemplateDetailsForm
               key={template?.id ?? 'create'}
@@ -164,26 +164,39 @@ function TemplateDetailsForm({ onSaved, template }: TemplateDetailsFormProps) {
   }
 
   return (
-    <form className="edit-form" onSubmit={form.handleSubmit(handleSave)}>
+    <form noValidate className="edit-form" onSubmit={form.handleSubmit(handleSave)}>
       <FieldGroup>
         <div className="form-row-two">
           <Controller
             control={form.control}
             name="module"
             render={({ field }) => (
-              <Field>
-                <FieldLabel>{t('common.fields.module')}</FieldLabel>
+              <Field data-invalid={form.formState.errors.module !== undefined}>
+                <FieldLabel htmlFor="TemplateEditPage-module">{t('common.fields.module')}</FieldLabel>
                 <Select
+                  onBlur={field.onBlur}
+                  ref={field.ref}
+                  aria-invalid={form.formState.errors.module !== undefined}
+                  aria-describedby={form.formState.errors.module ? 'TemplateEditPage-module-error' : undefined}
+                  id="TemplateEditPage-module"
                   onValueChange={field.onChange}
-                  options={toTranslatedTemplateOptions(TEMPLATE_MODULE_OPTIONS, t)}
+                  options={toTranslatedOptions(TEMPLATE_MODULE_OPTIONS, t)}
                   value={field.value}
                 />
+                <FieldError id="TemplateEditPage-module-error">{form.formState.errors.module?.message}</FieldError>
               </Field>
             )}
           />
-          <Field>
+          <Field data-invalid={form.formState.errors.key !== undefined}>
             <FieldLabel htmlFor="template-key">{t('common.fields.key')}</FieldLabel>
-            <Input id="template-key" required {...form.register('key')} />
+            <Input
+              aria-invalid={form.formState.errors.key !== undefined}
+              aria-describedby={form.formState.errors.key ? 'TemplateEditPage-key-error' : undefined}
+              id="template-key"
+              required
+              {...form.register('key')}
+            />
+            <FieldError id="TemplateEditPage-key-error">{form.formState.errors.key?.message}</FieldError>
           </Field>
         </div>
         <div className="form-row-two">
@@ -191,13 +204,19 @@ function TemplateDetailsForm({ onSaved, template }: TemplateDetailsFormProps) {
             control={form.control}
             name="severity"
             render={({ field }) => (
-              <Field>
-                <FieldLabel>{t('common.fields.severity')}</FieldLabel>
+              <Field data-invalid={form.formState.errors.severity !== undefined}>
+                <FieldLabel htmlFor="TemplateEditPage-severity">{t('common.fields.severity')}</FieldLabel>
                 <Select
+                  onBlur={field.onBlur}
+                  ref={field.ref}
+                  aria-invalid={form.formState.errors.severity !== undefined}
+                  aria-describedby={form.formState.errors.severity ? 'TemplateEditPage-severity-error' : undefined}
+                  id="TemplateEditPage-severity"
                   onValueChange={field.onChange}
-                  options={toTranslatedTemplateOptions(NOTIFICATION_SEVERITY_OPTIONS, t)}
+                  options={toTranslatedOptions(NOTIFICATION_SEVERITY_OPTIONS, t)}
                   value={field.value}
                 />
+                <FieldError id="TemplateEditPage-severity-error">{form.formState.errors.severity?.message}</FieldError>
               </Field>
             )}
           />
@@ -205,13 +224,19 @@ function TemplateDetailsForm({ onSaved, template }: TemplateDetailsFormProps) {
             control={form.control}
             name="retentionPolicy"
             render={({ field }) => (
-              <Field>
-                <FieldLabel>{t('common.fields.retentionPolicy')}</FieldLabel>
+              <Field data-invalid={form.formState.errors.retentionPolicy !== undefined}>
+                <FieldLabel htmlFor="TemplateEditPage-retentionPolicy">{t('common.fields.retentionPolicy')}</FieldLabel>
                 <Select
+                  onBlur={field.onBlur}
+                  ref={field.ref}
+                  aria-invalid={form.formState.errors.retentionPolicy !== undefined}
+                  aria-describedby={form.formState.errors.retentionPolicy ? 'TemplateEditPage-retentionPolicy-error' : undefined}
+                  id="TemplateEditPage-retentionPolicy"
                   onValueChange={field.onChange}
-                  options={toTranslatedTemplateOptions(RETENTION_POLICY_OPTIONS, t)}
+                  options={toTranslatedOptions(RETENTION_POLICY_OPTIONS, t)}
                   value={field.value}
                 />
+                <FieldError id="TemplateEditPage-retentionPolicy-error">{form.formState.errors.retentionPolicy?.message}</FieldError>
               </Field>
             )}
           />
@@ -307,7 +332,7 @@ function TemplateTranslations({ onChanged, template }: TemplateTranslationsProps
         data={template.translations}
         emptyText={t('features.courier.templates.messages.noTranslations')}
         isLoading={false}
-        loadingText={t('common.common.loading')}
+        loadingText={t('common.states.loading')}
         onSortingChange={setSorting}
         sorting={sorting}
       />

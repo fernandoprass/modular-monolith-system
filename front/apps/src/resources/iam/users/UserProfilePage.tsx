@@ -1,3 +1,5 @@
+import { toTranslatedOptions } from '../../../shared/translatedOptions'
+import { tokenStorage } from '../../../auth/tokenStorage'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { createValidationErrorMap } from '../../../shared/validation'
 import { useCallback, useEffect, useState } from 'react'
@@ -9,14 +11,13 @@ import { useTranslate } from '../../../app/i18n/i18n'
 import { useAuth, useNotifyError } from '../../../auth/AuthProvider'
 import { Button } from '../../../components/ui/button'
 import { Card, CardContent } from '../../../components/ui/card'
-import { Field, FieldGroup, FieldLabel } from '../../../components/ui/form'
+import { Field, FieldError, FieldGroup, FieldLabel } from '../../../components/ui/form'
 import { Input } from '../../../components/ui/input'
 import { Select } from '../../../components/ui/select'
 import { LANGUAGE_OPTIONS } from '../../../shared/languages'
 import { getCurrentUser, updateCurrentUser } from './userApi'
 import { UserAccessTabs } from './UserAccessTabs'
 import { USER_REQUEST_FIELDS, type UserDto } from './userTypes'
-import { toTranslatedOptions } from './userUi'
 
 type UserProfileForm = {
   language: string
@@ -58,7 +59,7 @@ export function UserProfileSection() {
       <Card>
         <CardContent>
           {user === null ? (
-            <p className="page-subtitle">{t('common.common.loading')}</p>
+            <p className="page-subtitle">{t('common.states.loading')}</p>
           ) : (
             <UserProfileFormPanel key={user.id} onSaved={loadUser} user={user} />
           )}
@@ -73,7 +74,7 @@ export function UserSecuritySection() {
   const { user } = useAuth()
 
   return user === null
-    ? <p className="page-subtitle">{t('common.common.loading')}</p>
+    ? <p className="page-subtitle">{t('common.states.loading')}</p>
     : <UserAccessTabs userId={user.id} />
 }
 
@@ -89,6 +90,7 @@ function UserProfileFormPanel({ onSaved, user }: UserProfileFormPanelProps) {
   const { showSuccess } = useToast()
   const [isSaving, setIsSaving] = useState(false)
   const {
+    formState: { errors },
     control,
     handleSubmit,
     register,
@@ -98,6 +100,7 @@ function UserProfileFormPanel({ onSaved, user }: UserProfileFormPanelProps) {
   })
 
   async function handleSave(value: UserProfileForm) {
+    const session = tokenStorage.getSession()
     setIsSaving(true)
 
     try {
@@ -106,38 +109,51 @@ function UserProfileFormPanel({ onSaved, user }: UserProfileFormPanelProps) {
         [USER_REQUEST_FIELDS.isActive]: user.isActive,
         [USER_REQUEST_FIELDS.language]: value.language,
       })
-      updateProfile(user.id, { fullName: value.name, language: value.language })
+      if (!updateProfile(user.id, { fullName: value.name, language: value.language }, session)) return
       showSuccess(message)
       await onSaved()
     } catch (error) {
-      notifyError(error, t('common.errors.generic'))
+      if (tokenStorage.isCurrentSession(session)) notifyError(error, t('common.errors.generic'))
     } finally {
       setIsSaving(false)
     }
   }
 
   return (
-    <form className="edit-form" onSubmit={handleSubmit(handleSave)}>
+    <form noValidate className="edit-form" onSubmit={handleSubmit(handleSave)}>
       <FieldGroup>
         <Field data-disabled>
           <FieldLabel>{t('common.fields.email')}</FieldLabel>
           <Input disabled value={user.email} />
         </Field>
-        <Field>
+        <Field data-invalid={errors.name !== undefined}>
           <FieldLabel htmlFor="name">{t('common.fields.name')}</FieldLabel>
-          <Input id="name" required {...register('name')} />
+          <Input
+            aria-invalid={errors.name !== undefined}
+            aria-describedby={errors.name ? 'UserProfilePage-name-error' : undefined}
+            id="name"
+            required
+            {...register('name')}
+          />
+          <FieldError id="UserProfilePage-name-error">{errors.name?.message}</FieldError>
         </Field>
         <Controller
           control={control}
           name="language"
           render={({ field }) => (
-            <Field>
-              <FieldLabel>{t('common.fields.language')}</FieldLabel>
+            <Field data-invalid={errors.language !== undefined}>
+              <FieldLabel htmlFor="UserProfilePage-language">{t('common.fields.language')}</FieldLabel>
               <Select
+                onBlur={field.onBlur}
+                ref={field.ref}
+                aria-invalid={errors.language !== undefined}
+                aria-describedby={errors.language ? 'UserProfilePage-language-error' : undefined}
+                id="UserProfilePage-language"
                 onValueChange={field.onChange}
                 options={toTranslatedOptions(LANGUAGE_OPTIONS, t)}
                 value={field.value}
               />
+              <FieldError id="UserProfilePage-language-error">{errors.language?.message}</FieldError>
             </Field>
           )}
         />

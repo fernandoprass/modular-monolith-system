@@ -1,3 +1,4 @@
+import { toTranslatedOptions } from '../../../shared/translatedOptions'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { createValidationErrorMap } from '../../../shared/validation'
 import type { ColumnDef, RowSelectionState, SortingState } from '@tanstack/react-table'
@@ -16,7 +17,7 @@ import { Button } from '../../../components/ui/button'
 import { Card, CardContent } from '../../../components/ui/card'
 import { Checkbox } from '../../../components/ui/checkbox'
 import { DataTable } from '../../../components/ui/data-table'
-import { Field, FieldGroup, FieldLabel } from '../../../components/ui/form'
+import { Field, FieldError, FieldGroup, FieldLabel } from '../../../components/ui/form'
 import { Input } from '../../../components/ui/input'
 import { Select } from '../../../components/ui/select'
 import { Textarea } from '../../../components/ui/textarea'
@@ -28,7 +29,6 @@ import {
   PERMISSION_FILTER_VALUES,
   PERMISSION_MODULE_OPTIONS,
 } from '../permissions/permissionTypes'
-import { toTranslatedOptions } from '../permissions/permissionUi'
 import {
   assignRolePermissions,
   createRole,
@@ -293,7 +293,7 @@ export function RoleEditPage() {
       <Card>
         <CardContent>
           {!isCreate && role === null ? (
-            <p className="page-subtitle">{t('common.common.loading')}</p>
+            <p className="page-subtitle">{t('common.states.loading')}</p>
           ) : (
             <RoleEditForm
               key={role?.id ?? 'create'}
@@ -339,7 +339,7 @@ export function RoleEditPage() {
                   emptyText={t('features.iam.permissions.messages.empty')}
                   getRowId={(permission) => permission.id}
                   isLoading={isPermissionLoading}
-                  loadingText={t('common.common.loading')}
+                  loadingText={t('common.states.loading')}
                   onRowSelectionChange={setAvailableSelection}
                   onSortingChange={setAvailableSorting}
                   rowSelection={availableSelection}
@@ -373,7 +373,7 @@ export function RoleEditPage() {
                   emptyText={t('features.iam.permissions.messages.empty')}
                   getRowId={(permission) => permission.id}
                   isLoading={isPermissionLoading}
-                  loadingText={t('common.common.loading')}
+                  loadingText={t('common.states.loading')}
                   onRowSelectionChange={setRolePermissionSelection}
                   onSortingChange={setRolePermissionSorting}
                   rowSelection={rolePermissionSelection}
@@ -399,6 +399,7 @@ function RoleEditForm({
   const { showSuccess } = useToast()
   const [isSaving, setIsSaving] = useState(false)
   const {
+    formState: { errors },
     control,
     handleSubmit,
     register,
@@ -428,31 +429,51 @@ function RoleEditForm({
   }
 
   return (
-    <form className="edit-form" onSubmit={handleSubmit(handleSave)}>
+    <form noValidate className="edit-form" onSubmit={handleSubmit(handleSave)}>
       <FieldGroup>
         <Controller
           control={control}
           name="organizationId"
           render={({ field }) => (
-            <Field data-disabled={!isCreate}>
-              <FieldLabel>{t('common.fields.organization')}</FieldLabel>
+            <Field data-disabled={!isCreate} data-invalid={errors.organizationId !== undefined}>
+              <FieldLabel htmlFor="RoleEditPage-organizationId">{t('common.fields.organization')}</FieldLabel>
               <OrganizationSelect
+                onBlur={field.onBlur}
+                ref={field.ref}
+                aria-invalid={errors.organizationId !== undefined}
+                aria-describedby={errors.organizationId ? 'RoleEditPage-organizationId-error' : undefined}
+                id="RoleEditPage-organizationId"
                 clearable
                 disabled={!isCreate}
                 includeInactive
                 onValueChange={field.onChange}
                 value={field.value}
               />
+              <FieldError id="RoleEditPage-organizationId-error">{errors.organizationId?.message}</FieldError>
             </Field>
           )}
         />
-        <Field>
+        <Field data-invalid={errors.name !== undefined}>
           <FieldLabel htmlFor="name">{t('common.fields.name')}</FieldLabel>
-          <Input id="name" required {...register('name')} />
+          <Input
+            aria-invalid={errors.name !== undefined}
+            aria-describedby={errors.name ? 'RoleEditPage-name-error' : undefined}
+            id="name"
+            required
+            {...register('name')}
+          />
+          <FieldError id="RoleEditPage-name-error">{errors.name?.message}</FieldError>
         </Field>
-        <Field>
+        <Field data-invalid={errors.description !== undefined}>
           <FieldLabel htmlFor="description">{t('common.fields.description')}</FieldLabel>
-          <Textarea id="description" required {...register('description')} />
+          <Textarea
+            aria-invalid={errors.description !== undefined}
+            aria-describedby={errors.description ? 'RoleEditPage-description-error' : undefined}
+            id="description"
+            required
+            {...register('description')}
+          />
+          <FieldError id="RoleEditPage-description-error">{errors.description?.message}</FieldError>
         </Field>
         <Controller
           control={control}

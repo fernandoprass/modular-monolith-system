@@ -9,7 +9,7 @@ export type SelectOption = {
   value: string
 }
 
-type SelectProps = {
+type SelectProps = Pick<ComponentProps<typeof SelectPrimitive.Trigger>, 'id' | 'aria-invalid' | 'aria-describedby' | 'onBlur' | 'ref'> & {
   disabled?: boolean
   onValueChange: (value: string) => void
   options: SelectOption[]
@@ -17,12 +17,12 @@ type SelectProps = {
   value?: string
 }
 
-export function Select({ disabled = false, onValueChange, options, placeholder, value }: SelectProps) {
+export function Select({ disabled = false, onValueChange, options, placeholder, value, ...triggerProps }: SelectProps) {
   const selectedOption = options.find((option) => option.value === value)
 
   return (
     <SelectPrimitive.Root disabled={disabled} onValueChange={onValueChange} value={value}>
-      <SelectPrimitive.Trigger className="select-trigger">
+      <SelectPrimitive.Trigger className="select-trigger" {...triggerProps}>
         <span>{selectedOption?.label ?? placeholder}</span>
         <SelectPrimitive.Icon>
           <ChevronDown />

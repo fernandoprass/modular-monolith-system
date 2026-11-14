@@ -41,7 +41,7 @@ export function createRoleTableColumns({
       accessorKey: 'isDefault',
       cell: ({ row }) => (
         <Badge variant={row.original.isDefault ? 'active' : 'inactive'}>
-          {row.original.isDefault ? t('common.common.yes') : t('common.common.no')}
+          {row.original.isDefault ? t('common.states.yes') : t('common.states.no')}
         </Badge>
       ),
       header: t('common.fields.isDefault'),
