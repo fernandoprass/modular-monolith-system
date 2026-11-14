@@ -1,20 +1,20 @@
-import type { Translate } from '../../../app/i18n/i18n'
+import type { PlainTranslationKey, Translate } from '../../../app/i18n/i18n'
 import { EMAIL_STATUSES, type EmailStatus } from './emailTypes'
 
 type EmailOption = {
-  labelKey: string
+  labelKey: PlainTranslationKey
   value: string
 }
 
-const EMAIL_STATUS_LABEL_KEYS: Record<EmailStatus, string> = {
+const EMAIL_STATUS_ENUM_KEYS: Record<EmailStatus, PlainTranslationKey> = {
   [EMAIL_STATUSES.pending]: 'features.courier.emails.statuses.pending',
   [EMAIL_STATUSES.processing]: 'features.courier.emails.statuses.processing',
   [EMAIL_STATUSES.sent]: 'features.courier.emails.statuses.sent',
   [EMAIL_STATUSES.failed]: 'features.courier.emails.statuses.failed',
 }
 
-export function getEmailStatusLabel(value: EmailStatus, t: Translate): string {
-  return t(EMAIL_STATUS_LABEL_KEYS[value])
+export function getEmailStatusEnum(value: EmailStatus, t: Translate): string {
+  return t(EMAIL_STATUS_ENUM_KEYS[value])
 }
 
 export function getEmailStatusClassName(value: EmailStatus): string {

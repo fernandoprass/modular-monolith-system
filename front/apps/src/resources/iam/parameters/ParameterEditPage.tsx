@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { createValidationErrorMap } from '../../../shared/validation'
 import { ArrowLeft } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
@@ -6,7 +7,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { z } from 'zod'
 
 import { useToast } from '../../../app/ToastProvider'
-import { useTranslate, type Translate } from '../../../app/i18n/i18n'
+import { useTranslate, type PlainTranslationKey, type Translate } from '../../../app/i18n/i18n'
 import { APP_ROUTES } from '../../../app/routes'
 import { useNotifyError } from '../../../auth/AuthProvider'
 import { Button } from '../../../components/ui/button'
@@ -28,7 +29,7 @@ import {
 import { ParameterValueInput } from './ParameterValueInput'
 
 type ParameterOption = {
-  labelKey: string
+  labelKey: PlainTranslationKey
   value: string
 }
 
@@ -98,7 +99,7 @@ export function ParameterEditPage() {
       const loaded = await getParameter(id)
       setParameter(loaded)
     } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
+      notifyError(error, t('common.errors.generic'))
     }
   }, [id, notifyError, t])
 
@@ -116,13 +117,13 @@ export function ParameterEditPage() {
         <h1 className="page-title">{t('features.iam.parameters.pages.edit')}</h1>
         <Button onClick={() => navigate(APP_ROUTES.parameters)} type="button" variant="outline">
           <ArrowLeft data-icon="inline-start" />
-          {t('shared.actions.back')}
+          {t('common.actions.back')}
         </Button>
       </div>
       <Card>
         <CardContent>
           {parameter === null ? (
-            <p className="page-subtitle">{t('shared.common.loading')}</p>
+            <p className="page-subtitle">{t('common.common.loading')}</p>
           ) : (
             <ParameterEditForm key={parameter.id} onSaved={loadParameter} parameter={parameter} />
           )}
@@ -144,7 +145,7 @@ function ParameterEditForm({ onSaved, parameter }: ParameterEditFormProps) {
     watch,
   } = useForm<ParameterForm>({
     defaultValues: toForm(parameter),
-    resolver: zodResolver(parameterEditSchema),
+    resolver: zodResolver(parameterEditSchema, { error: createValidationErrorMap(t) }),
   })
   const selectedType = watch('type')
   const showListItems = selectedType === PARAMETER_TYPE_VALUES.list
@@ -158,7 +159,7 @@ function ParameterEditForm({ onSaved, parameter }: ParameterEditFormProps) {
       showSuccess(message)
       await onSaved()
     } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
+      notifyError(error, t('common.errors.generic'))
     } finally {
       setIsSaving(false)
     }
@@ -168,7 +169,7 @@ function ParameterEditForm({ onSaved, parameter }: ParameterEditFormProps) {
     <form className="edit-form" onSubmit={handleSubmit(handleSave)}>
       <FieldGroup>
         <Field>
-          <FieldLabel htmlFor="parameter-key">{t('shared.fields.key')}</FieldLabel>
+          <FieldLabel htmlFor="parameter-key">{t('common.fields.key')}</FieldLabel>
           <Input disabled id="parameter-key" value={parameter.key} />
         </Field>
         <div className="form-row-two">
@@ -177,7 +178,7 @@ function ParameterEditForm({ onSaved, parameter }: ParameterEditFormProps) {
             name="module"
             render={({ field }) => (
               <Field>
-                <FieldLabel>{t('shared.fields.module')}</FieldLabel>
+                <FieldLabel>{t('common.fields.module')}</FieldLabel>
                 <Select
                   onValueChange={field.onChange}
                   options={toTranslatedOptions(PARAMETER_MODULE_OPTIONS, t)}
@@ -187,20 +188,20 @@ function ParameterEditForm({ onSaved, parameter }: ParameterEditFormProps) {
             )}
           />
           <Field>
-            <FieldLabel htmlFor="group">{t('shared.fields.group')}</FieldLabel>
+            <FieldLabel htmlFor="group">{t('common.fields.group')}</FieldLabel>
             <Input id="group" required {...register('group')} />
           </Field>
         </div>
         <Field>
-          <FieldLabel htmlFor="name">{t('shared.fields.name')}</FieldLabel>
+          <FieldLabel htmlFor="name">{t('common.fields.name')}</FieldLabel>
           <Input id="name" required {...register('name')} />
         </Field>
         <Field>
-          <FieldLabel htmlFor="title">{t('shared.fields.title')}</FieldLabel>
+          <FieldLabel htmlFor="title">{t('common.fields.title')}</FieldLabel>
           <Input id="title" required {...register('title')} />
         </Field>
         <Field>
-          <FieldLabel htmlFor="description">{t('shared.fields.description')}</FieldLabel>
+          <FieldLabel htmlFor="description">{t('common.fields.description')}</FieldLabel>
           <Textarea id="description" required {...register('description')} />
         </Field>
         <div className="form-row-two">
@@ -209,7 +210,7 @@ function ParameterEditForm({ onSaved, parameter }: ParameterEditFormProps) {
             name="overrideType"
             render={({ field }) => (
               <Field>
-                <FieldLabel>{t('shared.fields.overrideType')}</FieldLabel>
+                <FieldLabel>{t('common.fields.overrideType')}</FieldLabel>
                 <Select
                   onValueChange={field.onChange}
                   options={toTranslatedOptions(PARAMETER_OVERRIDE_TYPE_OPTIONS, t)}
@@ -223,7 +224,7 @@ function ParameterEditForm({ onSaved, parameter }: ParameterEditFormProps) {
             name="type"
             render={({ field }) => (
               <Field>
-                <FieldLabel>{t('shared.fields.type')}</FieldLabel>
+                <FieldLabel>{t('common.fields.type')}</FieldLabel>
                 <Select
                   onValueChange={field.onChange}
                   options={toTranslatedOptions(PARAMETER_TYPE_OPTIONS, t)}
@@ -238,7 +239,7 @@ function ParameterEditForm({ onSaved, parameter }: ParameterEditFormProps) {
           name="value"
           render={({ field }) => (
             <Field>
-              <FieldLabel htmlFor="value">{t('shared.fields.value')}</FieldLabel>
+              <FieldLabel htmlFor="value">{t('common.fields.value')}</FieldLabel>
               <ParameterValueInput
                 id="value"
                 onBlur={field.onBlur}
@@ -251,13 +252,13 @@ function ParameterEditForm({ onSaved, parameter }: ParameterEditFormProps) {
         />
         {showListItems && (
           <Field>
-            <FieldLabel htmlFor="listItems">{t('shared.fields.listItems')}</FieldLabel>
+            <FieldLabel htmlFor="listItems">{t('common.fields.listItems')}</FieldLabel>
             <Textarea id="listItems" required {...register('listItems')} />
           </Field>
         )}
         {showExternalListEndpoint && (
           <Field>
-            <FieldLabel htmlFor="externalListEndpoint">{t('shared.fields.externalListEndpoint')}</FieldLabel>
+            <FieldLabel htmlFor="externalListEndpoint">{t('common.fields.externalListEndpoint')}</FieldLabel>
             <Input id="externalListEndpoint" required {...register('externalListEndpoint')} />
           </Field>
         )}
@@ -267,7 +268,7 @@ function ParameterEditForm({ onSaved, parameter }: ParameterEditFormProps) {
           render={({ field }) => (
             <Checkbox
               checked={field.value}
-              label={t('shared.fields.isVisible')}
+              label={t('common.fields.isVisible')}
               onCheckedChange={field.onChange}
             />
           )}
@@ -275,7 +276,7 @@ function ParameterEditForm({ onSaved, parameter }: ParameterEditFormProps) {
       </FieldGroup>
       <div className="form-actions">
         <Button disabled={isSaving} type="submit">
-          {t('shared.actions.save')}
+          {t('common.actions.save')}
         </Button>
       </div>
     </form>

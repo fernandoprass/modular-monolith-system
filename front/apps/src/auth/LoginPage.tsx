@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { createValidationErrorMap } from '../shared/validation'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
@@ -37,7 +38,7 @@ export function LoginPage() {
       email: 'admin@saas.com',
       password: 'Password123!',
     },
-    resolver: zodResolver(loginSchema),
+    resolver: zodResolver(loginSchema, { error: createValidationErrorMap(t) }),
   })
 
   async function handleLogin(value: LoginForm) {
@@ -47,7 +48,7 @@ export function LoginPage() {
       await login(value)
       navigate(APP_ROUTES.dashboard)
     } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
+      notifyError(error, t('common.errors.generic'))
     } finally {
       setIsSubmitting(false)
     }

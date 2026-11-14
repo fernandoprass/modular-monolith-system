@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { createValidationErrorMap } from '../../../shared/validation'
 import { ArrowLeft, Edit } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
@@ -62,7 +63,7 @@ export function OrganizationEditPage() {
       const loaded = await getOrganization(id)
       setOrganization(loaded)
     } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
+      notifyError(error, t('common.errors.generic'))
     }
   }, [id, notifyError, t])
 
@@ -76,13 +77,13 @@ export function OrganizationEditPage() {
         <h1 className="page-title">{t('features.iam.organizations.pages.edit')}</h1>
         <Button onClick={() => navigate(APP_ROUTES.organizations)} type="button" variant="outline">
           <ArrowLeft data-icon="inline-start" />
-          {t('shared.actions.back')}
+          {t('common.actions.back')}
         </Button>
       </div>
       <Card>
         <CardContent>
           {organization === null ? (
-            <p className="page-subtitle">{t('shared.common.loading')}</p>
+            <p className="page-subtitle">{t('common.common.loading')}</p>
           ) : (
             <OrganizationEditForm
               key={organization.id}
@@ -126,7 +127,7 @@ function OrganizationEditForm({
     register,
   } = useForm<OrganizationEditForm>({
     defaultValues: toForm(organization),
-    resolver: zodResolver(organizationEditSchema),
+    resolver: zodResolver(organizationEditSchema, { error: createValidationErrorMap(t) }),
   })
 
   async function handleSave(value: OrganizationEditForm) {
@@ -142,7 +143,7 @@ function OrganizationEditForm({
       showSuccess(message)
       await onSaved()
     } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
+      notifyError(error, t('common.errors.generic'))
     } finally {
       setIsSaving(false)
     }
@@ -153,20 +154,20 @@ function OrganizationEditForm({
       <FieldGroup>
         <Field className="code-row" data-disabled>
           <div className="grow-field">
-            <FieldLabel>{t('shared.fields.code')}</FieldLabel>
+            <FieldLabel>{t('common.fields.code')}</FieldLabel>
             <Input disabled value={organization.code} />
           </div>
           <Button onClick={onEditCode} type="button" variant="outline">
             <Edit data-icon="inline-start" />
-            {t('shared.actions.editCode')}
+            {t('common.actions.editCode')}
           </Button>
         </Field>
         <Field>
-          <FieldLabel htmlFor="name">{t('shared.fields.name')}</FieldLabel>
+          <FieldLabel htmlFor="name">{t('common.fields.name')}</FieldLabel>
           <Input id="name" required {...register('name')} />
         </Field>
         <Field>
-          <FieldLabel htmlFor="description">{t('shared.fields.description')}</FieldLabel>
+          <FieldLabel htmlFor="description">{t('common.fields.description')}</FieldLabel>
           <Textarea id="description" required {...register('description')} />
         </Field>
         <Controller
@@ -174,7 +175,7 @@ function OrganizationEditForm({
           name="defaultLanguage"
           render={({ field }) => (
             <Field>
-              <FieldLabel>{t('shared.fields.defaultLanguage')}</FieldLabel>
+              <FieldLabel>{t('common.fields.defaultLanguage')}</FieldLabel>
               <Select
                 onValueChange={field.onChange}
                 options={toTranslatedOptions(LANGUAGE_OPTIONS, t)}
@@ -189,14 +190,14 @@ function OrganizationEditForm({
           render={({ field }) => (
             <Checkbox
               checked={field.value}
-              label={t('shared.fields.isActive')}
+              label={t('common.fields.isActive')}
               onCheckedChange={field.onChange}
             />
           )}
         />
       </FieldGroup>
       <div className="form-actions">
-        <Button disabled={isSaving} type="submit">{t('shared.actions.save')}</Button>
+        <Button disabled={isSaving} type="submit">{t('common.actions.save')}</Button>
       </div>
     </form>
   )

@@ -11,7 +11,7 @@ import { Button } from '../../../components/ui/button'
 import { Card, CardContent } from '../../../components/ui/card'
 import { getOrganization } from './organizationApi'
 import type { OrganizationDto } from './organizationTypes'
-import { getLanguageLabel, getOrganizationTypeLabel } from './organizationUi'
+import { getLanguageLabel, getOrganizationTypeEnum } from './organizationUi'
 
 export function OrganizationViewPage() {
   const t = useTranslate()
@@ -31,7 +31,7 @@ export function OrganizationViewPage() {
       try {
         setOrganization(await getOrganization(organizationId))
       } catch (error) {
-        notifyError(error, t('shared.errors.generic'))
+        notifyError(error, t('common.errors.generic'))
       }
     }
 
@@ -44,29 +44,29 @@ export function OrganizationViewPage() {
         <h1 className="page-title">{t('features.iam.organizations.pages.show')}</h1>
         <Button onClick={() => navigate(APP_ROUTES.organizations)} type="button" variant="outline">
           <ArrowLeft data-icon="inline-start" />
-          {t('shared.actions.back')}
+          {t('common.actions.back')}
         </Button>
       </div>
       <Card>
         <CardContent>
           {organization === null ? (
-            <p className="page-subtitle">{t('shared.common.loading')}</p>
+            <p className="page-subtitle">{t('common.common.loading')}</p>
           ) : (
             <div className="detail-grid-two-columns">
-              <Field label={t('shared.fields.type')}>
-                {getOrganizationTypeLabel(organization.type, t)}
+              <Field label={t('common.fields.type')}>
+                {getOrganizationTypeEnum(organization.type, t)}
               </Field>
-              <Field label={t('shared.fields.code')}>{organization.code}</Field>
-              <Field label={t('shared.fields.name')}>{organization.name}</Field>
-              <Field label={t('shared.fields.defaultLanguage')}>
+              <Field label={t('common.fields.code')}>{organization.code}</Field>
+              <Field label={t('common.fields.name')}>{organization.name}</Field>
+              <Field label={t('common.fields.defaultLanguage')}>
                 {getLanguageLabel(organization.defaultLanguage, t)}
               </Field>
-              <Field label={t('shared.fields.description')}>
+              <Field label={t('common.fields.description')}>
                 {organization.description ?? ''}
               </Field>
-              <Field label={t('shared.fields.isActive')}>
+              <Field label={t('common.fields.isActive')}>
                 <Badge variant={organization.isActive ? 'active' : 'inactive'}>
-                  {organization.isActive ? t('shared.status.active') : t('shared.status.inactive')}
+                  {organization.isActive ? t('common.status.active') : t('common.status.inactive')}
                 </Badge>
               </Field>
             </div>

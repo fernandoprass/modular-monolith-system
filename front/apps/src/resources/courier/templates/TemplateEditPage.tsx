@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { createValidationErrorMap } from '../../../shared/validation'
 import type { SortingState } from '@tanstack/react-table'
 import { ArrowLeft, Plus } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -86,7 +87,7 @@ export function TemplateEditPage() {
     try {
       setTemplate(await getTemplate(id))
     } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
+      notifyError(error, t('common.errors.generic'))
     }
   }, [id, notifyError, t])
 
@@ -106,13 +107,13 @@ export function TemplateEditPage() {
         </h1>
         <Button onClick={() => navigate(APP_ROUTES.templates)} type="button" variant="outline">
           <ArrowLeft data-icon="inline-start" />
-          {t('shared.actions.back')}
+          {t('common.actions.back')}
         </Button>
       </div>
       <Card>
         <CardContent>
           {!isCreate && template === null ? (
-            <p className="page-subtitle">{t('shared.common.loading')}</p>
+            <p className="page-subtitle">{t('common.common.loading')}</p>
           ) : (
             <TemplateDetailsForm
               key={template?.id ?? 'create'}
@@ -138,7 +139,7 @@ function TemplateDetailsForm({ onSaved, template }: TemplateDetailsFormProps) {
   const isCreate = template === null
   const form = useForm<TemplateForm>({
     defaultValues: template === null ? EMPTY_TEMPLATE_FORM : toForm(template),
-    resolver: zodResolver(templateSchema),
+    resolver: zodResolver(templateSchema, { error: createValidationErrorMap(t) }),
   })
 
   async function handleSave(value: TemplateForm) {
@@ -156,7 +157,7 @@ function TemplateDetailsForm({ onSaved, template }: TemplateDetailsFormProps) {
         await onSaved()
       }
     } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
+      notifyError(error, t('common.errors.generic'))
     } finally {
       setIsSaving(false)
     }
@@ -171,7 +172,7 @@ function TemplateDetailsForm({ onSaved, template }: TemplateDetailsFormProps) {
             name="module"
             render={({ field }) => (
               <Field>
-                <FieldLabel>{t('shared.fields.module')}</FieldLabel>
+                <FieldLabel>{t('common.fields.module')}</FieldLabel>
                 <Select
                   onValueChange={field.onChange}
                   options={toTranslatedTemplateOptions(TEMPLATE_MODULE_OPTIONS, t)}
@@ -181,7 +182,7 @@ function TemplateDetailsForm({ onSaved, template }: TemplateDetailsFormProps) {
             )}
           />
           <Field>
-            <FieldLabel htmlFor="template-key">{t('shared.fields.key')}</FieldLabel>
+            <FieldLabel htmlFor="template-key">{t('common.fields.key')}</FieldLabel>
             <Input id="template-key" required {...form.register('key')} />
           </Field>
         </div>
@@ -191,7 +192,7 @@ function TemplateDetailsForm({ onSaved, template }: TemplateDetailsFormProps) {
             name="severity"
             render={({ field }) => (
               <Field>
-                <FieldLabel>{t('shared.fields.severity')}</FieldLabel>
+                <FieldLabel>{t('common.fields.severity')}</FieldLabel>
                 <Select
                   onValueChange={field.onChange}
                   options={toTranslatedTemplateOptions(NOTIFICATION_SEVERITY_OPTIONS, t)}
@@ -205,7 +206,7 @@ function TemplateDetailsForm({ onSaved, template }: TemplateDetailsFormProps) {
             name="retentionPolicy"
             render={({ field }) => (
               <Field>
-                <FieldLabel>{t('shared.fields.retentionPolicy')}</FieldLabel>
+                <FieldLabel>{t('common.fields.retentionPolicy')}</FieldLabel>
                 <Select
                   onValueChange={field.onChange}
                   options={toTranslatedTemplateOptions(RETENTION_POLICY_OPTIONS, t)}
@@ -229,7 +230,7 @@ function TemplateDetailsForm({ onSaved, template }: TemplateDetailsFormProps) {
       </FieldGroup>
       <div className="form-actions">
         <Button disabled={isSaving} type="submit">
-          {t(isCreate ? 'shared.actions.create' : 'shared.actions.save')}
+          {t(isCreate ? 'common.actions.create' : 'common.actions.save')}
         </Button>
       </div>
     </form>
@@ -286,7 +287,7 @@ function TemplateTranslations({ onChanged, template }: TemplateTranslationsProps
       setTranslationToDelete(null)
       await onChanged()
     } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
+      notifyError(error, t('common.errors.generic'))
     }
   }
 
@@ -306,7 +307,7 @@ function TemplateTranslations({ onChanged, template }: TemplateTranslationsProps
         data={template.translations}
         emptyText={t('features.courier.templates.messages.noTranslations')}
         isLoading={false}
-        loadingText={t('shared.common.loading')}
+        loadingText={t('common.common.loading')}
         onSortingChange={setSorting}
         sorting={sorting}
       />
@@ -319,9 +320,9 @@ function TemplateTranslations({ onChanged, template }: TemplateTranslationsProps
         usedLanguages={usedLanguages}
       />
       <ConfirmDialog
-        backLabel={t('shared.actions.back')}
-        cancelText={t('shared.actions.cancel')}
-        confirmText={t('shared.actions.delete')}
+        backLabel={t('common.actions.back')}
+        cancelText={t('common.actions.cancel')}
+        confirmText={t('common.actions.delete')}
         onConfirm={() => void handleDelete()}
         onOpenChange={(open) => !open && setTranslationToDelete(null)}
         open={translationToDelete !== null}

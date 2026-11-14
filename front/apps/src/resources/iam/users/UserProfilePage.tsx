@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { createValidationErrorMap } from '../../../shared/validation'
 import { useCallback, useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -44,7 +45,7 @@ export function UserProfileSection() {
       const loaded = await getCurrentUser()
       setUser(loaded)
     } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
+      notifyError(error, t('common.errors.generic'))
     }
   }, [notifyError, t])
 
@@ -57,7 +58,7 @@ export function UserProfileSection() {
       <Card>
         <CardContent>
           {user === null ? (
-            <p className="page-subtitle">{t('shared.common.loading')}</p>
+            <p className="page-subtitle">{t('common.common.loading')}</p>
           ) : (
             <UserProfileFormPanel key={user.id} onSaved={loadUser} user={user} />
           )}
@@ -72,7 +73,7 @@ export function UserSecuritySection() {
   const { user } = useAuth()
 
   return user === null
-    ? <p className="page-subtitle">{t('shared.common.loading')}</p>
+    ? <p className="page-subtitle">{t('common.common.loading')}</p>
     : <UserAccessTabs userId={user.id} />
 }
 
@@ -83,6 +84,7 @@ type UserProfileFormPanelProps = {
 
 function UserProfileFormPanel({ onSaved, user }: UserProfileFormPanelProps) {
   const t = useTranslate()
+  const { updateProfile } = useAuth()
   const notifyError = useNotifyError()
   const { showSuccess } = useToast()
   const [isSaving, setIsSaving] = useState(false)
@@ -92,7 +94,7 @@ function UserProfileFormPanel({ onSaved, user }: UserProfileFormPanelProps) {
     register,
   } = useForm<UserProfileForm>({
     defaultValues: toForm(user),
-    resolver: zodResolver(userProfileSchema),
+    resolver: zodResolver(userProfileSchema, { error: createValidationErrorMap(t) }),
   })
 
   async function handleSave(value: UserProfileForm) {
@@ -104,10 +106,11 @@ function UserProfileFormPanel({ onSaved, user }: UserProfileFormPanelProps) {
         [USER_REQUEST_FIELDS.isActive]: user.isActive,
         [USER_REQUEST_FIELDS.language]: value.language,
       })
+      updateProfile(user.id, { fullName: value.name, language: value.language })
       showSuccess(message)
       await onSaved()
     } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
+      notifyError(error, t('common.errors.generic'))
     } finally {
       setIsSaving(false)
     }
@@ -117,11 +120,11 @@ function UserProfileFormPanel({ onSaved, user }: UserProfileFormPanelProps) {
     <form className="edit-form" onSubmit={handleSubmit(handleSave)}>
       <FieldGroup>
         <Field data-disabled>
-          <FieldLabel>{t('shared.fields.email')}</FieldLabel>
+          <FieldLabel>{t('common.fields.email')}</FieldLabel>
           <Input disabled value={user.email} />
         </Field>
         <Field>
-          <FieldLabel htmlFor="name">{t('shared.fields.name')}</FieldLabel>
+          <FieldLabel htmlFor="name">{t('common.fields.name')}</FieldLabel>
           <Input id="name" required {...register('name')} />
         </Field>
         <Controller
@@ -129,7 +132,7 @@ function UserProfileFormPanel({ onSaved, user }: UserProfileFormPanelProps) {
           name="language"
           render={({ field }) => (
             <Field>
-              <FieldLabel>{t('shared.fields.language')}</FieldLabel>
+              <FieldLabel>{t('common.fields.language')}</FieldLabel>
               <Select
                 onValueChange={field.onChange}
                 options={toTranslatedOptions(LANGUAGE_OPTIONS, t)}
@@ -140,7 +143,7 @@ function UserProfileFormPanel({ onSaved, user }: UserProfileFormPanelProps) {
         />
       </FieldGroup>
       <div className="form-actions">
-        <Button disabled={isSaving} type="submit">{t('shared.actions.save')}</Button>
+        <Button disabled={isSaving} type="submit">{t('common.actions.save')}</Button>
       </div>
     </form>
   )

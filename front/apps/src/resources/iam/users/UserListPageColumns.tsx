@@ -28,16 +28,16 @@ export function createUserTableColumns({
   return [
     {
       accessorKey: 'name',
-      header: t('shared.fields.name'),
+      header: t('common.fields.name'),
     },
     {
       accessorKey: 'email',
-      header: t('shared.fields.email'),
+      header: t('common.fields.email'),
     },
     {
       accessorKey: 'language',
       cell: ({ row }) => getLanguageLabel(row.original.language, t),
-      header: t('shared.fields.language'),
+      header: t('common.fields.language'),
       sortingFn: (left, right) =>
         getLanguageLabel(left.original.language, t).localeCompare(getLanguageLabel(right.original.language, t)),
     },
@@ -45,10 +45,10 @@ export function createUserTableColumns({
       accessorKey: 'isActive',
       cell: ({ row }) => (
         <Badge variant={row.original.isActive ? 'active' : 'inactive'}>
-          {row.original.isActive ? t('shared.status.active') : t('shared.status.inactive')}
+          {row.original.isActive ? t('common.status.active') : t('common.status.inactive')}
         </Badge>
       ),
-      header: t('shared.fields.isActive'),
+      header: t('common.fields.isActive'),
     },
     {
       cell: ({ row }) => (
@@ -57,19 +57,19 @@ export function createUserTableColumns({
             {
               isVisible: canView,
               kind: DATA_TABLE_ROW_ACTION_KINDS.view,
-              label: t('shared.actions.view'),
+              label: t('common.actions.view'),
               onClick: () => navigate(APP_ROUTES.userView(row.original.id)),
             },
             {
               isVisible: canUpdate,
               kind: DATA_TABLE_ROW_ACTION_KINDS.edit,
-              label: t('shared.actions.edit'),
+              label: t('common.actions.edit'),
               onClick: () => navigate(APP_ROUTES.userEdit(row.original.id)),
             },
             {
               isVisible: canDelete,
               kind: DATA_TABLE_ROW_ACTION_KINDS.delete,
-              label: t('shared.actions.delete'),
+              label: t('common.actions.delete'),
               onClick: () => setDeleteTarget(row.original),
             },
           ]}
@@ -77,7 +77,7 @@ export function createUserTableColumns({
       ),
       enableHiding: false,
       enableSorting: false,
-      header: t('shared.fields.actions'),
+      header: t('common.fields.actions'),
       id: 'actions',
     },
   ]

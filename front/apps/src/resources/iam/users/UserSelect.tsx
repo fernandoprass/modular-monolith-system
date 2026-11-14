@@ -52,7 +52,7 @@ export function UserSelect({
           value: lookupUser.id,
         })))
       } catch (error) {
-        notifyError(error, t('shared.errors.generic'))
+        notifyError(error, t('common.errors.generic'))
       }
     }
 

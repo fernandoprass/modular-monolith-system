@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { createValidationErrorMap } from '../../../shared/validation'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -41,7 +42,7 @@ export function UserPasswordEditDialog({ isOpen, onClose }: UserPasswordEditDial
     reset,
   } = useForm<UserPasswordUpdateForm>({
     defaultValues: EMPTY_PASSWORD_FORM,
-    resolver: zodResolver(passwordEditSchema),
+    resolver: zodResolver(passwordEditSchema, { error: createValidationErrorMap(t) }),
   })
 
   useEffect(() => {
@@ -66,7 +67,7 @@ export function UserPasswordEditDialog({ isOpen, onClose }: UserPasswordEditDial
       showSuccess(message)
       onClose()
     } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
+      notifyError(error, t('common.errors.generic'))
     } finally {
       setIsSaving(false)
     }
@@ -74,7 +75,7 @@ export function UserPasswordEditDialog({ isOpen, onClose }: UserPasswordEditDial
 
   return (
     <Dialog
-      backLabel={t('shared.actions.back')}
+      backLabel={t('common.actions.back')}
       onOpenChange={(open) => !open && onClose()}
       open={isOpen}
       title={t('features.iam.users.pages.changePassword')}
@@ -83,25 +84,25 @@ export function UserPasswordEditDialog({ isOpen, onClose }: UserPasswordEditDial
         <div className="dialog-body">
           <FieldGroup>
             <Field>
-              <FieldLabel htmlFor="passwordOld">{t('shared.fields.currentPassword')}</FieldLabel>
+              <FieldLabel htmlFor="passwordOld">{t('common.fields.currentPassword')}</FieldLabel>
               <Input autoComplete="current-password" autoFocus id="passwordOld" required type="password" {...register('passwordOld')} />
             </Field>
             <Field>
-              <FieldLabel htmlFor="passwordNew">{t('shared.fields.newPassword')}</FieldLabel>
+              <FieldLabel htmlFor="passwordNew">{t('common.fields.newPassword')}</FieldLabel>
               <Input autoComplete="new-password" id="passwordNew" required type="password" {...register('passwordNew')} />
             </Field>
             <Field>
-              <FieldLabel htmlFor="passwordConfirm">{t('shared.fields.confirmPassword')}</FieldLabel>
+              <FieldLabel htmlFor="passwordConfirm">{t('common.fields.confirmPassword')}</FieldLabel>
               <Input autoComplete="new-password" id="passwordConfirm" required type="password" {...register('passwordConfirm')} />
             </Field>
           </FieldGroup>
         </div>
         <div className="dialog-actions">
           <Button onClick={onClose} type="button" variant="outline">
-            {t('shared.actions.cancel')}
+            {t('common.actions.cancel')}
           </Button>
           <Button disabled={isSaving} type="submit">
-            {t('shared.actions.save')}
+            {t('common.actions.save')}
           </Button>
         </div>
       </form>

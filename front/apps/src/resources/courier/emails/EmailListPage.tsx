@@ -86,7 +86,7 @@ export function EmailListPage() {
         pageSize,
       }))
     } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
+      notifyError(error, t('common.errors.generic'))
     } finally {
       setIsLoading(false)
     }
@@ -133,7 +133,7 @@ export function EmailListPage() {
           name="organizationId"
           render={({ field }) => (
             <Field>
-              <FieldLabel>{t('shared.fields.organization')}</FieldLabel>
+              <FieldLabel>{t('common.fields.organization')}</FieldLabel>
               <OrganizationSelect clearable includeInactive onValueChange={field.onChange} value={field.value} />
             </Field>
           )}
@@ -143,7 +143,7 @@ export function EmailListPage() {
           name="userId"
           render={({ field }) => (
             <Field>
-              <FieldLabel>{t('shared.fields.user')}</FieldLabel>
+              <FieldLabel>{t('common.fields.user')}</FieldLabel>
               <UserSelect clearable includeInactive onValueChange={field.onChange} value={field.value} />
             </Field>
           )}
@@ -153,11 +153,11 @@ export function EmailListPage() {
           name="module"
           render={({ field }) => (
             <Field>
-              <FieldLabel>{t('shared.fields.module')}</FieldLabel>
+              <FieldLabel>{t('common.fields.module')}</FieldLabel>
               <Select
                 onValueChange={field.onChange}
                 options={[
-                  { label: t('shared.filters.all'), value: EMAIL_FILTER_VALUES.all },
+                  { label: t('common.filters.all'), value: EMAIL_FILTER_VALUES.all },
                   ...toTranslatedEmailOptions(EMAIL_MODULE_OPTIONS, t),
                 ]}
                 value={field.value}
@@ -170,11 +170,11 @@ export function EmailListPage() {
           name="feature"
           render={({ field }) => (
             <Field>
-              <FieldLabel>{t('shared.fields.feature')}</FieldLabel>
+              <FieldLabel>{t('common.fields.feature')}</FieldLabel>
               <Select
                 onValueChange={field.onChange}
                 options={[
-                  { label: t('shared.filters.all'), value: EMAIL_FILTER_VALUES.all },
+                  { label: t('common.filters.all'), value: EMAIL_FILTER_VALUES.all },
                   ...toTranslatedEmailOptions(EMAIL_FEATURE_OPTIONS, t),
                 ]}
                 value={field.value}
@@ -183,19 +183,19 @@ export function EmailListPage() {
           )}
         />
         <Field>
-          <FieldLabel htmlFor="email-subject">{t('shared.fields.subject')}</FieldLabel>
+          <FieldLabel htmlFor="email-subject">{t('common.fields.subject')}</FieldLabel>
           <Input id="email-subject" {...register('subject')} />
         </Field>
         <Field>
-          <FieldLabel htmlFor="email-recipient">{t('shared.fields.recipient')}</FieldLabel>
+          <FieldLabel htmlFor="email-recipient">{t('common.fields.recipient')}</FieldLabel>
           <Input id="email-recipient" {...register('recipient')} />
         </Field>
         <Field>
-          <FieldLabel htmlFor="email-date-from">{t('shared.fields.dateFrom')}</FieldLabel>
+          <FieldLabel htmlFor="email-date-from">{t('common.fields.dateFrom')}</FieldLabel>
           <Input id="email-date-from" required type="datetime-local" {...register('dateFrom')} />
         </Field>
         <Field>
-          <FieldLabel htmlFor="email-date-to">{t('shared.fields.dateTo')}</FieldLabel>
+          <FieldLabel htmlFor="email-date-to">{t('common.fields.dateTo')}</FieldLabel>
           <Input id="email-date-to" required type="datetime-local" {...register('dateTo')} />
         </Field>
       </FilterToolbar>
@@ -204,7 +204,7 @@ export function EmailListPage() {
         data={result?.items ?? []}
         emptyText={t('features.courier.emails.messages.empty')}
         isLoading={isLoading}
-        loadingText={t('shared.common.loading')}
+        loadingText={t('common.common.loading')}
         onSortingChange={setSorting}
         sorting={sorting}
       />

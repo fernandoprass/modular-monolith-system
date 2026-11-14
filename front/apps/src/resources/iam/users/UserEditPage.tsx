@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { createValidationErrorMap } from '../../../shared/validation'
 import { ArrowLeft } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
@@ -83,7 +84,7 @@ export function UserEditPage() {
       const loaded = await getUser(id)
       setUser(loaded)
     } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
+      notifyError(error, t('common.errors.generic'))
     }
   }, [id, isCreate, notifyError, t])
 
@@ -97,13 +98,13 @@ export function UserEditPage() {
         <h1 className="page-title">{isCreate ? t('features.iam.users.pages.create') : t('features.iam.users.pages.edit')}</h1>
         <Button onClick={() => navigate(APP_ROUTES.users)} type="button" variant="outline">
           <ArrowLeft data-icon="inline-start" />
-          {t('shared.actions.back')}
+          {t('common.actions.back')}
         </Button>
       </div>
       <Card>
         <CardContent>
           {!isCreate && user === null ? (
-            <p className="page-subtitle">{t('shared.common.loading')}</p>
+            <p className="page-subtitle">{t('common.common.loading')}</p>
           ) : (
             <UserEditFormPanel
               key={isCreate ? `create-${loggedOrganizationId}` : user?.id}
@@ -146,7 +147,7 @@ function UserEditFormPanel({
     register,
   } = useForm<UserEditForm>({
     defaultValues,
-    resolver: zodResolver(getUserEditSchema(isCreate)),
+    resolver: zodResolver(getUserEditSchema(isCreate), { error: createValidationErrorMap(t) }),
   })
 
   async function handleSave(value: UserEditForm) {
@@ -176,7 +177,7 @@ function UserEditFormPanel({
         await onReload()
       }
     } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
+      notifyError(error, t('common.errors.generic'))
     } finally {
       setIsSaving(false)
     }
@@ -191,7 +192,7 @@ function UserEditFormPanel({
             name="organizationId"
             render={({ field }) => (
               <Field data-disabled>
-                <FieldLabel>{t('shared.fields.organizationId')}</FieldLabel>
+                <FieldLabel>{t('common.fields.organizationId')}</FieldLabel>
                 <OrganizationSelect
                   disabled
                   includeInactive
@@ -202,16 +203,16 @@ function UserEditFormPanel({
             )}
           />
           <Field>
-            <FieldLabel htmlFor="name">{t('shared.fields.name')}</FieldLabel>
+            <FieldLabel htmlFor="name">{t('common.fields.name')}</FieldLabel>
             <Input id="name" required {...register('name')} />
           </Field>
           <Field data-disabled={!isCreate}>
-            <FieldLabel htmlFor="email">{t('shared.fields.email')}</FieldLabel>
+            <FieldLabel htmlFor="email">{t('common.fields.email')}</FieldLabel>
             <Input disabled={!isCreate} id="email" required type="email" {...register('email')} />
           </Field>
           {isCreate && (
             <Field>
-              <FieldLabel htmlFor="password">{t('shared.fields.password')}</FieldLabel>
+              <FieldLabel htmlFor="password">{t('common.fields.password')}</FieldLabel>
               <Input id="password" required type="password" {...register('password')} />
             </Field>
           )}
@@ -220,7 +221,7 @@ function UserEditFormPanel({
             name="language"
             render={({ field }) => (
               <Field>
-                <FieldLabel>{t('shared.fields.language')}</FieldLabel>
+                <FieldLabel>{t('common.fields.language')}</FieldLabel>
                 <Select
                   onValueChange={field.onChange}
                   options={toTranslatedOptions(LANGUAGE_OPTIONS, t)}
@@ -235,7 +236,7 @@ function UserEditFormPanel({
             render={({ field }) => (
               <Checkbox
                 checked={field.value}
-                label={t('shared.fields.isActive')}
+                label={t('common.fields.isActive')}
                 onCheckedChange={field.onChange}
               />
             )}
@@ -243,7 +244,7 @@ function UserEditFormPanel({
         </FieldGroup>
         <div className="form-actions">
           <Button disabled={isSaving} type="submit">
-            {isCreate ? t('shared.actions.create') : t('shared.actions.save')}
+            {isCreate ? t('common.actions.create') : t('common.actions.save')}
           </Button>
         </div>
       </form>

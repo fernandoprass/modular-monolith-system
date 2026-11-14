@@ -33,9 +33,9 @@ export const NOTIFICATION_SEVERITIES = {
 } as const
 
 export const NOTIFICATION_SEVERITY_OPTIONS = [
-  { labelKey: 'shared.enums.notificationSeverity.information', value: String(NOTIFICATION_SEVERITIES.information) },
-  { labelKey: 'shared.enums.notificationSeverity.warning', value: String(NOTIFICATION_SEVERITIES.warning) },
-  { labelKey: 'shared.enums.notificationSeverity.critical', value: String(NOTIFICATION_SEVERITIES.critical) },
+  { labelKey: 'common.enums.notificationSeverity.information', value: String(NOTIFICATION_SEVERITIES.information) },
+  { labelKey: 'common.enums.notificationSeverity.warning', value: String(NOTIFICATION_SEVERITIES.warning) },
+  { labelKey: 'common.enums.notificationSeverity.critical', value: String(NOTIFICATION_SEVERITIES.critical) },
 ] as const
 
 export const RETENTION_POLICIES = {
@@ -47,11 +47,11 @@ export const RETENTION_POLICIES = {
 } as const
 
 export const RETENTION_POLICY_OPTIONS = [
-  { labelKey: 'shared.enums.retentionPolicy.operational', value: String(RETENTION_POLICIES.operational) },
-  { labelKey: 'shared.enums.retentionPolicy.standard', value: String(RETENTION_POLICIES.standard) },
-  { labelKey: 'shared.enums.retentionPolicy.extended', value: String(RETENTION_POLICIES.extended) },
-  { labelKey: 'shared.enums.retentionPolicy.compliance', value: String(RETENTION_POLICIES.compliance) },
-  { labelKey: 'shared.enums.retentionPolicy.longTerm', value: String(RETENTION_POLICIES.longTerm) },
+  { labelKey: 'common.enums.retentionPolicy.operational', value: String(RETENTION_POLICIES.operational) },
+  { labelKey: 'common.enums.retentionPolicy.standard', value: String(RETENTION_POLICIES.standard) },
+  { labelKey: 'common.enums.retentionPolicy.extended', value: String(RETENTION_POLICIES.extended) },
+  { labelKey: 'common.enums.retentionPolicy.compliance', value: String(RETENTION_POLICIES.compliance) },
+  { labelKey: 'common.enums.retentionPolicy.longTerm', value: String(RETENTION_POLICIES.longTerm) },
 ] as const
 
 export type NotificationSeverity = typeof NOTIFICATION_SEVERITIES[keyof typeof NOTIFICATION_SEVERITIES]

@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { createValidationErrorMap } from '../../../shared/validation'
 import { useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { Link } from 'react-router-dom'
@@ -53,7 +54,7 @@ export function PublicOrganizationCreatePage() {
       userName: '',
       userPassword: '',
     },
-    resolver: zodResolver(publicOrganizationCreateSchema),
+    resolver: zodResolver(publicOrganizationCreateSchema, { error: createValidationErrorMap(t) }),
   })
   const isCompany = watch('type') === ORGANIZATION_TYPES.company
 
@@ -65,7 +66,7 @@ export function PublicOrganizationCreatePage() {
       setSuccessMessage(message)
       showSuccess(message)
     } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
+      notifyError(error, t('common.errors.generic'))
     } finally {
       setIsSubmitting(false)
     }
@@ -95,7 +96,7 @@ export function PublicOrganizationCreatePage() {
                     name="type"
                     render={({ field }) => (
                       <Field>
-                        <FieldLabel>{t('public.organizationRegistration.fields.type')}</FieldLabel>
+                        <FieldLabel>{t('common.fields.type')}</FieldLabel>
                         <Select
                           onValueChange={(value) => field.onChange(Number(value))}
                           options={toTranslatedOptions(ORGANIZATION_TYPE_OPTIONS, t)}
@@ -107,17 +108,17 @@ export function PublicOrganizationCreatePage() {
                   {isCompany && (
                     <>
                       <Field>
-                        <FieldLabel htmlFor="code">{t('public.organizationRegistration.fields.code')}</FieldLabel>
+                        <FieldLabel htmlFor="code">{t('common.fields.code')}</FieldLabel>
                         <Input id="code" required {...register('code')} />
                       </Field>
                       <Field>
-                        <FieldLabel htmlFor="name">{t('public.organizationRegistration.fields.name')}</FieldLabel>
+                        <FieldLabel htmlFor="name">{t('common.fields.name')}</FieldLabel>
                         <Input id="name" required {...register('name')} />
                       </Field>
                     </>
                   )}
                   <Field>
-                    <FieldLabel htmlFor="description">{t('public.organizationRegistration.fields.description')}</FieldLabel>
+                    <FieldLabel htmlFor="description">{t('common.fields.description')}</FieldLabel>
                     <Textarea id="description" required {...register('description')} />
                   </Field>
                   <Controller
@@ -125,7 +126,7 @@ export function PublicOrganizationCreatePage() {
                     name="defaultLanguage"
                     render={({ field }) => (
                       <Field>
-                        <FieldLabel>{t('public.organizationRegistration.fields.defaultLanguage')}</FieldLabel>
+                        <FieldLabel>{t('common.fields.defaultLanguage')}</FieldLabel>
                         <Select
                           onValueChange={field.onChange}
                           options={toTranslatedOptions(LANGUAGE_OPTIONS, t)}

@@ -1,7 +1,7 @@
-import type { Translate } from '../../../app/i18n/i18n'
+import type { PlainTranslationKey, Translate } from '../../../app/i18n/i18n'
 
 export type TranslationOption = {
-  labelKey: string
+  labelKey: PlainTranslationKey
   value: string
 }
 

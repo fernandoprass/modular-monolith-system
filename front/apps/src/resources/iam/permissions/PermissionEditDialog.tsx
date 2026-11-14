@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { createValidationErrorMap } from '../../../shared/validation'
 import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -55,7 +56,7 @@ export function PermissionEditDialog({
     reset,
   } = useForm<PermissionUpdateForm>({
     defaultValues: toForm(permission),
-    resolver: zodResolver(permissionEditSchema),
+    resolver: zodResolver(permissionEditSchema, { error: createValidationErrorMap(t) }),
   })
 
   useEffect(() => {
@@ -73,7 +74,7 @@ export function PermissionEditDialog({
       await onSaved()
       onClose()
     } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
+      notifyError(error, t('common.errors.generic'))
     } finally {
       setIsSaving(false)
     }
@@ -81,10 +82,10 @@ export function PermissionEditDialog({
 
   return (
     <Dialog
-      backLabel={t('shared.actions.back')}
+      backLabel={t('common.actions.back')}
       onOpenChange={(open) => !open && onClose()}
       open={isOpen}
-      title={t('shared.actions.edit')}
+      title={t('common.actions.edit')}
     >
       <form onSubmit={handleSubmit(handleSave)}>
         <div className="dialog-body">
@@ -94,7 +95,7 @@ export function PermissionEditDialog({
               name="module"
               render={({ field }) => (
                 <Field>
-                  <FieldLabel>{t('shared.fields.module')}</FieldLabel>
+                  <FieldLabel>{t('common.fields.module')}</FieldLabel>
                   <Select
                     onValueChange={field.onChange}
                     options={toTranslatedOptions(PERMISSION_MODULE_OPTIONS, t)}
@@ -108,7 +109,7 @@ export function PermissionEditDialog({
               name="resource"
               render={({ field }) => (
                 <Field>
-                  <FieldLabel>{t('shared.fields.resource')}</FieldLabel>
+                  <FieldLabel>{t('common.fields.resource')}</FieldLabel>
                   <Select
                     onValueChange={field.onChange}
                     options={toTranslatedOptions(PERMISSION_RESOURCE_OPTIONS, t)}
@@ -118,15 +119,15 @@ export function PermissionEditDialog({
               )}
             />
             <Field>
-              <FieldLabel htmlFor="action">{t('shared.fields.action')}</FieldLabel>
+              <FieldLabel htmlFor="action">{t('common.fields.action')}</FieldLabel>
               <Input id="action" required {...register('action')} />
             </Field>
             <Field>
-              <FieldLabel htmlFor="title">{t('shared.fields.title')}</FieldLabel>
+              <FieldLabel htmlFor="title">{t('common.fields.title')}</FieldLabel>
               <Input id="title" required {...register('title')} />
             </Field>
             <Field>
-              <FieldLabel htmlFor="description">{t('shared.fields.description')}</FieldLabel>
+              <FieldLabel htmlFor="description">{t('common.fields.description')}</FieldLabel>
               <Textarea id="description" required {...register('description')} />
             </Field>
             <Controller
@@ -135,7 +136,7 @@ export function PermissionEditDialog({
               render={({ field }) => (
                 <Checkbox
                   checked={field.value}
-                  label={t('shared.fields.isActive')}
+                  label={t('common.fields.isActive')}
                   onCheckedChange={field.onChange}
                 />
               )}
@@ -144,10 +145,10 @@ export function PermissionEditDialog({
         </div>
         <div className="dialog-actions">
           <Button onClick={onClose} type="button" variant="outline">
-            {t('shared.actions.cancel')}
+            {t('common.actions.cancel')}
           </Button>
           <Button disabled={isSaving} type="submit">
-            {t('shared.actions.save')}
+            {t('common.actions.save')}
           </Button>
         </div>
       </form>

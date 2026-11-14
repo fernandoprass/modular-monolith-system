@@ -57,7 +57,7 @@ export function DataTablePagination({
   return (
     <div className="pagination-row">
       <div className="pagination-page-size">
-        <span>{t('shared.pagination.pageSize')}</span>
+        <span>{t('common.pagination.pageSize')}</span>
         <Select
           onValueChange={(value) => onPageSizeChange(Number(value))}
           options={PAGE_SIZE_OPTIONS.map((option) => ({
@@ -68,16 +68,16 @@ export function DataTablePagination({
         />
       </div>
       <span>
-        {t('shared.pagination.visibleRows', {
+        {t('common.pagination.visibleRows', {
           start: getStartItemNumber(displayPageNumber, pageSize, totalCount),
           end: getEndItemNumber(displayPageNumber, pageSize, totalCount),
           total: totalCount,
         })}
       </span>
       <div className="pagination-actions">
-        <span>{t('shared.pagination.summary', { page: displayPageNumber, pages: safeTotalPages })}</span>
+        <span>{t('common.pagination.summary', { page: displayPageNumber, pages: safeTotalPages })}</span>
         <Button
-          aria-label={t('shared.pagination.firstPage')}
+          aria-label={t('common.pagination.firstPage')}
           disabled={!canGoPrevious}
           onClick={() => onPageChange(1)}
           size="icon"
@@ -87,7 +87,7 @@ export function DataTablePagination({
           <ChevronsLeft aria-hidden="true" />
         </Button>
         <Button
-          aria-label={t('shared.pagination.previousPage')}
+          aria-label={t('common.pagination.previousPage')}
           disabled={!canGoPrevious}
           onClick={() => onPageChange(displayPageNumber - 1)}
           size="icon"
@@ -97,7 +97,7 @@ export function DataTablePagination({
           <ChevronLeft aria-hidden="true" />
         </Button>
         <Button
-          aria-label={t('shared.pagination.nextPage')}
+          aria-label={t('common.pagination.nextPage')}
           disabled={!canGoNext}
           onClick={() => onPageChange(displayPageNumber + 1)}
           size="icon"
@@ -107,7 +107,7 @@ export function DataTablePagination({
           <ChevronRight aria-hidden="true" />
         </Button>
         <Button
-          aria-label={t('shared.pagination.lastPage')}
+          aria-label={t('common.pagination.lastPage')}
           disabled={!canGoNext}
           onClick={() => onPageChange(safeTotalPages)}
           size="icon"

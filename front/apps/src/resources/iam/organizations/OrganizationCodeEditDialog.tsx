@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { createValidationErrorMap } from '../../../shared/validation'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -46,7 +47,7 @@ export function OrganizationCodeEditDialog({
     defaultValues: {
       code: organization.code,
     },
-    resolver: zodResolver(organizationCodeSchema),
+    resolver: zodResolver(organizationCodeSchema, { error: createValidationErrorMap(t) }),
   })
 
   useEffect(() => {
@@ -66,7 +67,7 @@ export function OrganizationCodeEditDialog({
       await onSaved()
       onClose()
     } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
+      notifyError(error, t('common.errors.generic'))
     } finally {
       setIsSaving(false)
     }
@@ -74,26 +75,26 @@ export function OrganizationCodeEditDialog({
 
   return (
     <Dialog
-      backLabel={t('shared.actions.back')}
+      backLabel={t('common.actions.back')}
       onOpenChange={(open) => !open && onClose()}
       open={isOpen}
-      title={t('shared.actions.editCode')}
+      title={t('common.actions.editCode')}
     >
       <form onSubmit={handleSubmit(handleSave)}>
         <div className="dialog-body">
           <FieldGroup>
             <Field>
-              <FieldLabel htmlFor="code">{t('shared.fields.code')}</FieldLabel>
+              <FieldLabel htmlFor="code">{t('common.fields.code')}</FieldLabel>
               <Input autoFocus id="code" required {...register('code')} />
             </Field>
           </FieldGroup>
         </div>
         <div className="dialog-actions">
           <Button onClick={onClose} type="button" variant="outline">
-            {t('shared.actions.cancel')}
+            {t('common.actions.cancel')}
           </Button>
           <Button disabled={isSaving} type="submit">
-            {t('shared.actions.save')}
+            {t('common.actions.save')}
           </Button>
         </div>
       </form>

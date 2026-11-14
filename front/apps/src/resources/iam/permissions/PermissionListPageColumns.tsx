@@ -22,28 +22,28 @@ export function createPermissionTableColumns({
   return [
     {
       accessorKey: 'module',
-      header: t('shared.fields.module'),
+      header: t('common.fields.module'),
     },
     {
       accessorKey: 'resource',
-      header: t('shared.fields.resource'),
+      header: t('common.fields.resource'),
     },
     {
       accessorKey: 'action',
-      header: t('shared.fields.action'),
+      header: t('common.fields.action'),
     },
     {
       accessorKey: 'title',
-      header: t('shared.fields.title'),
+      header: t('common.fields.title'),
     },
     {
       accessorKey: 'isActive',
       cell: ({ row }) => (
         <Badge variant={row.original.isActive ? 'active' : 'inactive'}>
-          {row.original.isActive ? t('shared.status.active') : t('shared.status.inactive')}
+          {row.original.isActive ? t('common.status.active') : t('common.status.inactive')}
         </Badge>
       ),
-      header: t('shared.fields.isActive'),
+      header: t('common.fields.isActive'),
     },
     {
       cell: ({ row }) => (
@@ -52,7 +52,7 @@ export function createPermissionTableColumns({
             {
               isVisible: canUpdate,
               kind: DATA_TABLE_ROW_ACTION_KINDS.edit,
-              label: t('shared.actions.edit'),
+              label: t('common.actions.edit'),
               onClick: () => onEdit(row.original),
             },
           ]}
@@ -60,7 +60,7 @@ export function createPermissionTableColumns({
       ),
       enableHiding: false,
       enableSorting: false,
-      header: t('shared.fields.actions'),
+      header: t('common.fields.actions'),
       id: 'actions',
     },
   ]

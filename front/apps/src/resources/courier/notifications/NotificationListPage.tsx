@@ -85,7 +85,7 @@ export function NotificationListPage() {
         userId,
       }))
     } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
+      notifyError(error, t('common.errors.generic'))
     } finally {
       setIsLoading(false)
     }
@@ -97,7 +97,7 @@ export function NotificationListPage() {
       showSuccess(message)
       await loadNotifications(pageNumber)
     } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
+      notifyError(error, t('common.errors.generic'))
     }
   }, [loadNotifications, notifyError, pageNumber, showSuccess, t])
 
@@ -155,7 +155,7 @@ export function NotificationListPage() {
       setNotificationToDelete(null)
       await loadNotifications(pageNumber)
     } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
+      notifyError(error, t('common.errors.generic'))
     }
   }
 
@@ -172,11 +172,11 @@ export function NotificationListPage() {
           name="module"
           render={({ field }) => (
             <Field>
-              <FieldLabel>{t('shared.fields.module')}</FieldLabel>
+              <FieldLabel>{t('common.fields.module')}</FieldLabel>
               <Select
                 onValueChange={field.onChange}
                 options={[
-                  { label: t('shared.filters.all'), value: NOTIFICATION_FILTER_VALUES.all },
+                  { label: t('common.filters.all'), value: NOTIFICATION_FILTER_VALUES.all },
                   ...toTranslatedNotificationOptions(NOTIFICATION_MODULE_OPTIONS, t),
                 ]}
                 value={field.value}
@@ -189,11 +189,11 @@ export function NotificationListPage() {
           name="status"
           render={({ field }) => (
             <Field>
-              <FieldLabel>{t('shared.fields.status')}</FieldLabel>
+              <FieldLabel>{t('common.fields.status')}</FieldLabel>
               <Select
                 onValueChange={field.onChange}
                 options={[
-                  { label: t('shared.filters.all'), value: NOTIFICATION_FILTER_VALUES.all },
+                  { label: t('common.filters.all'), value: NOTIFICATION_FILTER_VALUES.all },
                   {
                     label: t('features.courier.notifications.statuses.unread'),
                     value: NOTIFICATION_STATUSES.unread.toString(),
@@ -209,15 +209,15 @@ export function NotificationListPage() {
           )}
         />
         <Field>
-          <FieldLabel htmlFor="notification-title">{t('shared.fields.title')}</FieldLabel>
+          <FieldLabel htmlFor="notification-title">{t('common.fields.title')}</FieldLabel>
           <Input id="notification-title" {...register('title')} />
         </Field>
         <Field>
-          <FieldLabel htmlFor="notification-date-from">{t('shared.fields.dateFrom')}</FieldLabel>
+          <FieldLabel htmlFor="notification-date-from">{t('common.fields.dateFrom')}</FieldLabel>
           <Input id="notification-date-from" required type="datetime-local" {...register('dateFrom')} />
         </Field>
         <Field>
-          <FieldLabel htmlFor="notification-date-to">{t('shared.fields.dateTo')}</FieldLabel>
+          <FieldLabel htmlFor="notification-date-to">{t('common.fields.dateTo')}</FieldLabel>
           <Input id="notification-date-to" required type="datetime-local" {...register('dateTo')} />
         </Field>
       </FilterToolbar>
@@ -226,7 +226,7 @@ export function NotificationListPage() {
         data={result?.items ?? []}
         emptyText={t('features.courier.notifications.messages.empty')}
         isLoading={isLoading}
-        loadingText={t('shared.common.loading')}
+        loadingText={t('common.common.loading')}
         onSortingChange={setSorting}
         sorting={sorting}
       />
@@ -239,9 +239,9 @@ export function NotificationListPage() {
         totalPages={totalPages}
       />
       <ConfirmDialog
-        backLabel={t('shared.actions.back')}
-        cancelText={t('shared.actions.cancel')}
-        confirmText={t('shared.actions.delete')}
+        backLabel={t('common.actions.back')}
+        cancelText={t('common.actions.cancel')}
+        confirmText={t('common.actions.delete')}
         onConfirm={() => void handleDelete()}
         onOpenChange={(open) => !open && setNotificationToDelete(null)}
         open={notificationToDelete !== null}

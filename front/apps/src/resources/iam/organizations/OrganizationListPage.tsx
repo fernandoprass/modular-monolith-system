@@ -79,7 +79,7 @@ export function OrganizationListPage() {
         type: appliedFilters.type === ORGANIZATION_FILTER_VALUES.all ? null : appliedFilters.type,
       }))
     } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
+      notifyError(error, t('common.errors.generic'))
     } finally {
       setIsLoading(false)
     }
@@ -116,7 +116,7 @@ export function OrganizationListPage() {
       setDeleteTarget(null)
       await loadOrganizations(pageNumber)
     } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
+      notifyError(error, t('common.errors.generic'))
     }
   }
 
@@ -133,21 +133,21 @@ export function OrganizationListPage() {
           name="type"
           render={({ field }) => (
             <Field>
-              <FieldLabel>{t('shared.fields.type')}</FieldLabel>
+              <FieldLabel>{t('common.fields.type')}</FieldLabel>
               <Select
                 onValueChange={field.onChange}
-                options={[{ label: t('shared.filters.all'), value: ORGANIZATION_FILTER_VALUES.all }, ...toTranslatedOptions(ORGANIZATION_TYPE_OPTIONS, t)]}
+                options={[{ label: t('common.filters.all'), value: ORGANIZATION_FILTER_VALUES.all }, ...toTranslatedOptions(ORGANIZATION_TYPE_OPTIONS, t)]}
                 value={field.value}
               />
             </Field>
           )}
         />
         <Field>
-          <FieldLabel htmlFor="code">{t('shared.fields.code')}</FieldLabel>
+          <FieldLabel htmlFor="code">{t('common.fields.code')}</FieldLabel>
           <Input id="code" {...register('code')} />
         </Field>
         <Field>
-          <FieldLabel htmlFor="name">{t('shared.fields.name')}</FieldLabel>
+          <FieldLabel htmlFor="name">{t('common.fields.name')}</FieldLabel>
           <Input id="name" {...register('name')} />
         </Field>
         <Controller
@@ -155,13 +155,13 @@ export function OrganizationListPage() {
           name="isActive"
           render={({ field }) => (
             <Field>
-              <FieldLabel>{t('shared.fields.isActive')}</FieldLabel>
+              <FieldLabel>{t('common.fields.isActive')}</FieldLabel>
               <Select
                 onValueChange={field.onChange}
                 options={[
-                  { label: t('shared.filters.all'), value: ORGANIZATION_FILTER_VALUES.all },
-                  { label: t('shared.status.active'), value: 'true' },
-                  { label: t('shared.status.inactive'), value: 'false' },
+                  { label: t('common.filters.all'), value: ORGANIZATION_FILTER_VALUES.all },
+                  { label: t('common.status.active'), value: 'true' },
+                  { label: t('common.status.inactive'), value: 'false' },
                 ]}
                 value={field.value}
               />
@@ -175,7 +175,7 @@ export function OrganizationListPage() {
         data={result?.items ?? []}
         emptyText={t('features.iam.organizations.messages.empty')}
         isLoading={isLoading}
-        loadingText={t('shared.common.loading')}
+        loadingText={t('common.common.loading')}
         onSortingChange={setSorting}
         sorting={sorting}
       />
@@ -190,13 +190,13 @@ export function OrganizationListPage() {
       />
 
       <ConfirmDialog
-        cancelText={t('shared.actions.cancel')}
-        backLabel={t('shared.actions.back')}
-        confirmText={t('shared.actions.delete')}
+        cancelText={t('common.actions.cancel')}
+        backLabel={t('common.actions.back')}
+        confirmText={t('common.actions.delete')}
         onConfirm={() => void handleConfirmDelete()}
         onOpenChange={(open) => !open && setDeleteTarget(null)}
         open={deleteTarget !== null}
-        title={t('shared.actions.delete')}
+        title={t('common.actions.delete')}
       >
         <p>{t('features.iam.organizations.messages.deleteConfirm')}</p>
       </ConfirmDialog>

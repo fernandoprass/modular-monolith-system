@@ -1,8 +1,8 @@
-import type { Translate } from '../../../app/i18n/i18n'
+import type { PlainTranslationKey, Translate } from '../../../app/i18n/i18n'
 import { LANGUAGE_OPTIONS } from '../../../shared/languages'
 
 export function toTranslatedOptions(
-  options: ReadonlyArray<{ labelKey: string, value: string }>,
+  options: ReadonlyArray<{ labelKey: PlainTranslationKey, value: string }>,
   t: Translate,
 ) {
   return options.map((option) => ({

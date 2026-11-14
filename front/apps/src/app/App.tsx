@@ -1,6 +1,7 @@
+import { useEffect, useMemo, type PropsWithChildren } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 
-import { AuthProvider } from '../auth/AuthProvider'
+import { AuthProvider, useAuth } from '../auth/AuthProvider'
 import { LoginPage } from '../auth/LoginPage'
 import { EmailCreatePage } from '../resources/courier/emails/EmailCreatePage'
 import { EmailListPage } from '../resources/courier/emails/EmailListPage'
@@ -30,15 +31,15 @@ import { UserViewPage } from '../resources/iam/users/UserViewPage'
 import { ToastProvider } from './ToastProvider'
 import { AppLayout } from './AppShell'
 import { UserAccountPage } from './UserAccountPage'
-import { I18nContext, translate } from './i18n/i18n'
+import { createTranslate, I18nContext, LocaleContext, resolveLocale, useTranslate } from './i18n/i18n'
 import { APP_ROUTES } from './routes'
 
 function App() {
   return (
-    <I18nContext.Provider value={translate}>
-      <ToastProvider>
-        <BrowserRouter>
-          <AuthProvider>
+    <AuthProvider>
+      <UserLanguageProvider>
+        <ToastProvider>
+          <BrowserRouter>
             <Routes>
               <Route path={APP_ROUTES.login} element={<LoginPage />} />
               <Route path={APP_ROUTES.registerOrganization} element={<PublicOrganizationCreatePage />} />
@@ -84,15 +85,31 @@ function App() {
                 <Route path="*" element={<Navigate to={APP_ROUTES.dashboard} replace />} />
               </Route>
             </Routes>
-          </AuthProvider>
-        </BrowserRouter>
-      </ToastProvider>
-    </I18nContext.Provider>
+          </BrowserRouter>
+        </ToastProvider>
+      </UserLanguageProvider>
+    </AuthProvider>
+  )
+}
+
+function UserLanguageProvider({ children }: PropsWithChildren) {
+  const { isAuthenticated, user } = useAuth()
+  const locale = resolveLocale(isAuthenticated ? user?.language : undefined)
+  const translate = useMemo(() => createTranslate(locale), [locale])
+
+  useEffect(() => {
+    document.documentElement.lang = locale
+  }, [locale])
+
+  return (
+    <LocaleContext.Provider value={locale}>
+      <I18nContext.Provider value={translate}>{children}</I18nContext.Provider>
+    </LocaleContext.Provider>
   )
 }
 
 function DashboardPage() {
-  const t = translate
+  const t = useTranslate()
 
   return (
     <main className="page">

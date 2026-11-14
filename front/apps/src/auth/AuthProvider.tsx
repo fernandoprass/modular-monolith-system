@@ -34,6 +34,7 @@ type AuthContextValue = {
   login: (request: LoginRequest) => Promise<void>
   logout: () => void
   permissions: PermissionCode[]
+  updateProfile: (userId: string, profile: Pick<StoredUser, 'fullName' | 'language'>) => void
   user: StoredUser | null
 }
 
@@ -90,13 +91,29 @@ export function AuthProvider({ children }: PropsWithChildren) {
     }
   }, [])
 
+  const updateProfile = useCallback((userId: string, profile: Pick<StoredUser, 'fullName' | 'language'>) => {
+    if (user === null || user.id !== userId || tokenStorage.getToken() === null) {
+      return
+    }
+
+    const updatedUser = {
+      ...user,
+      fullName: profile.fullName,
+      language: normalizeLanguageCode(profile.language),
+    }
+
+    tokenStorage.setUser(updatedUser)
+    setUser(updatedUser)
+  }, [user])
+
   const value = useMemo<AuthContextValue>(() => ({
     isAuthenticated: user !== null && tokenStorage.getToken() !== null,
     login,
     logout,
     permissions,
+    updateProfile,
     user,
-  }), [login, logout, permissions, user])
+  }), [login, logout, permissions, updateProfile, user])
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

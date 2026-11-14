@@ -26,25 +26,25 @@ export function createRoleTableColumns({
   return [
     {
       accessorKey: 'name',
-      header: t('shared.fields.name'),
+      header: t('common.fields.name'),
     },
     {
       accessorKey: 'isActive',
       cell: ({ row }) => (
         <Badge variant={row.original.isActive ? 'active' : 'inactive'}>
-          {row.original.isActive ? t('shared.status.active') : t('shared.status.inactive')}
+          {row.original.isActive ? t('common.status.active') : t('common.status.inactive')}
         </Badge>
       ),
-      header: t('shared.fields.isActive'),
+      header: t('common.fields.isActive'),
     },
     {
       accessorKey: 'isDefault',
       cell: ({ row }) => (
         <Badge variant={row.original.isDefault ? 'active' : 'inactive'}>
-          {row.original.isDefault ? t('shared.common.yes') : t('shared.common.no')}
+          {row.original.isDefault ? t('common.common.yes') : t('common.common.no')}
         </Badge>
       ),
-      header: t('shared.fields.isDefault'),
+      header: t('common.fields.isDefault'),
     },
     {
       cell: ({ row }) => (
@@ -53,13 +53,13 @@ export function createRoleTableColumns({
             {
               isVisible: canUpdate,
               kind: DATA_TABLE_ROW_ACTION_KINDS.edit,
-              label: t('shared.actions.edit'),
+              label: t('common.actions.edit'),
               onClick: () => onEdit(row.original),
             },
             {
               isVisible: canDelete,
               kind: DATA_TABLE_ROW_ACTION_KINDS.delete,
-              label: t('shared.actions.delete'),
+              label: t('common.actions.delete'),
               onClick: () => onDelete(row.original),
             },
           ]}
@@ -67,7 +67,7 @@ export function createRoleTableColumns({
       ),
       enableHiding: false,
       enableSorting: false,
-      header: t('shared.fields.actions'),
+      header: t('common.fields.actions'),
       id: 'actions',
     },
   ]

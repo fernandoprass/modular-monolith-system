@@ -64,7 +64,7 @@ export function PermissionListPage() {
         pageSize,
       }))
     } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
+      notifyError(error, t('common.errors.generic'))
     } finally {
       setIsLoading(false)
     }
@@ -107,10 +107,10 @@ export function PermissionListPage() {
           name="module"
           render={({ field }) => (
             <Field>
-              <FieldLabel>{t('shared.fields.module')}</FieldLabel>
+              <FieldLabel>{t('common.fields.module')}</FieldLabel>
               <Select
                 onValueChange={field.onChange}
-                options={[{ label: t('shared.filters.all'), value: PERMISSION_FILTER_VALUES.all }, ...toTranslatedOptions(PERMISSION_MODULE_OPTIONS, t)]}
+                options={[{ label: t('common.filters.all'), value: PERMISSION_FILTER_VALUES.all }, ...toTranslatedOptions(PERMISSION_MODULE_OPTIONS, t)]}
                 value={field.value}
               />
             </Field>
@@ -121,21 +121,21 @@ export function PermissionListPage() {
           name="resource"
           render={({ field }) => (
             <Field>
-              <FieldLabel>{t('shared.fields.resource')}</FieldLabel>
+              <FieldLabel>{t('common.fields.resource')}</FieldLabel>
               <Select
                 onValueChange={field.onChange}
-                options={[{ label: t('shared.filters.all'), value: PERMISSION_FILTER_VALUES.all }, ...toTranslatedOptions(PERMISSION_RESOURCE_OPTIONS, t)]}
+                options={[{ label: t('common.filters.all'), value: PERMISSION_FILTER_VALUES.all }, ...toTranslatedOptions(PERMISSION_RESOURCE_OPTIONS, t)]}
                 value={field.value}
               />
             </Field>
           )}
         />
         <Field>
-          <FieldLabel htmlFor="action">{t('shared.fields.action')}</FieldLabel>
+          <FieldLabel htmlFor="action">{t('common.fields.action')}</FieldLabel>
           <Input id="action" {...register('action')} />
         </Field>
         <Field>
-          <FieldLabel htmlFor="title">{t('shared.fields.title')}</FieldLabel>
+          <FieldLabel htmlFor="title">{t('common.fields.title')}</FieldLabel>
           <Input id="title" {...register('title')} />
         </Field>
       </FilterToolbar>
@@ -144,7 +144,7 @@ export function PermissionListPage() {
         data={result?.items ?? []}
         emptyText={t('features.iam.permissions.messages.empty')}
         isLoading={isLoading}
-        loadingText={t('shared.common.loading')}
+        loadingText={t('common.common.loading')}
         onSortingChange={setSorting}
         sorting={sorting}
       />

@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { createValidationErrorMap } from '../../../shared/validation'
 import { useCallback, useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -50,7 +51,7 @@ export function OrganizationProfilePage() {
       const loaded = await getOwnOrganization()
       setOrganization(loaded)
     } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
+      notifyError(error, t('common.errors.generic'))
     }
   }, [notifyError, t])
 
@@ -66,7 +67,7 @@ export function OrganizationProfilePage() {
       <Card>
         <CardContent>
           {organization === null ? (
-            <p className="page-subtitle">{t('shared.common.loading')}</p>
+            <p className="page-subtitle">{t('common.common.loading')}</p>
           ) : (
             <OrganizationProfileFormPanel
               key={organization.id}
@@ -99,7 +100,7 @@ function OrganizationProfileFormPanel({
     register,
   } = useForm<OrganizationProfileForm>({
     defaultValues: toForm(organization),
-    resolver: zodResolver(organizationProfileSchema),
+    resolver: zodResolver(organizationProfileSchema, { error: createValidationErrorMap(t) }),
   })
 
   async function handleSave(value: OrganizationProfileForm) {
@@ -115,7 +116,7 @@ function OrganizationProfileFormPanel({
       showSuccess(message)
       await onSaved()
     } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
+      notifyError(error, t('common.errors.generic'))
     } finally {
       setIsSaving(false)
     }
@@ -125,15 +126,15 @@ function OrganizationProfileFormPanel({
     <form className="edit-form" onSubmit={handleSubmit(handleSave)}>
       <FieldGroup>
         <Field data-disabled>
-          <FieldLabel>{t('shared.fields.code')}</FieldLabel>
+          <FieldLabel>{t('common.fields.code')}</FieldLabel>
           <Input disabled value={organization.code} />
         </Field>
         <Field>
-          <FieldLabel htmlFor="name">{t('shared.fields.name')}</FieldLabel>
+          <FieldLabel htmlFor="name">{t('common.fields.name')}</FieldLabel>
           <Input id="name" required {...register('name')} />
         </Field>
         <Field>
-          <FieldLabel htmlFor="description">{t('shared.fields.description')}</FieldLabel>
+          <FieldLabel htmlFor="description">{t('common.fields.description')}</FieldLabel>
           <Textarea id="description" required {...register('description')} />
         </Field>
         <Controller
@@ -141,7 +142,7 @@ function OrganizationProfileFormPanel({
           name="defaultLanguage"
           render={({ field }) => (
             <Field>
-              <FieldLabel>{t('shared.fields.defaultLanguage')}</FieldLabel>
+              <FieldLabel>{t('common.fields.defaultLanguage')}</FieldLabel>
               <Select
                 onValueChange={field.onChange}
                 options={toTranslatedOptions(LANGUAGE_OPTIONS, t)}
@@ -152,7 +153,7 @@ function OrganizationProfileFormPanel({
         />
       </FieldGroup>
       <div className="form-actions">
-        <Button disabled={isSaving} type="submit">{t('shared.actions.save')}</Button>
+        <Button disabled={isSaving} type="submit">{t('common.actions.save')}</Button>
       </div>
     </form>
   )

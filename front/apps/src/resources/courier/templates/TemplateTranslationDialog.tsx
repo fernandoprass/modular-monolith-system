@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { createValidationErrorMap } from '../../../shared/validation'
 import { useEffect, useMemo, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -128,7 +129,7 @@ export function TemplateTranslationDialog({
   const translationSchema = useMemo(() => createTranslationSchema(t), [t])
   const form = useForm<TemplateTranslationForm>({
     defaultValues: toForm(translation),
-    resolver: zodResolver(translationSchema),
+    resolver: zodResolver(translationSchema, { error: createValidationErrorMap(t) }),
   })
   const emailBody = form.watch('emailBody')
   const emailEnabled = form.watch('emailEnabled')
@@ -160,7 +161,7 @@ export function TemplateTranslationDialog({
       await onSaved()
       onClose()
     } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
+      notifyError(error, t('common.errors.generic'))
     } finally {
       setIsSaving(false)
     }
@@ -168,7 +169,7 @@ export function TemplateTranslationDialog({
 
   return (
     <Dialog
-      backLabel={t('shared.actions.back')}
+      backLabel={t('common.actions.back')}
       className="dialog-content-wide template-translation-dialog"
       onOpenChange={(open) => !open && onClose()}
       open={isOpen}
@@ -184,7 +185,7 @@ export function TemplateTranslationDialog({
               name="language"
               render={({ field }) => (
                 <Field>
-                  <FieldLabel>{t('shared.fields.language')}</FieldLabel>
+                  <FieldLabel>{t('common.fields.language')}</FieldLabel>
                   <Select
                     disabled={translation !== null}
                     onValueChange={field.onChange}
@@ -196,7 +197,7 @@ export function TemplateTranslationDialog({
               )}
             />
             <Field>
-              <FieldLabel htmlFor="template-translation-name">{t('shared.fields.name')}</FieldLabel>
+              <FieldLabel htmlFor="template-translation-name">{t('common.fields.name')}</FieldLabel>
               <Input id="template-translation-name" required {...form.register('name')} />
             </Field>
           </div>
@@ -209,7 +210,7 @@ export function TemplateTranslationDialog({
                 render={({ field }) => (
                   <Checkbox
                     checked={field.value}
-                    label={t('shared.fields.email')}
+                    label={t('common.fields.email')}
                     onCheckedChange={field.onChange}
                   />
                 )}
@@ -217,7 +218,7 @@ export function TemplateTranslationDialog({
               <FieldError>{form.formState.errors.emailEnabled?.message}</FieldError>
               <FieldGroup>
                 <Field>
-                  <FieldLabel htmlFor="template-email-subject">{t('shared.fields.subject')}</FieldLabel>
+                  <FieldLabel htmlFor="template-email-subject">{t('common.fields.subject')}</FieldLabel>
                   <Input
                     disabled={!emailEnabled}
                     id="template-email-subject"
@@ -226,7 +227,7 @@ export function TemplateTranslationDialog({
                   <FieldError>{form.formState.errors.emailSubject?.message}</FieldError>
                 </Field>
                 <Field>
-                  <FieldLabel htmlFor="template-email-body">{t('shared.fields.body')}</FieldLabel>
+                  <FieldLabel htmlFor="template-email-body">{t('common.fields.body')}</FieldLabel>
                   <Textarea
                     className="template-translation-body-input"
                     disabled={!emailEnabled}
@@ -236,12 +237,12 @@ export function TemplateTranslationDialog({
                   <FieldError>{form.formState.errors.emailBody?.message}</FieldError>
                 </Field>
                 <div className="template-preview-panel">
-                  <span className="detail-label">{t('shared.fields.preview')}</span>
+                  <span className="detail-label">{t('common.fields.preview')}</span>
                   <iframe
                     className="template-preview-frame"
                     sandbox=""
                     srcDoc={emailEnabled ? emailBody : ''}
-                    title={t('shared.fields.preview')}
+                    title={t('common.fields.preview')}
                   />
                 </div>
               </FieldGroup>
@@ -261,7 +262,7 @@ export function TemplateTranslationDialog({
               />
               <FieldGroup>
                 <Field>
-                  <FieldLabel htmlFor="template-notification-title">{t('shared.fields.title')}</FieldLabel>
+                  <FieldLabel htmlFor="template-notification-title">{t('common.fields.title')}</FieldLabel>
                   <Input
                     disabled={!notificationEnabled}
                     id="template-notification-title"
@@ -270,7 +271,7 @@ export function TemplateTranslationDialog({
                   <FieldError>{form.formState.errors.notificationTitle?.message}</FieldError>
                 </Field>
                 <Field>
-                  <FieldLabel htmlFor="template-notification-message">{t('shared.fields.message')}</FieldLabel>
+                  <FieldLabel htmlFor="template-notification-message">{t('common.fields.message')}</FieldLabel>
                   <Textarea
                     className="template-notification-message-input"
                     disabled={!notificationEnabled}
@@ -295,10 +296,10 @@ export function TemplateTranslationDialog({
         </div>
         <div className="dialog-actions">
           <Button onClick={onClose} type="button" variant="outline">
-            {t('shared.actions.cancel')}
+            {t('common.actions.cancel')}
           </Button>
           <Button disabled={isSaving} type="submit">
-            {t('shared.actions.save')}
+            {t('common.actions.save')}
           </Button>
         </div>
       </form>

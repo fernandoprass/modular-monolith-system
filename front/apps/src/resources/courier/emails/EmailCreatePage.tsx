@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { createValidationErrorMap } from '../../../shared/validation'
 import { ArrowLeft } from 'lucide-react'
 import { useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
@@ -57,7 +58,7 @@ export function EmailCreatePage() {
       templateKey: '',
       userId: user?.id ?? '',
     },
-    resolver: zodResolver(emailCreateSchema),
+    resolver: zodResolver(emailCreateSchema, { error: createValidationErrorMap(t) }),
   })
 
   async function handleSave(value: EmailCreateForm) {
@@ -69,7 +70,7 @@ export function EmailCreatePage() {
       showSuccess(message)
       navigate(APP_ROUTES.emailView(created.id))
     } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
+      notifyError(error, t('common.errors.generic'))
     } finally {
       setIsSaving(false)
     }
@@ -81,7 +82,7 @@ export function EmailCreatePage() {
         <h1 className="page-title">{t('features.courier.emails.pages.create')}</h1>
         <Button onClick={() => navigate(APP_ROUTES.emails)} type="button" variant="outline">
           <ArrowLeft data-icon="inline-start" />
-          {t('shared.actions.back')}
+          {t('common.actions.back')}
         </Button>
       </div>
       <Card>
@@ -94,7 +95,7 @@ export function EmailCreatePage() {
                   name="organizationId"
                   render={({ field }) => (
                     <Field>
-                      <FieldLabel>{t('shared.fields.organization')}</FieldLabel>
+                      <FieldLabel>{t('common.fields.organization')}</FieldLabel>
                       <OrganizationSelect onValueChange={field.onChange} value={field.value} />
                     </Field>
                   )}
@@ -104,7 +105,7 @@ export function EmailCreatePage() {
                   name="userId"
                   render={({ field }) => (
                     <Field>
-                      <FieldLabel>{t('shared.fields.user')}</FieldLabel>
+                      <FieldLabel>{t('common.fields.user')}</FieldLabel>
                       <UserSelect onValueChange={field.onChange} value={field.value} />
                     </Field>
                   )}
@@ -116,7 +117,7 @@ export function EmailCreatePage() {
                   name="module"
                   render={({ field }) => (
                     <Field>
-                      <FieldLabel>{t('shared.fields.module')}</FieldLabel>
+                      <FieldLabel>{t('common.fields.module')}</FieldLabel>
                       <Select
                         onValueChange={field.onChange}
                         options={toTranslatedEmailOptions(EMAIL_MODULE_OPTIONS, t)}
@@ -130,7 +131,7 @@ export function EmailCreatePage() {
                   name="feature"
                   render={({ field }) => (
                     <Field>
-                      <FieldLabel>{t('shared.fields.feature')}</FieldLabel>
+                      <FieldLabel>{t('common.fields.feature')}</FieldLabel>
                       <Select
                         onValueChange={field.onChange}
                         options={toTranslatedEmailOptions(EMAIL_FEATURE_OPTIONS, t)}
@@ -142,20 +143,20 @@ export function EmailCreatePage() {
               </div>
               <div className="form-row-two">
                 <Field>
-                  <FieldLabel htmlFor="email-template-key">{t('shared.fields.templateKey')}</FieldLabel>
+                  <FieldLabel htmlFor="email-template-key">{t('common.fields.templateKey')}</FieldLabel>
                   <Input id="email-template-key" required {...form.register('templateKey')} />
                 </Field>
                 <Field>
-                  <FieldLabel htmlFor="email-recipient">{t('shared.fields.recipient')}</FieldLabel>
+                  <FieldLabel htmlFor="email-recipient">{t('common.fields.recipient')}</FieldLabel>
                   <Input id="email-recipient" required type="email" {...form.register('recipient')} />
                 </Field>
               </div>
               <Field>
-                <FieldLabel htmlFor="email-subject">{t('shared.fields.subject')}</FieldLabel>
+                <FieldLabel htmlFor="email-subject">{t('common.fields.subject')}</FieldLabel>
                 <Input id="email-subject" required {...form.register('subject')} />
               </Field>
               <Field>
-                <FieldLabel htmlFor="email-body">{t('shared.fields.body')}</FieldLabel>
+                <FieldLabel htmlFor="email-body">{t('common.fields.body')}</FieldLabel>
                 <Textarea className="email-body-input" id="email-body" required {...form.register('body')} />
               </Field>
               <Controller
@@ -164,7 +165,7 @@ export function EmailCreatePage() {
                 render={({ field }) => (
                   <Checkbox
                     checked={field.value}
-                    label={t('shared.fields.isHtml')}
+                    label={t('common.fields.isHtml')}
                     onCheckedChange={field.onChange}
                   />
                 )}
@@ -172,7 +173,7 @@ export function EmailCreatePage() {
             </FieldGroup>
             <div className="form-actions">
               <Button disabled={isSaving} type="submit">
-                {t('shared.actions.create')}
+                {t('common.actions.create')}
               </Button>
             </div>
           </form>

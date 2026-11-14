@@ -49,7 +49,7 @@ export function ToastProvider({ children }: PropsWithChildren) {
           <div className={cn('toast', `toast-${toast.type}`)} key={toast.id}>
             <span>{toast.message}</span>
             <button
-              aria-label={t('shared.actions.back')}
+              aria-label={t('common.actions.back')}
               className="toast-close"
               onClick={() => removeToast(toast.id)}
               type="button"

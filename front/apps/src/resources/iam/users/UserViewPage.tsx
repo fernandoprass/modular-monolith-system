@@ -32,7 +32,7 @@ export function UserViewPage() {
       try {
         setUser(await getUser(userId))
       } catch (error) {
-        notifyError(error, t('shared.errors.generic'))
+        notifyError(error, t('common.errors.generic'))
       }
     }
 
@@ -45,29 +45,29 @@ export function UserViewPage() {
         <h1 className="page-title">{t('features.iam.users.pages.show')}</h1>
         <Button onClick={() => navigate(APP_ROUTES.users)} type="button" variant="outline">
           <ArrowLeft data-icon="inline-start" />
-          {t('shared.actions.back')}
+          {t('common.actions.back')}
         </Button>
       </div>
       <Card>
         <CardContent>
           {user === null ? (
-            <p className="page-subtitle">{t('shared.common.loading')}</p>
+            <p className="page-subtitle">{t('common.common.loading')}</p>
           ) : (
             <div className="detail-stack">
                 <div className="detail-grid-two-columns">
-                  <Field label={t('shared.fields.organization')}>{user.organizationName}</Field>
-                  <Field label={t('shared.fields.language')}>{getLanguageLabel(user.language, t)}</Field>
-                  <Field label={t('shared.fields.name')}>{user.name}</Field>
-                  <Field label={t('shared.fields.email')}>{user.email}</Field>
-                  <Field label={t('shared.fields.isSystemAdmin')}>
-                    {user.isSystemAdmin ? t('shared.common.yes') : t('shared.common.no')}
+                  <Field label={t('common.fields.organization')}>{user.organizationName}</Field>
+                  <Field label={t('common.fields.language')}>{getLanguageLabel(user.language, t)}</Field>
+                  <Field label={t('common.fields.name')}>{user.name}</Field>
+                  <Field label={t('common.fields.email')}>{user.email}</Field>
+                  <Field label={t('common.fields.isSystemAdmin')}>
+                    {user.isSystemAdmin ? t('common.common.yes') : t('common.common.no')}
                   </Field>
-                  <Field label={t('shared.fields.isOrganizationAdmin')}>
-                    {user.isOrganizationAdmin ? t('shared.common.yes') : t('shared.common.no')}
+                  <Field label={t('common.fields.isOrganizationAdmin')}>
+                    {user.isOrganizationAdmin ? t('common.common.yes') : t('common.common.no')}
                   </Field>
-                  <Field label={t('shared.fields.isActive')}>
+                  <Field label={t('common.fields.isActive')}>
                     <Badge variant={user.isActive ? 'active' : 'inactive'}>
-                      {user.isActive ? t('shared.status.active') : t('shared.status.inactive')}
+                      {user.isActive ? t('common.status.active') : t('common.status.inactive')}
                     </Badge>
                   </Field>
                 </div>

@@ -1,3 +1,4 @@
+import { formatUserDateTime } from '../../../shared/dateFormat'
 import type { ColumnDef } from '@tanstack/react-table'
 
 import type { Translate } from '../../../app/i18n/i18n'
@@ -6,39 +7,42 @@ import {
   DataTableRowActions,
 } from '../../../components/ui/data-table-row-actions'
 import type { SystemLogLiteDto } from './systemLogTypes'
-import { getSystemLogLevelLabel, getSystemLogStatusLabel } from './systemLogUi'
+import { getSystemLogLevelEnum, getSystemLogStatusEnum } from './systemLogUi'
 
 type CreateSystemLogTableColumnsRequest = {
   onView: (systemLog: SystemLogLiteDto) => void
+  locale: string
   t: Translate
 }
 
 export function createSystemLogTableColumns({
+  locale,
   onView,
   t,
 }: CreateSystemLogTableColumnsRequest): ColumnDef<SystemLogLiteDto>[] {
   return [
     {
       accessorKey: 'createdAt',
-      header: t('shared.fields.createdAt'),
+      cell: ({ row }) => formatUserDateTime(row.original.createdAt, locale),
+      header: t('common.fields.createdAt'),
     },
     {
       accessorKey: 'level',
-      cell: ({ row }) => getSystemLogLevelLabel(row.original.level, t),
-      header: t('shared.fields.level'),
+      cell: ({ row }) => getSystemLogLevelEnum(row.original.level, t),
+      header: t('common.fields.level'),
     },
     {
       accessorKey: 'status',
-      cell: ({ row }) => getSystemLogStatusLabel(row.original.status, t),
-      header: t('shared.fields.status'),
+      cell: ({ row }) => getSystemLogStatusEnum(row.original.status, t),
+      header: t('common.fields.status'),
     },
     {
       accessorKey: 'module',
-      header: t('shared.fields.module'),
+      header: t('common.fields.module'),
     },
     {
       accessorKey: 'message',
-      header: t('shared.fields.message'),
+      header: t('common.fields.message'),
     },
     {
       cell: ({ row }) => (
@@ -46,7 +50,7 @@ export function createSystemLogTableColumns({
           actions={[
             {
               kind: DATA_TABLE_ROW_ACTION_KINDS.view,
-              label: t('shared.actions.view'),
+              label: t('common.actions.view'),
               onClick: () => onView(row.original),
             },
           ]}
@@ -54,7 +58,7 @@ export function createSystemLogTableColumns({
       ),
       enableHiding: false,
       enableSorting: false,
-      header: t('shared.fields.actions'),
+      header: t('common.fields.actions'),
       id: 'actions',
     },
   ]

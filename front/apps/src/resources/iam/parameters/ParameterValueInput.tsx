@@ -39,8 +39,8 @@ export function ParameterValueInput({
         disabled={disabled}
         onValueChange={onChange}
         options={[
-          { label: t('shared.common.true'), value: 'true' },
-          { label: t('shared.common.false'), value: 'false' },
+          { label: t('common.common.true'), value: 'true' },
+          { label: t('common.common.false'), value: 'false' },
         ]}
         value={value.toLowerCase() === 'false' ? 'false' : 'true'}
       />

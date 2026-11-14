@@ -58,7 +58,7 @@ export function RoleListPage() {
     try {
       setRoles(await getRoles(appliedFilters))
     } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
+      notifyError(error, t('common.errors.generic'))
     } finally {
       setIsLoading(false)
     }
@@ -92,7 +92,7 @@ export function RoleListPage() {
       setDeleteTarget(null)
       await loadRoles()
     } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
+      notifyError(error, t('common.errors.generic'))
     }
   }
 
@@ -103,7 +103,7 @@ export function RoleListPage() {
         {canCreate && (
           <Button onClick={handleCreate} type="button">
             <Plus data-icon="inline-start" />
-            {t('shared.actions.create')}
+            {t('common.actions.create')}
           </Button>
         )}
       </div>
@@ -113,7 +113,7 @@ export function RoleListPage() {
           name="userId"
           render={({ field }) => (
             <Field>
-              <FieldLabel>{t('shared.fields.user')}</FieldLabel>
+              <FieldLabel>{t('common.fields.user')}</FieldLabel>
               <UserSelect
                 clearable
                 onValueChange={field.onChange}
@@ -123,7 +123,7 @@ export function RoleListPage() {
           )}
         />
         <Field>
-          <FieldLabel htmlFor="name">{t('shared.fields.name')}</FieldLabel>
+          <FieldLabel htmlFor="name">{t('common.fields.name')}</FieldLabel>
           <Input id="name" {...register('name')} />
         </Field>
       </FilterToolbar>
@@ -132,18 +132,18 @@ export function RoleListPage() {
         data={roles}
         emptyText={t('features.iam.roles.messages.empty')}
         isLoading={isLoading}
-        loadingText={t('shared.common.loading')}
+        loadingText={t('common.common.loading')}
         onSortingChange={setSorting}
         sorting={sorting}
       />
       <ConfirmDialog
-        cancelText={t('shared.actions.cancel')}
-        backLabel={t('shared.actions.back')}
-        confirmText={t('shared.actions.delete')}
+        cancelText={t('common.actions.cancel')}
+        backLabel={t('common.actions.back')}
+        confirmText={t('common.actions.delete')}
         onConfirm={() => void handleConfirmDelete()}
         onOpenChange={(open) => !open && setDeleteTarget(null)}
         open={deleteTarget !== null}
-        title={t('shared.actions.delete')}
+        title={t('common.actions.delete')}
       >
         <p>{t('features.iam.roles.messages.deleteConfirm')}</p>
       </ConfirmDialog>

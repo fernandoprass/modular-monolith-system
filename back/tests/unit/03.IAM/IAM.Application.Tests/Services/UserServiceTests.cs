@@ -162,7 +162,7 @@ public class UserServiceTests
       var result = await _userService.DeleteAsync(user.Id, TestContext.Current.CancellationToken);
 
       result.IsSuccess.Should().BeTrue();
-      AssertCrudSuccess(result.Messages, SharedTranslatedMessagesProvider.CrudDeletedSuccessInfo, "User deleted successfully.", "Usuário removido(a) com sucesso.");
+      AssertCrudSuccess(result.Messages, SharedTranslatedMessagesProvider.CrudDeletedSuccessInfo, "User deleted successfully.", "Usuário excluído(a) com sucesso.");
       await _unitOfWorkMock.Users.Received(1).DeleteAsync(user.Id, Arg.Any<CancellationToken>());
       await _unitOfWorkMock.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
    }
