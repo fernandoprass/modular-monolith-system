@@ -23,6 +23,6 @@ public class DatabaseSeeder(
       await new SeederAuthorization(roleRepository, permissionRepository, iamUnitOfWork).SeedAsync( seederData, cancellationToken);
       await new SeederParameters(seederData, sharedDbContext).SeedAsync(cancellationToken);
       await new SeederTemplates(courierDbContext, templateRepository, templateWriteRepository).SeedAsync(cancellationToken);
-      await new SeederOrganizations(organizationRepository, roleRepository, iamUnitOfWork, seederData).SeedAsync(cancellationToken);
+      await new SeederOrganizations(organizationRepository, iamUnitOfWork, seederData).SeedAsync(cancellationToken);
    }
 }

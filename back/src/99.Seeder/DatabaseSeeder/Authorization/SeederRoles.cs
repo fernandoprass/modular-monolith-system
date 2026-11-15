@@ -21,7 +21,7 @@ public class SeederRoles(
          .Select(role => role!.Name)
          .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-      if (roles != null)
+      if (roles.Any())
       {
          seederData.SysAdminRoleId = roles!.FirstOrDefault(r => r!.Name.Equals(seederData.SystemAdminRoleName, StringComparison.OrdinalIgnoreCase)).Id;
          seederData.OrganizationAdminRoleId = roles!.FirstOrDefault(r => r!.Name.Equals(seederData.OrganizationAdminRoleName, StringComparison.OrdinalIgnoreCase)).Id;
