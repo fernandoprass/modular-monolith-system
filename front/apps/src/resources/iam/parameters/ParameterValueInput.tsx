@@ -1,4 +1,4 @@
-import type { ChangeEvent } from 'react'
+import type { ChangeEvent, AriaAttributes } from 'react'
 
 import { useTranslate } from '../../../app/i18n/i18n'
 import { Input } from '../../../components/ui/input'
@@ -6,7 +6,7 @@ import { Select } from '../../../components/ui/select'
 import { Textarea } from '../../../components/ui/textarea'
 import { PARAMETER_TYPE_VALUES } from './parameterTypes'
 
-type ParameterValueInputProps = {
+type ParameterValueInputProps = Pick<AriaAttributes, 'aria-invalid' | 'aria-describedby'> & {
   disabled?: boolean
   id: string
   onBlur: () => void
@@ -30,17 +30,21 @@ export function ParameterValueInput({
   onChange,
   type,
   value,
+  ...ariaProps
 }: ParameterValueInputProps) {
   const t = useTranslate()
 
   if (type === PARAMETER_TYPE_VALUES.boolean) {
     return (
       <Select
+        {...ariaProps}
+        id={id}
+        onBlur={onBlur}
         disabled={disabled}
         onValueChange={onChange}
         options={[
-          { label: t('shared.common.true'), value: 'true' },
-          { label: t('shared.common.false'), value: 'false' },
+          { label: t('common.states.true'), value: 'true' },
+          { label: t('common.states.false'), value: 'false' },
         ]}
         value={value.toLowerCase() === 'false' ? 'false' : 'true'}
       />
@@ -50,6 +54,7 @@ export function ParameterValueInput({
   if (type === PARAMETER_TYPE_VALUES.integer) {
     return (
       <Input
+        {...ariaProps}
         id={id}
         disabled={disabled}
         onBlur={onBlur}
@@ -65,6 +70,7 @@ export function ParameterValueInput({
   if (type === PARAMETER_TYPE_VALUES.decimal) {
     return (
       <Input
+        {...ariaProps}
         id={id}
         disabled={disabled}
         onBlur={onBlur}
@@ -80,6 +86,7 @@ export function ParameterValueInput({
   if (type === PARAMETER_TYPE_VALUES.dateTime) {
     return (
       <Input
+        {...ariaProps}
         id={id}
         disabled={disabled}
         onBlur={onBlur}
@@ -94,6 +101,7 @@ export function ParameterValueInput({
   if (type === PARAMETER_TYPE_VALUES.date) {
     return (
       <Input
+        {...ariaProps}
         id={id}
         disabled={disabled}
         onBlur={onBlur}
@@ -108,6 +116,7 @@ export function ParameterValueInput({
   if (type === PARAMETER_TYPE_VALUES.time) {
     return (
       <Input
+        {...ariaProps}
         id={id}
         disabled={disabled}
         onBlur={onBlur}
@@ -122,6 +131,7 @@ export function ParameterValueInput({
   if (type === PARAMETER_TYPE_VALUES.character) {
     return (
       <Input
+        {...ariaProps}
         id={id}
         disabled={disabled}
         maxLength={1}
@@ -136,6 +146,7 @@ export function ParameterValueInput({
   if (type === PARAMETER_TYPE_VALUES.text || type === PARAMETER_TYPE_VALUES.richText) {
     return (
       <Textarea
+        {...ariaProps}
         id={id}
         disabled={disabled}
         onBlur={onBlur}
@@ -148,6 +159,7 @@ export function ParameterValueInput({
 
   return (
     <Input
+        {...ariaProps}
       id={id}
       disabled={disabled}
       onBlur={onBlur}

@@ -1,3 +1,5 @@
+import { resolveLocale } from '../app/i18n/messages'
+
 const USER_DATE_TIME_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
   day: '2-digit',
   hour: '2-digit',
@@ -15,7 +17,7 @@ export function formatUserDateTime(value: string, language?: string): string {
   }
 
   return new Intl.DateTimeFormat(
-    language?.trim().length ? language : undefined,
+    resolveLocale(language),
     USER_DATE_TIME_FORMAT_OPTIONS,
   ).format(date)
 }

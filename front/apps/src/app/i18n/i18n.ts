@@ -1,42 +1,13 @@
 import { createContext, useContext } from 'react'
+import { DEFAULT_LOCALE, translate, type SupportedLocale, type Translate } from './messages'
 
-import { enMessages } from './en'
+export * from './messages'
 
-type MessageTree = {
-  [key: string]: string | MessageTree
-}
+export const LocaleContext = createContext<SupportedLocale>(DEFAULT_LOCALE)
+export const I18nContext = createContext<Translate>(translate)
 
-const messages = enMessages as MessageTree
-
-function readMessage(path: string): string {
-  const value = path.split('.').reduce<string | MessageTree | undefined>((current, part) => {
-    if (typeof current !== 'object' || current === null) {
-      return undefined
-    }
-
-    return current[part]
-  }, messages)
-
-  return typeof value === 'string' ? value : path
-}
-
-function interpolate(value: string, variables?: Record<string, string | number>): string {
-  if (variables === undefined) {
-    return value
-  }
-
-  return Object.entries(variables).reduce(
-    (text, [key, variable]) => text.replaceAll(`{{${key}}}`, String(variable)),
-    value,
-  )
-}
-
-export type Translate = (key: string, variables?: Record<string, string | number>) => string
-
-export const I18nContext = createContext<Translate>((key) => key)
-
-export function translate(key: string, variables?: Record<string, string | number>): string {
-  return interpolate(readMessage(key), variables)
+export function useLocale(): SupportedLocale {
+  return useContext(LocaleContext)
 }
 
 export function useTranslate(): Translate {

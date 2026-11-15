@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 
-import { useTranslate } from '../../../app/i18n/i18n'
-import { useAuth, useNotifyError } from '../../../auth/AuthProvider'
+import { useLocale, useTranslate } from '../../../app/i18n/i18n'
+import { useNotifyError } from '../../../auth/AuthProvider'
 import { Badge } from '../../../components/ui/badge'
 import { Empty, EmptyDescription } from '../../../components/ui/empty'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../components/ui/tabs'
@@ -36,7 +36,7 @@ export function UserAccessTabs({ userId }: UserAccessTabsProps) {
         }
       } catch (error) {
         if (isCurrent) {
-          notifyError(error, t('shared.errors.generic'))
+          notifyError(error, t('common.errors.generic'))
         }
       } finally {
         if (isCurrent) {
@@ -56,7 +56,7 @@ export function UserAccessTabs({ userId }: UserAccessTabsProps) {
         }
       } catch (error) {
         if (isCurrent) {
-          notifyError(error, t('shared.errors.generic'))
+          notifyError(error, t('common.errors.generic'))
         }
       } finally {
         if (isCurrent) {
@@ -96,10 +96,10 @@ type RoleListProps = {
 
 function RoleList({ isLoading, roles }: RoleListProps) {
   const t = useTranslate()
-  const { user } = useAuth()
+  const locale = useLocale()
 
   if (isLoading) {
-    return <p className="page-subtitle">{t('shared.common.loading')}</p>
+    return <p className="page-subtitle">{t('common.states.loading')}</p>
   }
 
   if (roles.length === 0) {
@@ -115,31 +115,31 @@ function RoleList({ isLoading, roles }: RoleListProps) {
       <table className="access-table">
         <thead>
           <tr>
-            <th>{t('shared.fields.name')}</th>
-            <th>{t('shared.fields.startsAt')}</th>
-            <th>{t('shared.fields.expiresAt')}</th>
-            <th>{t('shared.fields.assignedBy')}</th>
-            <th>{t('shared.fields.assignedAt')}</th>
-            <th>{t('shared.fields.isActive')}</th>
-            <th>{t('shared.fields.isDefault')}</th>
+            <th>{t('common.fields.name')}</th>
+            <th>{t('common.fields.startsAt')}</th>
+            <th>{t('common.fields.expiresAt')}</th>
+            <th>{t('common.fields.assignedBy')}</th>
+            <th>{t('common.fields.assignedAt')}</th>
+            <th>{t('common.fields.isActive')}</th>
+            <th>{t('common.fields.isDefault')}</th>
           </tr>
         </thead>
         <tbody>
           {roles.map((role) => (
             <tr key={role.id}>
               <td>{role.name}</td>
-              <td>{formatUserDateTime(role.startsAt, user?.language)}</td>
-              <td>{role.expiresAt ? formatUserDateTime(role.expiresAt, user?.language) : '-'}</td>
-              <td>{formatUserDateTime(role.assignedBy, user?.language)}</td>
-              <td>{formatUserDateTime(role.assignedAt, user?.language)}</td>
+              <td>{formatUserDateTime(role.startsAt, locale)}</td>
+              <td>{role.expiresAt ? formatUserDateTime(role.expiresAt, locale) : '-'}</td>
+              <td>{role.assignedBy}</td>
+              <td>{formatUserDateTime(role.assignedAt, locale)}</td>
               <td>
                 <Badge variant={role.isActive ? 'active' : 'inactive'}>
-                  {role.isActive ? t('shared.status.active') : t('shared.status.inactive')}
+                  {role.isActive ? t('common.status.active') : t('common.status.inactive')}
                 </Badge>
               </td>
               <td>
                 <Badge variant={role.isDefault ? 'active' : 'inactive'}>
-                  {role.isDefault ? t('shared.common.yes') : t('shared.common.no')}
+                  {role.isDefault ? t('common.states.yes') : t('common.states.no')}
                 </Badge>
               </td>
             </tr>
@@ -159,7 +159,7 @@ function PermissionList({ isLoading, permissions }: PermissionListProps) {
   const t = useTranslate()
 
   if (isLoading) {
-    return <p className="page-subtitle">{t('shared.common.loading')}</p>
+    return <p className="page-subtitle">{t('common.states.loading')}</p>
   }
 
   if (permissions.length === 0) {
@@ -175,8 +175,8 @@ function PermissionList({ isLoading, permissions }: PermissionListProps) {
       <table className="access-table">
         <thead>
           <tr>
-            <th>{t('shared.fields.title')}</th>
-            <th>{t('shared.fields.isActive')}</th>
+            <th>{t('common.fields.title')}</th>
+            <th>{t('common.fields.isActive')}</th>
           </tr>
         </thead>
         <tbody>
@@ -185,7 +185,7 @@ function PermissionList({ isLoading, permissions }: PermissionListProps) {
               <td>{permission.title}</td>
               <td>
                 <Badge variant={permission.isActive ? 'active' : 'inactive'}>
-                  {permission.isActive ? t('shared.status.active') : t('shared.status.inactive')}
+                  {permission.isActive ? t('common.status.active') : t('common.status.inactive')}
                 </Badge>
               </td>
             </tr>

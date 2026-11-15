@@ -1,4 +1,6 @@
+import { toTranslatedOptions } from '../../../shared/translatedOptions'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { createValidationErrorMap } from '../../../shared/validation'
 import { ArrowLeft } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
@@ -12,7 +14,7 @@ import { useAuth, useNotifyError } from '../../../auth/AuthProvider'
 import { Button } from '../../../components/ui/button'
 import { Card, CardContent } from '../../../components/ui/card'
 import { Checkbox } from '../../../components/ui/checkbox'
-import { Field, FieldGroup, FieldLabel } from '../../../components/ui/form'
+import { Field, FieldError, FieldGroup, FieldLabel } from '../../../components/ui/form'
 import { Input } from '../../../components/ui/input'
 import { Select } from '../../../components/ui/select'
 import { LANGUAGE_CODES, LANGUAGE_OPTIONS } from '../../../shared/languages'
@@ -20,7 +22,6 @@ import { OrganizationSelect } from '../organizations/OrganizationSelect'
 import { UserAccessTabs } from './UserAccessTabs'
 import { createUser, getUser, updateUser } from './userApi'
 import { USER_REQUEST_FIELDS, type UserDto } from './userTypes'
-import { toTranslatedOptions } from './userUi'
 
 type UserEditForm = {
   email: string
@@ -83,7 +84,7 @@ export function UserEditPage() {
       const loaded = await getUser(id)
       setUser(loaded)
     } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
+      notifyError(error, t('common.errors.generic'))
     }
   }, [id, isCreate, notifyError, t])
 
@@ -97,13 +98,13 @@ export function UserEditPage() {
         <h1 className="page-title">{isCreate ? t('features.iam.users.pages.create') : t('features.iam.users.pages.edit')}</h1>
         <Button onClick={() => navigate(APP_ROUTES.users)} type="button" variant="outline">
           <ArrowLeft data-icon="inline-start" />
-          {t('shared.actions.back')}
+          {t('common.actions.back')}
         </Button>
       </div>
       <Card>
         <CardContent>
           {!isCreate && user === null ? (
-            <p className="page-subtitle">{t('shared.common.loading')}</p>
+            <p className="page-subtitle">{t('common.states.loading')}</p>
           ) : (
             <UserEditFormPanel
               key={isCreate ? `create-${loggedOrganizationId}` : user?.id}
@@ -141,12 +142,13 @@ function UserEditFormPanel({
     ? getEmptyUserEditForm(loggedOrganizationId)
     : toForm(user)
   const {
+    formState: { errors },
     control,
     handleSubmit,
     register,
   } = useForm<UserEditForm>({
     defaultValues,
-    resolver: zodResolver(getUserEditSchema(isCreate)),
+    resolver: zodResolver(getUserEditSchema(isCreate), { error: createValidationErrorMap(t) }),
   })
 
   async function handleSave(value: UserEditForm) {
@@ -159,24 +161,24 @@ function UserEditFormPanel({
 
     try {
       if (isCreate) {
-        const created = await createUser(value)
-        showSuccess(t('features.iam.users.notifications.created'))
+        const { data: created, message } = await createUser(value)
+        showSuccess(message)
         navigate(APP_ROUTES.userView(created.id))
       } else {
         if (user === null) {
           return
         }
 
-        await updateUser(user.id, {
+        const message = await updateUser(user.id, {
           [USER_REQUEST_FIELDS.name]: value.name,
           [USER_REQUEST_FIELDS.isActive]: value.isActive,
           [USER_REQUEST_FIELDS.language]: value.language,
         })
-        showSuccess(t('features.iam.users.notifications.updated'))
+        showSuccess(message)
         await onReload()
       }
     } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
+      notifyError(error, t('common.errors.generic'))
     } finally {
       setIsSaving(false)
     }
@@ -184,48 +186,84 @@ function UserEditFormPanel({
 
   return (
     <div className="detail-stack">
-      <form className="edit-form" onSubmit={handleSubmit(handleSave)}>
+      <form noValidate className="edit-form" onSubmit={handleSubmit(handleSave)}>
         <FieldGroup>
           <Controller
             control={control}
             name="organizationId"
             render={({ field }) => (
-              <Field data-disabled>
-                <FieldLabel>{t('shared.fields.organizationId')}</FieldLabel>
+              <Field data-disabled data-invalid={errors.organizationId !== undefined}>
+                <FieldLabel htmlFor="UserEditPage-organizationId">{t('common.fields.organizationId')}</FieldLabel>
                 <OrganizationSelect
+                  onBlur={field.onBlur}
+                  ref={field.ref}
+                  aria-invalid={errors.organizationId !== undefined}
+                  aria-describedby={errors.organizationId ? 'UserEditPage-organizationId-error' : undefined}
+                  id="UserEditPage-organizationId"
                   disabled
                   includeInactive
                   onValueChange={field.onChange}
                   value={field.value}
                 />
+                <FieldError id="UserEditPage-organizationId-error">{errors.organizationId?.message}</FieldError>
               </Field>
             )}
           />
-          <Field>
-            <FieldLabel htmlFor="name">{t('shared.fields.name')}</FieldLabel>
-            <Input id="name" required {...register('name')} />
+          <Field data-invalid={errors.name !== undefined}>
+            <FieldLabel htmlFor="name">{t('common.fields.name')}</FieldLabel>
+            <Input
+              aria-invalid={errors.name !== undefined}
+              aria-describedby={errors.name ? 'UserEditPage-name-error' : undefined}
+              id="name"
+              required
+              {...register('name')}
+            />
+            <FieldError id="UserEditPage-name-error">{errors.name?.message}</FieldError>
           </Field>
-          <Field data-disabled={!isCreate}>
-            <FieldLabel htmlFor="email">{t('shared.fields.email')}</FieldLabel>
-            <Input disabled={!isCreate} id="email" required type="email" {...register('email')} />
+          <Field data-disabled={!isCreate} data-invalid={errors.email !== undefined}>
+            <FieldLabel htmlFor="email">{t('common.fields.email')}</FieldLabel>
+            <Input
+              aria-invalid={errors.email !== undefined}
+              aria-describedby={errors.email ? 'UserEditPage-email-error' : undefined}
+              disabled={!isCreate}
+              id="email"
+              required
+              type="email"
+              {...register('email')}
+            />
+            <FieldError id="UserEditPage-email-error">{errors.email?.message}</FieldError>
           </Field>
           {isCreate && (
-            <Field>
-              <FieldLabel htmlFor="password">{t('shared.fields.password')}</FieldLabel>
-              <Input id="password" required type="password" {...register('password')} />
+            <Field data-invalid={errors.password !== undefined}>
+              <FieldLabel htmlFor="password">{t('common.fields.password')}</FieldLabel>
+              <Input
+                aria-invalid={errors.password !== undefined}
+                aria-describedby={errors.password ? 'UserEditPage-password-error' : undefined}
+                id="password"
+                required
+                type="password"
+                {...register('password')}
+              />
+              <FieldError id="UserEditPage-password-error">{errors.password?.message}</FieldError>
             </Field>
           )}
           <Controller
             control={control}
             name="language"
             render={({ field }) => (
-              <Field>
-                <FieldLabel>{t('shared.fields.language')}</FieldLabel>
+              <Field data-invalid={errors.language !== undefined}>
+                <FieldLabel htmlFor="UserEditPage-language">{t('common.fields.language')}</FieldLabel>
                 <Select
+                  onBlur={field.onBlur}
+                  ref={field.ref}
+                  aria-invalid={errors.language !== undefined}
+                  aria-describedby={errors.language ? 'UserEditPage-language-error' : undefined}
+                  id="UserEditPage-language"
                   onValueChange={field.onChange}
                   options={toTranslatedOptions(LANGUAGE_OPTIONS, t)}
                   value={field.value}
                 />
+                <FieldError id="UserEditPage-language-error">{errors.language?.message}</FieldError>
               </Field>
             )}
           />
@@ -235,7 +273,7 @@ function UserEditFormPanel({
             render={({ field }) => (
               <Checkbox
                 checked={field.value}
-                label={t('shared.fields.isActive')}
+                label={t('common.fields.isActive')}
                 onCheckedChange={field.onChange}
               />
             )}
@@ -243,7 +281,7 @@ function UserEditFormPanel({
         </FieldGroup>
         <div className="form-actions">
           <Button disabled={isSaving} type="submit">
-            {isCreate ? t('shared.actions.create') : t('shared.actions.save')}
+            {isCreate ? t('common.actions.create') : t('common.actions.save')}
           </Button>
         </div>
       </form>

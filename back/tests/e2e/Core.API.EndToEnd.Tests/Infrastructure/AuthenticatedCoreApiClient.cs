@@ -68,15 +68,16 @@ public sealed class AuthenticatedCoreApiClient
       Guid organizationId,
       CancellationToken cancellationToken = default)
    {
-      var response = await SendAsync(HttpMethod.Get, $"/api/v1/iam/users/by-organization/{organizationId}", cancellationToken: cancellationToken);
+      var response = await SendAsync(HttpMethod.Get, $"/api/v1/iam/users?OrganizationId={organizationId}", cancellationToken: cancellationToken);
       await response.EnsureSuccessStatusCodeAsync(cancellationToken);
 
-      return await response.ReadResultDataAsync<List<UserLiteDto>>(cancellationToken);
+      var page = await response.ReadResultDataAsync<PagedResultDto<UserLiteDto>>(cancellationToken);
+      return page.Items;
    }
 
    public async Task<UserDto> GetCurrentUserAsync(CancellationToken cancellationToken = default)
    {
-      var response = await SendAsync(HttpMethod.Get, "/api/v1/iam/users/me", cancellationToken: cancellationToken);
+      var response = await SendAsync(HttpMethod.Get, "/api/v1/iam/users/profile", cancellationToken: cancellationToken);
       await response.EnsureSuccessStatusCodeAsync(cancellationToken);
 
       return await response.ReadResultDataAsync<UserDto>(cancellationToken);
@@ -86,7 +87,7 @@ public sealed class AuthenticatedCoreApiClient
       UserUpdateRequest request,
       CancellationToken cancellationToken = default)
    {
-      var response = await SendAsync(HttpMethod.Put, "/api/v1/iam/users/me", request, cancellationToken);
+      var response = await SendAsync(HttpMethod.Put, "/api/v1/iam/users/profile", request, cancellationToken);
       await response.EnsureSuccessStatusCodeAsync(cancellationToken);
    }
 
@@ -94,7 +95,7 @@ public sealed class AuthenticatedCoreApiClient
       UserUpdatePasswordRequest request,
       CancellationToken cancellationToken = default)
    {
-      var response = await SendAsync(HttpMethod.Patch, "/api/v1/iam/users/me/password", request, cancellationToken);
+      var response = await SendAsync(HttpMethod.Patch, "/api/v1/iam/users/profile/password", request, cancellationToken);
       await response.EnsureSuccessStatusCodeAsync(cancellationToken);
    }
 
@@ -220,6 +221,8 @@ public sealed class AuthenticatedCoreApiClient
       }
 
       query.Add($"IncludeInactive={request.IncludeInactive}");
+      query.Add($"PageNumber={request.PageNumber}");
+      query.Add($"PageSize={request.PageSize}");
 
       var uri = "/api/v1/iam/permissions";
       if (query.Count > 0)
@@ -230,7 +233,8 @@ public sealed class AuthenticatedCoreApiClient
       var response = await SendAsync(HttpMethod.Get, uri, cancellationToken: cancellationToken);
       await response.EnsureSuccessStatusCodeAsync(cancellationToken);
 
-      return await response.ReadResultDataAsync<List<PermissionDto>>(cancellationToken);
+      var page = await response.ReadResultDataAsync<PagedResultDto<PermissionDto>>(cancellationToken);
+      return page.Items;
    }
 
    public async Task AssignPermissionsAsync(
@@ -265,7 +269,7 @@ public sealed class AuthenticatedCoreApiClient
          ?? throw new InvalidOperationException("Permission check response was empty.");
    }
 
-   public async Task<IReadOnlyCollection<ParameterDto>> SearchParametersAsync(
+   public async Task<IReadOnlyCollection<ParameterLiteDto>> SearchParametersAsync(
       ParameterSearchRequest request,
       CancellationToken cancellationToken = default)
    {
@@ -305,7 +309,8 @@ public sealed class AuthenticatedCoreApiClient
       var response = await SendAsync(HttpMethod.Get, uri, cancellationToken: cancellationToken);
       await response.EnsureSuccessStatusCodeAsync(cancellationToken);
 
-      return await response.ReadResultDataAsync<List<ParameterDto>>(cancellationToken);
+      var page = await response.ReadResultDataAsync<PagedResultDto<ParameterLiteDto>>(cancellationToken);
+      return page.Items;
    }
 
    public async Task<ParameterValueDto> GetParameterValueAsync(

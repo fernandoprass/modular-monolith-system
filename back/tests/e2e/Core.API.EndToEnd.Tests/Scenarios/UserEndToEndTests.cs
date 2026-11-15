@@ -8,6 +8,15 @@ public class UserEndToEndTests(CoreApiTestFixture fixture) : IClassFixture<CoreA
 {
    private readonly CoreApiTestFixture _fixture = fixture;
 
+   // Scenario: Create a user, update their profile and password, and delete them
+   // Given a new organization with a logged-in administrator
+   // When the administrator creates a user and lists the organization's users
+   // Then the list contains the new user and the creation response has the requested email
+   // When the user logs in and updates their profile and password
+   // And reads their profile back
+   // Then the profile has the updated name, language, and active status
+   // And the user still belongs to the same organization
+   // And the password update and administrator's user deletion succeed
    [Fact]
    public async Task UserFlow_ShouldCreateSearchLoginUpdatePasswordVerifyAndDeleteUser()
    {
@@ -38,11 +47,20 @@ public class UserEndToEndTests(CoreApiTestFixture fixture) : IClassFixture<CoreA
       Assert.Contains(organizationUsers, organizationUser => organizationUser.Id == user.Id);
       Assert.Equal(userRequest.Email, user.Email);
       Assert.Equal(userUpdateRequest.Name, updatedUser.Name);
-      Assert.Equal(userUpdateRequest.Language.ToLowerInvariant(), updatedUser.Language);
+      Assert.Equal(userUpdateRequest.Language, updatedUser.Language);
       Assert.Equal(userUpdateRequest.IsActive, updatedUser.IsActive);
       Assert.Equal(organization.Id, updatedUser.OrganizationId);
    }
 
+   // Scenario: Promote a user and allow them to update their organization's code
+   // Given a new organization with a logged-in administrator
+   // And a role with organization-read and organization-write permissions
+   // When the administrator creates a user, assigns that role, and promotes the user
+   // And the promoted user logs in and reads their profile
+   // Then the profile identifies the user as an organization administrator
+   // When the promoted user updates the organization's code and reads it back
+   // Then the organization has the requested code
+   // And deleting the user and role succeeds
    [Fact]
    public async Task UserFlow_ShouldCreateOrganizationAdminAndAllowAdminAction()
    {

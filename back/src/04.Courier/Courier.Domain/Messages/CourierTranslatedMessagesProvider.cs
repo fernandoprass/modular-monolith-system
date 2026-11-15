@@ -3,7 +3,7 @@ using Shared.Domain.Messages;
 
 namespace Courier.Domain.Messages;
 
-internal sealed class CourierTranslatedMessagesProvider : BaseTranslatedMessagesProvider
+public sealed class CourierTranslatedMessagesProvider : BaseTranslatedMessagesProvider
 {
    public const string TemplateDuplicateKeyError = nameof(TemplateDuplicateKeyError);
    public const string TemplateTranslationAlreadyExistsError = nameof(TemplateTranslationAlreadyExistsError);
@@ -17,6 +17,8 @@ internal sealed class CourierTranslatedMessagesProvider : BaseTranslatedMessages
 
    private CourierTranslatedMessagesProvider()
    {
+      AddVariableTranslations();
+
       AddTranslation(TemplateDuplicateKeyError, LanguageOptions.English, "Template key already exists in module {module}: {key}.");
       AddTranslation(TemplateDuplicateKeyError, LanguageOptions.Spanish, "La clave de plantilla ya existe en el módulo {module}: {key}.");
       AddTranslation(TemplateDuplicateKeyError, LanguageOptions.PortugueseBrazil, "A chave do modelo já existe no módulo {module}: {key}.");
@@ -44,5 +46,27 @@ internal sealed class CourierTranslatedMessagesProvider : BaseTranslatedMessages
       AddTranslation(TemplateLanguageNotFoundError, LanguageOptions.English, "Email template {key} does not have translation for language: {language}.");
       AddTranslation(TemplateLanguageNotFoundError, LanguageOptions.Spanish, "La plantilla de correo electrónico {key} no tiene traducción para el idioma: {language}.");
       AddTranslation(TemplateLanguageNotFoundError, LanguageOptions.PortugueseBrazil, "O modelo de e-mail {key} não possui tradução para o idioma: {language}.");
+   }
+   private void AddVariableTranslations()
+   {
+      AddVariableTranslation(CourierConst.Message.Variable.Email, LanguageOptions.English, "Email");
+      AddVariableTranslation(CourierConst.Message.Variable.Email, LanguageOptions.Spanish, "Correo electrónico");
+      AddVariableTranslation(CourierConst.Message.Variable.Email, LanguageOptions.PortugueseBrazil, "E-mail");
+
+      AddVariableTranslation(CourierConst.Message.Variable.Notification, LanguageOptions.English, "Notification");
+      AddVariableTranslation(CourierConst.Message.Variable.Notification, LanguageOptions.Spanish, "Notificación");
+      AddVariableTranslation(CourierConst.Message.Variable.Notification, LanguageOptions.PortugueseBrazil, "Notificação");
+
+      AddVariableTranslation(CourierConst.Message.Variable.Template, LanguageOptions.English, "Template");
+      AddVariableTranslation(CourierConst.Message.Variable.Template, LanguageOptions.Spanish, "Plantilla");
+      AddVariableTranslation(CourierConst.Message.Variable.Template, LanguageOptions.PortugueseBrazil, "Modelo");
+
+      AddVariableTranslation(CourierConst.Message.Variable.TemplateTranslation, LanguageOptions.English, "Template translation");
+      AddVariableTranslation(CourierConst.Message.Variable.TemplateTranslation, LanguageOptions.Spanish, "Traducción de plantilla");
+      AddVariableTranslation(CourierConst.Message.Variable.TemplateTranslation, LanguageOptions.PortugueseBrazil, "Tradução do modelo");
+
+      AddVariableTranslation(CourierConst.Message.Variable.UserPreference, LanguageOptions.English, "User preference");
+      AddVariableTranslation(CourierConst.Message.Variable.UserPreference, LanguageOptions.Spanish, "Preferencia de usuario");
+      AddVariableTranslation(CourierConst.Message.Variable.UserPreference, LanguageOptions.PortugueseBrazil, "Preferência do usuário");
    }
 }

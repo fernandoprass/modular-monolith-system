@@ -56,7 +56,7 @@ function groupParameters(parameters: ParameterLiteDto[]): GroupedParameters {
     }))
 }
 
-function getPageTitleKey(owner: ParameterSettingsOwner): string {
+function getPageTitleKey(owner: ParameterSettingsOwner) {
   return owner === 'organization'
     ? 'features.iam.parameters.pages.organizationSettings'
     : 'features.iam.parameters.pages.userSettings'
@@ -86,7 +86,7 @@ export function ParameterSettingsPage({ embedded = false, owner }: ParameterSett
       setOriginalValues(loadedValues)
       setValues(loadedValues)
     } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
+      notifyError(error, t('common.errors.generic'))
     } finally {
       setIsLoading(false)
     }
@@ -116,11 +116,11 @@ export function ParameterSettingsPage({ embedded = false, owner }: ParameterSett
     setParameterSaving(parameter.id, true)
 
     try {
-      await saveParameterOverride(parameter.id, value)
-      showSuccess(t('features.iam.parameters.notifications.overrideSaved'))
+      const message = await saveParameterOverride(parameter.id, value)
+      showSuccess(message)
       await loadParameters()
     } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
+      notifyError(error, t('common.errors.generic'))
     } finally {
       setParameterSaving(parameter.id, false)
     }
@@ -134,11 +134,11 @@ export function ParameterSettingsPage({ embedded = false, owner }: ParameterSett
     setParameterSaving(parameter.id, true)
 
     try {
-      await deleteParameterOverride(parameter.parameterOverrideId)
-      showSuccess(t('features.iam.parameters.notifications.overrideRemoved'))
+      const message = await deleteParameterOverride(parameter.parameterOverrideId)
+      showSuccess(message)
       await loadParameters()
     } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
+      notifyError(error, t('common.errors.generic'))
     } finally {
       setParameterSaving(parameter.id, false)
     }
@@ -154,7 +154,7 @@ export function ParameterSettingsPage({ embedded = false, owner }: ParameterSett
   const content = (
     <>
       {!embedded && <h1 className="page-title">{t(getPageTitleKey(owner))}</h1>}
-      {isLoading && <p className="page-subtitle">{t('shared.common.loading')}</p>}
+      {isLoading && <p className="page-subtitle">{t('common.states.loading')}</p>}
       {!isLoading && parameters.length === 0 && (
         <p className="page-subtitle">{t('features.iam.parameters.messages.empty')}</p>
       )}
@@ -189,32 +189,32 @@ export function ParameterSettingsPage({ embedded = false, owner }: ParameterSett
                           />
                           <div className="settings-parameter-actions">
                             <Button
-                              aria-label={t('shared.actions.saveOverride')}
+                              aria-label={t('common.actions.saveOverride')}
                               disabled={savingParameterIds.has(parameter.id) || values[parameter.id] === originalValues[parameter.id]}
                               onClick={() => void handleSaveOverride(parameter)}
                               size="icon"
-                              title={t('shared.actions.saveOverride')}
+                              title={t('common.actions.saveOverride')}
                               type="button"
                             >
                               <Save />
                             </Button>
                             <Button
-                              aria-label={t('shared.actions.reset')}
+                              aria-label={t('common.actions.reset')}
                               disabled={savingParameterIds.has(parameter.id) || values[parameter.id] === originalValues[parameter.id]}
                               onClick={() => handleReset(parameter.id)}
                               size="icon"
-                              title={t('shared.actions.reset')}
+                              title={t('common.actions.reset')}
                               type="button"
                               variant="outline"
                             >
                               <RotateCcw />
                             </Button>
                             <Button
-                              aria-label={t('shared.actions.removeOverride')}
+                              aria-label={t('common.actions.removeOverride')}
                               disabled={savingParameterIds.has(parameter.id) || parameter.parameterOverrideId === null}
                               onClick={() => void handleDeleteOverride(parameter)}
                               size="icon"
-                              title={t('shared.actions.removeOverride')}
+                              title={t('common.actions.removeOverride')}
                               type="button"
                               variant="outline"
                             >

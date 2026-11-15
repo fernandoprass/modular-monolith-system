@@ -15,8 +15,8 @@ export function FilterToolbar({ children, onReset, onSubmit }: FilterToolbarProp
   return (
     <form className="toolbar" onSubmit={onSubmit}>
       {children}
-      <Button type="submit">{t('shared.actions.filter')}</Button>
-      <Button onClick={onReset} type="button" variant="outline">{t('shared.actions.reset')}</Button>
+      <Button type="submit">{t('common.actions.filter')}</Button>
+      <Button onClick={onReset} type="button" variant="outline">{t('common.actions.reset')}</Button>
     </form>
   )
 }

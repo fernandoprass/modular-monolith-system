@@ -33,7 +33,7 @@ export function UserPreferencePage({ embedded = false }: UserPreferencePageProps
     try {
       setTemplates(await getUserPreference())
     } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
+      notifyError(error, t('common.errors.generic'))
     }
   }, [notifyError, t])
 
@@ -49,7 +49,7 @@ export function UserPreferencePage({ embedded = false }: UserPreferencePageProps
         </div>
       )}
       {templates === null ? (
-        <p className="page-subtitle">{t('shared.common.loading')}</p>
+        <p className="page-subtitle">{t('common.states.loading')}</p>
       ) : (
         <UserPreferenceFormPanel
           key={templates
@@ -106,11 +106,11 @@ function UserPreferenceFormPanel({ templates: initialTemplates, onSaved }: UserP
     setIsSaving(true)
 
     try {
-      await updateUserPreference(value)
-      showSuccess(t('features.courier.userPreferences.notifications.updated'))
+      const message = await updateUserPreference(value)
+      showSuccess(message)
       await onSaved()
     } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
+      notifyError(error, t('common.errors.generic'))
     } finally {
       setIsSaving(false)
     }
@@ -133,8 +133,8 @@ function UserPreferenceFormPanel({ templates: initialTemplates, onSaved }: UserP
               <table className="access-table user-preference-table">
                 <thead>
                   <tr>
-                    <th>{t('shared.fields.module')}</th>
-                    <th>{t('shared.fields.name')}</th>
+                    <th>{t('common.fields.module')}</th>
+                    <th>{t('common.fields.name')}</th>
                     <th>
                       <div className="user-preference-column-header">
                         <Checkbox
@@ -148,7 +148,7 @@ function UserPreferenceFormPanel({ templates: initialTemplates, onSaved }: UserP
                           }
                           onCheckedChange={setAllEmailEnabled}
                         />
-                        <span>{t('shared.fields.email')}</span>
+                        <span>{t('common.fields.email')}</span>
                       </div>
                     </th>
                     <th>
@@ -164,7 +164,7 @@ function UserPreferenceFormPanel({ templates: initialTemplates, onSaved }: UserP
                           }
                           onCheckedChange={setAllNotificationsEnabled}
                         />
-                        <span>{t('shared.fields.notification')}</span>
+                        <span>{t('common.fields.notification')}</span>
                       </div>
                     </th>
                   </tr>
@@ -212,7 +212,7 @@ function UserPreferenceFormPanel({ templates: initialTemplates, onSaved }: UserP
       <div className="form-actions">
         <Button disabled={isSaving} type="submit">
           <Save data-icon="inline-start" />
-          {t('shared.actions.save')}
+          {t('common.actions.save')}
         </Button>
       </div>
     </form>

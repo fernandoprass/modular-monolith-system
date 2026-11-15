@@ -9,6 +9,7 @@ import {
   type SortingState,
 } from '@tanstack/react-table'
 
+import { useTranslate } from '../../app/i18n/i18n'
 import { DataTableSortableButton } from './data-table-sortable-button'
 import { Empty, EmptyDescription } from './empty'
 import { Skeleton } from './skeleton'
@@ -38,13 +39,14 @@ export function DataTable<TData>({
   rowSelection,
   sorting,
 }: DataTableProps<TData>) {
+  const t = useTranslate()
   const tableColumns: ColumnDef<TData>[] = onRowSelectionChange === undefined
     ? columns
     : [
       {
         cell: ({ row }) => (
           <input
-            aria-label="Select row"
+            aria-label={t('common.table.selectRow')}
             checked={row.getIsSelected()}
             className="checkbox"
             onChange={row.getToggleSelectedHandler()}
@@ -54,7 +56,7 @@ export function DataTable<TData>({
         enableSorting: false,
         header: ({ table }) => (
           <input
-            aria-label="Select all rows"
+            aria-label={t('common.table.selectAllRows')}
             checked={table.getIsAllRowsSelected()}
             className="checkbox"
             onChange={table.getToggleAllRowsSelectedHandler()}

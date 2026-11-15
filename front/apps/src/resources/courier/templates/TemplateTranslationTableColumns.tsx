@@ -34,16 +34,16 @@ export function createTemplateTranslationColumns({
   return [
     {
       accessorKey: 'language',
-      header: t('shared.fields.language'),
+      header: t('common.fields.language'),
     },
     {
       accessorKey: 'name',
-      header: t('shared.fields.name'),
+      header: t('common.fields.name'),
     },
     {
       accessorKey: 'email',
       cell: ({ row }) => <ChannelBadge isConfigured={row.original.email !== null} t={t} />,
-      header: t('shared.fields.email'),
+      header: t('common.fields.email'),
     },
     {
       accessorKey: 'notification',
@@ -57,13 +57,13 @@ export function createTemplateTranslationColumns({
             {
               isVisible: canWrite,
               kind: DATA_TABLE_ROW_ACTION_KINDS.edit,
-              label: t('shared.actions.edit'),
+              label: t('common.actions.edit'),
               onClick: () => onEdit(row.original),
             },
             {
               isVisible: canWrite,
               kind: DATA_TABLE_ROW_ACTION_KINDS.delete,
-              label: t('shared.actions.delete'),
+              label: t('common.actions.delete'),
               onClick: () => onDelete(row.original),
             },
           ]}
@@ -71,7 +71,7 @@ export function createTemplateTranslationColumns({
       ),
       enableHiding: false,
       enableSorting: false,
-      header: t('shared.fields.actions'),
+      header: t('common.fields.actions'),
       id: 'actions',
     },
   ]

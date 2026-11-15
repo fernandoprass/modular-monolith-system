@@ -8,6 +8,7 @@ import { globalIgnores } from 'eslint/config'
 export default tseslint.config([
   globalIgnores(['dist']),
   js.configs.recommended,
+  { files: ['tests/**/*.mjs'], languageOptions: { globals: globals.node } },
   ...tseslint.configs.recommended,
   {
     files: ['**/*.{ts,tsx}'],

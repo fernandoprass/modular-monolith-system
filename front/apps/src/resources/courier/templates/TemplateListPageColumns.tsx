@@ -6,7 +6,7 @@ import {
   DataTableRowActions,
 } from '../../../components/ui/data-table-row-actions'
 import type { TemplateLiteDto } from './templateTypes'
-import { getNotificationSeverityLabel, getRetentionPolicyLabel } from './templateUi'
+import { getNotificationSeverityEnum, getRetentionPolicyEnum } from './templateUi'
 
 type CreateTemplateTableColumnsRequest = {
   canDelete: boolean
@@ -26,25 +26,25 @@ export function createTemplateTableColumns({
   return [
     {
       accessorKey: 'module',
-      header: t('shared.fields.module'),
+      header: t('common.fields.module'),
     },
     {
       accessorKey: 'key',
-      header: t('shared.fields.key'),
+      header: t('common.fields.key'),
     },
     {
       accessorKey: 'name',
-      header: t('shared.fields.name'),
+      header: t('common.fields.name'),
     },
     {
       accessorKey: 'severity',
-      cell: ({ row }) => getNotificationSeverityLabel(row.original.severity, t),
-      header: t('shared.fields.severity'),
+      cell: ({ row }) => getNotificationSeverityEnum(row.original.severity, t),
+      header: t('common.fields.severity'),
     },
     {
       accessorKey: 'retentionPolicy',
-      cell: ({ row }) => getRetentionPolicyLabel(row.original.retentionPolicy, t),
-      header: t('shared.fields.retentionPolicy'),
+      cell: ({ row }) => getRetentionPolicyEnum(row.original.retentionPolicy, t),
+      header: t('common.fields.retentionPolicy'),
     },
     {
       cell: ({ row }) => (
@@ -53,13 +53,13 @@ export function createTemplateTableColumns({
             {
               isVisible: canUpdate,
               kind: DATA_TABLE_ROW_ACTION_KINDS.edit,
-              label: t('shared.actions.edit'),
+              label: t('common.actions.edit'),
               onClick: () => onEdit(row.original),
             },
             {
               isVisible: canDelete,
               kind: DATA_TABLE_ROW_ACTION_KINDS.delete,
-              label: t('shared.actions.delete'),
+              label: t('common.actions.delete'),
               onClick: () => onDelete(row.original),
             },
           ]}
@@ -67,7 +67,7 @@ export function createTemplateTableColumns({
       ),
       enableHiding: false,
       enableSorting: false,
-      header: t('shared.fields.actions'),
+      header: t('common.fields.actions'),
       id: 'actions',
     },
   ]

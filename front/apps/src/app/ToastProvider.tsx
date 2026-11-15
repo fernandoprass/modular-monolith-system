@@ -27,6 +27,10 @@ export function ToastProvider({ children }: PropsWithChildren) {
   }, [])
 
   const showToast = useCallback((message: string, type: Toast['type']) => {
+    if (message.trim().length === 0) {
+      return
+    }
+
     const id = Date.now()
     setToasts((current) => [...current, { id, message, type }])
     window.setTimeout(() => removeToast(id), 4000)
@@ -45,7 +49,7 @@ export function ToastProvider({ children }: PropsWithChildren) {
           <div className={cn('toast', `toast-${toast.type}`)} key={toast.id}>
             <span>{toast.message}</span>
             <button
-              aria-label={t('shared.actions.back')}
+              aria-label={t('common.actions.close')}
               className="toast-close"
               onClick={() => removeToast(toast.id)}
               type="button"

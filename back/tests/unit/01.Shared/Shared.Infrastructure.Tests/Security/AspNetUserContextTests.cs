@@ -12,6 +12,22 @@ namespace Shared.Infrastructure.Tests.Security;
 
 public class AspNetUserContextTests
 {
+   [Theory]
+   [InlineData("pt-br", "pt-BR")]
+   [InlineData("es-ES;q=0.5, pt-BR;q=0.9", "pt-BR")]
+   [InlineData("fr-FR, es-ES;q=0.8", "es-ES")]
+   [InlineData("pt-BR;q=0", "en-US")]
+   [InlineData("fr-FR", "en-US")]
+   [InlineData("not a language", "en-US")]
+   [InlineData("", "en-US")]
+   public void Language_ShouldPreferSupportedRequestLanguageAndOtherwiseUseClaim(string header, string expected)
+   {
+      var context = CreateHttpContext([new Claim(SharedConst.Security.Claim.Language, LanguageOptions.English)]);
+      context.Request.Headers[HeaderNames.AcceptLanguage].Returns(new StringValues(header));
+
+      CreateUserContext(context).Language.Should().Be(expected);
+   }
+
    [Fact]
    public void Properties_WhenUserHasValidClaims_ShouldReturnUserContextValues()
    {
@@ -24,7 +40,7 @@ public class AspNetUserContextTests
          new Claim(SharedConst.Security.Claim.IsSystemAdmin, "true"),
          new Claim(SharedConst.Security.Claim.IsOrganizationAdmin, "true"),
          new Claim(SharedConst.Security.Claim.Language, "es"),
-         new Claim("email", "person@example.com"),
+         new Claim(ClaimTypes.Email, "person@example.com"),
          new Claim(SharedConst.Security.Claim.Role, "admin"),
          new Claim(SharedConst.Security.Claim.Role, "manager")
       ]);

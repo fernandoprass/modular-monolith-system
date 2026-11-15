@@ -21,19 +21,19 @@ export function createParameterTableColumns({
   return [
     {
       accessorKey: 'module',
-      header: t('shared.fields.module'),
+      header: t('common.fields.module'),
     },
     {
       accessorKey: 'group',
-      header: t('shared.fields.group'),
+      header: t('common.fields.group'),
     },
     {
       accessorKey: 'name',
-      header: t('shared.fields.name'),
+      header: t('common.fields.name'),
     },
     {
       accessorKey: 'title',
-      header: t('shared.fields.title'),
+      header: t('common.fields.title'),
     },
     {
       cell: ({ row }) => (
@@ -42,7 +42,7 @@ export function createParameterTableColumns({
             {
               isVisible: canUpdate,
               kind: DATA_TABLE_ROW_ACTION_KINDS.edit,
-              label: t('shared.actions.edit'),
+              label: t('common.actions.edit'),
               onClick: () => onEdit(row.original),
             },
           ]}
@@ -50,7 +50,7 @@ export function createParameterTableColumns({
       ),
       enableHiding: false,
       enableSorting: false,
-      header: t('shared.fields.actions'),
+      header: t('common.fields.actions'),
       id: 'actions',
     },
   ]

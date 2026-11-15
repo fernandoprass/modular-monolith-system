@@ -23,14 +23,14 @@ export const AUDIT_LOG_MODULE_OPTIONS = [
 ] as const
 
 export const AUDIT_LOG_FEATURE_OPTIONS = [
-  { labelKey: 'shared.featureLabels.authentication', value: 'authentication' },
-  { labelKey: 'shared.featureLabels.emails', value: 'emails' },
-  { labelKey: 'shared.featureLabels.organizations', value: 'organizations' },
-  { labelKey: 'shared.featureLabels.parameters', value: 'parameters' },
-  { labelKey: 'shared.featureLabels.permissions', value: 'permissions' },
-  { labelKey: 'shared.featureLabels.roles', value: 'roles' },
-  { labelKey: 'shared.featureLabels.security', value: 'security' },
-  { labelKey: 'shared.featureLabels.users', value: 'users' },
+  { labelKey: 'common.featureLabels.authentication', value: 'authentication' },
+  { labelKey: 'common.featureLabels.emails', value: 'emails' },
+  { labelKey: 'common.featureLabels.organizations', value: 'organizations' },
+  { labelKey: 'common.featureLabels.parameters', value: 'parameters' },
+  { labelKey: 'common.featureLabels.permissions', value: 'permissions' },
+  { labelKey: 'common.featureLabels.roles', value: 'roles' },
+  { labelKey: 'common.featureLabels.security', value: 'security' },
+  { labelKey: 'common.featureLabels.users', value: 'users' },
 ] as const
 
 export const AUDIT_PRIVACY_LEVELS = {

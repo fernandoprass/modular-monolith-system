@@ -145,6 +145,7 @@ public class RegisterOrchestratorTests
 
       _organizationService.ValidateCreateOrganizationAsync(request, Arg.Any<CancellationToken>())
          .Returns(Result.Success());
+
       _userService.ValidateUserForNewOrganizationAsync(request.User, Arg.Any<CancellationToken>())
          .Returns(Result.Success());
       _parameterService.GetGuidAsync(IamParam.Role.DefaultRoleIdForNewOrganization, Arg.Any<CancellationToken>())

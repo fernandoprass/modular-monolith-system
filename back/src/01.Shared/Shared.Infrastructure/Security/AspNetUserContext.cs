@@ -63,6 +63,21 @@ public class AspNetUserContext(IHttpContextAccessor accessor) : IUserContext
 
    private string GetLanguage()
    {
+      var header = _accessor.HttpContext?.Request.Headers[HeaderNames.AcceptLanguage].ToString();
+      if (!string.IsNullOrWhiteSpace(header) && StringWithQualityHeaderValue.TryParseList([header], out var languages))
+      {
+         var preferred = languages
+            .Where(language => (language.Quality ?? 1) > 0)
+            .OrderByDescending(language => language.Quality ?? 1)
+            .Select(language => language.Value.ToString())
+            .FirstOrDefault(LanguageOptions.IsSupported);
+
+         if (preferred is not null)
+         {
+            return LanguageOptions.Normalize(preferred);
+         }
+      }
+
       var value = _accessor.HttpContext?.User.FindFirst(SharedConst.Security.Claim.Language)?.Value;
 
       return string.IsNullOrEmpty(value) ? SharedConst.System.DefaultLanguage : value;

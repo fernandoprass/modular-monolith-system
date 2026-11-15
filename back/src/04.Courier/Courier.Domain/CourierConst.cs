@@ -63,6 +63,11 @@ public static partial class CourierConst
    {
       public static class Variable
       {
+         public const string Email = "email";
+         public const string Notification = "notification";
+         public const string Template = "template";
+         public const string TemplateTranslation = "templateTranslation";
+         public const string UserPreference = "userPreference";
          public const string Module = "module";
          public const string Key = "key";
          public const string Language = "language";

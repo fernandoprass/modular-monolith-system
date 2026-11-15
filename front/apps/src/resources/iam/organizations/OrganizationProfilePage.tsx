@@ -1,4 +1,6 @@
+import { toTranslatedOptions } from '../../../shared/translatedOptions'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { createValidationErrorMap } from '../../../shared/validation'
 import { useCallback, useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -8,14 +10,13 @@ import { useTranslate } from '../../../app/i18n/i18n'
 import { useNotifyError } from '../../../auth/AuthProvider'
 import { Button } from '../../../components/ui/button'
 import { Card, CardContent } from '../../../components/ui/card'
-import { Field, FieldGroup, FieldLabel } from '../../../components/ui/form'
+import { Field, FieldError, FieldGroup, FieldLabel } from '../../../components/ui/form'
 import { Input } from '../../../components/ui/input'
 import { Select } from '../../../components/ui/select'
 import { Textarea } from '../../../components/ui/textarea'
 import { LANGUAGE_OPTIONS } from '../../../shared/languages'
 import { getOwnOrganization, updateOwnOrganization } from './organizationApi'
 import { ORGANIZATION_REQUEST_FIELDS, type OrganizationDto } from './organizationTypes'
-import { toTranslatedOptions } from './organizationUi'
 
 type OrganizationProfileForm = {
   defaultLanguage: string
@@ -50,7 +51,7 @@ export function OrganizationProfilePage() {
       const loaded = await getOwnOrganization()
       setOrganization(loaded)
     } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
+      notifyError(error, t('common.errors.generic'))
     }
   }, [notifyError, t])
 
@@ -66,7 +67,7 @@ export function OrganizationProfilePage() {
       <Card>
         <CardContent>
           {organization === null ? (
-            <p className="page-subtitle">{t('shared.common.loading')}</p>
+            <p className="page-subtitle">{t('common.states.loading')}</p>
           ) : (
             <OrganizationProfileFormPanel
               key={organization.id}
@@ -94,65 +95,86 @@ function OrganizationProfileFormPanel({
   const { showSuccess } = useToast()
   const [isSaving, setIsSaving] = useState(false)
   const {
+    formState: { errors },
     control,
     handleSubmit,
     register,
   } = useForm<OrganizationProfileForm>({
     defaultValues: toForm(organization),
-    resolver: zodResolver(organizationProfileSchema),
+    resolver: zodResolver(organizationProfileSchema, { error: createValidationErrorMap(t) }),
   })
 
   async function handleSave(value: OrganizationProfileForm) {
     setIsSaving(true)
 
     try {
-      await updateOwnOrganization({
+      const message = await updateOwnOrganization({
         [ORGANIZATION_REQUEST_FIELDS.name]: value.name,
         [ORGANIZATION_REQUEST_FIELDS.description]: value.description,
         [ORGANIZATION_REQUEST_FIELDS.isActive]: value.isActive,
         [ORGANIZATION_REQUEST_FIELDS.defaultLanguage]: value.defaultLanguage,
       })
-      showSuccess(t('features.iam.organizations.notifications.updated'))
+      showSuccess(message)
       await onSaved()
     } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
+      notifyError(error, t('common.errors.generic'))
     } finally {
       setIsSaving(false)
     }
   }
 
   return (
-    <form className="edit-form" onSubmit={handleSubmit(handleSave)}>
+    <form noValidate className="edit-form" onSubmit={handleSubmit(handleSave)}>
       <FieldGroup>
         <Field data-disabled>
-          <FieldLabel>{t('shared.fields.code')}</FieldLabel>
+          <FieldLabel>{t('common.fields.code')}</FieldLabel>
           <Input disabled value={organization.code} />
         </Field>
-        <Field>
-          <FieldLabel htmlFor="name">{t('shared.fields.name')}</FieldLabel>
-          <Input id="name" required {...register('name')} />
+        <Field data-invalid={errors.name !== undefined}>
+          <FieldLabel htmlFor="name">{t('common.fields.name')}</FieldLabel>
+          <Input
+            aria-invalid={errors.name !== undefined}
+            aria-describedby={errors.name ? 'OrganizationProfilePage-name-error' : undefined}
+            id="name"
+            required
+            {...register('name')}
+          />
+          <FieldError id="OrganizationProfilePage-name-error">{errors.name?.message}</FieldError>
         </Field>
-        <Field>
-          <FieldLabel htmlFor="description">{t('shared.fields.description')}</FieldLabel>
-          <Textarea id="description" required {...register('description')} />
+        <Field data-invalid={errors.description !== undefined}>
+          <FieldLabel htmlFor="description">{t('common.fields.description')}</FieldLabel>
+          <Textarea
+            aria-invalid={errors.description !== undefined}
+            aria-describedby={errors.description ? 'OrganizationProfilePage-description-error' : undefined}
+            id="description"
+            required
+            {...register('description')}
+          />
+          <FieldError id="OrganizationProfilePage-description-error">{errors.description?.message}</FieldError>
         </Field>
         <Controller
           control={control}
           name="defaultLanguage"
           render={({ field }) => (
-            <Field>
-              <FieldLabel>{t('shared.fields.defaultLanguage')}</FieldLabel>
+            <Field data-invalid={errors.defaultLanguage !== undefined}>
+              <FieldLabel htmlFor="OrganizationProfilePage-defaultLanguage">{t('common.fields.defaultLanguage')}</FieldLabel>
               <Select
+                onBlur={field.onBlur}
+                ref={field.ref}
+                aria-invalid={errors.defaultLanguage !== undefined}
+                aria-describedby={errors.defaultLanguage ? 'OrganizationProfilePage-defaultLanguage-error' : undefined}
+                id="OrganizationProfilePage-defaultLanguage"
                 onValueChange={field.onChange}
                 options={toTranslatedOptions(LANGUAGE_OPTIONS, t)}
                 value={field.value}
               />
+              <FieldError id="OrganizationProfilePage-defaultLanguage-error">{errors.defaultLanguage?.message}</FieldError>
             </Field>
           )}
         />
       </FieldGroup>
       <div className="form-actions">
-        <Button disabled={isSaving} type="submit">{t('shared.actions.save')}</Button>
+        <Button disabled={isSaving} type="submit">{t('common.actions.save')}</Button>
       </div>
     </form>
   )

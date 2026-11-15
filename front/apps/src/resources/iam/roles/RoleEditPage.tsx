@@ -1,4 +1,6 @@
+import { toTranslatedOptions } from '../../../shared/translatedOptions'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { createValidationErrorMap } from '../../../shared/validation'
 import type { ColumnDef, RowSelectionState, SortingState } from '@tanstack/react-table'
 import { ArrowLeft, Minus, Plus } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -15,7 +17,7 @@ import { Button } from '../../../components/ui/button'
 import { Card, CardContent } from '../../../components/ui/card'
 import { Checkbox } from '../../../components/ui/checkbox'
 import { DataTable } from '../../../components/ui/data-table'
-import { Field, FieldGroup, FieldLabel } from '../../../components/ui/form'
+import { Field, FieldError, FieldGroup, FieldLabel } from '../../../components/ui/form'
 import { Input } from '../../../components/ui/input'
 import { Select } from '../../../components/ui/select'
 import { Textarea } from '../../../components/ui/textarea'
@@ -27,7 +29,6 @@ import {
   PERMISSION_FILTER_VALUES,
   PERMISSION_MODULE_OPTIONS,
 } from '../permissions/permissionTypes'
-import { toTranslatedOptions } from '../permissions/permissionUi'
 import {
   assignRolePermissions,
   createRole,
@@ -102,7 +103,7 @@ export function RoleEditPage() {
   const canAssignPermissions = hasPermissionCode(permissions, IAM_PERMISSIONS.permissions.assign)
   const pageTitle = isCreate ? t('features.iam.roles.pages.create') : t('features.iam.roles.pages.edit')
   const permissionModuleOptions = useMemo(() => [
-    { label: t('shared.filters.all'), value: PERMISSION_FILTER_VALUES.all },
+    { label: t('common.filters.all'), value: PERMISSION_FILTER_VALUES.all },
     ...toTranslatedOptions(PERMISSION_MODULE_OPTIONS, t),
   ], [t])
   const filteredAvailablePermissions = useMemo(() => {
@@ -126,15 +127,15 @@ export function RoleEditPage() {
   const availablePermissionColumns = useMemo<ColumnDef<PermissionDto>[]>(() => [
     {
       accessorKey: 'module',
-      header: t('shared.fields.module'),
+      header: t('common.fields.module'),
     },
     {
       accessorKey: 'resource',
-      header: t('shared.fields.resource'),
+      header: t('common.fields.resource'),
     },
     {
       accessorKey: 'title',
-      header: t('shared.fields.title'),
+      header: t('common.fields.title'),
     },
     {
       cell: ({ row }) => (
@@ -143,31 +144,31 @@ export function RoleEditPage() {
         </span>
       ),
       enableSorting: false,
-      header: t('shared.fields.info'),
+      header: t('common.fields.info'),
       id: 'info',
     },
   ], [t])
   const assignedPermissionColumns = useMemo<ColumnDef<PermissionDto>[]>(() => [
     {
       accessorKey: 'module',
-      header: t('shared.fields.module'),
+      header: t('common.fields.module'),
     },
     {
       accessorKey: 'resource',
-      header: t('shared.fields.resource'),
+      header: t('common.fields.resource'),
     },
     {
       accessorKey: 'title',
-      header: t('shared.fields.title'),
+      header: t('common.fields.title'),
     },
     {
       accessorKey: 'isActive',
       cell: ({ row }) => (
         <Badge variant={row.original.isActive ? 'active' : 'inactive'}>
-          {row.original.isActive ? t('shared.status.active') : t('shared.status.inactive')}
+          {row.original.isActive ? t('common.status.active') : t('common.status.inactive')}
         </Badge>
       ),
-      header: t('shared.fields.isActive'),
+      header: t('common.fields.isActive'),
     },
   ], [t])
   const loadRole = useCallback(async () => {
@@ -179,7 +180,7 @@ export function RoleEditPage() {
       const loaded = await getRole(id)
       setRole(loaded)
     } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
+      notifyError(error, t('common.errors.generic'))
     }
   }, [id, isCreate, notifyError, t])
 
@@ -201,7 +202,7 @@ export function RoleEditPage() {
       setAvailableSelection({})
       setRolePermissionSelection({})
     } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
+      notifyError(error, t('common.errors.generic'))
     } finally {
       setIsPermissionLoading(false)
     }
@@ -246,11 +247,11 @@ export function RoleEditPage() {
     setIsPermissionSaving(true)
 
     try {
-      await assignRolePermissions(id, permissionIds)
-      showSuccess(t('features.iam.roles.notifications.permissionsAssigned'))
+      const message = await assignRolePermissions(id, permissionIds)
+      showSuccess(message)
       await loadPermissions()
     } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
+      notifyError(error, t('common.errors.generic'))
     } finally {
       setIsPermissionSaving(false)
     }
@@ -270,11 +271,11 @@ export function RoleEditPage() {
     setIsPermissionSaving(true)
 
     try {
-      await unassignRolePermissions(id, permissionIds)
-      showSuccess(t('features.iam.roles.notifications.permissionsUnassigned'))
+      const message = await unassignRolePermissions(id, permissionIds)
+      showSuccess(message)
       await loadPermissions()
     } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
+      notifyError(error, t('common.errors.generic'))
     } finally {
       setIsPermissionSaving(false)
     }
@@ -286,13 +287,13 @@ export function RoleEditPage() {
         <h1 className="page-title">{pageTitle}</h1>
         <Button onClick={() => navigate(APP_ROUTES.roles)} type="button" variant="outline">
           <ArrowLeft data-icon="inline-start" />
-          {t('shared.actions.back')}
+          {t('common.actions.back')}
         </Button>
       </div>
       <Card>
         <CardContent>
           {!isCreate && role === null ? (
-            <p className="page-subtitle">{t('shared.common.loading')}</p>
+            <p className="page-subtitle">{t('common.states.loading')}</p>
           ) : (
             <RoleEditForm
               key={role?.id ?? 'create'}
@@ -313,7 +314,7 @@ export function RoleEditPage() {
             <h2 className="card-title">{t('features.iam.permissions.name')}</h2>
             <div className="permission-filter-form">
               <Field>
-                <FieldLabel>{t('shared.fields.module')}</FieldLabel>
+                <FieldLabel>{t('common.fields.module')}</FieldLabel>
                 <Select
                   onValueChange={handlePermissionModuleChange}
                   options={permissionModuleOptions}
@@ -321,7 +322,7 @@ export function RoleEditPage() {
                 />
               </Field>
               <Field>
-                <FieldLabel htmlFor="permission-title-filter">{t('shared.fields.title')}</FieldLabel>
+                <FieldLabel htmlFor="permission-title-filter">{t('common.fields.title')}</FieldLabel>
                 <Input
                   id="permission-title-filter"
                   onChange={(event) => setPermissionTitleFilter(event.currentTarget.value)}
@@ -338,7 +339,7 @@ export function RoleEditPage() {
                   emptyText={t('features.iam.permissions.messages.empty')}
                   getRowId={(permission) => permission.id}
                   isLoading={isPermissionLoading}
-                  loadingText={t('shared.common.loading')}
+                  loadingText={t('common.states.loading')}
                   onRowSelectionChange={setAvailableSelection}
                   onSortingChange={setAvailableSorting}
                   rowSelection={availableSelection}
@@ -352,7 +353,7 @@ export function RoleEditPage() {
                   type="button"
                 >
                   <Plus data-icon="inline-start" />
-                  {t('shared.actions.add')}
+                  {t('common.actions.add')}
                 </Button>
                 <Button
                   disabled={isPermissionSaving || getSelectedIds(rolePermissionSelection).length === 0}
@@ -361,7 +362,7 @@ export function RoleEditPage() {
                   variant="outline"
                 >
                   <Minus data-icon="inline-start" />
-                  {t('shared.actions.remove')}
+                  {t('common.actions.remove')}
                 </Button>
               </div>
               <div className="permission-table-column">
@@ -372,7 +373,7 @@ export function RoleEditPage() {
                   emptyText={t('features.iam.permissions.messages.empty')}
                   getRowId={(permission) => permission.id}
                   isLoading={isPermissionLoading}
-                  loadingText={t('shared.common.loading')}
+                  loadingText={t('common.states.loading')}
                   onRowSelectionChange={setRolePermissionSelection}
                   onSortingChange={setRolePermissionSorting}
                   rowSelection={rolePermissionSelection}
@@ -398,12 +399,13 @@ function RoleEditForm({
   const { showSuccess } = useToast()
   const [isSaving, setIsSaving] = useState(false)
   const {
+    formState: { errors },
     control,
     handleSubmit,
     register,
   } = useForm<RoleForm>({
     defaultValues: role === null ? EMPTY_ROLE_FORM : toForm(role),
-    resolver: zodResolver(roleEditSchema),
+    resolver: zodResolver(roleEditSchema, { error: createValidationErrorMap(t) }),
   })
 
   async function handleSave(value: RoleForm) {
@@ -411,47 +413,67 @@ function RoleEditForm({
 
     try {
       if (isCreate) {
-        const created = await createRole(value)
-        showSuccess(t('features.iam.roles.notifications.created'))
+        const { data: created, message } = await createRole(value)
+        showSuccess(message)
         onCreated(created)
       } else if (role !== null) {
-        await updateRole(role.id, value)
-        showSuccess(t('features.iam.roles.notifications.updated'))
+        const message = await updateRole(role.id, value)
+        showSuccess(message)
         await onSaved()
       }
     } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
+      notifyError(error, t('common.errors.generic'))
     } finally {
       setIsSaving(false)
     }
   }
 
   return (
-    <form className="edit-form" onSubmit={handleSubmit(handleSave)}>
+    <form noValidate className="edit-form" onSubmit={handleSubmit(handleSave)}>
       <FieldGroup>
         <Controller
           control={control}
           name="organizationId"
           render={({ field }) => (
-            <Field data-disabled={!isCreate}>
-              <FieldLabel>{t('shared.fields.organization')}</FieldLabel>
+            <Field data-disabled={!isCreate} data-invalid={errors.organizationId !== undefined}>
+              <FieldLabel htmlFor="RoleEditPage-organizationId">{t('common.fields.organization')}</FieldLabel>
               <OrganizationSelect
+                onBlur={field.onBlur}
+                ref={field.ref}
+                aria-invalid={errors.organizationId !== undefined}
+                aria-describedby={errors.organizationId ? 'RoleEditPage-organizationId-error' : undefined}
+                id="RoleEditPage-organizationId"
                 clearable
                 disabled={!isCreate}
                 includeInactive
                 onValueChange={field.onChange}
                 value={field.value}
               />
+              <FieldError id="RoleEditPage-organizationId-error">{errors.organizationId?.message}</FieldError>
             </Field>
           )}
         />
-        <Field>
-          <FieldLabel htmlFor="name">{t('shared.fields.name')}</FieldLabel>
-          <Input id="name" required {...register('name')} />
+        <Field data-invalid={errors.name !== undefined}>
+          <FieldLabel htmlFor="name">{t('common.fields.name')}</FieldLabel>
+          <Input
+            aria-invalid={errors.name !== undefined}
+            aria-describedby={errors.name ? 'RoleEditPage-name-error' : undefined}
+            id="name"
+            required
+            {...register('name')}
+          />
+          <FieldError id="RoleEditPage-name-error">{errors.name?.message}</FieldError>
         </Field>
-        <Field>
-          <FieldLabel htmlFor="description">{t('shared.fields.description')}</FieldLabel>
-          <Textarea id="description" required {...register('description')} />
+        <Field data-invalid={errors.description !== undefined}>
+          <FieldLabel htmlFor="description">{t('common.fields.description')}</FieldLabel>
+          <Textarea
+            aria-invalid={errors.description !== undefined}
+            aria-describedby={errors.description ? 'RoleEditPage-description-error' : undefined}
+            id="description"
+            required
+            {...register('description')}
+          />
+          <FieldError id="RoleEditPage-description-error">{errors.description?.message}</FieldError>
         </Field>
         <Controller
           control={control}
@@ -459,7 +481,7 @@ function RoleEditForm({
           render={({ field }) => (
             <Checkbox
               checked={field.value}
-              label={t('shared.fields.isActive')}
+              label={t('common.fields.isActive')}
               onCheckedChange={field.onChange}
             />
           )}
@@ -470,7 +492,7 @@ function RoleEditForm({
           render={({ field }) => (
             <Checkbox
               checked={field.value}
-              label={t('shared.fields.isDefault')}
+              label={t('common.fields.isDefault')}
               onCheckedChange={field.onChange}
             />
           )}
@@ -478,7 +500,7 @@ function RoleEditForm({
       </FieldGroup>
       <div className="form-actions">
         <Button disabled={isSaving} type="submit">
-          {isCreate ? t('shared.actions.create') : t('shared.actions.save')}
+          {isCreate ? t('common.actions.create') : t('common.actions.save')}
         </Button>
       </div>
     </form>

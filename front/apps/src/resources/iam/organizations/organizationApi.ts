@@ -7,7 +7,7 @@ import {
   postIamJson,
   putIamJson,
 } from '../../../data/httpClient'
-import { ensureResultSuccess, unwrapResult } from '../../../data/result'
+import { getApiSuccessText, type ApiMutationResult, unwrapResult } from '../../../data/result'
 import type { PagedResultDto } from '../../../shared/pagination'
 import {
   ORGANIZATION_QUERY_PARAMS,
@@ -84,13 +84,13 @@ export function toOrganizationCreateRequest(data: OrganizationCreateForm): Organ
   }
 }
 
-export async function createOrganization(data: OrganizationCreateForm): Promise<OrganizationDto> {
+export async function createOrganization(data: OrganizationCreateForm): Promise<ApiMutationResult<OrganizationDto>> {
   const response = await postIamJson(
     API_PATHS.iam.organizations.list,
     toOrganizationCreateRequest(data),
   )
 
-  return unwrapResult<OrganizationDto>(response)
+  return { data: unwrapResult<OrganizationDto>(response), message: getApiSuccessText(response) }
 }
 
 export async function getOrganizations(
@@ -127,29 +127,29 @@ export async function getOwnOrganization(): Promise<OrganizationDto> {
   return unwrapResult<OrganizationDto>(response)
 }
 
-export async function updateOrganization(id: string, request: OrganizationUpdateRequest): Promise<void> {
+export async function updateOrganization(id: string, request: OrganizationUpdateRequest): Promise<string> {
   const response = await putIamJson(API_PATHS.iam.organizations.byId(id), request)
 
-  ensureResultSuccess(response)
+  return getApiSuccessText(response)
 }
 
-export async function updateOwnOrganization(request: OrganizationUpdateRequest): Promise<void> {
+export async function updateOwnOrganization(request: OrganizationUpdateRequest): Promise<string> {
   const response = await putIamJson(API_PATHS.iam.organizations.profile, request)
 
-  ensureResultSuccess(response)
+  return getApiSuccessText(response)
 }
 
 export async function updateOrganizationCode(
   id: string,
   request: OrganizationCodeUpdateRequest,
-): Promise<void> {
+): Promise<string> {
   const response = await patchIamJson(API_PATHS.iam.organizations.code(id), request)
 
-  ensureResultSuccess(response)
+  return getApiSuccessText(response)
 }
 
-export async function deleteOrganization(id: string): Promise<void> {
+export async function deleteOrganization(id: string): Promise<string> {
   const response = await deleteIamJson(API_PATHS.iam.organizations.byId(id))
 
-  ensureResultSuccess(response)
+  return getApiSuccessText(response)
 }

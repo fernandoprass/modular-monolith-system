@@ -1,4 +1,6 @@
+import { toTranslatedOptions } from '../../../shared/translatedOptions'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { createValidationErrorMap } from '../../../shared/validation'
 import { ArrowLeft } from 'lucide-react'
 import { useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
@@ -12,7 +14,7 @@ import { useAuth, useNotifyError } from '../../../auth/AuthProvider'
 import { Button } from '../../../components/ui/button'
 import { Card, CardContent } from '../../../components/ui/card'
 import { Checkbox } from '../../../components/ui/checkbox'
-import { Field, FieldGroup, FieldLabel } from '../../../components/ui/form'
+import { Field, FieldError, FieldGroup, FieldLabel } from '../../../components/ui/form'
 import { Input } from '../../../components/ui/input'
 import { Select } from '../../../components/ui/select'
 import { Textarea } from '../../../components/ui/textarea'
@@ -24,7 +26,6 @@ import {
   EMAIL_MODULE_OPTIONS,
   type EmailCreateForm,
 } from './emailTypes'
-import { toTranslatedEmailOptions } from './emailUi'
 
 const emailCreateSchema = z.object({
   body: z.string().trim().min(1),
@@ -57,19 +58,19 @@ export function EmailCreatePage() {
       templateKey: '',
       userId: user?.id ?? '',
     },
-    resolver: zodResolver(emailCreateSchema),
+    resolver: zodResolver(emailCreateSchema, { error: createValidationErrorMap(t) }),
   })
 
   async function handleSave(value: EmailCreateForm) {
     setIsSaving(true)
 
     try {
-      const created = await createEmail(value)
+      const { data: created, message } = await createEmail(value)
 
-      showSuccess(t('features.courier.emails.notifications.created'))
+      showSuccess(message)
       navigate(APP_ROUTES.emailView(created.id))
     } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
+      notifyError(error, t('common.errors.generic'))
     } finally {
       setIsSaving(false)
     }
@@ -81,21 +82,30 @@ export function EmailCreatePage() {
         <h1 className="page-title">{t('features.courier.emails.pages.create')}</h1>
         <Button onClick={() => navigate(APP_ROUTES.emails)} type="button" variant="outline">
           <ArrowLeft data-icon="inline-start" />
-          {t('shared.actions.back')}
+          {t('common.actions.back')}
         </Button>
       </div>
       <Card>
         <CardContent>
-          <form className="edit-form" onSubmit={form.handleSubmit(handleSave)}>
+          <form noValidate className="edit-form" onSubmit={form.handleSubmit(handleSave)}>
             <FieldGroup>
               <div className="form-row-two">
                 <Controller
                   control={form.control}
                   name="organizationId"
                   render={({ field }) => (
-                    <Field>
-                      <FieldLabel>{t('shared.fields.organization')}</FieldLabel>
-                      <OrganizationSelect onValueChange={field.onChange} value={field.value} />
+                    <Field data-invalid={form.formState.errors.organizationId !== undefined}>
+                      <FieldLabel htmlFor="EmailCreatePage-organizationId">{t('common.fields.organization')}</FieldLabel>
+                      <OrganizationSelect
+                        onBlur={field.onBlur}
+                        ref={field.ref}
+                        aria-invalid={form.formState.errors.organizationId !== undefined}
+                        aria-describedby={form.formState.errors.organizationId ? 'EmailCreatePage-organizationId-error' : undefined}
+                        id="EmailCreatePage-organizationId"
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      />
+                      <FieldError id="EmailCreatePage-organizationId-error">{form.formState.errors.organizationId?.message}</FieldError>
                     </Field>
                   )}
                 />
@@ -103,9 +113,18 @@ export function EmailCreatePage() {
                   control={form.control}
                   name="userId"
                   render={({ field }) => (
-                    <Field>
-                      <FieldLabel>{t('shared.fields.user')}</FieldLabel>
-                      <UserSelect onValueChange={field.onChange} value={field.value} />
+                    <Field data-invalid={form.formState.errors.userId !== undefined}>
+                      <FieldLabel htmlFor="EmailCreatePage-userId">{t('common.fields.user')}</FieldLabel>
+                      <UserSelect
+                        onBlur={field.onBlur}
+                        ref={field.ref}
+                        aria-invalid={form.formState.errors.userId !== undefined}
+                        aria-describedby={form.formState.errors.userId ? 'EmailCreatePage-userId-error' : undefined}
+                        id="EmailCreatePage-userId"
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      />
+                      <FieldError id="EmailCreatePage-userId-error">{form.formState.errors.userId?.message}</FieldError>
                     </Field>
                   )}
                 />
@@ -115,13 +134,19 @@ export function EmailCreatePage() {
                   control={form.control}
                   name="module"
                   render={({ field }) => (
-                    <Field>
-                      <FieldLabel>{t('shared.fields.module')}</FieldLabel>
+                    <Field data-invalid={form.formState.errors.module !== undefined}>
+                      <FieldLabel htmlFor="EmailCreatePage-module">{t('common.fields.module')}</FieldLabel>
                       <Select
+                        onBlur={field.onBlur}
+                        ref={field.ref}
+                        aria-invalid={form.formState.errors.module !== undefined}
+                        aria-describedby={form.formState.errors.module ? 'EmailCreatePage-module-error' : undefined}
+                        id="EmailCreatePage-module"
                         onValueChange={field.onChange}
-                        options={toTranslatedEmailOptions(EMAIL_MODULE_OPTIONS, t)}
+                        options={toTranslatedOptions(EMAIL_MODULE_OPTIONS, t)}
                         value={field.value}
                       />
+                      <FieldError id="EmailCreatePage-module-error">{form.formState.errors.module?.message}</FieldError>
                     </Field>
                   )}
                 />
@@ -129,34 +154,70 @@ export function EmailCreatePage() {
                   control={form.control}
                   name="feature"
                   render={({ field }) => (
-                    <Field>
-                      <FieldLabel>{t('shared.fields.feature')}</FieldLabel>
+                    <Field data-invalid={form.formState.errors.feature !== undefined}>
+                      <FieldLabel htmlFor="EmailCreatePage-feature">{t('common.fields.feature')}</FieldLabel>
                       <Select
+                        onBlur={field.onBlur}
+                        ref={field.ref}
+                        aria-invalid={form.formState.errors.feature !== undefined}
+                        aria-describedby={form.formState.errors.feature ? 'EmailCreatePage-feature-error' : undefined}
+                        id="EmailCreatePage-feature"
                         onValueChange={field.onChange}
-                        options={toTranslatedEmailOptions(EMAIL_FEATURE_OPTIONS, t)}
+                        options={toTranslatedOptions(EMAIL_FEATURE_OPTIONS, t)}
                         value={field.value}
                       />
+                      <FieldError id="EmailCreatePage-feature-error">{form.formState.errors.feature?.message}</FieldError>
                     </Field>
                   )}
                 />
               </div>
               <div className="form-row-two">
-                <Field>
-                  <FieldLabel htmlFor="email-template-key">{t('shared.fields.templateKey')}</FieldLabel>
-                  <Input id="email-template-key" required {...form.register('templateKey')} />
+                <Field data-invalid={form.formState.errors.templateKey !== undefined}>
+                  <FieldLabel htmlFor="email-template-key">{t('common.fields.templateKey')}</FieldLabel>
+                  <Input
+                    aria-invalid={form.formState.errors.templateKey !== undefined}
+                    aria-describedby={form.formState.errors.templateKey ? 'EmailCreatePage-templateKey-error' : undefined}
+                    id="email-template-key"
+                    required
+                    {...form.register('templateKey')}
+                  />
+                  <FieldError id="EmailCreatePage-templateKey-error">{form.formState.errors.templateKey?.message}</FieldError>
                 </Field>
-                <Field>
-                  <FieldLabel htmlFor="email-recipient">{t('shared.fields.recipient')}</FieldLabel>
-                  <Input id="email-recipient" required type="email" {...form.register('recipient')} />
+                <Field data-invalid={form.formState.errors.recipient !== undefined}>
+                  <FieldLabel htmlFor="email-recipient">{t('common.fields.recipient')}</FieldLabel>
+                  <Input
+                    aria-invalid={form.formState.errors.recipient !== undefined}
+                    aria-describedby={form.formState.errors.recipient ? 'EmailCreatePage-recipient-error' : undefined}
+                    id="email-recipient"
+                    required
+                    type="email"
+                    {...form.register('recipient')}
+                  />
+                  <FieldError id="EmailCreatePage-recipient-error">{form.formState.errors.recipient?.message}</FieldError>
                 </Field>
               </div>
-              <Field>
-                <FieldLabel htmlFor="email-subject">{t('shared.fields.subject')}</FieldLabel>
-                <Input id="email-subject" required {...form.register('subject')} />
+              <Field data-invalid={form.formState.errors.subject !== undefined}>
+                <FieldLabel htmlFor="email-subject">{t('common.fields.subject')}</FieldLabel>
+                <Input
+                  aria-invalid={form.formState.errors.subject !== undefined}
+                  aria-describedby={form.formState.errors.subject ? 'EmailCreatePage-subject-error' : undefined}
+                  id="email-subject"
+                  required
+                  {...form.register('subject')}
+                />
+                <FieldError id="EmailCreatePage-subject-error">{form.formState.errors.subject?.message}</FieldError>
               </Field>
-              <Field>
-                <FieldLabel htmlFor="email-body">{t('shared.fields.body')}</FieldLabel>
-                <Textarea className="email-body-input" id="email-body" required {...form.register('body')} />
+              <Field data-invalid={form.formState.errors.body !== undefined}>
+                <FieldLabel htmlFor="email-body">{t('common.fields.body')}</FieldLabel>
+                <Textarea
+                  aria-invalid={form.formState.errors.body !== undefined}
+                  aria-describedby={form.formState.errors.body ? 'EmailCreatePage-body-error' : undefined}
+                  className="email-body-input"
+                  id="email-body"
+                  required
+                  {...form.register('body')}
+                />
+                <FieldError id="EmailCreatePage-body-error">{form.formState.errors.body?.message}</FieldError>
               </Field>
               <Controller
                 control={form.control}
@@ -164,7 +225,7 @@ export function EmailCreatePage() {
                 render={({ field }) => (
                   <Checkbox
                     checked={field.value}
-                    label={t('shared.fields.isHtml')}
+                    label={t('common.fields.isHtml')}
                     onCheckedChange={field.onChange}
                   />
                 )}
@@ -172,7 +233,7 @@ export function EmailCreatePage() {
             </FieldGroup>
             <div className="form-actions">
               <Button disabled={isSaving} type="submit">
-                {t('shared.actions.create')}
+                {t('common.actions.create')}
               </Button>
             </div>
           </form>

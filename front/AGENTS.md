@@ -37,7 +37,7 @@ Prefer shadcn MCP examples before guessing component usage.
 
 ## SKILLS
 
-Read `.agent/skill` if it exists.
+Read `.agents/skills/` if it exists.
 
 If it does not exist, say so briefly and continue.
 
@@ -264,6 +264,14 @@ Prefer depending on `organizationId` instead of `user?.organizationId` in callba
 
 Use React Hook Form plus Zod for create, edit, profile, and modal forms.
 
+Pass `createValidationErrorMap(t)` from `shared/validation.ts` to every Zod resolver.
+Use the active `t` from `useTranslate()`.
+Keep resource-specific validation messages in that resource's translation keys.
+Backend business errors must retain the messages returned by the API.
+Use `noValidate` on Zod-owned forms, render `FieldError`, and connect errors with `aria-describedby`.
+Set `data-invalid` on the field and `aria-invalid` on its control.
+Required and conditional rules must be enforced by the schema, not just native input attributes.
+
 Use `Controller` for controlled shadcn/Radix/custom inputs:
 - `Select`
 - `Checkbox`
@@ -277,7 +285,7 @@ Good:
 ```tsx
 const form = useForm<UserForm>({
   defaultValues: EMPTY_USER_FORM,
-  resolver: zodResolver(userSchema),
+  resolver: zodResolver(userSchema, { error: createValidationErrorMap(t) }),
 })
 
 <Input id="name" required {...form.register('name')} />
@@ -305,6 +313,7 @@ Example:
 export const LANGUAGE_CODES = {
   english: 'en-US',
   portugueseBrazil: 'pt-BR',
+  french: 'fr-FR',
   spanish: 'es-ES',
 } as const
 ```
@@ -369,7 +378,7 @@ useEffect(() => {
 }, [loadRole])
 
 return role === null
-  ? <p>{t('shared.common.loading')}</p>
+  ? <p>{t('common.states.loading')}</p>
   : <RoleEditForm key={role.id} role={role} />
 ```
 
@@ -377,9 +386,10 @@ Good:
 
 ```ts
 function RoleEditForm({ role }: RoleEditFormProps) {
+  const t = useTranslate()
   const form = useForm<RoleForm>({
     defaultValues: toForm(role),
-    resolver: zodResolver(roleSchema),
+    resolver: zodResolver(roleSchema, { error: createValidationErrorMap(t) }),
   })
 
   async function handleSave(value: RoleForm) {
@@ -531,7 +541,7 @@ User-facing action labels must use translation keys.
 Good:
 
 ```tsx
-{t('shared.actions.add')}
+{t('common.actions.add')}
 ```
 
 Avoid:
@@ -695,6 +705,7 @@ The app should be ready to add:
 
 ```text
 pt-BR
+fr-FR
 es-ES
 ```
 
@@ -720,21 +731,21 @@ Group keys by module and resource.
 Example:
 
 ```text
-resources.iam.users.fields.email
-resources.iam.users.actions.create
-resources.iam.roles.notifications.created
-resources.iam.parameters.fields.overrideType
+features.iam.users.pages.create
+features.iam.users.messages.organizationRequired
+features.iam.roles.messages.deleteConfirm
+features.iam.parameters.pages.organizationSettings
 ```
 
-Shared text should live under shared keys.
+Reusable UI text belongs in common.ts under common.* translation keys. This namespace is separate from the backend Shared module.
 
 Example:
 
 ```text
-shared.actions.save
-shared.actions.cancel
-shared.status.active
-shared.status.inactive
+common.actions.save
+common.actions.cancel
+common.status.active
+common.status.inactive
 ```
 
 Do not use backend enum numeric values directly as labels.
@@ -749,7 +760,56 @@ Recommended folder:
 front/apps/src/app/i18n
 ```
 
-If a component needs text, it should use the app translation function.
+Locale folders use module numbers matching the backend:
+
+```text
+en-US/
+  app.ts
+  common.ts
+  enums.ts
+  02.sentinel.ts
+  03.iam.ts
+  04.courier.ts
+  index.ts
+```
+
+Keep module, core feature, and resource labels in `app.ts`.
+Keep all enum translations in `enums.ts`; enum values remain in domain/type files.
+Group enum translations by backend definition ownership with numbered module comments.
+An enum used by another module stays in its owning module's section.
+Use named `*_ENUM` exports, `*_ENUM_KEYS` translation maps, and `get...Enum` helpers.
+If splitting becomes necessary, keep `enums.ts` as the re-export entry point.
+Keep module-only messages and non-enum labels in their numbered module file.
+Share labels only when their meaning matches, not merely because the English text matches.
+Keep existing translation keys stable when reorganizing files.
+
+Components must use `useTranslate()` rather than the default `translate` function.
+Use `Translate` for translation callbacks and `PlainTranslationKey` for labels without variables.
+Translation keys and required interpolation variables are derived from English.
+Do not bypass these checks with arbitrary strings or type assertions.
+
+New dictionaries must satisfy `MessageDictionary` and be registered in `LOCALE_DICTIONARIES`.
+Run `npm run check:i18n` to validate dictionary keys and interpolation placeholders; the build also runs this check.
+Run `npm test` for the frontend regression checks.
+English is currently the only registered UI dictionary.
+Unsupported locales and missing translations fall back to English.
+Missing keys warn once per locale/key in development.
+
+Use `LANGUAGE_CODES` and `LanguageCode` from `shared/languages.ts`.
+`LANGUAGE_OPTIONS` lists backend-supported languages for user/organization preferences and template content.
+`ALL_LANGUAGE_OPTIONS` also includes planned languages such as French.
+`UI_LANGUAGE_OPTIONS` includes only languages with registered UI dictionaries.
+Adding a preference language does not make its UI translation available.
+
+The UI locale follows the signed-in user's preference, resolved through `resolveLocale()`.
+Use English before login and for unavailable locales.
+After a successful profile save, synchronize the saved preference through the auth provider.
+
+Use `useLocale()` when a component needs the active UI locale.
+Keep HTML `lang` synchronized in the app provider.
+Use the shared date formatter and the resolved UI locale for display formatting.
+Numeric translation variables are formatted automatically; pass counts as numbers.
+Keep identifiers and API/form values separate from localized display values.
 
 Do not concatenate translated strings unless there is no better option.
 

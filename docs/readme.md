@@ -35,6 +35,7 @@ The files are grouped by prefix:
 | `01.shared.entities.md` | Explains Shared base entities, audited entities, parameters, parameter overrides, and parameter relationships. |
 | `01.shared.enums.md` | Explains Shared enums such as parameter type, override type, audit privacy level, and system log status/level. |
 | `01.shared.exception-handling.md` | Explains shared API exception responses, system log publishing, request metadata, and retention policies. |
+| [01.shared.messages.md](01.shared.messages.md) | Explains translated business messages, CRUD success helpers, module ownership, and frontend notifications. |
 | `01.shared.repositories.md` | Explains the shared repository pattern, base repository, query repositories, ownership checks, and testing guidance. |
 | `01.shared.uow.md` | Explains Unit of Work, automatic audit field population, transaction boundaries, and module-specific UoW implementations. |
 

@@ -6,7 +6,7 @@ import {
   postCourierJson,
   putCourierJson,
 } from '../../../data/httpClient'
-import { ensureResultSuccess, unwrapResult } from '../../../data/result'
+import { getApiSuccessText, type ApiMutationResult, unwrapResult } from '../../../data/result'
 import type { PagedResultDto } from '../../../shared/pagination'
 import {
   NOTIFICATION_SEVERITIES,
@@ -245,48 +245,48 @@ export async function getTemplate(id: string): Promise<TemplateDto> {
   return normalizeTemplateDto(unwrapResult<unknown>(response))
 }
 
-export async function createTemplate(request: TemplateForm): Promise<TemplateDto> {
+export async function createTemplate(request: TemplateForm): Promise<ApiMutationResult<TemplateDto>> {
   const response = await postCourierJson(API_PATHS.courier.templates.list, toTemplateRequest(request))
 
-  return normalizeTemplateDto(unwrapResult<unknown>(response))
+  return { data: normalizeTemplateDto(unwrapResult<unknown>(response)), message: getApiSuccessText(response) }
 }
 
-export async function updateTemplate(id: string, request: TemplateForm): Promise<void> {
+export async function updateTemplate(id: string, request: TemplateForm): Promise<string> {
   const response = await putCourierJson(API_PATHS.courier.templates.byId(id), toTemplateRequest(request))
 
-  ensureResultSuccess(response)
+  return getApiSuccessText(response)
 }
 
-export async function deleteTemplate(id: string): Promise<void> {
+export async function deleteTemplate(id: string): Promise<string> {
   const response = await deleteCourierJson(API_PATHS.courier.templates.byId(id))
 
-  ensureResultSuccess(response)
+  return getApiSuccessText(response)
 }
 
-export async function addTemplateTranslation(id: string, request: TemplateTranslationForm): Promise<void> {
+export async function addTemplateTranslation(id: string, request: TemplateTranslationForm): Promise<string> {
   const response = await postCourierJson(
     API_PATHS.courier.templates.translations(id),
     toTranslationRequest(request),
   )
 
-  ensureResultSuccess(response)
+  return getApiSuccessText(response)
 }
 
 export async function updateTemplateTranslation(
   id: string,
   language: string,
   request: TemplateTranslationForm,
-): Promise<void> {
+): Promise<string> {
   const response = await putCourierJson(
     API_PATHS.courier.templates.translation(id, language),
     toTranslationRequest(request),
   )
 
-  ensureResultSuccess(response)
+  return getApiSuccessText(response)
 }
 
-export async function deleteTemplateTranslation(id: string, language: string): Promise<void> {
+export async function deleteTemplateTranslation(id: string, language: string): Promise<string> {
   const response = await deleteCourierJson(API_PATHS.courier.templates.translation(id, language))
 
-  ensureResultSuccess(response)
+  return getApiSuccessText(response)
 }

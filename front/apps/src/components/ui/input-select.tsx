@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useTranslate } from '../../app/i18n/i18n';
 import type { SelectOption, SetState } from "../../types";
 import { CheckIcon, ChevronDown, X } from "lucide-react";
 import { cn } from "../../lib/utils";
@@ -48,7 +49,7 @@ export const InputSelect: React.FC<{
   options,
   value = "",
   onValueChange,
-  placeholder = "Select...",
+  placeholder,
   clearable = false,
   disabled = false,
   className,
@@ -57,6 +58,7 @@ export const InputSelect: React.FC<{
   children,
   ...restProps
 }) => {
+  const t = useTranslate();
   const [selectedValue, setSelectedValue] = React.useState<string>(value);
   const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
 
@@ -82,7 +84,7 @@ export const InputSelect: React.FC<{
         {children({
           options,
           onValueChange,
-          placeholder,
+          placeholder: placeholder ?? t('common.lookup.select'),
           clearable,
           disabled,
           selectedValue,
@@ -102,11 +104,11 @@ export const InputSelect: React.FC<{
         <Command shouldFilter={false}>
           <CommandInput
             onValueChange={onSearchChange}
-            placeholder="Search..."
+            placeholder={t('common.lookup.search')}
             value={searchValue}
           />
           <CommandList className="max-h-[unset] overflow-y-hidden">
-            <CommandEmpty>No results found.</CommandEmpty>
+            <CommandEmpty>{t('common.lookup.empty')}</CommandEmpty>
             <CommandGroup className="max-h-[16rem] min-h-[10rem] overflow-y-auto">
               {options.map((option) => {
                 const isSelected = selectedValue === option.value;
@@ -142,7 +144,7 @@ InputSelect.displayName = "InputSelect";
 
 export const InputSelectTrigger = React.forwardRef<
   HTMLButtonElement,
-  InputSelectProvided & {
+  InputSelectProvided & Pick<React.ComponentProps<"button">, "id" | "aria-invalid" | "aria-describedby" | "onBlur"> & {
     className?: string;
     children?: (v: SelectOption) => React.ReactNode;
     style?: React.CSSProperties;
@@ -160,6 +162,10 @@ export const InputSelectTrigger = React.forwardRef<
       className,
       style,
       children,
+      id,
+      'aria-invalid': ariaInvalid,
+      'aria-describedby': ariaDescribedBy,
+      onBlur,
     },
     ref,
   ) => {
@@ -169,6 +175,10 @@ export const InputSelectTrigger = React.forwardRef<
 
     return (
       <Button
+        id={id}
+        aria-invalid={ariaInvalid}
+        aria-describedby={ariaDescribedBy}
+        onBlur={onBlur}
         ref={ref}
         onClick={onTogglePopover}
         variant="outline"

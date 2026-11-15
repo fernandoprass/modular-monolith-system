@@ -5,7 +5,7 @@ import {
   getCourierJsonWithQuery,
   patchCourierJson,
 } from '../../../data/httpClient'
-import { unwrapResult } from '../../../data/result'
+import { getApiSuccessText, unwrapResult } from '../../../data/result'
 import type { PagedResultDto } from '../../../shared/pagination'
 import {
   NOTIFICATION_FILTER_VALUES,
@@ -146,10 +146,14 @@ export async function getUnreadNotificationCount(): Promise<number> {
   return readNumber({ count: unwrapResult<unknown>(response) }, 'count')
 }
 
-export async function markNotificationAsRead(id: string): Promise<void> {
-  await patchCourierJson(API_PATHS.courier.notifications.read(id), {})
+export async function markNotificationAsRead(id: string): Promise<string> {
+  const response = await patchCourierJson(API_PATHS.courier.notifications.read(id), {})
+
+  return getApiSuccessText(response)
 }
 
-export async function deleteNotification(id: string): Promise<void> {
-  await deleteCourierJson(API_PATHS.courier.notifications.byId(id))
+export async function deleteNotification(id: string): Promise<string> {
+  const response = await deleteCourierJson(API_PATHS.courier.notifications.byId(id))
+
+  return getApiSuccessText(response)
 }

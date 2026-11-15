@@ -1,6 +1,6 @@
 import { API_PATHS } from '../../../data/apiPaths'
 import { deleteIamJson, deleteIamJsonWithBody, getIamJson, getIamJsonWithQuery, postIamJson, putIamJson } from '../../../data/httpClient'
-import { ensureResultSuccess, unwrapResult } from '../../../data/result'
+import { getApiSuccessText, type ApiMutationResult, unwrapResult } from '../../../data/result'
 import type { PermissionDto } from '../../../shared/permissions'
 import { PERMISSION_FILTER_VALUES } from '../permissions/permissionTypes'
 import {
@@ -162,22 +162,22 @@ export async function getRole(id: string): Promise<RoleDto> {
   return normalizeRoleDto(unwrapResult<unknown>(response))
 }
 
-export async function createRole(request: RoleForm): Promise<RoleDto> {
+export async function createRole(request: RoleForm): Promise<ApiMutationResult<RoleDto>> {
   const response = await postIamJson(API_PATHS.iam.roles.list, toRoleCreateRequest(request))
 
-  return normalizeRoleDto(unwrapResult<RoleDto>(response))
+  return { data: normalizeRoleDto(unwrapResult<RoleDto>(response)), message: getApiSuccessText(response) }
 }
 
-export async function updateRole(id: string, request: RoleForm): Promise<void> {
+export async function updateRole(id: string, request: RoleForm): Promise<string> {
   const response = await putIamJson(API_PATHS.iam.roles.byId(id), toRoleUpdateRequest(request))
 
-  ensureResultSuccess(response)
+  return getApiSuccessText(response)
 }
 
-export async function deleteRole(id: string): Promise<void> {
+export async function deleteRole(id: string): Promise<string> {
   const response = await deleteIamJson(API_PATHS.iam.roles.byId(id))
 
-  ensureResultSuccess(response)
+  return getApiSuccessText(response)
 }
 
 export async function getRolePermissions(roleId: string, module: string): Promise<PermissionDto[]> {
@@ -198,20 +198,20 @@ export async function getAvailableRolePermissions(roleId: string, module: string
   return unwrapResult<unknown[]>(response).map(normalizePermissionDto)
 }
 
-export async function assignRolePermissions(roleId: string, permissionIds: string[]): Promise<void> {
+export async function assignRolePermissions(roleId: string, permissionIds: string[]): Promise<string> {
   const response = await postIamJson(API_PATHS.iam.roles.permissionAssign, {
     PermissionIds: permissionIds,
     RoleId: roleId,
   })
 
-  ensureResultSuccess(response)
+  return getApiSuccessText(response)
 }
 
-export async function unassignRolePermissions(roleId: string, permissionIds: string[]): Promise<void> {
+export async function unassignRolePermissions(roleId: string, permissionIds: string[]): Promise<string> {
   const response = await deleteIamJsonWithBody(API_PATHS.iam.roles.permissionUnassign, {
     PermissionIds: permissionIds,
     RoleId: roleId,
   })
 
-  ensureResultSuccess(response)
+  return getApiSuccessText(response)
 }

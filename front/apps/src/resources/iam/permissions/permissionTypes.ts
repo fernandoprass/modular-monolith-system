@@ -47,12 +47,12 @@ export const PERMISSION_RESOURCE_OPTIONS = [
 ] as const
 
 export const PERMISSION_ACTION_OPTIONS = [
-  { labelKey: 'shared.actions.read', value: 'read' },
-  { labelKey: 'shared.actions.write', value: 'write' },
-  { labelKey: 'shared.actions.delete', value: 'delete' },
-  { labelKey: 'shared.actions.viewAccess', value: 'viewaccess' },
-  { labelKey: 'shared.actions.viewPermissions', value: 'viewpermissions' },
-  { labelKey: 'shared.actions.saveOverride', value: 'saveoverride' },
+  { labelKey: 'common.actions.read', value: 'read' },
+  { labelKey: 'common.actions.write', value: 'write' },
+  { labelKey: 'common.actions.delete', value: 'delete' },
+  { labelKey: 'common.actions.viewAccess', value: 'viewaccess' },
+  { labelKey: 'common.actions.viewPermissions', value: 'viewpermissions' },
+  { labelKey: 'common.actions.saveOverride', value: 'saveoverride' },
 ] as const
 
 export type PermissionSearchForm = {

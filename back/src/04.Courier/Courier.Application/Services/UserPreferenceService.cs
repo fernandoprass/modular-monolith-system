@@ -1,12 +1,13 @@
 using Courier.Application.Contracts;
+using Courier.Domain;
 using Courier.Domain.DTOs.Requests;
 using Courier.Domain.DTOs.Responses;
 using Courier.Domain.Entities;
 using Courier.Domain.Interfaces.Repositories;
+using Courier.Domain.Messages;
 using Courier.Domain.ValueObjects;
 using Myce.Response;
 using Shared.Application.Contracts;
-using Shared.Domain.Messages;
 
 namespace Courier.Application.Services;
 
@@ -67,7 +68,7 @@ public class UserPreferenceService(
 
       await _userPreferenceRepository.UpdateAsync(preference, cancellationToken);
 
-      return Result.Success(new SuccessInfo());
+      return Result.Success(CourierTranslatedMessagesProvider.Instance.UpdatedSuccess(CourierConst.Message.Variable.UserPreference));
    }
 
    private static bool IsSameTemplate(UserPreferenceTemplate template, string module, string key)

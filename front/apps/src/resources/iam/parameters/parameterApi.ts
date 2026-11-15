@@ -1,6 +1,6 @@
 import { API_PATHS } from '../../../data/apiPaths'
 import { deleteIamJson, getIamJson, getIamJsonWithQuery, putIamJson } from '../../../data/httpClient'
-import { ensureResultSuccess, unwrapResult } from '../../../data/result'
+import { getApiSuccessText, unwrapResult } from '../../../data/result'
 import type { PagedResultDto } from '../../../shared/pagination'
 import {
   PARAMETER_FILTER_VALUES,
@@ -264,20 +264,20 @@ function toParameterOwnerUpdateRequest(value: string): ParameterOwnerUpdateReque
   }
 }
 
-export async function updateParameter(id: string, request: ParameterForm): Promise<void> {
+export async function updateParameter(id: string, request: ParameterForm): Promise<string> {
   const response = await putIamJson(API_PATHS.iam.parameters.byId(id), toParameterUpdateRequest(request))
 
-  ensureResultSuccess(response)
+  return getApiSuccessText(response)
 }
 
-export async function saveParameterOverride(id: string, value: string): Promise<void> {
+export async function saveParameterOverride(id: string, value: string): Promise<string> {
   const response = await putIamJson(API_PATHS.iam.parameters.override(id), toParameterOwnerUpdateRequest(value))
 
-  ensureResultSuccess(response)
+  return getApiSuccessText(response)
 }
 
-export async function deleteParameterOverride(parameterOverrideId: string): Promise<void> {
+export async function deleteParameterOverride(parameterOverrideId: string): Promise<string> {
   const response = await deleteIamJson(API_PATHS.iam.parameters.override(parameterOverrideId))
 
-  ensureResultSuccess(response)
+  return getApiSuccessText(response)
 }

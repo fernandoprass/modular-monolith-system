@@ -1,5 +1,6 @@
 import { CONFIG } from '../app/config'
 import { tokenStorage } from '../auth/tokenStorage'
+import { LANGUAGE_OPTIONS, normalizeLanguageCode } from '../shared/languages'
 import { ApiResultError, isApiResult } from './result'
 
 type RequestOptions = {
@@ -22,6 +23,10 @@ function getHeaders(): Headers {
 
   if (token !== null) {
     headers.set('Authorization', `Bearer ${token}`)
+    const language = normalizeLanguageCode(tokenStorage.getUser()?.language ?? '')
+    if (LANGUAGE_OPTIONS.some(option => option.value === language)) {
+      headers.set('Accept-Language', language)
+    }
   }
 
   return headers
@@ -42,6 +47,7 @@ async function readBody(response: Response): Promise<unknown> {
 }
 
 async function request(path: string, options: RequestOptions): Promise<unknown> {
+  const session = tokenStorage.getSession()
   const response = await fetch(buildUrl(options.baseUrl, path, options.query), {
     body: options.body === undefined ? undefined : JSON.stringify(options.body),
     headers: getHeaders(),
@@ -49,7 +55,7 @@ async function request(path: string, options: RequestOptions): Promise<unknown> 
   })
   const body = await readBody(response)
 
-  if (response.status === 401 || response.status === 403) {
+  if (response.status === 401 && session.token !== null && tokenStorage.isCurrentSession(session)) {
     tokenStorage.clearAll()
   }
 

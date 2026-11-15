@@ -1,4 +1,6 @@
+import { toTranslatedOptions } from '../../../shared/translatedOptions'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { createValidationErrorMap } from '../../../shared/validation'
 import { ArrowLeft, Edit } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
@@ -12,7 +14,7 @@ import { useNotifyError } from '../../../auth/AuthProvider'
 import { Button } from '../../../components/ui/button'
 import { Card, CardContent } from '../../../components/ui/card'
 import { Checkbox } from '../../../components/ui/checkbox'
-import { Field, FieldGroup, FieldLabel } from '../../../components/ui/form'
+import { Field, FieldError, FieldGroup, FieldLabel } from '../../../components/ui/form'
 import { Input } from '../../../components/ui/input'
 import { Select } from '../../../components/ui/select'
 import { Textarea } from '../../../components/ui/textarea'
@@ -20,7 +22,6 @@ import { LANGUAGE_OPTIONS } from '../../../shared/languages'
 import { OrganizationCodeEditDialog } from './OrganizationCodeEditDialog'
 import { getOrganization, updateOrganization } from './organizationApi'
 import { ORGANIZATION_REQUEST_FIELDS, type OrganizationDto } from './organizationTypes'
-import { toTranslatedOptions } from './organizationUi'
 
 type OrganizationEditForm = {
   defaultLanguage: string
@@ -62,7 +63,7 @@ export function OrganizationEditPage() {
       const loaded = await getOrganization(id)
       setOrganization(loaded)
     } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
+      notifyError(error, t('common.errors.generic'))
     }
   }, [id, notifyError, t])
 
@@ -76,13 +77,13 @@ export function OrganizationEditPage() {
         <h1 className="page-title">{t('features.iam.organizations.pages.edit')}</h1>
         <Button onClick={() => navigate(APP_ROUTES.organizations)} type="button" variant="outline">
           <ArrowLeft data-icon="inline-start" />
-          {t('shared.actions.back')}
+          {t('common.actions.back')}
         </Button>
       </div>
       <Card>
         <CardContent>
           {organization === null ? (
-            <p className="page-subtitle">{t('shared.common.loading')}</p>
+            <p className="page-subtitle">{t('common.states.loading')}</p>
           ) : (
             <OrganizationEditForm
               key={organization.id}
@@ -121,65 +122,86 @@ function OrganizationEditForm({
   const { showSuccess } = useToast()
   const [isSaving, setIsSaving] = useState(false)
   const {
+    formState: { errors },
     control,
     handleSubmit,
     register,
   } = useForm<OrganizationEditForm>({
     defaultValues: toForm(organization),
-    resolver: zodResolver(organizationEditSchema),
+    resolver: zodResolver(organizationEditSchema, { error: createValidationErrorMap(t) }),
   })
 
   async function handleSave(value: OrganizationEditForm) {
     setIsSaving(true)
 
     try {
-      await updateOrganization(organization.id, {
+      const message = await updateOrganization(organization.id, {
         [ORGANIZATION_REQUEST_FIELDS.name]: value.name,
         [ORGANIZATION_REQUEST_FIELDS.description]: value.description,
         [ORGANIZATION_REQUEST_FIELDS.isActive]: value.isActive,
         [ORGANIZATION_REQUEST_FIELDS.defaultLanguage]: value.defaultLanguage,
       })
-      showSuccess(t('features.iam.organizations.notifications.updated'))
+      showSuccess(message)
       await onSaved()
     } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
+      notifyError(error, t('common.errors.generic'))
     } finally {
       setIsSaving(false)
     }
   }
 
   return (
-    <form className="edit-form" onSubmit={handleSubmit(handleSave)}>
+    <form noValidate className="edit-form" onSubmit={handleSubmit(handleSave)}>
       <FieldGroup>
         <Field className="code-row" data-disabled>
           <div className="grow-field">
-            <FieldLabel>{t('shared.fields.code')}</FieldLabel>
+            <FieldLabel>{t('common.fields.code')}</FieldLabel>
             <Input disabled value={organization.code} />
           </div>
           <Button onClick={onEditCode} type="button" variant="outline">
             <Edit data-icon="inline-start" />
-            {t('shared.actions.editCode')}
+            {t('common.actions.editCode')}
           </Button>
         </Field>
-        <Field>
-          <FieldLabel htmlFor="name">{t('shared.fields.name')}</FieldLabel>
-          <Input id="name" required {...register('name')} />
+        <Field data-invalid={errors.name !== undefined}>
+          <FieldLabel htmlFor="name">{t('common.fields.name')}</FieldLabel>
+          <Input
+            aria-invalid={errors.name !== undefined}
+            aria-describedby={errors.name ? 'OrganizationEditPage-name-error' : undefined}
+            id="name"
+            required
+            {...register('name')}
+          />
+          <FieldError id="OrganizationEditPage-name-error">{errors.name?.message}</FieldError>
         </Field>
-        <Field>
-          <FieldLabel htmlFor="description">{t('shared.fields.description')}</FieldLabel>
-          <Textarea id="description" required {...register('description')} />
+        <Field data-invalid={errors.description !== undefined}>
+          <FieldLabel htmlFor="description">{t('common.fields.description')}</FieldLabel>
+          <Textarea
+            aria-invalid={errors.description !== undefined}
+            aria-describedby={errors.description ? 'OrganizationEditPage-description-error' : undefined}
+            id="description"
+            required
+            {...register('description')}
+          />
+          <FieldError id="OrganizationEditPage-description-error">{errors.description?.message}</FieldError>
         </Field>
         <Controller
           control={control}
           name="defaultLanguage"
           render={({ field }) => (
-            <Field>
-              <FieldLabel>{t('shared.fields.defaultLanguage')}</FieldLabel>
+            <Field data-invalid={errors.defaultLanguage !== undefined}>
+              <FieldLabel htmlFor="OrganizationEditPage-defaultLanguage">{t('common.fields.defaultLanguage')}</FieldLabel>
               <Select
+                onBlur={field.onBlur}
+                ref={field.ref}
+                aria-invalid={errors.defaultLanguage !== undefined}
+                aria-describedby={errors.defaultLanguage ? 'OrganizationEditPage-defaultLanguage-error' : undefined}
+                id="OrganizationEditPage-defaultLanguage"
                 onValueChange={field.onChange}
                 options={toTranslatedOptions(LANGUAGE_OPTIONS, t)}
                 value={field.value}
               />
+              <FieldError id="OrganizationEditPage-defaultLanguage-error">{errors.defaultLanguage?.message}</FieldError>
             </Field>
           )}
         />
@@ -189,14 +211,14 @@ function OrganizationEditForm({
           render={({ field }) => (
             <Checkbox
               checked={field.value}
-              label={t('shared.fields.isActive')}
+              label={t('common.fields.isActive')}
               onCheckedChange={field.onChange}
             />
           )}
         />
       </FieldGroup>
       <div className="form-actions">
-        <Button disabled={isSaving} type="submit">{t('shared.actions.save')}</Button>
+        <Button disabled={isSaving} type="submit">{t('common.actions.save')}</Button>
       </div>
     </form>
   )

@@ -29,7 +29,7 @@ export function FieldError({ children, className, ...props }: HTMLAttributes<HTM
   }
 
   return (
-    <p className={cn('field-error', className)} {...props}>
+    <p role="alert" className={cn('field-error', className)} {...props}>
       {children}
     </p>
   )

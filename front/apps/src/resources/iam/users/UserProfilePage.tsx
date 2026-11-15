@@ -1,4 +1,7 @@
+import { toTranslatedOptions } from '../../../shared/translatedOptions'
+import { tokenStorage } from '../../../auth/tokenStorage'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { createValidationErrorMap } from '../../../shared/validation'
 import { useCallback, useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -8,14 +11,13 @@ import { useTranslate } from '../../../app/i18n/i18n'
 import { useAuth, useNotifyError } from '../../../auth/AuthProvider'
 import { Button } from '../../../components/ui/button'
 import { Card, CardContent } from '../../../components/ui/card'
-import { Field, FieldGroup, FieldLabel } from '../../../components/ui/form'
+import { Field, FieldError, FieldGroup, FieldLabel } from '../../../components/ui/form'
 import { Input } from '../../../components/ui/input'
 import { Select } from '../../../components/ui/select'
 import { LANGUAGE_OPTIONS } from '../../../shared/languages'
 import { getCurrentUser, updateCurrentUser } from './userApi'
 import { UserAccessTabs } from './UserAccessTabs'
 import { USER_REQUEST_FIELDS, type UserDto } from './userTypes'
-import { toTranslatedOptions } from './userUi'
 
 type UserProfileForm = {
   language: string
@@ -44,7 +46,7 @@ export function UserProfileSection() {
       const loaded = await getCurrentUser()
       setUser(loaded)
     } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
+      notifyError(error, t('common.errors.generic'))
     }
   }, [notifyError, t])
 
@@ -57,7 +59,7 @@ export function UserProfileSection() {
       <Card>
         <CardContent>
           {user === null ? (
-            <p className="page-subtitle">{t('shared.common.loading')}</p>
+            <p className="page-subtitle">{t('common.states.loading')}</p>
           ) : (
             <UserProfileFormPanel key={user.id} onSaved={loadUser} user={user} />
           )}
@@ -72,7 +74,7 @@ export function UserSecuritySection() {
   const { user } = useAuth()
 
   return user === null
-    ? <p className="page-subtitle">{t('shared.common.loading')}</p>
+    ? <p className="page-subtitle">{t('common.states.loading')}</p>
     : <UserAccessTabs userId={user.id} />
 }
 
@@ -83,64 +85,81 @@ type UserProfileFormPanelProps = {
 
 function UserProfileFormPanel({ onSaved, user }: UserProfileFormPanelProps) {
   const t = useTranslate()
+  const { updateProfile } = useAuth()
   const notifyError = useNotifyError()
   const { showSuccess } = useToast()
   const [isSaving, setIsSaving] = useState(false)
   const {
+    formState: { errors },
     control,
     handleSubmit,
     register,
   } = useForm<UserProfileForm>({
     defaultValues: toForm(user),
-    resolver: zodResolver(userProfileSchema),
+    resolver: zodResolver(userProfileSchema, { error: createValidationErrorMap(t) }),
   })
 
   async function handleSave(value: UserProfileForm) {
+    const session = tokenStorage.getSession()
     setIsSaving(true)
 
     try {
-      await updateCurrentUser({
+      const message = await updateCurrentUser({
         [USER_REQUEST_FIELDS.name]: value.name,
         [USER_REQUEST_FIELDS.isActive]: user.isActive,
         [USER_REQUEST_FIELDS.language]: value.language,
       })
-      showSuccess(t('features.iam.users.notifications.profileUpdated'))
+      if (!updateProfile(user.id, { fullName: value.name, language: value.language }, session)) return
+      showSuccess(message)
       await onSaved()
     } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
+      if (tokenStorage.isCurrentSession(session)) notifyError(error, t('common.errors.generic'))
     } finally {
       setIsSaving(false)
     }
   }
 
   return (
-    <form className="edit-form" onSubmit={handleSubmit(handleSave)}>
+    <form noValidate className="edit-form" onSubmit={handleSubmit(handleSave)}>
       <FieldGroup>
         <Field data-disabled>
-          <FieldLabel>{t('shared.fields.email')}</FieldLabel>
+          <FieldLabel>{t('common.fields.email')}</FieldLabel>
           <Input disabled value={user.email} />
         </Field>
-        <Field>
-          <FieldLabel htmlFor="name">{t('shared.fields.name')}</FieldLabel>
-          <Input id="name" required {...register('name')} />
+        <Field data-invalid={errors.name !== undefined}>
+          <FieldLabel htmlFor="name">{t('common.fields.name')}</FieldLabel>
+          <Input
+            aria-invalid={errors.name !== undefined}
+            aria-describedby={errors.name ? 'UserProfilePage-name-error' : undefined}
+            id="name"
+            required
+            {...register('name')}
+          />
+          <FieldError id="UserProfilePage-name-error">{errors.name?.message}</FieldError>
         </Field>
         <Controller
           control={control}
           name="language"
           render={({ field }) => (
-            <Field>
-              <FieldLabel>{t('shared.fields.language')}</FieldLabel>
+            <Field data-invalid={errors.language !== undefined}>
+              <FieldLabel htmlFor="UserProfilePage-language">{t('common.fields.language')}</FieldLabel>
               <Select
+                onBlur={field.onBlur}
+                ref={field.ref}
+                aria-invalid={errors.language !== undefined}
+                aria-describedby={errors.language ? 'UserProfilePage-language-error' : undefined}
+                id="UserProfilePage-language"
                 onValueChange={field.onChange}
                 options={toTranslatedOptions(LANGUAGE_OPTIONS, t)}
                 value={field.value}
               />
+              <FieldError id="UserProfilePage-language-error">{errors.language?.message}</FieldError>
             </Field>
           )}
         />
       </FieldGroup>
       <div className="form-actions">
-        <Button disabled={isSaving} type="submit">{t('shared.actions.save')}</Button>
+        <Button disabled={isSaving} type="submit">{t('common.actions.save')}</Button>
       </div>
     </form>
   )

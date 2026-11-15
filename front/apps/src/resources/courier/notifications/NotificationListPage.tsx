@@ -1,9 +1,10 @@
+import { toTranslatedOptions } from '../../../shared/translatedOptions'
 import type { SortingState } from '@tanstack/react-table'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 
-import { useTranslate } from '../../../app/i18n/i18n'
+import { useLocale, useTranslate } from '../../../app/i18n/i18n'
 import { useToast } from '../../../app/ToastProvider'
 import { useAuth, useNotifyError } from '../../../auth/AuthProvider'
 import { DataTable } from '../../../components/ui/data-table'
@@ -29,7 +30,6 @@ import {
   type NotificationLiteDto,
   type NotificationSearchForm,
 } from './notificationTypes'
-import { toTranslatedNotificationOptions } from './notificationUi'
 
 function toDateTimeLocalValue(date: Date): string {
   const offsetMs = date.getTimezoneOffset() * 60_000
@@ -55,6 +55,7 @@ function getDefaultNotificationSearch(): NotificationSearchForm {
 
 export function NotificationListPage() {
   const t = useTranslate()
+  const locale = useLocale()
   const navigate = useNavigate()
   const notifyError = useNotifyError()
   const { showSuccess } = useToast()
@@ -85,7 +86,7 @@ export function NotificationListPage() {
         userId,
       }))
     } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
+      notifyError(error, t('common.errors.generic'))
     } finally {
       setIsLoading(false)
     }
@@ -93,11 +94,11 @@ export function NotificationListPage() {
 
   const handleMarkRead = useCallback(async (notification: NotificationLiteDto) => {
     try {
-      await markNotificationAsRead(notification.id)
-      showSuccess(t('features.courier.notifications.notifications.markedRead'))
+      const message = await markNotificationAsRead(notification.id)
+      showSuccess(message)
       await loadNotifications(pageNumber)
     } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
+      notifyError(error, t('common.errors.generic'))
     }
   }, [loadNotifications, notifyError, pageNumber, showSuccess, t])
 
@@ -115,12 +116,12 @@ export function NotificationListPage() {
   const columns = useMemo(() => createNotificationTableColumns({
     canDelete: canWrite,
     canMarkRead: canWrite,
-    language: user?.language,
+    language: locale,
     onDelete: setNotificationToDelete,
     onMarkRead: (notification) => void handleMarkRead(notification),
     onOpenLink: handleOpenLink,
     t,
-  }), [canWrite, handleMarkRead, handleOpenLink, t, user?.language])
+  }), [canWrite, handleMarkRead, handleOpenLink, t, locale])
 
   useEffect(() => {
     void loadNotifications(pageNumber)
@@ -150,12 +151,12 @@ export function NotificationListPage() {
     }
 
     try {
-      await deleteNotification(notificationToDelete.id)
-      showSuccess(t('features.courier.notifications.notifications.deleted'))
+      const message = await deleteNotification(notificationToDelete.id)
+      showSuccess(message)
       setNotificationToDelete(null)
       await loadNotifications(pageNumber)
     } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
+      notifyError(error, t('common.errors.generic'))
     }
   }
 
@@ -172,12 +173,12 @@ export function NotificationListPage() {
           name="module"
           render={({ field }) => (
             <Field>
-              <FieldLabel>{t('shared.fields.module')}</FieldLabel>
+              <FieldLabel>{t('common.fields.module')}</FieldLabel>
               <Select
                 onValueChange={field.onChange}
                 options={[
-                  { label: t('shared.filters.all'), value: NOTIFICATION_FILTER_VALUES.all },
-                  ...toTranslatedNotificationOptions(NOTIFICATION_MODULE_OPTIONS, t),
+                  { label: t('common.filters.all'), value: NOTIFICATION_FILTER_VALUES.all },
+                  ...toTranslatedOptions(NOTIFICATION_MODULE_OPTIONS, t),
                 ]}
                 value={field.value}
               />
@@ -189,11 +190,11 @@ export function NotificationListPage() {
           name="status"
           render={({ field }) => (
             <Field>
-              <FieldLabel>{t('shared.fields.status')}</FieldLabel>
+              <FieldLabel>{t('common.fields.status')}</FieldLabel>
               <Select
                 onValueChange={field.onChange}
                 options={[
-                  { label: t('shared.filters.all'), value: NOTIFICATION_FILTER_VALUES.all },
+                  { label: t('common.filters.all'), value: NOTIFICATION_FILTER_VALUES.all },
                   {
                     label: t('features.courier.notifications.statuses.unread'),
                     value: NOTIFICATION_STATUSES.unread.toString(),
@@ -209,15 +210,15 @@ export function NotificationListPage() {
           )}
         />
         <Field>
-          <FieldLabel htmlFor="notification-title">{t('shared.fields.title')}</FieldLabel>
+          <FieldLabel htmlFor="notification-title">{t('common.fields.title')}</FieldLabel>
           <Input id="notification-title" {...register('title')} />
         </Field>
         <Field>
-          <FieldLabel htmlFor="notification-date-from">{t('shared.fields.dateFrom')}</FieldLabel>
+          <FieldLabel htmlFor="notification-date-from">{t('common.fields.dateFrom')}</FieldLabel>
           <Input id="notification-date-from" required type="datetime-local" {...register('dateFrom')} />
         </Field>
         <Field>
-          <FieldLabel htmlFor="notification-date-to">{t('shared.fields.dateTo')}</FieldLabel>
+          <FieldLabel htmlFor="notification-date-to">{t('common.fields.dateTo')}</FieldLabel>
           <Input id="notification-date-to" required type="datetime-local" {...register('dateTo')} />
         </Field>
       </FilterToolbar>
@@ -226,7 +227,7 @@ export function NotificationListPage() {
         data={result?.items ?? []}
         emptyText={t('features.courier.notifications.messages.empty')}
         isLoading={isLoading}
-        loadingText={t('shared.common.loading')}
+        loadingText={t('common.states.loading')}
         onSortingChange={setSorting}
         sorting={sorting}
       />
@@ -239,9 +240,9 @@ export function NotificationListPage() {
         totalPages={totalPages}
       />
       <ConfirmDialog
-        backLabel={t('shared.actions.back')}
-        cancelText={t('shared.actions.cancel')}
-        confirmText={t('shared.actions.delete')}
+        backLabel={t('common.actions.back')}
+        cancelText={t('common.actions.cancel')}
+        confirmText={t('common.actions.delete')}
         onConfirm={() => void handleDelete()}
         onOpenChange={(open) => !open && setNotificationToDelete(null)}
         open={notificationToDelete !== null}

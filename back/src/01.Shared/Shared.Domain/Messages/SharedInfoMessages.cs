@@ -10,34 +10,25 @@ public class SuccessInfo : InformationMessage
          SharedTranslatedMessagesProvider.Instance.GetTranslations(SharedTranslatedMessagesProvider.SuccessInfo)) { }
 }
 
-public class CrudSuccessInfo : InformationMessage
+public abstract class CrudSuccessInfo : InformationMessage
 {
-   public CrudSuccessInfo(CrudOperation operation, string entityKey)
+   protected CrudSuccessInfo(string code, IReadOnlyDictionary<string, string> entityTranslations)
       : base(
-         GetCode(operation),
-         SharedTranslatedMessagesProvider.Instance.GetTranslations(GetCode(operation)))
+         code,
+         SharedTranslatedMessagesProvider.Instance.GetTranslations(code))
    {
-      foreach (var translation in SharedTranslatedMessagesProvider.Instance.GetVariableTranslations(entityKey))
+      foreach (var translation in entityTranslations)
       {
          AddVariable(translation.Key, SharedConst.Message.Variable.Entity, translation.Value);
       }
    }
-
-   private static string GetCode(CrudOperation operation)
-   {
-      return operation switch
-      {
-         CrudOperation.Created => SharedTranslatedMessagesProvider.CrudCreatedSuccess,
-         CrudOperation.Updated => SharedTranslatedMessagesProvider.CrudUpdatedSuccess,
-         CrudOperation.Deleted => SharedTranslatedMessagesProvider.CrudDeletedSuccess,
-         _ => throw new ArgumentOutOfRangeException(nameof(operation), operation, null)
-      };
-   }
 }
 
-public enum CrudOperation
-{
-   Created,
-   Updated,
-   Deleted
-}
+public class CreatedSuccessInfo(IReadOnlyDictionary<string, string> entityTranslations)
+   : CrudSuccessInfo(SharedTranslatedMessagesProvider.CrudCreatedSuccessInfo, entityTranslations) {}
+
+public class UpdatedSuccessInfo(IReadOnlyDictionary<string, string> entityTranslations) 
+   : CrudSuccessInfo(SharedTranslatedMessagesProvider.CrudUpdatedSuccessInfo, entityTranslations) {}
+
+public class DeletedSuccessInfo(IReadOnlyDictionary<string, string> entityTranslations) 
+   : CrudSuccessInfo(SharedTranslatedMessagesProvider.CrudDeletedSuccessInfo, entityTranslations) {}

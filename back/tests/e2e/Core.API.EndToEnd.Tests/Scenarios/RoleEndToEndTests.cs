@@ -9,6 +9,17 @@ public class RoleEndToEndTests(CoreApiTestFixture fixture) : IClassFixture<CoreA
 {
    private readonly CoreApiTestFixture _fixture = fixture;
 
+   // Scenario: A new user inherits the permissions of a default organization role
+   // Given a new organization with a logged-in administrator
+   // When the administrator creates a role and updates it to be a default role
+   // And assigns user-read and organization-admin-update permissions to it
+   // And removes the organization-admin-update permission
+   // And searches for the updated active role
+   // And creates a user who logs in
+   // Then the role appears in the search results
+   // And the user's permission checks allow user reads but deny organization-admin updates
+   // And the administrator's permissions and permission check allow role writes
+   // And deleting the user and role succeeds
    [Fact]
    public async Task RoleFlow_ShouldCreateUpdateAssignPermissionsSearchCreateUserVerifyPermissionsAndDelete()
    {
@@ -81,6 +92,13 @@ public class RoleEndToEndTests(CoreApiTestFixture fixture) : IClassFixture<CoreA
       Assert.False(hasUpdateOrganizationAdminPermission.Allowed);
    }
 
+   // Scenario: A user receives a permission through an explicitly assigned role
+   // Given a new organization with a logged-in administrator
+   // And the administrator creates a role with the user-read permission
+   // When the administrator creates a user and assigns that role to the user
+   // And the user logs in
+   // Then the user's permission check allows user reads
+   // And deleting the user and role succeeds
    [Fact]
    public async Task RoleFlow_ShouldAssignRoleDirectlyToUserAndVerifyPermission()
    {
@@ -97,7 +115,7 @@ public class RoleEndToEndTests(CoreApiTestFixture fixture) : IClassFixture<CoreA
 
       var role = await adminApi.CreateRoleAsync(roleRequest, TestContext.Current.CancellationToken);
       var permissions = await adminApi.SearchPermissionsAsync(
-         new PermissionSearchRequest(null, "iam", "users", "view", null, false),
+         new PermissionSearchRequest(null, "iam", "users", IamPermission.Users.Read.Split('.')[2], null, false),
          TestContext.Current.CancellationToken);
       var viewPermission = GetPermissionByCode(permissions, IamPermission.Users.Read);
       await adminApi.AssignPermissionsAsync(

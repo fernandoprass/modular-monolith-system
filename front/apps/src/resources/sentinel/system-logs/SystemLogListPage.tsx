@@ -1,9 +1,10 @@
+import { toTranslatedOptions } from '../../../shared/translatedOptions'
 import type { SortingState } from '@tanstack/react-table'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 
-import { useTranslate, type Translate } from '../../../app/i18n/i18n'
+import { useLocale, useTranslate } from '../../../app/i18n/i18n'
 import { APP_ROUTES } from '../../../app/routes'
 import { useNotifyError } from '../../../auth/AuthProvider'
 import { DataTable } from '../../../components/ui/data-table'
@@ -24,11 +25,6 @@ import {
   type SystemLogLiteDto,
   type SystemLogSearchForm,
 } from './systemLogTypes'
-
-type SystemLogOption = {
-  labelKey: string
-  value: string
-}
 
 function toDateTimeLocalValue(date: Date): string {
   const offsetMs = date.getTimezoneOffset() * 60_000
@@ -54,15 +50,9 @@ function getDefaultSystemLogSearch(): SystemLogSearchForm {
   }
 }
 
-function toTranslatedOptions(options: readonly SystemLogOption[], t: Translate) {
-  return options.map((option) => ({
-    label: t(option.labelKey),
-    value: option.value,
-  }))
-}
-
 export function SystemLogListPage() {
   const t = useTranslate()
+  const locale = useLocale()
   const navigate = useNavigate()
   const notifyError = useNotifyError()
   const [appliedFilters, setAppliedFilters] = useState<SystemLogSearchForm>(() => getDefaultSystemLogSearch())
@@ -75,9 +65,10 @@ export function SystemLogListPage() {
     defaultValues: appliedFilters,
   })
   const columns = useMemo(() => createSystemLogTableColumns({
+    locale,
     onView: (systemLog) => navigate(APP_ROUTES.systemLogView(systemLog.id)),
     t,
-  }), [navigate, t])
+  }), [locale, navigate, t])
 
   const loadSystemLogs = useCallback(async (targetPage: number) => {
     setIsLoading(true)
@@ -89,7 +80,7 @@ export function SystemLogListPage() {
         pageSize,
       }))
     } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
+      notifyError(error, t('common.errors.generic'))
     } finally {
       setIsLoading(false)
     }
@@ -130,7 +121,7 @@ export function SystemLogListPage() {
           name="organizationId"
           render={({ field }) => (
             <Field>
-              <FieldLabel>{t('shared.fields.organization')}</FieldLabel>
+              <FieldLabel>{t('common.fields.organization')}</FieldLabel>
               <OrganizationSelect
                 clearable
                 includeInactive
@@ -145,7 +136,7 @@ export function SystemLogListPage() {
           name="userId"
           render={({ field }) => (
             <Field>
-              <FieldLabel>{t('shared.fields.user')}</FieldLabel>
+              <FieldLabel>{t('common.fields.user')}</FieldLabel>
               <UserSelect
                 clearable
                 includeInactive
@@ -160,10 +151,10 @@ export function SystemLogListPage() {
           name="level"
           render={({ field }) => (
             <Field>
-              <FieldLabel>{t('shared.fields.level')}</FieldLabel>
+              <FieldLabel>{t('common.fields.level')}</FieldLabel>
               <Select
                 onValueChange={field.onChange}
-                options={[{ label: t('shared.filters.all'), value: SYSTEM_LOG_FILTER_VALUES.all }, ...toTranslatedOptions(SYSTEM_LOG_LEVEL_OPTIONS, t)]}
+                options={[{ label: t('common.filters.all'), value: SYSTEM_LOG_FILTER_VALUES.all }, ...toTranslatedOptions(SYSTEM_LOG_LEVEL_OPTIONS, t)]}
                 value={field.value}
               />
             </Field>
@@ -174,25 +165,25 @@ export function SystemLogListPage() {
           name="status"
           render={({ field }) => (
             <Field>
-              <FieldLabel>{t('shared.fields.status')}</FieldLabel>
+              <FieldLabel>{t('common.fields.status')}</FieldLabel>
               <Select
                 onValueChange={field.onChange}
-                options={[{ label: t('shared.filters.all'), value: SYSTEM_LOG_FILTER_VALUES.all }, ...toTranslatedOptions(SYSTEM_LOG_STATUS_OPTIONS, t)]}
+                options={[{ label: t('common.filters.all'), value: SYSTEM_LOG_FILTER_VALUES.all }, ...toTranslatedOptions(SYSTEM_LOG_STATUS_OPTIONS, t)]}
                 value={field.value}
               />
             </Field>
           )}
         />
         <Field>
-          <FieldLabel htmlFor="requestId">{t('shared.fields.requestId')}</FieldLabel>
+          <FieldLabel htmlFor="requestId">{t('common.fields.requestId')}</FieldLabel>
           <Input id="requestId" {...register('requestId')} />
         </Field>
         <Field>
-          <FieldLabel htmlFor="from">{t('shared.fields.from')}</FieldLabel>
+          <FieldLabel htmlFor="from">{t('common.fields.from')}</FieldLabel>
           <Input id="from" required type="datetime-local" {...register('from')} />
         </Field>
         <Field>
-          <FieldLabel htmlFor="to">{t('shared.fields.to')}</FieldLabel>
+          <FieldLabel htmlFor="to">{t('common.fields.to')}</FieldLabel>
           <Input id="to" required type="datetime-local" {...register('to')} />
         </Field>
       </FilterToolbar>
@@ -201,7 +192,7 @@ export function SystemLogListPage() {
         data={result?.items ?? []}
         emptyText={t('features.sentinel.systemLogs.messages.empty')}
         isLoading={isLoading}
-        loadingText={t('shared.common.loading')}
+        loadingText={t('common.states.loading')}
         onSortingChange={setSorting}
         sorting={sorting}
       />

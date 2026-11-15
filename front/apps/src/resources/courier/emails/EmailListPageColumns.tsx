@@ -8,7 +8,7 @@ import {
 } from '../../../components/ui/data-table-row-actions'
 import { formatUserDateTime } from '../../../shared/dateFormat'
 import type { EmailLiteDto } from './emailTypes'
-import { getEmailStatusClassName, getEmailStatusLabel } from './emailUi'
+import { getEmailStatusClassName, getEmailStatusEnum } from './emailUi'
 
 type CreateEmailTableColumnsRequest = {
   language?: string
@@ -25,32 +25,32 @@ export function createEmailTableColumns({
     {
       accessorKey: 'createdAt',
       cell: ({ row }) => formatUserDateTime(row.original.createdAt, language),
-      header: t('shared.fields.createdAt'),
+      header: t('common.fields.createdAt'),
     },
     {
       accessorKey: 'module',
-      header: t('shared.fields.module'),
+      header: t('common.fields.module'),
     },
     {
       accessorKey: 'feature',
-      header: t('shared.fields.feature'),
+      header: t('common.fields.feature'),
     },
     {
       accessorKey: 'recipient',
-      header: t('shared.fields.recipient'),
+      header: t('common.fields.recipient'),
     },
     {
       accessorKey: 'subject',
-      header: t('shared.fields.subject'),
+      header: t('common.fields.subject'),
     },
     {
       accessorKey: 'status',
       cell: ({ row }) => (
         <Badge className={getEmailStatusClassName(row.original.status)}>
-          {getEmailStatusLabel(row.original.status, t)}
+          {getEmailStatusEnum(row.original.status, t)}
         </Badge>
       ),
-      header: t('shared.fields.status'),
+      header: t('common.fields.status'),
     },
     {
       cell: ({ row }) => (
@@ -58,7 +58,7 @@ export function createEmailTableColumns({
           actions={[
             {
               kind: DATA_TABLE_ROW_ACTION_KINDS.view,
-              label: t('shared.actions.view'),
+              label: t('common.actions.view'),
               onClick: () => onView(row.original),
             },
           ]}
@@ -66,7 +66,7 @@ export function createEmailTableColumns({
       ),
       enableHiding: false,
       enableSorting: false,
-      header: t('shared.fields.actions'),
+      header: t('common.fields.actions'),
       id: 'actions',
     },
   ]

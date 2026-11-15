@@ -9,7 +9,7 @@ import {
 } from '../../../components/ui/data-table-row-actions'
 import { formatUserDateTime } from '../../../shared/dateFormat'
 import { NOTIFICATION_STATUSES, type NotificationLiteDto } from './notificationTypes'
-import { getNotificationStatusClassName, getNotificationStatusLabel } from './notificationUi'
+import { getNotificationStatusClassName, getNotificationStatusEnum } from './notificationUi'
 
 type CreateNotificationTableColumnsRequest = {
   canDelete: boolean
@@ -34,37 +34,37 @@ export function createNotificationTableColumns({
     {
       accessorKey: 'createdAt',
       cell: ({ row }) => formatUserDateTime(row.original.createdAt, language),
-      header: t('shared.fields.createdAt'),
+      header: t('common.fields.createdAt'),
     },
     {
       accessorKey: 'module',
-      header: t('shared.fields.module'),
+      header: t('common.fields.module'),
     },
     {
       accessorKey: 'feature',
-      header: t('shared.fields.feature'),
+      header: t('common.fields.feature'),
     },
     {
       accessorKey: 'title',
-      header: t('shared.fields.title'),
+      header: t('common.fields.title'),
     },
     {
       accessorKey: 'message',
-      header: t('shared.fields.message'),
+      header: t('common.fields.message'),
     },
     {
       accessorKey: 'status',
       cell: ({ row }) => (
         <Badge className={getNotificationStatusClassName(row.original.status)}>
-          {getNotificationStatusLabel(row.original.status, t)}
+          {getNotificationStatusEnum(row.original.status, t)}
         </Badge>
       ),
-      header: t('shared.fields.status'),
+      header: t('common.fields.status'),
     },
     {
       accessorKey: 'readAt',
       cell: ({ row }) => row.original.readAt === null ? '' : formatUserDateTime(row.original.readAt, language),
-      header: t('shared.fields.readAt'),
+      header: t('common.fields.readAt'),
     },
     {
       cell: ({ row }) => (
@@ -87,7 +87,7 @@ export function createNotificationTableColumns({
             {
               isVisible: canDelete,
               kind: DATA_TABLE_ROW_ACTION_KINDS.delete,
-              label: t('shared.actions.delete'),
+              label: t('common.actions.delete'),
               onClick: () => onDelete(row.original),
             },
           ]}
@@ -95,7 +95,7 @@ export function createNotificationTableColumns({
       ),
       enableHiding: false,
       enableSorting: false,
-      header: t('shared.fields.actions'),
+      header: t('common.fields.actions'),
       id: 'actions',
     },
   ]

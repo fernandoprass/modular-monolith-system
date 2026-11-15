@@ -1,9 +1,10 @@
+import { toTranslatedOptions } from '../../../shared/translatedOptions'
 import type { SortingState } from '@tanstack/react-table'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 
-import { useTranslate, type Translate } from '../../../app/i18n/i18n'
+import { useLocale, useTranslate } from '../../../app/i18n/i18n'
 import { APP_ROUTES } from '../../../app/routes'
 import { useAuth, useNotifyError } from '../../../auth/AuthProvider'
 import { DataTable } from '../../../components/ui/data-table'
@@ -23,11 +24,6 @@ import {
   type AuditLogLiteDto,
   type AuditLogSearchForm,
 } from './auditLogTypes'
-
-type AuditLogOption = {
-  labelKey: string
-  value: string
-}
 
 function toDateTimeLocalValue(date: Date): string {
   const offsetMs = date.getTimezoneOffset() * 60_000
@@ -53,15 +49,9 @@ function getDefaultAuditLogSearch(): AuditLogSearchForm {
   }
 }
 
-function toTranslatedOptions(options: readonly AuditLogOption[], t: Translate) {
-  return options.map((option) => ({
-    label: t(option.labelKey),
-    value: option.value,
-  }))
-}
-
 export function AuditLogListPage() {
   const t = useTranslate()
+  const locale = useLocale()
   const navigate = useNavigate()
   const notifyError = useNotifyError()
   const { user } = useAuth()
@@ -76,9 +66,10 @@ export function AuditLogListPage() {
     defaultValues: appliedFilters,
   })
   const columns = useMemo(() => createAuditLogTableColumns({
+    locale,
     onView: (auditLog) => navigate(APP_ROUTES.auditLogView(auditLog.id)),
     t,
-  }), [navigate, t])
+  }), [locale, navigate, t])
 
   const loadAuditLogs = useCallback(async (targetPage: number) => {
     setIsLoading(true)
@@ -91,7 +82,7 @@ export function AuditLogListPage() {
         pageSize,
       }))
     } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
+      notifyError(error, t('common.errors.generic'))
     } finally {
       setIsLoading(false)
     }
@@ -132,10 +123,10 @@ export function AuditLogListPage() {
           name="module"
           render={({ field }) => (
             <Field>
-              <FieldLabel>{t('shared.fields.module')}</FieldLabel>
+              <FieldLabel>{t('common.fields.module')}</FieldLabel>
               <Select
                 onValueChange={field.onChange}
-                options={[{ label: t('shared.filters.all'), value: AUDIT_LOG_FILTER_VALUES.all }, ...toTranslatedOptions(AUDIT_LOG_MODULE_OPTIONS, t)]}
+                options={[{ label: t('common.filters.all'), value: AUDIT_LOG_FILTER_VALUES.all }, ...toTranslatedOptions(AUDIT_LOG_MODULE_OPTIONS, t)]}
                 value={field.value}
               />
             </Field>
@@ -146,17 +137,17 @@ export function AuditLogListPage() {
           name="feature"
           render={({ field }) => (
             <Field>
-              <FieldLabel>{t('shared.fields.feature')}</FieldLabel>
+              <FieldLabel>{t('common.fields.feature')}</FieldLabel>
               <Select
                 onValueChange={field.onChange}
-                options={[{ label: t('shared.filters.all'), value: AUDIT_LOG_FILTER_VALUES.all }, ...toTranslatedOptions(AUDIT_LOG_FEATURE_OPTIONS, t)]}
+                options={[{ label: t('common.filters.all'), value: AUDIT_LOG_FILTER_VALUES.all }, ...toTranslatedOptions(AUDIT_LOG_FEATURE_OPTIONS, t)]}
                 value={field.value}
               />
             </Field>
           )}
         />
         <Field>
-          <FieldLabel htmlFor="action">{t('shared.fields.action')}</FieldLabel>
+          <FieldLabel htmlFor="action">{t('common.fields.action')}</FieldLabel>
           <Input id="action" {...register('action')} />
         </Field>
         <Controller
@@ -164,7 +155,7 @@ export function AuditLogListPage() {
           name="userId"
           render={({ field }) => (
             <Field>
-              <FieldLabel>{t('shared.fields.user')}</FieldLabel>
+              <FieldLabel>{t('common.fields.user')}</FieldLabel>
               <UserSelect
                 clearable
                 includeInactive
@@ -175,15 +166,15 @@ export function AuditLogListPage() {
           )}
         />
         <Field>
-          <FieldLabel htmlFor="targetId">{t('shared.fields.targetId')}</FieldLabel>
+          <FieldLabel htmlFor="targetId">{t('common.fields.targetId')}</FieldLabel>
           <Input id="targetId" {...register('targetId')} />
         </Field>
         <Field>
-          <FieldLabel htmlFor="from">{t('shared.fields.from')}</FieldLabel>
+          <FieldLabel htmlFor="from">{t('common.fields.from')}</FieldLabel>
           <Input id="from" required type="datetime-local" {...register('from')} />
         </Field>
         <Field>
-          <FieldLabel htmlFor="to">{t('shared.fields.to')}</FieldLabel>
+          <FieldLabel htmlFor="to">{t('common.fields.to')}</FieldLabel>
           <Input id="to" required type="datetime-local" {...register('to')} />
         </Field>
       </FilterToolbar>
@@ -192,7 +183,7 @@ export function AuditLogListPage() {
         data={result?.items ?? []}
         emptyText={t('features.sentinel.auditLogs.messages.empty')}
         isLoading={isLoading}
-        loadingText={t('shared.common.loading')}
+        loadingText={t('common.states.loading')}
         onSortingChange={setSorting}
         sorting={sorting}
       />

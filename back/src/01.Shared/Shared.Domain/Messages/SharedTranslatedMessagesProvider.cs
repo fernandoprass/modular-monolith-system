@@ -1,3 +1,5 @@
+using System.Runtime.CompilerServices;
+
 namespace Shared.Domain.Messages;
 
 public sealed class SharedTranslatedMessagesProvider : BaseTranslatedMessagesProvider
@@ -12,14 +14,42 @@ public sealed class SharedTranslatedMessagesProvider : BaseTranslatedMessagesPro
    public const string ParameterInvalidValueFormatError = nameof(ParameterInvalidValueFormatError);
    public const string ParameterInvalidValueError = nameof(ParameterInvalidValueError);
    public const string ParameterInvalidKeyFormatError = nameof(ParameterInvalidKeyFormatError);
-   public const string SuccessInfo = "Success";
-   public const string CrudCreatedSuccess = nameof(CrudCreatedSuccess);
-   public const string CrudUpdatedSuccess = nameof(CrudUpdatedSuccess);
-   public const string CrudDeletedSuccess = nameof(CrudDeletedSuccess);
+   public const string SuccessInfo = nameof(SuccessInfo);
+   public const string CrudCreatedSuccessInfo = nameof(CrudCreatedSuccessInfo);
+   public const string CrudUpdatedSuccessInfo = nameof(CrudUpdatedSuccessInfo);
+   public const string CrudDeletedSuccessInfo = nameof(CrudDeletedSuccessInfo);
 
    public static SharedTranslatedMessagesProvider Instance { get; } = new();
 
    private SharedTranslatedMessagesProvider()
+   {
+      AddErrorMessageTranslations();
+
+      AddInfoMessageTranslations();
+
+      AddVariableTranslations();
+   }
+
+   private void AddInfoMessageTranslations()
+   {
+      AddTranslation(CrudCreatedSuccessInfo, LanguageOptions.English, "{entity} created successfully.");
+      AddTranslation(CrudCreatedSuccessInfo, LanguageOptions.Spanish, "Operación de creación completada para {entity}.");
+      AddTranslation(CrudCreatedSuccessInfo, LanguageOptions.PortugueseBrazil, "{entity} criado(a) com sucesso.");
+
+      AddTranslation(CrudUpdatedSuccessInfo, LanguageOptions.English, "{entity} updated successfully.");
+      AddTranslation(CrudUpdatedSuccessInfo, LanguageOptions.Spanish, "Operación de actualización completada para {entity}.");
+      AddTranslation(CrudUpdatedSuccessInfo, LanguageOptions.PortugueseBrazil, "{entity} atualizado(a) com sucesso.");
+
+      AddTranslation(CrudDeletedSuccessInfo, LanguageOptions.English, "{entity} deleted successfully.");
+      AddTranslation(CrudDeletedSuccessInfo, LanguageOptions.Spanish, "{entity} eliminado(a) con éxito.");
+      AddTranslation(CrudDeletedSuccessInfo, LanguageOptions.PortugueseBrazil, "{entity} excluído(a) com sucesso.");
+
+      AddTranslation(SuccessInfo, LanguageOptions.English, "Operation completed successfully.");
+      AddTranslation(SuccessInfo, LanguageOptions.Spanish, "Operación completada con éxito.");
+      AddTranslation(SuccessInfo, LanguageOptions.PortugueseBrazil, "Operação concluída com sucesso.");
+   }
+
+   private void AddErrorMessageTranslations()
    {
       AddTranslation(FailedToRecordDataError, LanguageOptions.English, "Failed to record data.");
       AddTranslation(FailedToRecordDataError, LanguageOptions.Spanish, "No se pudieron registrar los datos.");
@@ -56,21 +86,12 @@ public sealed class SharedTranslatedMessagesProvider : BaseTranslatedMessagesPro
       AddTranslation(ParameterInvalidKeyFormatError, LanguageOptions.English, "Invalid Parameter Key format. The key must follow the pattern 'Module.Group.Name', where each segment contains at least 2 alphanumeric characters.");
       AddTranslation(ParameterInvalidKeyFormatError, LanguageOptions.Spanish, "Formato de clave de parámetro inválido. La clave debe seguir el patrón 'Module.Group.Name', donde cada segmento contiene al menos 2 caracteres alfanuméricos.");
       AddTranslation(ParameterInvalidKeyFormatError, LanguageOptions.PortugueseBrazil, "Formato de chave de parâmetro inválido. A chave deve seguir o padrão 'Module.Group.Name', onde cada segmento contém pelo menos 2 caracteres alfanuméricos.");
- 
-      AddTranslation(CrudCreatedSuccess, LanguageOptions.English, "{entity} created successfully.");
-      AddTranslation(CrudCreatedSuccess, LanguageOptions.Spanish, "Operación de creación completada para {entity}.");
-      AddTranslation(CrudCreatedSuccess, LanguageOptions.PortugueseBrazil, "{entity} criado(a) com sucesso.");
+   }
 
-      AddTranslation(CrudUpdatedSuccess, LanguageOptions.English, "{entity} updated successfully.");
-      AddTranslation(CrudUpdatedSuccess, LanguageOptions.Spanish, "Operación de actualización completada para {entity}.");
-      AddTranslation(CrudUpdatedSuccess, LanguageOptions.PortugueseBrazil, "{entity} atualizado(a) com sucesso.");
-
-      AddTranslation(CrudDeletedSuccess, LanguageOptions.English, "{entity} deleted successfully.");
-      AddTranslation(CrudDeletedSuccess, LanguageOptions.Spanish, "Operación de eliminación completada para {entity}.");
-      AddTranslation(CrudDeletedSuccess, LanguageOptions.PortugueseBrazil, "{entity} removido(a) com sucesso.");
-
-      AddTranslation(SuccessInfo, LanguageOptions.English, "Operation completed successfully.");
-      AddTranslation(SuccessInfo, LanguageOptions.Spanish, "Operación completada correctamente.");
-      AddTranslation(SuccessInfo, LanguageOptions.PortugueseBrazil, "Operação concluída com sucesso.");
+   private void AddVariableTranslations()
+   {
+      AddVariableTranslation(SharedConst.Message.Variable.Parameter, LanguageOptions.English, "Parameter");
+      AddVariableTranslation(SharedConst.Message.Variable.Parameter, LanguageOptions.Spanish, "Parámetro");
+      AddVariableTranslation(SharedConst.Message.Variable.Parameter, LanguageOptions.PortugueseBrazil, "Parâmetro");
    }
 }

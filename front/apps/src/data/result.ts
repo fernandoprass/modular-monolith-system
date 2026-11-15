@@ -12,6 +12,11 @@ export type ApiResult<TData> = {
   title: string | null
 }
 
+export type ApiMutationResult<TData> = {
+  data: TData
+  message: string
+}
+
 export class ApiResultError extends Error {
   messages: ApiMessage[]
   status?: number
@@ -72,4 +77,19 @@ export function getApiErrorText(error: unknown, fallback: string): string {
   }
 
   return fallback
+}
+
+export function getApiSuccessText(response: unknown): string {
+  ensureResultSuccess(response)
+
+  const result = response as ApiResult<unknown>
+
+  if (typeof result.title === 'string' && result.title.trim().length > 0) {
+    return result.title
+  }
+
+  return result.messages
+    .map((message) => message.text)
+    .filter((text) => typeof text === 'string' && text.trim().length > 0)
+    .join('\n')
 }

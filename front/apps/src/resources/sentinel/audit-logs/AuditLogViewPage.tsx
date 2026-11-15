@@ -1,16 +1,17 @@
+import { formatUserDateTime } from '../../../shared/dateFormat'
 import { ArrowLeft } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
-import { useTranslate } from '../../../app/i18n/i18n'
+import { useLocale, useTranslate } from '../../../app/i18n/i18n'
 import { APP_ROUTES } from '../../../app/routes'
 import { useNotifyError } from '../../../auth/AuthProvider'
 import { Button } from '../../../components/ui/button'
 import { Card, CardContent } from '../../../components/ui/card'
 import { getAuditLog } from './auditLogApi'
 import type { AuditLogDto } from './auditLogTypes'
-import { getAuditPrivacyLevelLabel } from './auditLogUi'
+import { getAuditPrivacyLevelEnum } from './auditLogUi'
 
 function formatMetadata(value: string): string {
   if (value.trim().length === 0) {
@@ -26,6 +27,7 @@ function formatMetadata(value: string): string {
 
 export function AuditLogViewPage() {
   const t = useTranslate()
+  const locale = useLocale()
   const navigate = useNavigate()
   const notifyError = useNotifyError()
   const { id } = useParams()
@@ -42,7 +44,7 @@ export function AuditLogViewPage() {
       try {
         setAuditLog(await getAuditLog(auditLogId))
       } catch (error) {
-        notifyError(error, t('shared.errors.generic'))
+        notifyError(error, t('common.errors.generic'))
       }
     }
 
@@ -55,31 +57,31 @@ export function AuditLogViewPage() {
         <h1 className="page-title">{t('features.sentinel.auditLogs.pages.show')}</h1>
         <Button onClick={() => navigate(APP_ROUTES.auditLogs)} type="button" variant="outline">
           <ArrowLeft data-icon="inline-start" />
-          {t('shared.actions.back')}
+          {t('common.actions.back')}
         </Button>
       </div>
       <Card>
         <CardContent>
           {auditLog === null ? (
-            <p className="page-subtitle">{t('shared.common.loading')}</p>
+            <p className="page-subtitle">{t('common.states.loading')}</p>
           ) : (
             <div className="detail-grid-one-column">
               <div className="detail-grid-two-columns">
-                <DetailField label={t('shared.fields.id')}>{auditLog.id}</DetailField>
-                <DetailField label={t('shared.fields.privacyLevel')}>{getAuditPrivacyLevelLabel(auditLog.privacyLevel, t)}</DetailField>
-                <DetailField label={t('shared.fields.module')}>{auditLog.module}</DetailField>
-                <DetailField label={t('shared.fields.feature')}>{auditLog.feature}</DetailField>
-                <DetailField label={t('shared.fields.action')}>{auditLog.action}</DetailField>
-                <DetailField label={t('shared.fields.userId')}>{auditLog.userId}</DetailField>
-                <DetailField label={t('shared.fields.organizationId')}>{auditLog.organizationId}</DetailField>
-                <DetailField label={t('shared.fields.targetId')}>{auditLog.targetId}</DetailField>
-                <DetailField label={t('shared.fields.ipAddress')}>{auditLog.ipAddress ?? ''}</DetailField>
-                <DetailField label={t('shared.fields.createdAt')}>{auditLog.createdAt}</DetailField>
-                <DetailField label={t('shared.fields.expiresAt')}>{auditLog.expiresAt}</DetailField>
+                <DetailField label={t('common.fields.id')}>{auditLog.id}</DetailField>
+                <DetailField label={t('common.fields.privacyLevel')}>{getAuditPrivacyLevelEnum(auditLog.privacyLevel, t)}</DetailField>
+                <DetailField label={t('common.fields.module')}>{auditLog.module}</DetailField>
+                <DetailField label={t('common.fields.feature')}>{auditLog.feature}</DetailField>
+                <DetailField label={t('common.fields.action')}>{auditLog.action}</DetailField>
+                <DetailField label={t('common.fields.userId')}>{auditLog.userId}</DetailField>
+                <DetailField label={t('common.fields.organizationId')}>{auditLog.organizationId}</DetailField>
+                <DetailField label={t('common.fields.targetId')}>{auditLog.targetId}</DetailField>
+                <DetailField label={t('common.fields.ipAddress')}>{auditLog.ipAddress ?? ''}</DetailField>
+                <DetailField label={t('common.fields.createdAt')}>{formatUserDateTime(auditLog.createdAt, locale)}</DetailField>
+                <DetailField label={t('common.fields.expiresAt')}>{formatUserDateTime(auditLog.expiresAt, locale)}</DetailField>
               </div>
-              <DetailField label={t('shared.fields.description')}>{auditLog.description}</DetailField>
-              <DetailField label={t('shared.fields.userAgent')}>{auditLog.userAgent ?? ''}</DetailField>
-              <DetailField label={t('shared.fields.metadata')}>
+              <DetailField label={t('common.fields.description')}>{auditLog.description}</DetailField>
+              <DetailField label={t('common.fields.userAgent')}>{auditLog.userAgent ?? ''}</DetailField>
+              <DetailField label={t('common.fields.metadata')}>
                 <pre className="detail-code">{formatMetadata(auditLog.metadata)}</pre>
               </DetailField>
             </div>

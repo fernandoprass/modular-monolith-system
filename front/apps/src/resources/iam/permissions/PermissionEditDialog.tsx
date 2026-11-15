@@ -1,4 +1,6 @@
+import { toTranslatedOptions } from '../../../shared/translatedOptions'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { createValidationErrorMap } from '../../../shared/validation'
 import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -9,7 +11,7 @@ import { useNotifyError } from '../../../auth/AuthProvider'
 import { Button } from '../../../components/ui/button'
 import { Checkbox } from '../../../components/ui/checkbox'
 import { Dialog } from '../../../components/ui/dialog-confirm'
-import { Field, FieldGroup, FieldLabel } from '../../../components/ui/form'
+import { Field, FieldError, FieldGroup, FieldLabel } from '../../../components/ui/form'
 import { Input } from '../../../components/ui/input'
 import { Select } from '../../../components/ui/select'
 import { Textarea } from '../../../components/ui/textarea'
@@ -20,7 +22,6 @@ import {
   PERMISSION_RESOURCE_OPTIONS,
   type PermissionUpdateForm,
 } from './permissionTypes'
-import { toTranslatedOptions } from './permissionUi'
 
 type PermissionEditDialogProps = {
   isOpen: boolean
@@ -49,13 +50,14 @@ export function PermissionEditDialog({
   const { showSuccess } = useToast()
   const [isSaving, setIsSaving] = useState(false)
   const {
+    formState: { errors },
     control,
     handleSubmit,
     register,
     reset,
   } = useForm<PermissionUpdateForm>({
     defaultValues: toForm(permission),
-    resolver: zodResolver(permissionEditSchema),
+    resolver: zodResolver(permissionEditSchema, { error: createValidationErrorMap(t) }),
   })
 
   useEffect(() => {
@@ -68,12 +70,12 @@ export function PermissionEditDialog({
     setIsSaving(true)
 
     try {
-      await updatePermission(permission.id, value)
-      showSuccess(t('features.iam.permissions.notifications.updated'))
+      const message = await updatePermission(permission.id, value)
+      showSuccess(message)
       await onSaved()
       onClose()
     } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
+      notifyError(error, t('common.errors.generic'))
     } finally {
       setIsSaving(false)
     }
@@ -81,25 +83,31 @@ export function PermissionEditDialog({
 
   return (
     <Dialog
-      backLabel={t('shared.actions.back')}
+      backLabel={t('common.actions.back')}
       onOpenChange={(open) => !open && onClose()}
       open={isOpen}
-      title={t('shared.actions.edit')}
+      title={t('common.actions.edit')}
     >
-      <form onSubmit={handleSubmit(handleSave)}>
+      <form noValidate onSubmit={handleSubmit(handleSave)}>
         <div className="dialog-body">
           <FieldGroup>
             <Controller
               control={control}
               name="module"
               render={({ field }) => (
-                <Field>
-                  <FieldLabel>{t('shared.fields.module')}</FieldLabel>
+                <Field data-invalid={errors.module !== undefined}>
+                  <FieldLabel htmlFor="PermissionEditDialog-module">{t('common.fields.module')}</FieldLabel>
                   <Select
+                    onBlur={field.onBlur}
+                    ref={field.ref}
+                    aria-invalid={errors.module !== undefined}
+                    aria-describedby={errors.module ? 'PermissionEditDialog-module-error' : undefined}
+                    id="PermissionEditDialog-module"
                     onValueChange={field.onChange}
                     options={toTranslatedOptions(PERMISSION_MODULE_OPTIONS, t)}
                     value={field.value}
                   />
+                  <FieldError id="PermissionEditDialog-module-error">{errors.module?.message}</FieldError>
                 </Field>
               )}
             />
@@ -107,27 +115,54 @@ export function PermissionEditDialog({
               control={control}
               name="resource"
               render={({ field }) => (
-                <Field>
-                  <FieldLabel>{t('shared.fields.resource')}</FieldLabel>
+                <Field data-invalid={errors.resource !== undefined}>
+                  <FieldLabel htmlFor="PermissionEditDialog-resource">{t('common.fields.resource')}</FieldLabel>
                   <Select
+                    onBlur={field.onBlur}
+                    ref={field.ref}
+                    aria-invalid={errors.resource !== undefined}
+                    aria-describedby={errors.resource ? 'PermissionEditDialog-resource-error' : undefined}
+                    id="PermissionEditDialog-resource"
                     onValueChange={field.onChange}
                     options={toTranslatedOptions(PERMISSION_RESOURCE_OPTIONS, t)}
                     value={field.value}
                   />
+                  <FieldError id="PermissionEditDialog-resource-error">{errors.resource?.message}</FieldError>
                 </Field>
               )}
             />
-            <Field>
-              <FieldLabel htmlFor="action">{t('shared.fields.action')}</FieldLabel>
-              <Input id="action" required {...register('action')} />
+            <Field data-invalid={errors.action !== undefined}>
+              <FieldLabel htmlFor="action">{t('common.fields.action')}</FieldLabel>
+              <Input
+                aria-invalid={errors.action !== undefined}
+                aria-describedby={errors.action ? 'PermissionEditDialog-action-error' : undefined}
+                id="action"
+                required
+                {...register('action')}
+              />
+              <FieldError id="PermissionEditDialog-action-error">{errors.action?.message}</FieldError>
             </Field>
-            <Field>
-              <FieldLabel htmlFor="title">{t('shared.fields.title')}</FieldLabel>
-              <Input id="title" required {...register('title')} />
+            <Field data-invalid={errors.title !== undefined}>
+              <FieldLabel htmlFor="title">{t('common.fields.title')}</FieldLabel>
+              <Input
+                aria-invalid={errors.title !== undefined}
+                aria-describedby={errors.title ? 'PermissionEditDialog-title-error' : undefined}
+                id="title"
+                required
+                {...register('title')}
+              />
+              <FieldError id="PermissionEditDialog-title-error">{errors.title?.message}</FieldError>
             </Field>
-            <Field>
-              <FieldLabel htmlFor="description">{t('shared.fields.description')}</FieldLabel>
-              <Textarea id="description" required {...register('description')} />
+            <Field data-invalid={errors.description !== undefined}>
+              <FieldLabel htmlFor="description">{t('common.fields.description')}</FieldLabel>
+              <Textarea
+                aria-invalid={errors.description !== undefined}
+                aria-describedby={errors.description ? 'PermissionEditDialog-description-error' : undefined}
+                id="description"
+                required
+                {...register('description')}
+              />
+              <FieldError id="PermissionEditDialog-description-error">{errors.description?.message}</FieldError>
             </Field>
             <Controller
               control={control}
@@ -135,7 +170,7 @@ export function PermissionEditDialog({
               render={({ field }) => (
                 <Checkbox
                   checked={field.value}
-                  label={t('shared.fields.isActive')}
+                  label={t('common.fields.isActive')}
                   onCheckedChange={field.onChange}
                 />
               )}
@@ -144,10 +179,10 @@ export function PermissionEditDialog({
         </div>
         <div className="dialog-actions">
           <Button onClick={onClose} type="button" variant="outline">
-            {t('shared.actions.cancel')}
+            {t('common.actions.cancel')}
           </Button>
           <Button disabled={isSaving} type="submit">
-            {t('shared.actions.save')}
+            {t('common.actions.save')}
           </Button>
         </div>
       </form>

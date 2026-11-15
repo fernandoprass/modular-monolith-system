@@ -623,6 +623,7 @@ builder.Services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHand
 - Authorization handlers must have unit tests for success, failure, role claims, admin bypass, and cache behavior.
 - When adding audit logging, update service tests to verify log dispatch on success.
 - Do not add controller tests when behavior is only in application services.
+- When creating an E2E test, add a Gherkin comment above the test method using Scenario, Given, When, Then, and And to describe the steps and outcomes it actually covers.
 
 ---
 

@@ -81,7 +81,7 @@ export function UserListPage() {
         pageSize,
       }))
     } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
+      notifyError(error, t('common.errors.generic'))
     } finally {
       setIsLoading(false)
     }
@@ -113,12 +113,12 @@ export function UserListPage() {
     }
 
     try {
-      await deleteUser(deleteTarget.id)
-      showSuccess(t('features.iam.users.notifications.deleted'))
+      const message = await deleteUser(deleteTarget.id)
+      showSuccess(message)
       setDeleteTarget(null)
       await loadUsers(pageNumber)
     } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
+      notifyError(error, t('common.errors.generic'))
     }
   }
 
@@ -131,17 +131,17 @@ export function UserListPage() {
         {canCreate && (
           <Button onClick={() => navigate(APP_ROUTES.userCreate)} type="button">
             <Plus data-icon="inline-start" />
-            {t('shared.actions.create')}
+            {t('common.actions.create')}
           </Button>
         )}
       </div>
       <FilterToolbar onReset={handleReset} onSubmit={handleSubmit(handleSearch)}>
         <Field>
-          <FieldLabel htmlFor="name">{t('shared.fields.name')}</FieldLabel>
+          <FieldLabel htmlFor="name">{t('common.fields.name')}</FieldLabel>
           <Input id="name" {...register('name')} />
         </Field>
         <Field>
-          <FieldLabel htmlFor="email">{t('shared.fields.email')}</FieldLabel>
+          <FieldLabel htmlFor="email">{t('common.fields.email')}</FieldLabel>
           <Input id="email" {...register('email')} />
         </Field>
         <Controller
@@ -149,13 +149,13 @@ export function UserListPage() {
           name="isActive"
           render={({ field }) => (
             <Field>
-              <FieldLabel>{t('shared.fields.isActive')}</FieldLabel>
+              <FieldLabel>{t('common.fields.isActive')}</FieldLabel>
               <Select
                 onValueChange={field.onChange}
                 options={[
-                  { label: t('shared.filters.all'), value: USER_FILTER_VALUES.all },
-                  { label: t('shared.status.active'), value: 'true' },
-                  { label: t('shared.status.inactive'), value: 'false' },
+                  { label: t('common.filters.all'), value: USER_FILTER_VALUES.all },
+                  { label: t('common.status.active'), value: 'true' },
+                  { label: t('common.status.inactive'), value: 'false' },
                 ]}
                 value={field.value}
               />
@@ -169,7 +169,7 @@ export function UserListPage() {
         data={result?.items ?? []}
         emptyText={t('features.iam.users.messages.empty')}
         isLoading={isLoading}
-        loadingText={t('shared.common.loading')}
+        loadingText={t('common.states.loading')}
         onSortingChange={setSorting}
         sorting={sorting}
       />
@@ -184,13 +184,13 @@ export function UserListPage() {
       />
 
       <ConfirmDialog
-        cancelText={t('shared.actions.cancel')}
-        backLabel={t('shared.actions.back')}
-        confirmText={t('shared.actions.delete')}
+        cancelText={t('common.actions.cancel')}
+        backLabel={t('common.actions.back')}
+        confirmText={t('common.actions.delete')}
         onConfirm={() => void handleConfirmDelete()}
         onOpenChange={(open) => !open && setDeleteTarget(null)}
         open={deleteTarget !== null}
-        title={t('shared.actions.delete')}
+        title={t('common.actions.delete')}
       >
         <p>{t('features.iam.users.messages.deleteConfirm')}</p>
       </ConfirmDialog>

@@ -1,9 +1,10 @@
+import { toTranslatedOptions } from '../../../shared/translatedOptions'
 import type { SortingState } from '@tanstack/react-table'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 
-import { useTranslate, type Translate } from '../../../app/i18n/i18n'
+import { useTranslate } from '../../../app/i18n/i18n'
 import { APP_ROUTES } from '../../../app/routes'
 import { useAuth, useNotifyError } from '../../../auth/AuthProvider'
 import { DataTable } from '../../../components/ui/data-table'
@@ -29,18 +30,6 @@ const EMPTY_PARAMETER_SEARCH: ParameterSearchForm = {
   module: PARAMETER_FILTER_VALUES.all,
   name: '',
   title: '',
-}
-
-type ParameterOption = {
-  labelKey: string
-  value: string
-}
-
-function toTranslatedOptions(options: readonly ParameterOption[], t: Translate) {
-  return options.map((option) => ({
-    label: t(option.labelKey),
-    value: option.value,
-  }))
 }
 
 export function ParameterListPage() {
@@ -77,7 +66,7 @@ export function ParameterListPage() {
         title: appliedFilters.title,
       }))
     } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
+      notifyError(error, t('common.errors.generic'))
     } finally {
       setIsLoading(false)
     }
@@ -116,25 +105,25 @@ export function ParameterListPage() {
           name="module"
           render={({ field }) => (
             <Field>
-              <FieldLabel>{t('shared.fields.module')}</FieldLabel>
+              <FieldLabel>{t('common.fields.module')}</FieldLabel>
               <Select
                 onValueChange={field.onChange}
-                options={[{ label: t('shared.filters.all'), value: PARAMETER_FILTER_VALUES.all }, ...toTranslatedOptions(PARAMETER_MODULE_OPTIONS, t)]}
+                options={[{ label: t('common.filters.all'), value: PARAMETER_FILTER_VALUES.all }, ...toTranslatedOptions(PARAMETER_MODULE_OPTIONS, t)]}
                 value={field.value}
               />
             </Field>
           )}
         />
         <Field>
-          <FieldLabel htmlFor="group">{t('shared.fields.group')}</FieldLabel>
+          <FieldLabel htmlFor="group">{t('common.fields.group')}</FieldLabel>
           <Input id="group" {...register('group')} />
         </Field>
         <Field>
-          <FieldLabel htmlFor="name">{t('shared.fields.name')}</FieldLabel>
+          <FieldLabel htmlFor="name">{t('common.fields.name')}</FieldLabel>
           <Input id="name" {...register('name')} />
         </Field>
         <Field>
-          <FieldLabel htmlFor="title">{t('shared.fields.title')}</FieldLabel>
+          <FieldLabel htmlFor="title">{t('common.fields.title')}</FieldLabel>
           <Input id="title" {...register('title')} />
         </Field>
       </FilterToolbar>
@@ -143,7 +132,7 @@ export function ParameterListPage() {
         data={result?.items ?? []}
         emptyText={t('features.iam.parameters.messages.empty')}
         isLoading={isLoading}
-        loadingText={t('shared.common.loading')}
+        loadingText={t('common.states.loading')}
         onSortingChange={setSorting}
         sorting={sorting}
       />

@@ -1,3 +1,4 @@
+import { toTranslatedOptions } from '../../../shared/translatedOptions'
 import type { SortingState } from '@tanstack/react-table'
 import { Plus } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -28,7 +29,6 @@ import {
   type TemplateLiteDto,
   type TemplateSearchForm,
 } from './templateTypes'
-import { toTranslatedTemplateOptions } from './templateUi'
 
 const EMPTY_TEMPLATE_SEARCH: TemplateSearchForm = {
   key: '',
@@ -72,7 +72,7 @@ export function TemplateListPage() {
         pageSize,
       }))
     } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
+      notifyError(error, t('common.errors.generic'))
     } finally {
       setIsLoading(false)
     }
@@ -104,12 +104,12 @@ export function TemplateListPage() {
     }
 
     try {
-      await deleteTemplate(templateToDelete.id)
-      showSuccess(t('features.courier.templates.notifications.deleted'))
+      const message = await deleteTemplate(templateToDelete.id)
+      showSuccess(message)
       setTemplateToDelete(null)
       await loadTemplates(pageNumber)
     } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
+      notifyError(error, t('common.errors.generic'))
     }
   }
 
@@ -132,12 +132,12 @@ export function TemplateListPage() {
           name="module"
           render={({ field }) => (
             <Field>
-              <FieldLabel>{t('shared.fields.module')}</FieldLabel>
+              <FieldLabel>{t('common.fields.module')}</FieldLabel>
               <Select
                 onValueChange={field.onChange}
                 options={[
-                  { label: t('shared.filters.all'), value: TEMPLATE_FILTER_VALUES.all },
-                  ...toTranslatedTemplateOptions(TEMPLATE_MODULE_OPTIONS, t),
+                  { label: t('common.filters.all'), value: TEMPLATE_FILTER_VALUES.all },
+                  ...toTranslatedOptions(TEMPLATE_MODULE_OPTIONS, t),
                 ]}
                 value={field.value}
               />
@@ -145,11 +145,11 @@ export function TemplateListPage() {
           )}
         />
         <Field>
-          <FieldLabel htmlFor="template-key-filter">{t('shared.fields.key')}</FieldLabel>
+          <FieldLabel htmlFor="template-key-filter">{t('common.fields.key')}</FieldLabel>
           <Input id="template-key-filter" {...register('key')} />
         </Field>
         <Field>
-          <FieldLabel htmlFor="template-name-filter">{t('shared.fields.name')}</FieldLabel>
+          <FieldLabel htmlFor="template-name-filter">{t('common.fields.name')}</FieldLabel>
           <Input id="template-name-filter" {...register('name')} />
         </Field>
         <Controller
@@ -157,12 +157,12 @@ export function TemplateListPage() {
           name="severity"
           render={({ field }) => (
             <Field>
-              <FieldLabel>{t('shared.fields.severity')}</FieldLabel>
+              <FieldLabel>{t('common.fields.severity')}</FieldLabel>
               <Select
                 onValueChange={field.onChange}
                 options={[
-                  { label: t('shared.filters.all'), value: TEMPLATE_FILTER_VALUES.all },
-                  ...toTranslatedTemplateOptions(NOTIFICATION_SEVERITY_OPTIONS, t),
+                  { label: t('common.filters.all'), value: TEMPLATE_FILTER_VALUES.all },
+                  ...toTranslatedOptions(NOTIFICATION_SEVERITY_OPTIONS, t),
                 ]}
                 value={field.value}
               />
@@ -175,7 +175,7 @@ export function TemplateListPage() {
         data={result?.items ?? []}
         emptyText={t('features.courier.templates.messages.empty')}
         isLoading={isLoading}
-        loadingText={t('shared.common.loading')}
+        loadingText={t('common.states.loading')}
         onSortingChange={setSorting}
         sorting={sorting}
       />
@@ -188,9 +188,9 @@ export function TemplateListPage() {
         totalPages={totalPages}
       />
       <ConfirmDialog
-        backLabel={t('shared.actions.back')}
-        cancelText={t('shared.actions.cancel')}
-        confirmText={t('shared.actions.delete')}
+        backLabel={t('common.actions.back')}
+        cancelText={t('common.actions.cancel')}
+        confirmText={t('common.actions.delete')}
         onConfirm={() => void handleDelete()}
         onOpenChange={(open) => !open && setTemplateToDelete(null)}
         open={templateToDelete !== null}

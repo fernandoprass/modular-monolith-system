@@ -1,5 +1,10 @@
 import type { PermissionCode } from '../shared/permissions'
 import { STORAGE_KEYS } from './storageKeys'
+import { normalizeLanguageCode } from '../shared/languages'
+
+let sessionVersion = 0
+
+export type AuthSession = { version: number; token: string | null }
 
 export type StoredUser = {
   email: string
@@ -26,15 +31,25 @@ function parseStoredValue<TValue>(value: string | null, clearValue: () => void):
 }
 
 export const tokenStorage = {
+  getSession(): AuthSession {
+    return { version: sessionVersion, token: this.getToken() }
+  },
+
+  isCurrentSession(session: AuthSession): boolean {
+    return session.version === sessionVersion && session.token === this.getToken()
+  },
+
   getToken(): string | null {
     return localStorage.getItem(STORAGE_KEYS.authToken)
   },
 
   setToken(token: string): void {
+    sessionVersion += 1
     localStorage.setItem(STORAGE_KEYS.authToken, token)
   },
 
   clearToken(): void {
+    sessionVersion += 1
     localStorage.removeItem(STORAGE_KEYS.authToken)
   },
 
@@ -47,6 +62,15 @@ export const tokenStorage = {
 
   setUser(user: StoredUser): void {
     localStorage.setItem(STORAGE_KEYS.authUser, JSON.stringify(user))
+  },
+
+  updateProfile(userId: string, profile: Pick<StoredUser, 'fullName' | 'language'>, session: AuthSession): StoredUser | null {
+    const user = this.getUser()
+    if (!this.isCurrentSession(session) || session.token === null || user?.id !== userId) return null
+
+    const updatedUser = { ...user, ...profile, language: normalizeLanguageCode(profile.language) }
+    this.setUser(updatedUser)
+    return updatedUser
   },
 
   clearUser(): void {

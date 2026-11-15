@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { createValidationErrorMap } from '../../../shared/validation'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -8,7 +9,7 @@ import { useTranslate } from '../../../app/i18n/i18n'
 import { useNotifyError } from '../../../auth/AuthProvider'
 import { Button } from '../../../components/ui/button'
 import { Dialog } from '../../../components/ui/dialog-confirm'
-import { Field, FieldGroup, FieldLabel } from '../../../components/ui/form'
+import { Field, FieldError, FieldGroup, FieldLabel } from '../../../components/ui/form'
 import { Input } from '../../../components/ui/input'
 import { ORGANIZATION_REQUEST_FIELDS, type OrganizationDto } from './organizationTypes'
 import { updateOrganizationCode } from './organizationApi'
@@ -39,6 +40,7 @@ export function OrganizationCodeEditDialog({
   const { showSuccess } = useToast()
   const [isSaving, setIsSaving] = useState(false)
   const {
+    formState: { errors },
     handleSubmit,
     register,
     reset,
@@ -46,7 +48,7 @@ export function OrganizationCodeEditDialog({
     defaultValues: {
       code: organization.code,
     },
-    resolver: zodResolver(organizationCodeSchema),
+    resolver: zodResolver(organizationCodeSchema, { error: createValidationErrorMap(t) }),
   })
 
   useEffect(() => {
@@ -59,14 +61,14 @@ export function OrganizationCodeEditDialog({
     setIsSaving(true)
 
     try {
-      await updateOrganizationCode(organization.id, {
+      const message = await updateOrganizationCode(organization.id, {
         [ORGANIZATION_REQUEST_FIELDS.code]: value.code,
       })
-      showSuccess(t('features.iam.organizations.notifications.codeUpdated'))
+      showSuccess(message)
       await onSaved()
       onClose()
     } catch (error) {
-      notifyError(error, t('shared.errors.generic'))
+      notifyError(error, t('common.errors.generic'))
     } finally {
       setIsSaving(false)
     }
@@ -74,26 +76,34 @@ export function OrganizationCodeEditDialog({
 
   return (
     <Dialog
-      backLabel={t('shared.actions.back')}
+      backLabel={t('common.actions.back')}
       onOpenChange={(open) => !open && onClose()}
       open={isOpen}
-      title={t('shared.actions.editCode')}
+      title={t('common.actions.editCode')}
     >
-      <form onSubmit={handleSubmit(handleSave)}>
+      <form noValidate onSubmit={handleSubmit(handleSave)}>
         <div className="dialog-body">
           <FieldGroup>
-            <Field>
-              <FieldLabel htmlFor="code">{t('shared.fields.code')}</FieldLabel>
-              <Input autoFocus id="code" required {...register('code')} />
+            <Field data-invalid={errors.code !== undefined}>
+              <FieldLabel htmlFor="code">{t('common.fields.code')}</FieldLabel>
+              <Input
+                aria-invalid={errors.code !== undefined}
+                aria-describedby={errors.code ? 'OrganizationCodeEditDialog-code-error' : undefined}
+                autoFocus
+                id="code"
+                required
+                {...register('code')}
+              />
+              <FieldError id="OrganizationCodeEditDialog-code-error">{errors.code?.message}</FieldError>
             </Field>
           </FieldGroup>
         </div>
         <div className="dialog-actions">
           <Button onClick={onClose} type="button" variant="outline">
-            {t('shared.actions.cancel')}
+            {t('common.actions.cancel')}
           </Button>
           <Button disabled={isSaving} type="submit">
-            {t('shared.actions.save')}
+            {t('common.actions.save')}
           </Button>
         </div>
       </form>
