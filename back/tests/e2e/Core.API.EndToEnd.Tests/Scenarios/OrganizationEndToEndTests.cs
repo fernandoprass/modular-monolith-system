@@ -6,6 +6,13 @@ public class OrganizationEndToEndTests(CoreApiTestFixture fixture) : IClassFixtu
 {
    private readonly CoreApiTestFixture _fixture = fixture;
 
+   // Scenario: Create, update, and delete an organization
+   // Given a new organization and its administrator are registered
+   // And the administrator logs in
+   // When the administrator updates the organization details and code
+   // And reads the organization back
+   // Then its name, description, language, active status, and code match the updates
+   // And deleting the organization succeeds
    [Fact]
    public async Task OrganizationFlow_ShouldCreateLoginUpdateVerifyAndDeleteOrganization()
    {

@@ -122,7 +122,9 @@ public class RegisterOrchestrator(
          BuildOrganizationTemplateValues(organization, user),
          cancellationToken);
 
-      return new Result<OrganizationDto>(IamTranslatedMessagesProvider.Instance.CreatedSuccess(IamConst.Message.Variable.Organization));
+      return new Result<OrganizationDto>(
+         organization.ToOrganizationDto(),
+         [IamTranslatedMessagesProvider.Instance.CreatedSuccess(IamConst.Message.Variable.Organization)]);
    }
 
    public async Task<Result> DeleteOrganizationAsync(Guid id, CancellationToken cancellationToken = default)

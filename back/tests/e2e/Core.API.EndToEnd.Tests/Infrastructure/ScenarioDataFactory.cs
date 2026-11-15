@@ -1,5 +1,6 @@
 using IAM.Domain.DTOs.Requests;
 using IAM.Domain.Enums;
+using Shared.Domain;
 
 namespace Core.API.EndToEnd.Tests.Infrastructure;
 
@@ -17,7 +18,7 @@ internal static class ScenarioDataFactory
          $"E2E Test - Acme {suffix}",
          $"acme{suffix}",
          $"E2E Test - Organization {suffix}",
-         "en",
+         LanguageOptions.English,
          new OrganizationUserCreateRequest(
             $"E2E Test - Admin {suffix}",
             $"admin-{suffix}@example.com",
@@ -32,7 +33,7 @@ internal static class ScenarioDataFactory
          $"E2E Test - Updated Acme {suffix}",
          $"E2E Test - Updated organization {suffix}",
          true,
-         "en");
+         LanguageOptions.English);
    }
 
    public static OrganizationUpdateCodeRequest UpdateOrganizationCode()
@@ -50,7 +51,7 @@ internal static class ScenarioDataFactory
          $"E2E Test - User {suffix}",
          $"user-{suffix}@example.com",
          Password,
-         "en",
+         LanguageOptions.English,
          organizationId);
    }
 
@@ -61,7 +62,7 @@ internal static class ScenarioDataFactory
       return new UserUpdateRequest(
          $"E2E Test - Updated User {suffix}",
          true,
-         "pt-BR");
+         LanguageOptions.PortugueseBrazil);
    }
 
    public static UserUpdatePasswordRequest UpdatePassword()

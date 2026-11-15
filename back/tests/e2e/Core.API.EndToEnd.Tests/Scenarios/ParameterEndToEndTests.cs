@@ -11,6 +11,13 @@ public class ParameterEndToEndTests(CoreApiTestFixture fixture) : IClassFixture<
 
    private readonly CoreApiTestFixture _fixture = fixture;
 
+   // Scenario: Override a parameter and restore its default value
+   // Given a new organization with a logged-in administrator
+   // And the maximum password age parameter has a default value of 90 days
+   // When the administrator finds the parameter and overrides it with 30 days
+   // Then reading its value returns 30 days with an override flag and identifier
+   // When the administrator deletes that override
+   // Then reading its value returns 90 days with no override flag or identifier
    [Fact]
    public async Task ParameterFlow_ShouldOverrideReadDeleteOverrideAndReadDefaultValue()
    {

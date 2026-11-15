@@ -8,6 +8,10 @@ public class PermissionEndToEndTests(CoreApiTestFixture fixture) : IClassFixture
 {
    private readonly CoreApiTestFixture _fixture = fixture;
 
+   // Scenario: Find a known permission using search filters
+   // Given a new organization with a logged-in administrator
+   // When the administrator searches active permissions for IAM users and the read action
+   // Then the results contain the iam.users.read permission
    [Fact]
    public async Task PermissionFlow_ShouldSearchPermissionsAndFindKnownPermission()
    {
@@ -21,7 +25,7 @@ public class PermissionEndToEndTests(CoreApiTestFixture fixture) : IClassFixture
          TestContext.Current.CancellationToken);
 
       var permissions = await adminApi.SearchPermissionsAsync(
-         new PermissionSearchRequest(null, "iam", "users", "view", null, false),
+         new PermissionSearchRequest(null, "iam", "users", IamPermission.Users.Read.Split('.')[2], null, false),
          TestContext.Current.CancellationToken);
 
       Assert.Contains(permissions, permission => permission.Code == IamPermission.Users.Read);
