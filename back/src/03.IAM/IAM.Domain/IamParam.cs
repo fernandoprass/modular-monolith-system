@@ -21,6 +21,6 @@ public static class IamParam
       private const string Group = "Role";
 
       public const string DefaultRoleIdForNewUser = $"{Module}.{Group}.{nameof(DefaultRoleIdForNewUser)}";
-      public const string DefaultRoleIdForNewOrganization = $"{Module}.{Group}.{nameof(DefaultRoleIdForNewOrganization)}";
+      public const string DefaultRoleIdForOrganizationAdministrator = $"{Module}.{Group}.{nameof(DefaultRoleIdForOrganizationAdministrator)}";
    }
 }

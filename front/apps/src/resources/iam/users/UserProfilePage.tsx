@@ -46,7 +46,7 @@ export function UserProfileSection() {
       const loaded = await getCurrentUser()
       setUser(loaded)
     } catch (error) {
-      notifyError(error, t('common.errors.generic'))
+      notifyError(error, t('common.messages.errors.generic'))
     }
   }, [notifyError, t])
 
@@ -113,7 +113,7 @@ function UserProfileFormPanel({ onSaved, user }: UserProfileFormPanelProps) {
       showSuccess(message)
       await onSaved()
     } catch (error) {
-      if (tokenStorage.isCurrentSession(session)) notifyError(error, t('common.errors.generic'))
+      if (tokenStorage.isCurrentSession(session)) notifyError(error, t('common.messages.errors.generic'))
     } finally {
       setIsSaving(false)
     }
@@ -123,11 +123,11 @@ function UserProfileFormPanel({ onSaved, user }: UserProfileFormPanelProps) {
     <form noValidate className="edit-form" onSubmit={handleSubmit(handleSave)}>
       <FieldGroup>
         <Field data-disabled>
-          <FieldLabel>{t('common.fields.email')}</FieldLabel>
+          <FieldLabel>{t('common.labels.email')}</FieldLabel>
           <Input disabled value={user.email} />
         </Field>
         <Field data-invalid={errors.name !== undefined}>
-          <FieldLabel htmlFor="name">{t('common.fields.name')}</FieldLabel>
+          <FieldLabel htmlFor="name">{t('common.labels.name')}</FieldLabel>
           <Input
             aria-invalid={errors.name !== undefined}
             aria-describedby={errors.name ? 'UserProfilePage-name-error' : undefined}
@@ -142,7 +142,7 @@ function UserProfileFormPanel({ onSaved, user }: UserProfileFormPanelProps) {
           name="language"
           render={({ field }) => (
             <Field data-invalid={errors.language !== undefined}>
-              <FieldLabel htmlFor="UserProfilePage-language">{t('common.fields.language')}</FieldLabel>
+              <FieldLabel htmlFor="UserProfilePage-language">{t('common.labels.language')}</FieldLabel>
               <Select
                 onBlur={field.onBlur}
                 ref={field.ref}

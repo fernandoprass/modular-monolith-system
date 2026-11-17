@@ -17,10 +17,10 @@ export function createParameterEditSchema(t: Translate) {
     value: z.string().min(1),
   }).superRefine((value, context) => {
     if (value.type === PARAMETER_TYPE_VALUES.list && !value.listItems.trim()) {
-      context.addIssue({ code: 'custom', path: ['listItems'], message: t('common.validation.required') })
+      context.addIssue({ code: 'custom', path: ['listItems'], message: t('common.messages.validation.required') })
     }
     if (value.type === PARAMETER_TYPE_VALUES.referenceId && !value.externalListEndpoint.trim()) {
-      context.addIssue({ code: 'custom', path: ['externalListEndpoint'], message: t('common.validation.required') })
+      context.addIssue({ code: 'custom', path: ['externalListEndpoint'], message: t('common.messages.validation.required') })
     }
     if (!value.value) return
 
@@ -30,7 +30,7 @@ export function createParameterEditSchema(t: Translate) {
       && (!value.value.trim() || !Number.isFinite(number))
     const invalidCharacter = value.type === PARAMETER_TYPE_VALUES.character && value.value.length > 1
     if (invalidInteger || invalidNumber || invalidCharacter) {
-      context.addIssue({ code: 'custom', path: ['value'], message: t('common.validation.invalid') })
+      context.addIssue({ code: 'custom', path: ['value'], message: t('common.messages.validation.invalid') })
     }
   })
 }

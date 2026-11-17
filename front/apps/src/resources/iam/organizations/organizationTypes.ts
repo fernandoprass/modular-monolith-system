@@ -84,11 +84,11 @@ export type OrganizationCodeUpdateRequest = {
 
 export const ORGANIZATION_TYPE_OPTIONS = [
   {
-    labelKey: 'features.iam.organizations.types.company',
+    labelKey: 'features.iam.enums.organizationType.company',
     value: String(ORGANIZATION_TYPES.company),
   },
   {
-    labelKey: 'features.iam.organizations.types.individual',
+    labelKey: 'features.iam.enums.organizationType.individual',
     value: String(ORGANIZATION_TYPES.individual),
   },
 ] as const

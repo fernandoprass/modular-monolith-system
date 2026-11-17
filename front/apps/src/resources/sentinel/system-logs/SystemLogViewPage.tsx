@@ -44,7 +44,7 @@ export function SystemLogViewPage() {
       try {
         setSystemLog(await getSystemLog(systemLogId))
       } catch (error) {
-        notifyError(error, t('common.errors.generic'))
+        notifyError(error, t('common.messages.errors.generic'))
       }
     }
 
@@ -54,7 +54,7 @@ export function SystemLogViewPage() {
   return (
     <main className="page">
       <div className="page-header">
-        <h1 className="page-title">{t('features.sentinel.systemLogs.pages.show')}</h1>
+        <h1 className="page-title">{t('common.pages.show', { entity: t('features.sentinel.labels.systemLog') })}</h1>
         <Button onClick={() => navigate(APP_ROUTES.systemLogs)} type="button" variant="outline">
           <ArrowLeft data-icon="inline-start" />
           {t('common.actions.back')}
@@ -67,22 +67,22 @@ export function SystemLogViewPage() {
           ) : (
             <div className="detail-grid-one-column">
               <div className="detail-grid-two-columns">
-                <DetailField label={t('common.fields.id')}>{systemLog.id}</DetailField>
-                <DetailField label={t('common.fields.level')}>{getSystemLogLevelEnum(systemLog.level, t)}</DetailField>
-                <DetailField label={t('common.fields.status')}>{getSystemLogStatusEnum(systemLog.status, t)}</DetailField>
-                <DetailField label={t('common.fields.module')}>{systemLog.module}</DetailField>
-                <DetailField label={t('common.fields.createdAt')}>{formatUserDateTime(systemLog.createdAt, locale)}</DetailField>
-                <DetailField label={t('common.fields.expiresAt')}>{formatUserDateTime(systemLog.expiresAt, locale)}</DetailField>
-                <DetailField label={t('common.fields.requestId')}>{systemLog.requestId ?? ''}</DetailField>
-                <DetailField label={t('common.fields.userId')}>{systemLog.userId ?? ''}</DetailField>
-                <DetailField label={t('common.fields.organizationId')}>{systemLog.organizationId ?? ''}</DetailField>
+                <DetailField label={t('common.labels.id')}>{systemLog.id}</DetailField>
+                <DetailField label={t('features.sentinel.labels.level')}>{getSystemLogLevelEnum(systemLog.level, t)}</DetailField>
+                <DetailField label={t('common.labels.status')}>{getSystemLogStatusEnum(systemLog.status, t)}</DetailField>
+                <DetailField label={t('common.labels.module')}>{systemLog.module}</DetailField>
+                <DetailField label={t('common.labels.createdAt')}>{formatUserDateTime(systemLog.createdAt, locale)}</DetailField>
+                <DetailField label={t('common.labels.expiresAt')}>{formatUserDateTime(systemLog.expiresAt, locale)}</DetailField>
+                <DetailField label={t('features.sentinel.labels.requestId')}>{systemLog.requestId ?? ''}</DetailField>
+                <DetailField label={t('features.iam.labels.userId')}>{systemLog.userId ?? ''}</DetailField>
+                <DetailField label={t('features.iam.labels.organizationId')}>{systemLog.organizationId ?? ''}</DetailField>
               </div>
-              <DetailField label={t('common.fields.message')}>{systemLog.message}</DetailField>
-              <DetailField label={t('common.fields.exception')}>{systemLog.exception ?? ''}</DetailField>
-              <DetailField label={t('common.fields.stackTrace')}>
+              <DetailField label={t('common.labels.message')}>{systemLog.message}</DetailField>
+              <DetailField label={t('features.sentinel.labels.exception')}>{systemLog.exception ?? ''}</DetailField>
+              <DetailField label={t('common.labels.stackTrace')}>
                 <pre className="detail-code">{systemLog.stackTrace ?? ''}</pre>
               </DetailField>
-              <DetailField label={t('common.fields.propertiesJson')}>
+              <DetailField label={t('features.sentinel.labels.propertiesJson')}>
                 <pre className="detail-code">{formatJson(systemLog.propertiesJson)}</pre>
               </DetailField>
             </div>

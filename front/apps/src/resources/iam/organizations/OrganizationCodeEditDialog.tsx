@@ -68,7 +68,7 @@ export function OrganizationCodeEditDialog({
       await onSaved()
       onClose()
     } catch (error) {
-      notifyError(error, t('common.errors.generic'))
+      notifyError(error, t('common.messages.errors.generic'))
     } finally {
       setIsSaving(false)
     }
@@ -85,7 +85,7 @@ export function OrganizationCodeEditDialog({
         <div className="dialog-body">
           <FieldGroup>
             <Field data-invalid={errors.code !== undefined}>
-              <FieldLabel htmlFor="code">{t('common.fields.code')}</FieldLabel>
+              <FieldLabel htmlFor="code">{t('common.labels.code')}</FieldLabel>
               <Input
                 aria-invalid={errors.code !== undefined}
                 aria-describedby={errors.code ? 'OrganizationCodeEditDialog-code-error' : undefined}

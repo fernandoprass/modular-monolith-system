@@ -42,7 +42,7 @@ export function UserAccountPage() {
   return (
     <main className="page user-account-page">
       <div className="page-header">
-        <h1 className="page-title">{t('features.iam.users.account.title')}</h1>
+        <h1 className="page-title">{t('features.iam.labels.userProfile')}</h1>
       </div>
       <Tabs
         className="user-account-tabs"
@@ -51,21 +51,21 @@ export function UserAccountPage() {
       >
         <TabsList>
           <TabsTrigger value={USER_ACCOUNT_SECTIONS.profile}>
-            {t('features.iam.users.account.profile')}
+            {t('common.labels.profile')}
           </TabsTrigger>
           {canViewSecurity && (
             <TabsTrigger value={USER_ACCOUNT_SECTIONS.security}>
-              {t('features.iam.users.account.security')}
+              {t('common.featureLabels.security')}
             </TabsTrigger>
           )}
           {canViewSettings && (
             <TabsTrigger value={USER_ACCOUNT_SECTIONS.settings}>
-              {t('features.iam.users.account.settings')}
+              {t('common.labels.settings')}
             </TabsTrigger>
           )}
           {canViewCommunication && (
             <TabsTrigger value={USER_ACCOUNT_SECTIONS.communication}>
-              {t('features.iam.users.account.communication')}
+              {t('features.courier.labels.communications')}
             </TabsTrigger>
           )}
         </TabsList>

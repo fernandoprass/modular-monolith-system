@@ -74,7 +74,7 @@ export function ParameterEditPage() {
       const loaded = await getParameter(id)
       setParameter(loaded)
     } catch (error) {
-      notifyError(error, t('common.errors.generic'))
+      notifyError(error, t('common.messages.errors.generic'))
     }
   }, [id, notifyError, t])
 
@@ -89,7 +89,7 @@ export function ParameterEditPage() {
   return (
     <main className="page">
       <div className="page-header">
-        <h1 className="page-title">{t('features.iam.parameters.pages.edit')}</h1>
+        <h1 className="page-title">{t('common.pages.edit', { entity: t('features.iam.labels.parameter') })}</h1>
         <Button onClick={() => navigate(APP_ROUTES.parameters)} type="button" variant="outline">
           <ArrowLeft data-icon="inline-start" />
           {t('common.actions.back')}
@@ -135,7 +135,7 @@ function ParameterEditForm({ onSaved, parameter }: ParameterEditFormProps) {
       showSuccess(message)
       await onSaved()
     } catch (error) {
-      notifyError(error, t('common.errors.generic'))
+      notifyError(error, t('common.messages.errors.generic'))
     } finally {
       setIsSaving(false)
     }
@@ -145,7 +145,7 @@ function ParameterEditForm({ onSaved, parameter }: ParameterEditFormProps) {
     <form noValidate className="edit-form" onSubmit={handleSubmit(handleSave)}>
       <FieldGroup>
         <Field>
-          <FieldLabel htmlFor="parameter-key">{t('common.fields.key')}</FieldLabel>
+          <FieldLabel htmlFor="parameter-key">{t('common.labels.key')}</FieldLabel>
           <Input disabled id="parameter-key" value={parameter.key} />
         </Field>
         <div className="form-row-two">
@@ -154,7 +154,7 @@ function ParameterEditForm({ onSaved, parameter }: ParameterEditFormProps) {
             name="module"
             render={({ field }) => (
               <Field data-invalid={errors.module !== undefined}>
-                <FieldLabel htmlFor="ParameterEditPage-module">{t('common.fields.module')}</FieldLabel>
+                <FieldLabel htmlFor="ParameterEditPage-module">{t('common.labels.module')}</FieldLabel>
                 <Select
                   onBlur={field.onBlur}
                   ref={field.ref}
@@ -170,7 +170,7 @@ function ParameterEditForm({ onSaved, parameter }: ParameterEditFormProps) {
             )}
           />
           <Field data-invalid={errors.group !== undefined}>
-            <FieldLabel htmlFor="group">{t('common.fields.group')}</FieldLabel>
+            <FieldLabel htmlFor="group">{t('common.labels.group')}</FieldLabel>
             <Input
               aria-invalid={errors.group !== undefined}
               aria-describedby={errors.group ? 'ParameterEditPage-group-error' : undefined}
@@ -182,7 +182,7 @@ function ParameterEditForm({ onSaved, parameter }: ParameterEditFormProps) {
           </Field>
         </div>
         <Field data-invalid={errors.name !== undefined}>
-          <FieldLabel htmlFor="name">{t('common.fields.name')}</FieldLabel>
+          <FieldLabel htmlFor="name">{t('common.labels.name')}</FieldLabel>
           <Input
             aria-invalid={errors.name !== undefined}
             aria-describedby={errors.name ? 'ParameterEditPage-name-error' : undefined}
@@ -193,7 +193,7 @@ function ParameterEditForm({ onSaved, parameter }: ParameterEditFormProps) {
           <FieldError id="ParameterEditPage-name-error">{errors.name?.message}</FieldError>
         </Field>
         <Field data-invalid={errors.title !== undefined}>
-          <FieldLabel htmlFor="title">{t('common.fields.title')}</FieldLabel>
+          <FieldLabel htmlFor="title">{t('common.labels.title')}</FieldLabel>
           <Input
             aria-invalid={errors.title !== undefined}
             aria-describedby={errors.title ? 'ParameterEditPage-title-error' : undefined}
@@ -204,7 +204,7 @@ function ParameterEditForm({ onSaved, parameter }: ParameterEditFormProps) {
           <FieldError id="ParameterEditPage-title-error">{errors.title?.message}</FieldError>
         </Field>
         <Field data-invalid={errors.description !== undefined}>
-          <FieldLabel htmlFor="description">{t('common.fields.description')}</FieldLabel>
+          <FieldLabel htmlFor="description">{t('common.labels.description')}</FieldLabel>
           <Textarea
             aria-invalid={errors.description !== undefined}
             aria-describedby={errors.description ? 'ParameterEditPage-description-error' : undefined}
@@ -220,7 +220,7 @@ function ParameterEditForm({ onSaved, parameter }: ParameterEditFormProps) {
             name="overrideType"
             render={({ field }) => (
               <Field data-invalid={errors.overrideType !== undefined}>
-                <FieldLabel htmlFor="ParameterEditPage-overrideType">{t('common.fields.overrideType')}</FieldLabel>
+                <FieldLabel htmlFor="ParameterEditPage-overrideType">{t('features.iam.labels.overrideType')}</FieldLabel>
                 <Select
                   onBlur={field.onBlur}
                   ref={field.ref}
@@ -240,7 +240,7 @@ function ParameterEditForm({ onSaved, parameter }: ParameterEditFormProps) {
             name="type"
             render={({ field }) => (
               <Field data-invalid={errors.type !== undefined}>
-                <FieldLabel htmlFor="ParameterEditPage-type">{t('common.fields.type')}</FieldLabel>
+                <FieldLabel htmlFor="ParameterEditPage-type">{t('common.labels.type')}</FieldLabel>
                 <Select
                   onBlur={field.onBlur}
                   ref={field.ref}
@@ -261,7 +261,7 @@ function ParameterEditForm({ onSaved, parameter }: ParameterEditFormProps) {
           name="value"
           render={({ field }) => (
             <Field data-invalid={errors.value !== undefined}>
-              <FieldLabel htmlFor="value">{t('common.fields.value')}</FieldLabel>
+              <FieldLabel htmlFor="value">{t('common.labels.value')}</FieldLabel>
               <ParameterValueInput
                 aria-invalid={errors.value !== undefined}
                 aria-describedby={errors.value ? 'ParameterEditPage-value-error' : undefined}
@@ -277,7 +277,7 @@ function ParameterEditForm({ onSaved, parameter }: ParameterEditFormProps) {
         />
         {showListItems && (
           <Field data-invalid={errors.listItems !== undefined}>
-            <FieldLabel htmlFor="listItems">{t('common.fields.listItems')}</FieldLabel>
+            <FieldLabel htmlFor="listItems">{t('features.iam.labels.listItems')}</FieldLabel>
             <Textarea
               aria-invalid={errors.listItems !== undefined}
               aria-describedby={errors.listItems ? 'ParameterEditPage-listItems-error' : undefined}
@@ -290,7 +290,7 @@ function ParameterEditForm({ onSaved, parameter }: ParameterEditFormProps) {
         )}
         {showExternalListEndpoint && (
           <Field data-invalid={errors.externalListEndpoint !== undefined}>
-            <FieldLabel htmlFor="externalListEndpoint">{t('common.fields.externalListEndpoint')}</FieldLabel>
+            <FieldLabel htmlFor="externalListEndpoint">{t('features.iam.labels.externalListEndpoint')}</FieldLabel>
             <Input
               aria-invalid={errors.externalListEndpoint !== undefined}
               aria-describedby={errors.externalListEndpoint ? 'ParameterEditPage-externalListEndpoint-error' : undefined}
@@ -307,7 +307,7 @@ function ParameterEditForm({ onSaved, parameter }: ParameterEditFormProps) {
           render={({ field }) => (
             <Checkbox
               checked={field.value}
-              label={t('common.fields.isVisible')}
+              label={t('common.labels.isVisible')}
               onCheckedChange={field.onChange}
             />
           )}

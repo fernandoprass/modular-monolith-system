@@ -30,18 +30,18 @@ export const SYSTEM_LOG_STATUSES = {
 } as const
 
 export const SYSTEM_LOG_LEVEL_OPTIONS = [
-  { labelKey: 'features.sentinel.systemLogs.levels.debug', value: SYSTEM_LOG_LEVELS.debug.toString() },
-  { labelKey: 'features.sentinel.systemLogs.levels.information', value: SYSTEM_LOG_LEVELS.information.toString() },
-  { labelKey: 'features.sentinel.systemLogs.levels.warning', value: SYSTEM_LOG_LEVELS.warning.toString() },
-  { labelKey: 'features.sentinel.systemLogs.levels.error', value: SYSTEM_LOG_LEVELS.error.toString() },
-  { labelKey: 'features.sentinel.systemLogs.levels.critical', value: SYSTEM_LOG_LEVELS.critical.toString() },
+  { labelKey: 'features.sentinel.enums.systemLogLevel.debug', value: SYSTEM_LOG_LEVELS.debug.toString() },
+  { labelKey: 'features.sentinel.enums.systemLogLevel.information', value: SYSTEM_LOG_LEVELS.information.toString() },
+  { labelKey: 'features.sentinel.enums.systemLogLevel.warning', value: SYSTEM_LOG_LEVELS.warning.toString() },
+  { labelKey: 'features.sentinel.enums.systemLogLevel.error', value: SYSTEM_LOG_LEVELS.error.toString() },
+  { labelKey: 'features.sentinel.enums.systemLogLevel.critical', value: SYSTEM_LOG_LEVELS.critical.toString() },
 ] as const
 
 export const SYSTEM_LOG_STATUS_OPTIONS = [
-  { labelKey: 'features.sentinel.systemLogs.statuses.unknown', value: SYSTEM_LOG_STATUSES.unknown.toString() },
-  { labelKey: 'features.sentinel.systemLogs.statuses.success', value: SYSTEM_LOG_STATUSES.success.toString() },
-  { labelKey: 'features.sentinel.systemLogs.statuses.failure', value: SYSTEM_LOG_STATUSES.failure.toString() },
-  { labelKey: 'features.sentinel.systemLogs.statuses.unauthorized', value: SYSTEM_LOG_STATUSES.unauthorized.toString() },
+  { labelKey: 'features.sentinel.enums.systemLogStatus.unknown', value: SYSTEM_LOG_STATUSES.unknown.toString() },
+  { labelKey: 'features.sentinel.enums.systemLogStatus.success', value: SYSTEM_LOG_STATUSES.success.toString() },
+  { labelKey: 'features.sentinel.enums.systemLogStatus.failure', value: SYSTEM_LOG_STATUSES.failure.toString() },
+  { labelKey: 'features.sentinel.enums.systemLogStatus.unauthorized', value: SYSTEM_LOG_STATUSES.unauthorized.toString() },
 ] as const
 
 export type SystemLogLevel = typeof SYSTEM_LOG_LEVELS[keyof typeof SYSTEM_LOG_LEVELS]

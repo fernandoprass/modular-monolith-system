@@ -31,7 +31,7 @@ test('invalid controls expose their error message to assistive technology', asyn
     assert.match(html, /aria-describedby="language-error"/)
     assert.match(html, /id="language"/)
   }
-  const error = renderToStaticMarkup(createElement(FieldError, { id: 'language-error' }, t('common.validation.required')))
+  const error = renderToStaticMarkup(createElement(FieldError, { id: 'language-error' }, t('common.messages.validation.required')))
   assert.match(error, /role="alert"/)
   assert.match(error, /This field is required\./)
   assert.equal(renderToStaticMarkup(createElement(FieldError)), '')

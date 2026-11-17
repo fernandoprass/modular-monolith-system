@@ -128,7 +128,7 @@ public sealed class CoreApiTestFixture : WebApplicationFactory<CoreApi::Program>
          CreateParameter(IamParam.Security.LockoutDurationInMins, ParameterType.Integer, "60", ParameterOverrideType.None),
          CreateParameter(IamParam.Security.MaxFailedLoginAttempts, ParameterType.Integer, "3", ParameterOverrideType.None),
          CreateParameter(IamParam.Security.JwtExpirationInHours, ParameterType.Integer, "24", ParameterOverrideType.None),
-         CreateParameter(IamParam.Role.DefaultRoleIdForNewOrganization, ParameterType.UUID, organizationAdminRole.Id.ToString(), ParameterOverrideType.None),
+         CreateParameter(IamParam.Role.DefaultRoleIdForOrganizationAdministrator, ParameterType.UUID, organizationAdminRole.Id.ToString(), ParameterOverrideType.None),
          CreateParameter(IamParam.Role.DefaultRoleIdForNewUser, ParameterType.UUID, userRole.Id.ToString(), ParameterOverrideType.None));
 
       await sharedDbContext.SaveChangesAsync();
@@ -217,7 +217,7 @@ public sealed class CoreApiTestFixture : WebApplicationFactory<CoreApi::Program>
       }
 
       var organizationAdminRoleId = await sharedDbContext.Parameters
-         .Where(parameter => parameter.Key == IamParam.Role.DefaultRoleIdForNewOrganization)
+         .Where(parameter => parameter.Key == IamParam.Role.DefaultRoleIdForOrganizationAdministrator)
          .Select(parameter => parameter.Value)
          .FirstOrDefaultAsync();
 

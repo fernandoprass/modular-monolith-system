@@ -64,7 +64,7 @@ export function PermissionListPage() {
         pageSize,
       }))
     } catch (error) {
-      notifyError(error, t('common.errors.generic'))
+      notifyError(error, t('common.messages.errors.generic'))
     } finally {
       setIsLoading(false)
     }
@@ -99,7 +99,7 @@ export function PermissionListPage() {
   return (
     <main className="page">
       <div className="page-header">
-        <h1 className="page-title">{t('features.iam.permissions.pages.list')}</h1>
+        <h1 className="page-title">{t('features.iam.labels.permissions')}</h1>
       </div>
       <FilterToolbar onReset={handleReset} onSubmit={handleSubmit(handleSearch)}>
         <Controller
@@ -107,10 +107,10 @@ export function PermissionListPage() {
           name="module"
           render={({ field }) => (
             <Field>
-              <FieldLabel>{t('common.fields.module')}</FieldLabel>
+              <FieldLabel>{t('common.labels.module')}</FieldLabel>
               <Select
                 onValueChange={field.onChange}
-                options={[{ label: t('common.filters.all'), value: PERMISSION_FILTER_VALUES.all }, ...toTranslatedOptions(PERMISSION_MODULE_OPTIONS, t)]}
+                options={[{ label: t('common.actions.all'), value: PERMISSION_FILTER_VALUES.all }, ...toTranslatedOptions(PERMISSION_MODULE_OPTIONS, t)]}
                 value={field.value}
               />
             </Field>
@@ -121,28 +121,28 @@ export function PermissionListPage() {
           name="resource"
           render={({ field }) => (
             <Field>
-              <FieldLabel>{t('common.fields.resource')}</FieldLabel>
+              <FieldLabel>{t('common.labels.resource')}</FieldLabel>
               <Select
                 onValueChange={field.onChange}
-                options={[{ label: t('common.filters.all'), value: PERMISSION_FILTER_VALUES.all }, ...toTranslatedOptions(PERMISSION_RESOURCE_OPTIONS, t)]}
+                options={[{ label: t('common.actions.all'), value: PERMISSION_FILTER_VALUES.all }, ...toTranslatedOptions(PERMISSION_RESOURCE_OPTIONS, t)]}
                 value={field.value}
               />
             </Field>
           )}
         />
         <Field>
-          <FieldLabel htmlFor="action">{t('common.fields.action')}</FieldLabel>
+          <FieldLabel htmlFor="action">{t('common.labels.action')}</FieldLabel>
           <Input id="action" {...register('action')} />
         </Field>
         <Field>
-          <FieldLabel htmlFor="title">{t('common.fields.title')}</FieldLabel>
+          <FieldLabel htmlFor="title">{t('common.labels.title')}</FieldLabel>
           <Input id="title" {...register('title')} />
         </Field>
       </FilterToolbar>
       <DataTable
         columns={columns}
         data={result?.items ?? []}
-        emptyText={t('features.iam.permissions.messages.empty')}
+        emptyText={t('common.states.noResults', { entities: t('app.entities.permissions') })}
         isLoading={isLoading}
         loadingText={t('common.states.loading')}
         onSortingChange={setSorting}

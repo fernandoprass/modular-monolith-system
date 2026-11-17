@@ -50,8 +50,8 @@ public class SeederParametersIam(ISeederData seederData,SharedDbContext dbContex
          cancellationToken);
 
       await AddParameterAsync(
-         IamParam.Role.DefaultRoleIdForNewOrganization,
-         "Default Roles for Organization",
+         IamParam.Role.DefaultRoleIdForOrganizationAdministrator,
+         "Default Roles for Organization Administrators",
          "The default role Id assigned to the organization's administrator user when it is created.",
          ParameterType.UUID,
          value: seederData.OrganizationAdminRoleId.ToString(),

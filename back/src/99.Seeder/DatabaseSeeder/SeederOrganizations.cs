@@ -10,7 +10,6 @@ namespace DatabaseSeeder;
 
 public class SeederOrganizations(
    IOrganizationRepository organizationRepository,
-   IRoleRepository roleRepository,
    IIamUnitOfWork iamUnitOfWork,
    ISeederData seederData)
 {

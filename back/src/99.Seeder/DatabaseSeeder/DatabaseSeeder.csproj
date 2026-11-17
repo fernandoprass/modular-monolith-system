@@ -8,6 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="..\..\00.Core\Core.API\appsettings.json" Link="appsettings.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\01.Shared\Shared.Infrastructure\Shared.Infrastructure.csproj" />
     <ProjectReference Include="..\..\02.Sentinel\Sentinel.Domain\Sentinel.Domain.csproj" />
     <ProjectReference Include="..\..\03.IAM\IAM.Infrastructure\IAM.Infrastructure.csproj" />

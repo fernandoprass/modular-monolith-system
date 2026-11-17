@@ -724,17 +724,19 @@ Use translation keys for:
 - enum labels
 - status labels
 
-Keep translation keys stable.
-
-Group keys by module and resource.
+Use category-first dictionaries. Keep keys alphabetical at every nesting level.
+Keep actions and labels flat within their owning dictionary. Group messages by feature or purpose.
+Validation text belongs under `messages.validation`, grouped by feature when needed.
+Do not nest actions or labels under individual resources, or create duplicate `name`, `pages.list`, or `sections` aliases.
 
 Example:
 
 ```text
-features.iam.users.pages.create
-features.iam.users.messages.organizationRequired
-features.iam.roles.messages.deleteConfirm
-features.iam.parameters.pages.organizationSettings
+features.iam.actions.signIn
+features.iam.labels.organization
+features.iam.messages.users.organizationRequired
+features.courier.messages.validation.templates.emailBody
+features.courier.enums.notificationSeverity.warning
 ```
 
 Reusable UI text belongs in common.ts under common.* translation keys. This namespace is separate from the backend Shared module.
@@ -744,9 +746,27 @@ Example:
 ```text
 common.actions.save
 common.actions.cancel
-common.status.active
-common.status.inactive
+common.labels.email
+common.states.active
+common.messages.errors.generic
+common.messages.validation.required
 ```
+
+Use `actions` for button text and selection prompts, `labels` for fields and headings, `states` for state text, `enums` for enum translation maps, and `messages` for sentences, errors, confirmations, and validation.
+Keep the existing common `pages`, `pagination`, and `languages` groups for their reusable patterns.
+Use `common.actions.lookupSearch`, `common.actions.lookupSelect`, and `common.messages.lookup.empty` for lookup controls.
+
+Reuse parameterized text instead of adding one sentence per entity:
+
+```tsx
+t('common.pages.create', { entity: t('features.iam.labels.organization') })
+t('common.actions.select', { label: t('common.labels.language') })
+t('common.messages.confirmations.delete', { entity: t('app.entities.user') })
+t('common.states.noResults', { entities: t('app.entities.users') })
+```
+
+Use capitalized labels for page patterns and selection actions. Keep separate sentence-case entity labels where confirmations and empty states need them; do not lowercase translated labels at runtime.
+Keep specialized warnings separate when their meaning differs, such as deleting a template and all its translations.
 
 Do not use backend enum numeric values directly as labels.
 
@@ -773,7 +793,11 @@ en-US/
   index.ts
 ```
 
-Keep module, core feature, and resource labels in `app.ts`.
+Keep app identity, navigation, module names, core feature names, and used sentence-case entity labels in `app.ts`.
+Authentication and organization registration text belong in `03.iam.ts`.
+Put reusable labels such as Email/Emails and User/Users in `common.labels`.
+Put domain-specific labels in `features.<module>.labels`, even when another module uses them.
+Do not recreate a central `RESOURCE_LABELS` collection or a `resources.*` translation namespace.
 Keep all enum translations in `enums.ts`; enum values remain in domain/type files.
 Group enum translations by backend definition ownership with numbered module comments.
 An enum used by another module stays in its owning module's section.
@@ -781,7 +805,9 @@ Use named `*_ENUM` exports, `*_ENUM_KEYS` translation maps, and `get...Enum` hel
 If splitting becomes necessary, keep `enums.ts` as the re-export entry point.
 Keep module-only messages and non-enum labels in their numbered module file.
 Share labels only when their meaning matches, not merely because the English text matches.
-Keep existing translation keys stable when reorganizing files.
+Avoid unnecessary key changes. For an approved reorganization, update every caller, typed option map, and test together, and remove obsolete keys and empty groups.
+Before removing an apparently unused key, inspect dynamic translation maps and fallback keys as well as direct `t(...)` calls.
+For a new module, add its numbered dictionary and register it under `features` in the locale `index.ts`; do not duplicate common text.
 
 Components must use `useTranslate()` rather than the default `translate` function.
 Use `Translate` for translation callbacks and `PlainTranslationKey` for labels without variables.

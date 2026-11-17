@@ -26,16 +26,16 @@ export function createRoleTableColumns({
   return [
     {
       accessorKey: 'name',
-      header: t('common.fields.name'),
+      header: t('common.labels.name'),
     },
     {
       accessorKey: 'isActive',
       cell: ({ row }) => (
         <Badge variant={row.original.isActive ? 'active' : 'inactive'}>
-          {row.original.isActive ? t('common.status.active') : t('common.status.inactive')}
+          {row.original.isActive ? t('common.states.active') : t('common.states.inactive')}
         </Badge>
       ),
-      header: t('common.fields.isActive'),
+      header: t('common.labels.isActive'),
     },
     {
       accessorKey: 'isDefault',
@@ -44,7 +44,7 @@ export function createRoleTableColumns({
           {row.original.isDefault ? t('common.states.yes') : t('common.states.no')}
         </Badge>
       ),
-      header: t('common.fields.isDefault'),
+      header: t('common.labels.isDefault'),
     },
     {
       cell: ({ row }) => (
@@ -67,7 +67,7 @@ export function createRoleTableColumns({
       ),
       enableHiding: false,
       enableSorting: false,
-      header: t('common.fields.actions'),
+      header: t('common.labels.actions'),
       id: 'actions',
     },
   ]

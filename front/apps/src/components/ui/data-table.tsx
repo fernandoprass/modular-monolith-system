@@ -46,7 +46,7 @@ export function DataTable<TData>({
       {
         cell: ({ row }) => (
           <input
-            aria-label={t('common.table.selectRow')}
+            aria-label={t('common.actions.selectRow')}
             checked={row.getIsSelected()}
             className="checkbox"
             onChange={row.getToggleSelectedHandler()}
@@ -56,7 +56,7 @@ export function DataTable<TData>({
         enableSorting: false,
         header: ({ table }) => (
           <input
-            aria-label={t('common.table.selectAllRows')}
+            aria-label={t('common.actions.selectAllRows')}
             checked={table.getIsAllRowsSelected()}
             className="checkbox"
             onChange={table.getToggleAllRowsSelectedHandler()}

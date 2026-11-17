@@ -79,7 +79,7 @@ export function OrganizationListPage() {
         type: appliedFilters.type === ORGANIZATION_FILTER_VALUES.all ? null : appliedFilters.type,
       }))
     } catch (error) {
-      notifyError(error, t('common.errors.generic'))
+      notifyError(error, t('common.messages.errors.generic'))
     } finally {
       setIsLoading(false)
     }
@@ -116,7 +116,7 @@ export function OrganizationListPage() {
       setDeleteTarget(null)
       await loadOrganizations(pageNumber)
     } catch (error) {
-      notifyError(error, t('common.errors.generic'))
+      notifyError(error, t('common.messages.errors.generic'))
     }
   }
 
@@ -125,7 +125,7 @@ export function OrganizationListPage() {
   return (
     <main className="page">
       <div className="page-header">
-        <h1 className="page-title">{t('features.iam.organizations.pages.list')}</h1>
+        <h1 className="page-title">{t('features.iam.labels.organizations')}</h1>
       </div>
       <FilterToolbar onReset={handleReset} onSubmit={handleSubmit(handleSearch)}>
         <Controller
@@ -133,21 +133,21 @@ export function OrganizationListPage() {
           name="type"
           render={({ field }) => (
             <Field>
-              <FieldLabel>{t('common.fields.type')}</FieldLabel>
+              <FieldLabel>{t('common.labels.type')}</FieldLabel>
               <Select
                 onValueChange={field.onChange}
-                options={[{ label: t('common.filters.all'), value: ORGANIZATION_FILTER_VALUES.all }, ...toTranslatedOptions(ORGANIZATION_TYPE_OPTIONS, t)]}
+                options={[{ label: t('common.actions.all'), value: ORGANIZATION_FILTER_VALUES.all }, ...toTranslatedOptions(ORGANIZATION_TYPE_OPTIONS, t)]}
                 value={field.value}
               />
             </Field>
           )}
         />
         <Field>
-          <FieldLabel htmlFor="code">{t('common.fields.code')}</FieldLabel>
+          <FieldLabel htmlFor="code">{t('common.labels.code')}</FieldLabel>
           <Input id="code" {...register('code')} />
         </Field>
         <Field>
-          <FieldLabel htmlFor="name">{t('common.fields.name')}</FieldLabel>
+          <FieldLabel htmlFor="name">{t('common.labels.name')}</FieldLabel>
           <Input id="name" {...register('name')} />
         </Field>
         <Controller
@@ -155,13 +155,13 @@ export function OrganizationListPage() {
           name="isActive"
           render={({ field }) => (
             <Field>
-              <FieldLabel>{t('common.fields.isActive')}</FieldLabel>
+              <FieldLabel>{t('common.labels.isActive')}</FieldLabel>
               <Select
                 onValueChange={field.onChange}
                 options={[
-                  { label: t('common.filters.all'), value: ORGANIZATION_FILTER_VALUES.all },
-                  { label: t('common.status.active'), value: 'true' },
-                  { label: t('common.status.inactive'), value: 'false' },
+                  { label: t('common.actions.all'), value: ORGANIZATION_FILTER_VALUES.all },
+                  { label: t('common.states.active'), value: 'true' },
+                  { label: t('common.states.inactive'), value: 'false' },
                 ]}
                 value={field.value}
               />
@@ -173,7 +173,7 @@ export function OrganizationListPage() {
       <DataTable
         columns={columns}
         data={result?.items ?? []}
-        emptyText={t('features.iam.organizations.messages.empty')}
+        emptyText={t('common.states.noResults', { entities: t('app.entities.organizations') })}
         isLoading={isLoading}
         loadingText={t('common.states.loading')}
         onSortingChange={setSorting}
@@ -198,7 +198,7 @@ export function OrganizationListPage() {
         open={deleteTarget !== null}
         title={t('common.actions.delete')}
       >
-        <p>{t('features.iam.organizations.messages.deleteConfirm')}</p>
+        <p>{t('common.messages.confirmations.delete', { entity: t('app.entities.organization') })}</p>
       </ConfirmDialog>
     </main>
   )

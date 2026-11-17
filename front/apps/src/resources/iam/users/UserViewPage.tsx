@@ -32,7 +32,7 @@ export function UserViewPage() {
       try {
         setUser(await getUser(userId))
       } catch (error) {
-        notifyError(error, t('common.errors.generic'))
+        notifyError(error, t('common.messages.errors.generic'))
       }
     }
 
@@ -42,7 +42,7 @@ export function UserViewPage() {
   return (
     <main className="page">
       <div className="page-header">
-        <h1 className="page-title">{t('features.iam.users.pages.show')}</h1>
+        <h1 className="page-title">{t('common.pages.show', { entity: t('common.labels.user') })}</h1>
         <Button onClick={() => navigate(APP_ROUTES.users)} type="button" variant="outline">
           <ArrowLeft data-icon="inline-start" />
           {t('common.actions.back')}
@@ -55,19 +55,19 @@ export function UserViewPage() {
           ) : (
             <div className="detail-stack">
                 <div className="detail-grid-two-columns">
-                  <Field label={t('common.fields.organization')}>{user.organizationName}</Field>
-                  <Field label={t('common.fields.language')}>{getLanguageLabel(user.language, t)}</Field>
-                  <Field label={t('common.fields.name')}>{user.name}</Field>
-                  <Field label={t('common.fields.email')}>{user.email}</Field>
-                  <Field label={t('common.fields.isSystemAdmin')}>
+                  <Field label={t('features.iam.labels.organization')}>{user.organizationName}</Field>
+                  <Field label={t('common.labels.language')}>{getLanguageLabel(user.language, t)}</Field>
+                  <Field label={t('common.labels.name')}>{user.name}</Field>
+                  <Field label={t('common.labels.email')}>{user.email}</Field>
+                  <Field label={t('features.iam.labels.isSystemAdmin')}>
                     {user.isSystemAdmin ? t('common.states.yes') : t('common.states.no')}
                   </Field>
-                  <Field label={t('common.fields.isOrganizationAdmin')}>
+                  <Field label={t('features.iam.labels.isOrganizationAdmin')}>
                     {user.isOrganizationAdmin ? t('common.states.yes') : t('common.states.no')}
                   </Field>
-                  <Field label={t('common.fields.isActive')}>
+                  <Field label={t('common.labels.isActive')}>
                     <Badge variant={user.isActive ? 'active' : 'inactive'}>
-                      {user.isActive ? t('common.status.active') : t('common.status.inactive')}
+                      {user.isActive ? t('common.states.active') : t('common.states.inactive')}
                     </Badge>
                   </Field>
                 </div>

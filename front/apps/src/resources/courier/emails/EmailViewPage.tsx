@@ -36,7 +36,7 @@ export function EmailViewPage() {
       try {
         setEmail(await getEmail(emailId))
       } catch (error) {
-        notifyError(error, t('common.errors.generic'))
+        notifyError(error, t('common.messages.errors.generic'))
       }
     }
 
@@ -46,7 +46,7 @@ export function EmailViewPage() {
   return (
     <main className="page courier-email-page">
       <div className="page-header">
-        <h1 className="page-title">{t('features.courier.emails.pages.show')}</h1>
+        <h1 className="page-title">{t('common.pages.show', { entity: t('common.labels.email') })}</h1>
         <Button onClick={() => navigate(APP_ROUTES.emails)} type="button" variant="outline">
           <ArrowLeft data-icon="inline-start" />
           {t('common.actions.back')}
@@ -59,43 +59,43 @@ export function EmailViewPage() {
           ) : (
             <div className="detail-grid-one-column">
               <div className="detail-grid-two-columns">
-                <DetailField label={t('common.fields.id')}>{email.id}</DetailField>
-                <DetailField label={t('common.fields.status')}>
+                <DetailField label={t('common.labels.id')}>{email.id}</DetailField>
+                <DetailField label={t('common.labels.status')}>
                   <Badge className={getEmailStatusClassName(email.status)}>
                     {getEmailStatusEnum(email.status, t)}
                   </Badge>
                 </DetailField>
-                <DetailField label={t('common.fields.organizationId')}>{email.organizationId}</DetailField>
-                <DetailField label={t('common.fields.userId')}>{email.userId}</DetailField>
-                <DetailField label={t('common.fields.module')}>{email.module}</DetailField>
-                <DetailField label={t('common.fields.feature')}>{email.feature}</DetailField>
-                <DetailField label={t('common.fields.templateKey')}>{email.templateKey}</DetailField>
-                <DetailField label={t('common.fields.recipient')}>{email.recipient}</DetailField>
-                <DetailField label={t('common.fields.createdAt')}>{formatUserDateTime(email.createdAt, locale)}</DetailField>
-                <DetailField label={t('common.fields.sentAt')}>{formatOptionalDate(email.sentAt, locale)}</DetailField>
-                <DetailField label={t('common.fields.expiresAt')}>{formatUserDateTime(email.expiresAt, locale)}</DetailField>
-                <DetailField label={t('common.fields.nextAttemptAt')}>{formatOptionalDate(email.nextAttemptAt, locale)}</DetailField>
-                <DetailField label={t('common.fields.retryCount')}>{email.retryCount}</DetailField>
-                <DetailField label={t('common.fields.isHtml')}>{email.isHtml ? t('common.states.yes') : t('common.states.no')}</DetailField>
+                <DetailField label={t('features.iam.labels.organizationId')}>{email.organizationId}</DetailField>
+                <DetailField label={t('features.iam.labels.userId')}>{email.userId}</DetailField>
+                <DetailField label={t('common.labels.module')}>{email.module}</DetailField>
+                <DetailField label={t('common.labels.feature')}>{email.feature}</DetailField>
+                <DetailField label={t('features.courier.labels.templateKey')}>{email.templateKey}</DetailField>
+                <DetailField label={t('features.courier.labels.recipient')}>{email.recipient}</DetailField>
+                <DetailField label={t('common.labels.createdAt')}>{formatUserDateTime(email.createdAt, locale)}</DetailField>
+                <DetailField label={t('features.courier.labels.sentAt')}>{formatOptionalDate(email.sentAt, locale)}</DetailField>
+                <DetailField label={t('common.labels.expiresAt')}>{formatUserDateTime(email.expiresAt, locale)}</DetailField>
+                <DetailField label={t('features.courier.labels.nextAttemptAt')}>{formatOptionalDate(email.nextAttemptAt, locale)}</DetailField>
+                <DetailField label={t('features.courier.labels.retryCount')}>{email.retryCount}</DetailField>
+                <DetailField label={t('features.courier.labels.isHtml')}>{email.isHtml ? t('common.states.yes') : t('common.states.no')}</DetailField>
               </div>
-              <DetailField label={t('common.fields.subject')}>{email.subject}</DetailField>
-              <DetailField label={t('common.fields.body')}>
+              <DetailField label={t('features.courier.labels.subject')}>{email.subject}</DetailField>
+              <DetailField label={t('features.courier.labels.body')}>
                 <pre className="detail-code email-body">{email.body}</pre>
               </DetailField>
               <div className="email-attempts">
-                <h2 className="detail-section-title">{t('features.courier.emails.sections.attempts')}</h2>
+                <h2 className="detail-section-title">{t('features.courier.labels.deliveryAttempts')}</h2>
                 {email.attempts.length === 0 ? (
-                  <p className="page-subtitle">{t('features.courier.emails.messages.noAttempts')}</p>
+                  <p className="page-subtitle">{t('features.courier.messages.emails.noAttempts')}</p>
                 ) : email.attempts.map((attempt, index) => (
                   <Card key={`${attempt.attemptedAt}.${index}`}>
                     <CardContent>
                       <div className="detail-grid-one-column">
-                        <DetailField label={t('common.fields.attemptedAt')}>
+                        <DetailField label={t('features.courier.labels.attemptedAt')}>
                           {formatUserDateTime(attempt.attemptedAt, locale)}
                         </DetailField>
-                        <DetailField label={t('common.fields.errorMessage')}>{attempt.errorMessage}</DetailField>
+                        <DetailField label={t('common.labels.errorMessage')}>{attempt.errorMessage}</DetailField>
                         {attempt.stackTrace !== null && (
-                          <DetailField label={t('common.fields.stackTrace')}>
+                          <DetailField label={t('common.labels.stackTrace')}>
                             <pre className="detail-code">{attempt.stackTrace}</pre>
                           </DetailField>
                         )}

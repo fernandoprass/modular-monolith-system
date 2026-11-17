@@ -14,28 +14,32 @@ using Microsoft.Extensions.DependencyInjection;
 using Shared.Application.Contracts;
 using Shared.Infrastructure;
 
+var configuration = new ConfigurationBuilder()
+   .SetBasePath(AppContext.BaseDirectory)
+   .AddJsonFile("appsettings.json", optional: true, reloadOnChange: false)
+   .Build();
+
 var connectionString =
    Environment.GetEnvironmentVariable("ConnectionStrings__IamDb")
    ?? Environment.GetEnvironmentVariable("IAM_DB_CONNECTION")
+   ?? configuration.GetConnectionString("IamDb")
    ?? throw new InvalidOperationException("IAM database connection string is required.");
 
 var courierConnectionString =
    Environment.GetEnvironmentVariable("ConnectionStrings__CourierDb")
    ?? Environment.GetEnvironmentVariable("COURIER_DB_CONNECTION")
+   ?? configuration.GetConnectionString("CourierDb")
    ?? throw new InvalidOperationException("Courier database connection string is required.");
 
 var courierDatabaseName =
    Environment.GetEnvironmentVariable("Courier__DatabaseName")
    ?? Environment.GetEnvironmentVariable("COURIER_DATABASE_NAME")
+   ?? configuration["Courier:DatabaseName"]
    ?? "courier";
 
-var configuration = new ConfigurationBuilder()
-   .AddInMemoryCollection(new Dictionary<string, string?>
-   {
-      ["ConnectionStrings:CourierDb"] = courierConnectionString,
-      ["Courier:DatabaseName"] = courierDatabaseName
-   })
-   .Build();
+configuration["ConnectionStrings:IamDb"] = connectionString;
+configuration["ConnectionStrings:CourierDb"] = courierConnectionString;
+configuration["Courier:DatabaseName"] = courierDatabaseName;
 
 var services = new ServiceCollection();
 

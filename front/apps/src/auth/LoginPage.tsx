@@ -49,7 +49,7 @@ export function LoginPage() {
       await login(value)
       navigate(APP_ROUTES.dashboard)
     } catch (error) {
-      notifyError(error, t('common.errors.generic'))
+      notifyError(error, t('common.messages.errors.generic'))
     } finally {
       setIsSubmitting(false)
     }
@@ -64,13 +64,13 @@ export function LoginPage() {
       <Card className="auth-card">
         <CardHeader>
           <CardTitle>{APP_CONSTANTS.appName}</CardTitle>
-          <CardDescription>{t('auth.login.title')}</CardDescription>
+          <CardDescription>{t('features.iam.actions.signIn')}</CardDescription>
         </CardHeader>
         <CardContent>
           <form noValidate onSubmit={handleSubmit(handleLogin)}>
             <FieldGroup>
               <Field data-invalid={errors.email !== undefined}>
-                <FieldLabel htmlFor="email">{t('auth.login.email')}</FieldLabel>
+                <FieldLabel htmlFor="email">{t('common.labels.email')}</FieldLabel>
                 <Input
                   aria-invalid={errors.email !== undefined}
                   aria-describedby={errors.email ? 'LoginPage-email-error' : undefined}
@@ -83,7 +83,7 @@ export function LoginPage() {
                 <FieldError id="LoginPage-email-error">{errors.email?.message}</FieldError>
               </Field>
               <Field data-invalid={errors.password !== undefined}>
-                <FieldLabel htmlFor="password">{t('auth.login.password')}</FieldLabel>
+                <FieldLabel htmlFor="password">{t('features.iam.labels.password')}</FieldLabel>
                 <Input
                   aria-invalid={errors.password !== undefined}
                   aria-describedby={errors.password ? 'LoginPage-password-error' : undefined}
@@ -96,10 +96,10 @@ export function LoginPage() {
                 <FieldError id="LoginPage-password-error">{errors.password?.message}</FieldError>
               </Field>
               <Button disabled={isSubmitting} type="submit">
-                {t('auth.login.submit')}
+                {t('features.iam.actions.signIn')}
               </Button>
               <Link className="text-link text-center" to={APP_ROUTES.registerOrganization}>
-                {t('auth.login.signUp')}
+                {t('features.iam.messages.login.signUp')}
               </Link>
             </FieldGroup>
           </form>

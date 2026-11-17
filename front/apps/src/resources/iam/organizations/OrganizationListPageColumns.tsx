@@ -30,22 +30,22 @@ export function createOrganizationTableColumns({
     {
       accessorKey: 'type',
       cell: ({ row }) => getOrganizationTypeEnum(row.original.type, t),
-      header: t('common.fields.type'),
+      header: t('common.labels.type'),
       sortingFn: (left, right) =>
         getOrganizationTypeEnum(left.original.type, t).localeCompare(getOrganizationTypeEnum(right.original.type, t)),
     },
     {
       accessorKey: 'code',
-      header: t('common.fields.code'),
+      header: t('common.labels.code'),
     },
     {
       accessorKey: 'name',
-      header: t('common.fields.name'),
+      header: t('common.labels.name'),
     },
     {
       accessorKey: 'defaultLanguage',
       cell: ({ row }) => getLanguageLabel(row.original.defaultLanguage, t),
-      header: t('common.fields.defaultLanguage'),
+      header: t('common.labels.defaultLanguage'),
       sortingFn: (left, right) =>
         getLanguageLabel(left.original.defaultLanguage, t).localeCompare(getLanguageLabel(right.original.defaultLanguage, t)),
     },
@@ -53,10 +53,10 @@ export function createOrganizationTableColumns({
       accessorKey: 'isActive',
       cell: ({ row }) => (
         <Badge variant={row.original.isActive ? 'active' : 'inactive'}>
-          {row.original.isActive ? t('common.status.active') : t('common.status.inactive')}
+          {row.original.isActive ? t('common.states.active') : t('common.states.inactive')}
         </Badge>
       ),
-      header: t('common.fields.isActive'),
+      header: t('common.labels.isActive'),
     },
     {
       cell: ({ row }) => (
@@ -85,7 +85,7 @@ export function createOrganizationTableColumns({
       ),
       enableHiding: false,
       enableSorting: false,
-      header: t('common.fields.actions'),
+      header: t('common.labels.actions'),
       id: 'actions',
     },
   ]

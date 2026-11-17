@@ -25,23 +25,23 @@ export function createEmailTableColumns({
     {
       accessorKey: 'createdAt',
       cell: ({ row }) => formatUserDateTime(row.original.createdAt, language),
-      header: t('common.fields.createdAt'),
+      header: t('common.labels.createdAt'),
     },
     {
       accessorKey: 'module',
-      header: t('common.fields.module'),
+      header: t('common.labels.module'),
     },
     {
       accessorKey: 'feature',
-      header: t('common.fields.feature'),
+      header: t('common.labels.feature'),
     },
     {
       accessorKey: 'recipient',
-      header: t('common.fields.recipient'),
+      header: t('features.courier.labels.recipient'),
     },
     {
       accessorKey: 'subject',
-      header: t('common.fields.subject'),
+      header: t('features.courier.labels.subject'),
     },
     {
       accessorKey: 'status',
@@ -50,7 +50,7 @@ export function createEmailTableColumns({
           {getEmailStatusEnum(row.original.status, t)}
         </Badge>
       ),
-      header: t('common.fields.status'),
+      header: t('common.labels.status'),
     },
     {
       cell: ({ row }) => (
@@ -66,7 +66,7 @@ export function createEmailTableColumns({
       ),
       enableHiding: false,
       enableSorting: false,
-      header: t('common.fields.actions'),
+      header: t('common.labels.actions'),
       id: 'actions',
     },
   ]

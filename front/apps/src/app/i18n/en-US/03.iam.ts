@@ -1,106 +1,58 @@
-import { RESOURCE_LABELS } from './app'
 import { ORGANIZATION_TYPE_ENUM } from './enums'
 
 export const iamMessages = {
-  organizations: {
-    messages: {
-      deleteConfirm: 'Delete this organization?',
-      empty: 'No organizations found.',
-    },
-    name: RESOURCE_LABELS.iam.organizations,
-    pages: {
-      edit: 'Edit organization',
-      list: RESOURCE_LABELS.iam.organizations,
-      profile: RESOURCE_LABELS.iam.organizationProfile,
-      show: 'Organization details',
-    },
-    placeholders: {
-      search: 'Search organization',
-    },
-    types: ORGANIZATION_TYPE_ENUM,
+  actions: {
+    backToSignIn: 'Back to sign in',
+    changePassword: 'Change password',
+    logout: 'Logout',
+    signIn: 'Sign in',
   },
-  parameters: {
-    name: RESOURCE_LABELS.iam.parameters,
-    messages: {
-      empty: 'No parameters found.',
-    },
-    pages: {
-      edit: 'Edit parameter',
-      list: RESOURCE_LABELS.iam.parameters,
-      organizationSettings: 'Settings',
-      userSettings: 'Settings',
-    },
+  enums: {
+    organizationType: ORGANIZATION_TYPE_ENUM,
   },
-  permissions: {
-    messages: {
-      empty: 'No permissions found.',
-    },
-    name: RESOURCE_LABELS.iam.permissions,
-    pages: {
-      list: RESOURCE_LABELS.iam.permissions,
-    },
+  labels: {
+    adminEmail: 'Admin email',
+    adminName: 'Admin name',
+    adminPassword: 'Admin password',
+    assignedAt: 'Assigned at',
+    assignedBy: 'Assigned by',
+    assignedPermissions: 'Assigned permissions',
+    assignedRoles: 'Assigned roles',
+    availablePermissions: 'Available permissions',
+    availableRoles: 'Available roles',
+    confirmPassword: 'Confirm password',
+    currentPassword: 'Current password',
+    externalListEndpoint: 'External list endpoint',
+    isOrganizationAdmin: 'Organization admin',
+    isSystemAdmin: 'System admin',
+    listItems: 'List items',
+    newPassword: 'New password',
+    organization: 'Organization',
+    organizationId: 'Organization ID',
+    organizationProfile: 'Organization profile',
+    organizations: 'Organizations',
+    overrideType: 'Override type',
+    parameter: 'Parameter',
+    parameters: 'Parameters',
+    password: 'Password',
+    permission: 'Permission',
+    permissions: 'Permissions',
+    role: 'Role',
+    roles: 'Roles',
+    userAccess: 'User Access',
+    userId: 'User ID',
+    userProfile: 'User profile',
   },
-  roles: {
-    labels: {
-      assignedPermissions: 'Assigned permissions',
-      availablePermissions: 'Available permissions',
+  messages: {
+    login: {
+      signUp: 'New here? Sign up',
     },
-    messages: {
-      deleteConfirm: 'Delete this role?',
-      empty: 'No roles found.',
+    userAccess: {
+      noUserSelected: 'Select a user to manage access.',
     },
-    name: RESOURCE_LABELS.iam.roles,
-    pages: {
-      create: 'Create role',
-      edit: 'Edit role',
-      list: RESOURCE_LABELS.iam.roles,
-    },
-  },
-  users: {
-    account: {
-      communication: 'Communication',
-      profile: 'Profile',
-      security: 'Security',
-      settings: 'Settings',
-      title: 'User profile',
-    },
-    messages: {
-      deleteConfirm: 'Delete this user?',
-      empty: 'No users found.',
-      noPermissions: 'No permissions found.',
-      noRoles: 'No roles found.',
+    users: {
       organizationRequired: 'Select an organization.',
       passwordsDoNotMatch: 'Passwords do not match.',
-    },
-    name: RESOURCE_LABELS.iam.users,
-    pages: {
-      changePassword: 'Change password',
-      create: 'Create user',
-      edit: 'Edit user',
-      list: RESOURCE_LABELS.iam.users,
-      profile: RESOURCE_LABELS.iam.userProfile,
-      show: 'User details',
-    },
-    placeholders: {
-      search: 'Search user',
-    },
-    tabs: {
-      permissions: 'Permissions',
-      roles: 'Roles',
-    },
-  },
-  userAccess: {
-    labels: {
-      assignedRoles: 'Assigned roles',
-      availableRoles: 'Available roles',
-    },
-    messages: {
-      noUserSelected: 'Select a user to manage access.',
-      noRoles: 'No roles found.',
-    },
-    name: 'User Access',
-    pages: {
-      list: 'User Access',
     },
   },
 } as const

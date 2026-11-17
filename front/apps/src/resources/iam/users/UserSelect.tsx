@@ -53,7 +53,7 @@ export function UserSelect({
           value: lookupUser.id,
         })))
       } catch (error) {
-        notifyError(error, t('common.errors.generic'))
+        notifyError(error, t('common.messages.errors.generic'))
       }
     }
 
@@ -67,7 +67,7 @@ export function UserSelect({
       onSearchChange={setSearch}
       onValueChange={onValueChange}
       options={options}
-      placeholder={t('features.iam.users.placeholders.search')}
+      placeholder={t('common.pages.search', { entity: t('common.labels.user') })}
       searchValue={search}
       value={value}
     >

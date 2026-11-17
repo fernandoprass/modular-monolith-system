@@ -105,12 +105,13 @@ public class UserService(
 
    private async Task AddDefaultRolesAsync( User user, CancellationToken ct)
    {
-      user.AddRole(await _parameterService.GetGuidAsync(IamParam.Role.DefaultRoleIdForNewUser, ct), DateTime.UtcNow, null);
+      var defaultRoleIdForNewUser = await _parameterService.GetGuidAsync(IamParam.Role.DefaultRoleIdForNewUser, ct);
+      user.AddRole(defaultRoleIdForNewUser, DateTime.UtcNow, null);
 
-      var rolesIds = await _roleService.GetDefaultRolesByOrganizationIdAsync(user.OrganizationId, ct);
-      if (rolesIds != null)
+      var rolesIdForOrganizations = await _roleService.GetDefaultRolesByOrganizationIdAsync(user.OrganizationId, ct);
+      if (rolesIdForOrganizations != null)
       {
-         foreach (var id in rolesIds)
+         foreach (var id in rolesIdForOrganizations)
          {
             user.AddRole(id, DateTime.UtcNow, null);
          }

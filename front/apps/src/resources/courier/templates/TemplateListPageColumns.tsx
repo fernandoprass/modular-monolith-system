@@ -26,25 +26,25 @@ export function createTemplateTableColumns({
   return [
     {
       accessorKey: 'module',
-      header: t('common.fields.module'),
+      header: t('common.labels.module'),
     },
     {
       accessorKey: 'key',
-      header: t('common.fields.key'),
+      header: t('common.labels.key'),
     },
     {
       accessorKey: 'name',
-      header: t('common.fields.name'),
+      header: t('common.labels.name'),
     },
     {
       accessorKey: 'severity',
       cell: ({ row }) => getNotificationSeverityEnum(row.original.severity, t),
-      header: t('common.fields.severity'),
+      header: t('features.courier.labels.severity'),
     },
     {
       accessorKey: 'retentionPolicy',
       cell: ({ row }) => getRetentionPolicyEnum(row.original.retentionPolicy, t),
-      header: t('common.fields.retentionPolicy'),
+      header: t('common.labels.retentionPolicy'),
     },
     {
       cell: ({ row }) => (
@@ -67,7 +67,7 @@ export function createTemplateTableColumns({
       ),
       enableHiding: false,
       enableSorting: false,
-      header: t('common.fields.actions'),
+      header: t('common.labels.actions'),
       id: 'actions',
     },
   ]

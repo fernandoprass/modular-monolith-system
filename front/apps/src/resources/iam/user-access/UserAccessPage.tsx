@@ -64,16 +64,16 @@ export function UserAccessPage() {
   const availableRoleColumns = useMemo<ColumnDef<RoleDto>[]>(() => [
     {
       accessorKey: 'name',
-      header: t('common.fields.name'),
+      header: t('common.labels.name'),
     },
     {
       accessorKey: 'isActive',
       cell: ({ row }) => (
         <Badge variant={row.original.isActive ? 'active' : 'inactive'}>
-          {row.original.isActive ? t('common.status.active') : t('common.status.inactive')}
+          {row.original.isActive ? t('common.states.active') : t('common.states.inactive')}
         </Badge>
       ),
-      header: t('common.fields.isActive'),
+      header: t('common.labels.isActive'),
     },
     {
       accessorKey: 'isDefault',
@@ -82,32 +82,32 @@ export function UserAccessPage() {
           {row.original.isDefault ? t('common.states.yes') : t('common.states.no')}
         </Badge>
       ),
-      header: t('common.fields.isDefault'),
+      header: t('common.labels.isDefault'),
     },
   ], [t])
   const assignedRoleColumns = useMemo<ColumnDef<UserRoleDto>[]>(() => [
     {
       accessorKey: 'name',
-      header: t('common.fields.name'),
+      header: t('common.labels.name'),
     },
     {
       accessorKey: 'startsAt',
       cell: ({ row }) => formatUserDateTime(row.original.startsAt, locale),
-      header: t('common.fields.startsAt'),
+      header: t('common.labels.startsAt'),
     },
     {
       accessorKey: 'expiresAt',
       cell: ({ row }) => row.original.expiresAt ? formatUserDateTime(row.original.expiresAt, locale) : '-',
-      header: t('common.fields.expiresAt'),
+      header: t('common.labels.expiresAt'),
     },
     {
       accessorKey: 'isActive',
       cell: ({ row }) => (
         <Badge variant={row.original.isActive ? 'active' : 'inactive'}>
-          {row.original.isActive ? t('common.status.active') : t('common.status.inactive')}
+          {row.original.isActive ? t('common.states.active') : t('common.states.inactive')}
         </Badge>
       ),
-      header: t('common.fields.isActive'),
+      header: t('common.labels.isActive'),
     },
   ], [t, locale])
 
@@ -131,7 +131,7 @@ export function UserAccessPage() {
       setAvailableSelection({})
       setAssignedSelection({})
     } catch (error) {
-      notifyError(error, t('common.errors.generic'))
+      notifyError(error, t('common.messages.errors.generic'))
     } finally {
       setIsLoading(false)
     }
@@ -160,7 +160,7 @@ export function UserAccessPage() {
       showSuccess(message)
       await loadUserAccess()
     } catch (error) {
-      notifyError(error, t('common.errors.generic'))
+      notifyError(error, t('common.messages.errors.generic'))
     } finally {
       setIsSaving(false)
     }
@@ -180,7 +180,7 @@ export function UserAccessPage() {
       showSuccess(message)
       await loadUserAccess()
     } catch (error) {
-      notifyError(error, t('common.errors.generic'))
+      notifyError(error, t('common.messages.errors.generic'))
     } finally {
       setIsSaving(false)
     }
@@ -189,12 +189,12 @@ export function UserAccessPage() {
   return (
     <main className="page">
       <div className="page-header">
-        <h1 className="page-title">{t('features.iam.userAccess.pages.list')}</h1>
+        <h1 className="page-title">{t('features.iam.labels.userAccess')}</h1>
       </div>
       <Card>
         <CardContent>
           <Field>
-            <FieldLabel>{t('common.fields.user')}</FieldLabel>
+            <FieldLabel>{t('common.labels.user')}</FieldLabel>
             <UserSelect clearable includeInactive onValueChange={setUserId} value={userId} />
           </Field>
         </CardContent>
@@ -203,7 +203,7 @@ export function UserAccessPage() {
         <Card>
           <CardContent>
             <Empty>
-              <EmptyDescription>{t('features.iam.userAccess.messages.noUserSelected')}</EmptyDescription>
+              <EmptyDescription>{t('features.iam.messages.userAccess.noUserSelected')}</EmptyDescription>
             </Empty>
           </CardContent>
         </Card>
@@ -212,11 +212,11 @@ export function UserAccessPage() {
           <CardContent>
             <div className="permission-assignment-grid">
               <div className="permission-table-column">
-                <h2 className="card-title">{t('features.iam.userAccess.labels.availableRoles')}</h2>
+                <h2 className="card-title">{t('features.iam.labels.availableRoles')}</h2>
                 <DataTable
                   columns={availableRoleColumns}
                   data={availableRoles}
-                  emptyText={t('features.iam.userAccess.messages.noRoles')}
+                  emptyText={t('common.states.noResults', { entities: t('app.entities.roles') })}
                   getRowId={(role) => role.id}
                   isLoading={isLoading}
                   loadingText={t('common.states.loading')}
@@ -228,11 +228,11 @@ export function UserAccessPage() {
               </div>
               <div className="permission-action-column user-access-action-column">
                 <Field>
-                  <FieldLabel>{t('common.fields.startsAt')}</FieldLabel>
+                  <FieldLabel>{t('common.labels.startsAt')}</FieldLabel>
                   <Input onChange={(event) => setStartsAt(event.currentTarget.value)} type="datetime-local" value={startsAt} />
                 </Field>
                 <Field>
-                  <FieldLabel>{t('common.fields.expiresAt')}</FieldLabel>
+                  <FieldLabel>{t('common.labels.expiresAt')}</FieldLabel>
                   <Input onChange={(event) => setExpiresAt(event.currentTarget.value)} type="datetime-local" value={expiresAt} />
                 </Field>
                 <Button
@@ -254,11 +254,11 @@ export function UserAccessPage() {
                 </Button>
               </div>
               <div className="permission-table-column">
-                <h2 className="card-title">{t('features.iam.userAccess.labels.assignedRoles')}</h2>
+                <h2 className="card-title">{t('features.iam.labels.assignedRoles')}</h2>
                 <DataTable
                   columns={assignedRoleColumns}
                   data={assignedRoles}
-                  emptyText={t('features.iam.userAccess.messages.noRoles')}
+                  emptyText={t('common.states.noResults', { entities: t('app.entities.roles') })}
                   getRowId={(role) => role.roleId}
                   isLoading={isLoading}
                   loadingText={t('common.states.loading')}

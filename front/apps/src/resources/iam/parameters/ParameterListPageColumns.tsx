@@ -21,19 +21,19 @@ export function createParameterTableColumns({
   return [
     {
       accessorKey: 'module',
-      header: t('common.fields.module'),
+      header: t('common.labels.module'),
     },
     {
       accessorKey: 'group',
-      header: t('common.fields.group'),
+      header: t('common.labels.group'),
     },
     {
       accessorKey: 'name',
-      header: t('common.fields.name'),
+      header: t('common.labels.name'),
     },
     {
       accessorKey: 'title',
-      header: t('common.fields.title'),
+      header: t('common.labels.title'),
     },
     {
       cell: ({ row }) => (
@@ -50,7 +50,7 @@ export function createParameterTableColumns({
       ),
       enableHiding: false,
       enableSorting: false,
-      header: t('common.fields.actions'),
+      header: t('common.labels.actions'),
       id: 'actions',
     },
   ]

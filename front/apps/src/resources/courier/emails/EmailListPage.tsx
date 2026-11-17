@@ -87,7 +87,7 @@ export function EmailListPage() {
         pageSize,
       }))
     } catch (error) {
-      notifyError(error, t('common.errors.generic'))
+      notifyError(error, t('common.messages.errors.generic'))
     } finally {
       setIsLoading(false)
     }
@@ -120,11 +120,11 @@ export function EmailListPage() {
   return (
     <main className="page courier-email-page">
       <div className="page-header">
-        <h1 className="page-title">{t('features.courier.emails.pages.list')}</h1>
+        <h1 className="page-title">{t('common.labels.emails')}</h1>
         {canCreate && (
           <Button onClick={() => navigate(APP_ROUTES.emailCreate)} type="button">
             <Plus data-icon="inline-start" />
-            {t('features.courier.emails.actions.create')}
+            {t('common.pages.create', { entity: t('common.labels.email') })}
           </Button>
         )}
       </div>
@@ -134,7 +134,7 @@ export function EmailListPage() {
           name="organizationId"
           render={({ field }) => (
             <Field>
-              <FieldLabel>{t('common.fields.organization')}</FieldLabel>
+              <FieldLabel>{t('features.iam.labels.organization')}</FieldLabel>
               <OrganizationSelect clearable includeInactive onValueChange={field.onChange} value={field.value} />
             </Field>
           )}
@@ -144,7 +144,7 @@ export function EmailListPage() {
           name="userId"
           render={({ field }) => (
             <Field>
-              <FieldLabel>{t('common.fields.user')}</FieldLabel>
+              <FieldLabel>{t('common.labels.user')}</FieldLabel>
               <UserSelect clearable includeInactive onValueChange={field.onChange} value={field.value} />
             </Field>
           )}
@@ -154,11 +154,11 @@ export function EmailListPage() {
           name="module"
           render={({ field }) => (
             <Field>
-              <FieldLabel>{t('common.fields.module')}</FieldLabel>
+              <FieldLabel>{t('common.labels.module')}</FieldLabel>
               <Select
                 onValueChange={field.onChange}
                 options={[
-                  { label: t('common.filters.all'), value: EMAIL_FILTER_VALUES.all },
+                  { label: t('common.actions.all'), value: EMAIL_FILTER_VALUES.all },
                   ...toTranslatedOptions(EMAIL_MODULE_OPTIONS, t),
                 ]}
                 value={field.value}
@@ -171,11 +171,11 @@ export function EmailListPage() {
           name="feature"
           render={({ field }) => (
             <Field>
-              <FieldLabel>{t('common.fields.feature')}</FieldLabel>
+              <FieldLabel>{t('common.labels.feature')}</FieldLabel>
               <Select
                 onValueChange={field.onChange}
                 options={[
-                  { label: t('common.filters.all'), value: EMAIL_FILTER_VALUES.all },
+                  { label: t('common.actions.all'), value: EMAIL_FILTER_VALUES.all },
                   ...toTranslatedOptions(EMAIL_FEATURE_OPTIONS, t),
                 ]}
                 value={field.value}
@@ -184,26 +184,26 @@ export function EmailListPage() {
           )}
         />
         <Field>
-          <FieldLabel htmlFor="email-subject">{t('common.fields.subject')}</FieldLabel>
+          <FieldLabel htmlFor="email-subject">{t('features.courier.labels.subject')}</FieldLabel>
           <Input id="email-subject" {...register('subject')} />
         </Field>
         <Field>
-          <FieldLabel htmlFor="email-recipient">{t('common.fields.recipient')}</FieldLabel>
+          <FieldLabel htmlFor="email-recipient">{t('features.courier.labels.recipient')}</FieldLabel>
           <Input id="email-recipient" {...register('recipient')} />
         </Field>
         <Field>
-          <FieldLabel htmlFor="email-date-from">{t('common.fields.dateFrom')}</FieldLabel>
+          <FieldLabel htmlFor="email-date-from">{t('common.labels.dateFrom')}</FieldLabel>
           <Input id="email-date-from" required type="datetime-local" {...register('dateFrom')} />
         </Field>
         <Field>
-          <FieldLabel htmlFor="email-date-to">{t('common.fields.dateTo')}</FieldLabel>
+          <FieldLabel htmlFor="email-date-to">{t('common.labels.dateTo')}</FieldLabel>
           <Input id="email-date-to" required type="datetime-local" {...register('dateTo')} />
         </Field>
       </FilterToolbar>
       <DataTable
         columns={columns}
         data={result?.items ?? []}
-        emptyText={t('features.courier.emails.messages.empty')}
+        emptyText={t('common.states.noResults', { entities: t('app.entities.emails') })}
         isLoading={isLoading}
         loadingText={t('common.states.loading')}
         onSortingChange={setSorting}

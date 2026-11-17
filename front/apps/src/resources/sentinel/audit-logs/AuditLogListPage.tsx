@@ -82,7 +82,7 @@ export function AuditLogListPage() {
         pageSize,
       }))
     } catch (error) {
-      notifyError(error, t('common.errors.generic'))
+      notifyError(error, t('common.messages.errors.generic'))
     } finally {
       setIsLoading(false)
     }
@@ -115,7 +115,7 @@ export function AuditLogListPage() {
   return (
     <main className="page">
       <div className="page-header">
-        <h1 className="page-title">{t('features.sentinel.auditLogs.pages.list')}</h1>
+        <h1 className="page-title">{t('features.sentinel.labels.auditLogs')}</h1>
       </div>
       <FilterToolbar onReset={handleReset} onSubmit={handleSubmit(handleSearch)}>
         <Controller
@@ -123,10 +123,10 @@ export function AuditLogListPage() {
           name="module"
           render={({ field }) => (
             <Field>
-              <FieldLabel>{t('common.fields.module')}</FieldLabel>
+              <FieldLabel>{t('common.labels.module')}</FieldLabel>
               <Select
                 onValueChange={field.onChange}
-                options={[{ label: t('common.filters.all'), value: AUDIT_LOG_FILTER_VALUES.all }, ...toTranslatedOptions(AUDIT_LOG_MODULE_OPTIONS, t)]}
+                options={[{ label: t('common.actions.all'), value: AUDIT_LOG_FILTER_VALUES.all }, ...toTranslatedOptions(AUDIT_LOG_MODULE_OPTIONS, t)]}
                 value={field.value}
               />
             </Field>
@@ -137,17 +137,17 @@ export function AuditLogListPage() {
           name="feature"
           render={({ field }) => (
             <Field>
-              <FieldLabel>{t('common.fields.feature')}</FieldLabel>
+              <FieldLabel>{t('common.labels.feature')}</FieldLabel>
               <Select
                 onValueChange={field.onChange}
-                options={[{ label: t('common.filters.all'), value: AUDIT_LOG_FILTER_VALUES.all }, ...toTranslatedOptions(AUDIT_LOG_FEATURE_OPTIONS, t)]}
+                options={[{ label: t('common.actions.all'), value: AUDIT_LOG_FILTER_VALUES.all }, ...toTranslatedOptions(AUDIT_LOG_FEATURE_OPTIONS, t)]}
                 value={field.value}
               />
             </Field>
           )}
         />
         <Field>
-          <FieldLabel htmlFor="action">{t('common.fields.action')}</FieldLabel>
+          <FieldLabel htmlFor="action">{t('common.labels.action')}</FieldLabel>
           <Input id="action" {...register('action')} />
         </Field>
         <Controller
@@ -155,7 +155,7 @@ export function AuditLogListPage() {
           name="userId"
           render={({ field }) => (
             <Field>
-              <FieldLabel>{t('common.fields.user')}</FieldLabel>
+              <FieldLabel>{t('common.labels.user')}</FieldLabel>
               <UserSelect
                 clearable
                 includeInactive
@@ -166,22 +166,22 @@ export function AuditLogListPage() {
           )}
         />
         <Field>
-          <FieldLabel htmlFor="targetId">{t('common.fields.targetId')}</FieldLabel>
+          <FieldLabel htmlFor="targetId">{t('features.sentinel.labels.targetId')}</FieldLabel>
           <Input id="targetId" {...register('targetId')} />
         </Field>
         <Field>
-          <FieldLabel htmlFor="from">{t('common.fields.from')}</FieldLabel>
+          <FieldLabel htmlFor="from">{t('common.labels.from')}</FieldLabel>
           <Input id="from" required type="datetime-local" {...register('from')} />
         </Field>
         <Field>
-          <FieldLabel htmlFor="to">{t('common.fields.to')}</FieldLabel>
+          <FieldLabel htmlFor="to">{t('common.labels.to')}</FieldLabel>
           <Input id="to" required type="datetime-local" {...register('to')} />
         </Field>
       </FilterToolbar>
       <DataTable
         columns={columns}
         data={result?.items ?? []}
-        emptyText={t('features.sentinel.auditLogs.messages.empty')}
+        emptyText={t('common.states.noResults', { entities: t('app.entities.auditLogs') })}
         isLoading={isLoading}
         loadingText={t('common.states.loading')}
         onSortingChange={setSorting}

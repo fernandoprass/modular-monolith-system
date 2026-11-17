@@ -72,7 +72,7 @@ export function TemplateListPage() {
         pageSize,
       }))
     } catch (error) {
-      notifyError(error, t('common.errors.generic'))
+      notifyError(error, t('common.messages.errors.generic'))
     } finally {
       setIsLoading(false)
     }
@@ -109,7 +109,7 @@ export function TemplateListPage() {
       setTemplateToDelete(null)
       await loadTemplates(pageNumber)
     } catch (error) {
-      notifyError(error, t('common.errors.generic'))
+      notifyError(error, t('common.messages.errors.generic'))
     }
   }
 
@@ -118,11 +118,11 @@ export function TemplateListPage() {
   return (
     <main className="page courier-template-page">
       <div className="page-header">
-        <h1 className="page-title">{t('features.courier.templates.pages.list')}</h1>
+        <h1 className="page-title">{t('features.courier.labels.templates')}</h1>
         {canWrite && (
           <Button onClick={() => navigate(APP_ROUTES.templateCreate)} type="button">
             <Plus data-icon="inline-start" />
-            {t('features.courier.templates.actions.create')}
+            {t('common.pages.create', { entity: t('features.courier.labels.template') })}
           </Button>
         )}
       </div>
@@ -132,11 +132,11 @@ export function TemplateListPage() {
           name="module"
           render={({ field }) => (
             <Field>
-              <FieldLabel>{t('common.fields.module')}</FieldLabel>
+              <FieldLabel>{t('common.labels.module')}</FieldLabel>
               <Select
                 onValueChange={field.onChange}
                 options={[
-                  { label: t('common.filters.all'), value: TEMPLATE_FILTER_VALUES.all },
+                  { label: t('common.actions.all'), value: TEMPLATE_FILTER_VALUES.all },
                   ...toTranslatedOptions(TEMPLATE_MODULE_OPTIONS, t),
                 ]}
                 value={field.value}
@@ -145,11 +145,11 @@ export function TemplateListPage() {
           )}
         />
         <Field>
-          <FieldLabel htmlFor="template-key-filter">{t('common.fields.key')}</FieldLabel>
+          <FieldLabel htmlFor="template-key-filter">{t('common.labels.key')}</FieldLabel>
           <Input id="template-key-filter" {...register('key')} />
         </Field>
         <Field>
-          <FieldLabel htmlFor="template-name-filter">{t('common.fields.name')}</FieldLabel>
+          <FieldLabel htmlFor="template-name-filter">{t('common.labels.name')}</FieldLabel>
           <Input id="template-name-filter" {...register('name')} />
         </Field>
         <Controller
@@ -157,11 +157,11 @@ export function TemplateListPage() {
           name="severity"
           render={({ field }) => (
             <Field>
-              <FieldLabel>{t('common.fields.severity')}</FieldLabel>
+              <FieldLabel>{t('features.courier.labels.severity')}</FieldLabel>
               <Select
                 onValueChange={field.onChange}
                 options={[
-                  { label: t('common.filters.all'), value: TEMPLATE_FILTER_VALUES.all },
+                  { label: t('common.actions.all'), value: TEMPLATE_FILTER_VALUES.all },
                   ...toTranslatedOptions(NOTIFICATION_SEVERITY_OPTIONS, t),
                 ]}
                 value={field.value}
@@ -173,7 +173,7 @@ export function TemplateListPage() {
       <DataTable
         columns={columns}
         data={result?.items ?? []}
-        emptyText={t('features.courier.templates.messages.empty')}
+        emptyText={t('common.states.noResults', { entities: t('app.entities.templates') })}
         isLoading={isLoading}
         loadingText={t('common.states.loading')}
         onSortingChange={setSorting}
@@ -194,9 +194,9 @@ export function TemplateListPage() {
         onConfirm={() => void handleDelete()}
         onOpenChange={(open) => !open && setTemplateToDelete(null)}
         open={templateToDelete !== null}
-        title={t('features.courier.templates.messages.deleteTitle')}
+        title={t('common.actions.delete')}
       >
-        {t('features.courier.templates.messages.deleteConfirm')}
+        {t('features.courier.messages.templates.deleteConfirm')}
       </ConfirmDialog>
     </main>
   )
