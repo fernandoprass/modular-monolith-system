@@ -22,28 +22,28 @@ export function createPermissionTableColumns({
   return [
     {
       accessorKey: 'module',
-      header: t('common.fields.module'),
+      header: t('common.labels.module'),
     },
     {
       accessorKey: 'resource',
-      header: t('common.fields.resource'),
+      header: t('common.labels.resource'),
     },
     {
       accessorKey: 'action',
-      header: t('common.fields.action'),
+      header: t('common.labels.action'),
     },
     {
       accessorKey: 'title',
-      header: t('common.fields.title'),
+      header: t('common.labels.title'),
     },
     {
       accessorKey: 'isActive',
       cell: ({ row }) => (
         <Badge variant={row.original.isActive ? 'active' : 'inactive'}>
-          {row.original.isActive ? t('common.status.active') : t('common.status.inactive')}
+          {row.original.isActive ? t('common.states.active') : t('common.states.inactive')}
         </Badge>
       ),
-      header: t('common.fields.isActive'),
+      header: t('common.labels.isActive'),
     },
     {
       cell: ({ row }) => (
@@ -60,7 +60,7 @@ export function createPermissionTableColumns({
       ),
       enableHiding: false,
       enableSorting: false,
-      header: t('common.fields.actions'),
+      header: t('common.labels.actions'),
       id: 'actions',
     },
   ]

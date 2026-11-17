@@ -70,7 +70,7 @@ export function EmailCreatePage() {
       showSuccess(message)
       navigate(APP_ROUTES.emailView(created.id))
     } catch (error) {
-      notifyError(error, t('common.errors.generic'))
+      notifyError(error, t('common.messages.errors.generic'))
     } finally {
       setIsSaving(false)
     }
@@ -79,7 +79,7 @@ export function EmailCreatePage() {
   return (
     <main className="page courier-email-page">
       <div className="page-header">
-        <h1 className="page-title">{t('features.courier.emails.pages.create')}</h1>
+        <h1 className="page-title">{t('common.pages.create', { entity: t('common.labels.email') })}</h1>
         <Button onClick={() => navigate(APP_ROUTES.emails)} type="button" variant="outline">
           <ArrowLeft data-icon="inline-start" />
           {t('common.actions.back')}
@@ -95,7 +95,7 @@ export function EmailCreatePage() {
                   name="organizationId"
                   render={({ field }) => (
                     <Field data-invalid={form.formState.errors.organizationId !== undefined}>
-                      <FieldLabel htmlFor="EmailCreatePage-organizationId">{t('common.fields.organization')}</FieldLabel>
+                      <FieldLabel htmlFor="EmailCreatePage-organizationId">{t('features.iam.labels.organization')}</FieldLabel>
                       <OrganizationSelect
                         onBlur={field.onBlur}
                         ref={field.ref}
@@ -114,7 +114,7 @@ export function EmailCreatePage() {
                   name="userId"
                   render={({ field }) => (
                     <Field data-invalid={form.formState.errors.userId !== undefined}>
-                      <FieldLabel htmlFor="EmailCreatePage-userId">{t('common.fields.user')}</FieldLabel>
+                      <FieldLabel htmlFor="EmailCreatePage-userId">{t('common.labels.user')}</FieldLabel>
                       <UserSelect
                         onBlur={field.onBlur}
                         ref={field.ref}
@@ -135,7 +135,7 @@ export function EmailCreatePage() {
                   name="module"
                   render={({ field }) => (
                     <Field data-invalid={form.formState.errors.module !== undefined}>
-                      <FieldLabel htmlFor="EmailCreatePage-module">{t('common.fields.module')}</FieldLabel>
+                      <FieldLabel htmlFor="EmailCreatePage-module">{t('common.labels.module')}</FieldLabel>
                       <Select
                         onBlur={field.onBlur}
                         ref={field.ref}
@@ -155,7 +155,7 @@ export function EmailCreatePage() {
                   name="feature"
                   render={({ field }) => (
                     <Field data-invalid={form.formState.errors.feature !== undefined}>
-                      <FieldLabel htmlFor="EmailCreatePage-feature">{t('common.fields.feature')}</FieldLabel>
+                      <FieldLabel htmlFor="EmailCreatePage-feature">{t('common.labels.feature')}</FieldLabel>
                       <Select
                         onBlur={field.onBlur}
                         ref={field.ref}
@@ -173,7 +173,7 @@ export function EmailCreatePage() {
               </div>
               <div className="form-row-two">
                 <Field data-invalid={form.formState.errors.templateKey !== undefined}>
-                  <FieldLabel htmlFor="email-template-key">{t('common.fields.templateKey')}</FieldLabel>
+                  <FieldLabel htmlFor="email-template-key">{t('features.courier.labels.templateKey')}</FieldLabel>
                   <Input
                     aria-invalid={form.formState.errors.templateKey !== undefined}
                     aria-describedby={form.formState.errors.templateKey ? 'EmailCreatePage-templateKey-error' : undefined}
@@ -184,7 +184,7 @@ export function EmailCreatePage() {
                   <FieldError id="EmailCreatePage-templateKey-error">{form.formState.errors.templateKey?.message}</FieldError>
                 </Field>
                 <Field data-invalid={form.formState.errors.recipient !== undefined}>
-                  <FieldLabel htmlFor="email-recipient">{t('common.fields.recipient')}</FieldLabel>
+                  <FieldLabel htmlFor="email-recipient">{t('features.courier.labels.recipient')}</FieldLabel>
                   <Input
                     aria-invalid={form.formState.errors.recipient !== undefined}
                     aria-describedby={form.formState.errors.recipient ? 'EmailCreatePage-recipient-error' : undefined}
@@ -197,7 +197,7 @@ export function EmailCreatePage() {
                 </Field>
               </div>
               <Field data-invalid={form.formState.errors.subject !== undefined}>
-                <FieldLabel htmlFor="email-subject">{t('common.fields.subject')}</FieldLabel>
+                <FieldLabel htmlFor="email-subject">{t('features.courier.labels.subject')}</FieldLabel>
                 <Input
                   aria-invalid={form.formState.errors.subject !== undefined}
                   aria-describedby={form.formState.errors.subject ? 'EmailCreatePage-subject-error' : undefined}
@@ -208,7 +208,7 @@ export function EmailCreatePage() {
                 <FieldError id="EmailCreatePage-subject-error">{form.formState.errors.subject?.message}</FieldError>
               </Field>
               <Field data-invalid={form.formState.errors.body !== undefined}>
-                <FieldLabel htmlFor="email-body">{t('common.fields.body')}</FieldLabel>
+                <FieldLabel htmlFor="email-body">{t('features.courier.labels.body')}</FieldLabel>
                 <Textarea
                   aria-invalid={form.formState.errors.body !== undefined}
                   aria-describedby={form.formState.errors.body ? 'EmailCreatePage-body-error' : undefined}
@@ -225,7 +225,7 @@ export function EmailCreatePage() {
                 render={({ field }) => (
                   <Checkbox
                     checked={field.value}
-                    label={t('common.fields.isHtml')}
+                    label={t('features.courier.labels.isHtml')}
                     onCheckedChange={field.onChange}
                   />
                 )}

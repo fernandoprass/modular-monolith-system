@@ -33,9 +33,9 @@ export const NOTIFICATION_SEVERITIES = {
 } as const
 
 export const NOTIFICATION_SEVERITY_OPTIONS = [
-  { labelKey: 'common.enums.notificationSeverity.information', value: String(NOTIFICATION_SEVERITIES.information) },
-  { labelKey: 'common.enums.notificationSeverity.warning', value: String(NOTIFICATION_SEVERITIES.warning) },
-  { labelKey: 'common.enums.notificationSeverity.critical', value: String(NOTIFICATION_SEVERITIES.critical) },
+  { labelKey: 'features.courier.enums.notificationSeverity.information', value: String(NOTIFICATION_SEVERITIES.information) },
+  { labelKey: 'features.courier.enums.notificationSeverity.warning', value: String(NOTIFICATION_SEVERITIES.warning) },
+  { labelKey: 'features.courier.enums.notificationSeverity.critical', value: String(NOTIFICATION_SEVERITIES.critical) },
 ] as const
 
 export const RETENTION_POLICIES = {

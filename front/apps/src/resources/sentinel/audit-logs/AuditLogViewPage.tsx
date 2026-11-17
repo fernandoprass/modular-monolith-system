@@ -44,7 +44,7 @@ export function AuditLogViewPage() {
       try {
         setAuditLog(await getAuditLog(auditLogId))
       } catch (error) {
-        notifyError(error, t('common.errors.generic'))
+        notifyError(error, t('common.messages.errors.generic'))
       }
     }
 
@@ -54,7 +54,7 @@ export function AuditLogViewPage() {
   return (
     <main className="page">
       <div className="page-header">
-        <h1 className="page-title">{t('features.sentinel.auditLogs.pages.show')}</h1>
+        <h1 className="page-title">{t('common.pages.show', { entity: t('features.sentinel.labels.auditLog') })}</h1>
         <Button onClick={() => navigate(APP_ROUTES.auditLogs)} type="button" variant="outline">
           <ArrowLeft data-icon="inline-start" />
           {t('common.actions.back')}
@@ -67,21 +67,21 @@ export function AuditLogViewPage() {
           ) : (
             <div className="detail-grid-one-column">
               <div className="detail-grid-two-columns">
-                <DetailField label={t('common.fields.id')}>{auditLog.id}</DetailField>
-                <DetailField label={t('common.fields.privacyLevel')}>{getAuditPrivacyLevelEnum(auditLog.privacyLevel, t)}</DetailField>
-                <DetailField label={t('common.fields.module')}>{auditLog.module}</DetailField>
-                <DetailField label={t('common.fields.feature')}>{auditLog.feature}</DetailField>
-                <DetailField label={t('common.fields.action')}>{auditLog.action}</DetailField>
-                <DetailField label={t('common.fields.userId')}>{auditLog.userId}</DetailField>
-                <DetailField label={t('common.fields.organizationId')}>{auditLog.organizationId}</DetailField>
-                <DetailField label={t('common.fields.targetId')}>{auditLog.targetId}</DetailField>
-                <DetailField label={t('common.fields.ipAddress')}>{auditLog.ipAddress ?? ''}</DetailField>
-                <DetailField label={t('common.fields.createdAt')}>{formatUserDateTime(auditLog.createdAt, locale)}</DetailField>
-                <DetailField label={t('common.fields.expiresAt')}>{formatUserDateTime(auditLog.expiresAt, locale)}</DetailField>
+                <DetailField label={t('common.labels.id')}>{auditLog.id}</DetailField>
+                <DetailField label={t('features.sentinel.labels.privacyLevel')}>{getAuditPrivacyLevelEnum(auditLog.privacyLevel, t)}</DetailField>
+                <DetailField label={t('common.labels.module')}>{auditLog.module}</DetailField>
+                <DetailField label={t('common.labels.feature')}>{auditLog.feature}</DetailField>
+                <DetailField label={t('common.labels.action')}>{auditLog.action}</DetailField>
+                <DetailField label={t('features.iam.labels.userId')}>{auditLog.userId}</DetailField>
+                <DetailField label={t('features.iam.labels.organizationId')}>{auditLog.organizationId}</DetailField>
+                <DetailField label={t('features.sentinel.labels.targetId')}>{auditLog.targetId}</DetailField>
+                <DetailField label={t('features.sentinel.labels.ipAddress')}>{auditLog.ipAddress ?? ''}</DetailField>
+                <DetailField label={t('common.labels.createdAt')}>{formatUserDateTime(auditLog.createdAt, locale)}</DetailField>
+                <DetailField label={t('common.labels.expiresAt')}>{formatUserDateTime(auditLog.expiresAt, locale)}</DetailField>
               </div>
-              <DetailField label={t('common.fields.description')}>{auditLog.description}</DetailField>
-              <DetailField label={t('common.fields.userAgent')}>{auditLog.userAgent ?? ''}</DetailField>
-              <DetailField label={t('common.fields.metadata')}>
+              <DetailField label={t('common.labels.description')}>{auditLog.description}</DetailField>
+              <DetailField label={t('features.sentinel.labels.userAgent')}>{auditLog.userAgent ?? ''}</DetailField>
+              <DetailField label={t('features.sentinel.labels.metadata')}>
                 <pre className="detail-code">{formatMetadata(auditLog.metadata)}</pre>
               </DetailField>
             </div>

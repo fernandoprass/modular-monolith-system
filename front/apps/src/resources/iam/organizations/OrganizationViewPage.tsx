@@ -32,7 +32,7 @@ export function OrganizationViewPage() {
       try {
         setOrganization(await getOrganization(organizationId))
       } catch (error) {
-        notifyError(error, t('common.errors.generic'))
+        notifyError(error, t('common.messages.errors.generic'))
       }
     }
 
@@ -42,7 +42,7 @@ export function OrganizationViewPage() {
   return (
     <main className="page">
       <div className="page-header">
-        <h1 className="page-title">{t('features.iam.organizations.pages.show')}</h1>
+        <h1 className="page-title">{t('common.pages.show', { entity: t('features.iam.labels.organization') })}</h1>
         <Button onClick={() => navigate(APP_ROUTES.organizations)} type="button" variant="outline">
           <ArrowLeft data-icon="inline-start" />
           {t('common.actions.back')}
@@ -54,20 +54,20 @@ export function OrganizationViewPage() {
             <p className="page-subtitle">{t('common.states.loading')}</p>
           ) : (
             <div className="detail-grid-two-columns">
-              <Field label={t('common.fields.type')}>
+              <Field label={t('common.labels.type')}>
                 {getOrganizationTypeEnum(organization.type, t)}
               </Field>
-              <Field label={t('common.fields.code')}>{organization.code}</Field>
-              <Field label={t('common.fields.name')}>{organization.name}</Field>
-              <Field label={t('common.fields.defaultLanguage')}>
+              <Field label={t('common.labels.code')}>{organization.code}</Field>
+              <Field label={t('common.labels.name')}>{organization.name}</Field>
+              <Field label={t('common.labels.defaultLanguage')}>
                 {getLanguageLabel(organization.defaultLanguage, t)}
               </Field>
-              <Field label={t('common.fields.description')}>
+              <Field label={t('common.labels.description')}>
                 {organization.description ?? ''}
               </Field>
-              <Field label={t('common.fields.isActive')}>
+              <Field label={t('common.labels.isActive')}>
                 <Badge variant={organization.isActive ? 'active' : 'inactive'}>
-                  {organization.isActive ? t('common.status.active') : t('common.status.inactive')}
+                  {organization.isActive ? t('common.states.active') : t('common.states.inactive')}
                 </Badge>
               </Field>
             </div>

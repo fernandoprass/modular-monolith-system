@@ -58,7 +58,7 @@ export function RoleListPage() {
     try {
       setRoles(await getRoles(appliedFilters))
     } catch (error) {
-      notifyError(error, t('common.errors.generic'))
+      notifyError(error, t('common.messages.errors.generic'))
     } finally {
       setIsLoading(false)
     }
@@ -92,14 +92,14 @@ export function RoleListPage() {
       setDeleteTarget(null)
       await loadRoles()
     } catch (error) {
-      notifyError(error, t('common.errors.generic'))
+      notifyError(error, t('common.messages.errors.generic'))
     }
   }
 
   return (
     <main className="page">
       <div className="page-header">
-        <h1 className="page-title">{t('features.iam.roles.pages.list')}</h1>
+        <h1 className="page-title">{t('features.iam.labels.roles')}</h1>
         {canCreate && (
           <Button onClick={handleCreate} type="button">
             <Plus data-icon="inline-start" />
@@ -113,7 +113,7 @@ export function RoleListPage() {
           name="userId"
           render={({ field }) => (
             <Field>
-              <FieldLabel>{t('common.fields.user')}</FieldLabel>
+              <FieldLabel>{t('common.labels.user')}</FieldLabel>
               <UserSelect
                 clearable
                 onValueChange={field.onChange}
@@ -123,14 +123,14 @@ export function RoleListPage() {
           )}
         />
         <Field>
-          <FieldLabel htmlFor="name">{t('common.fields.name')}</FieldLabel>
+          <FieldLabel htmlFor="name">{t('common.labels.name')}</FieldLabel>
           <Input id="name" {...register('name')} />
         </Field>
       </FilterToolbar>
       <DataTable
         columns={columns}
         data={roles}
-        emptyText={t('features.iam.roles.messages.empty')}
+        emptyText={t('common.states.noResults', { entities: t('app.entities.roles') })}
         isLoading={isLoading}
         loadingText={t('common.states.loading')}
         onSortingChange={setSorting}
@@ -145,7 +145,7 @@ export function RoleListPage() {
         open={deleteTarget !== null}
         title={t('common.actions.delete')}
       >
-        <p>{t('features.iam.roles.messages.deleteConfirm')}</p>
+        <p>{t('common.messages.confirmations.delete', { entity: t('app.entities.role') })}</p>
       </ConfirmDialog>
     </main>
   )

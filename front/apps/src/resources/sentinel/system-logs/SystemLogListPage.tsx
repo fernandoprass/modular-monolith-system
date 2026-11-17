@@ -80,7 +80,7 @@ export function SystemLogListPage() {
         pageSize,
       }))
     } catch (error) {
-      notifyError(error, t('common.errors.generic'))
+      notifyError(error, t('common.messages.errors.generic'))
     } finally {
       setIsLoading(false)
     }
@@ -113,7 +113,7 @@ export function SystemLogListPage() {
   return (
     <main className="page">
       <div className="page-header">
-        <h1 className="page-title">{t('features.sentinel.systemLogs.pages.list')}</h1>
+        <h1 className="page-title">{t('features.sentinel.labels.systemLogs')}</h1>
       </div>
       <FilterToolbar onReset={handleReset} onSubmit={handleSubmit(handleSearch)}>
         <Controller
@@ -121,7 +121,7 @@ export function SystemLogListPage() {
           name="organizationId"
           render={({ field }) => (
             <Field>
-              <FieldLabel>{t('common.fields.organization')}</FieldLabel>
+              <FieldLabel>{t('features.iam.labels.organization')}</FieldLabel>
               <OrganizationSelect
                 clearable
                 includeInactive
@@ -136,7 +136,7 @@ export function SystemLogListPage() {
           name="userId"
           render={({ field }) => (
             <Field>
-              <FieldLabel>{t('common.fields.user')}</FieldLabel>
+              <FieldLabel>{t('common.labels.user')}</FieldLabel>
               <UserSelect
                 clearable
                 includeInactive
@@ -151,10 +151,10 @@ export function SystemLogListPage() {
           name="level"
           render={({ field }) => (
             <Field>
-              <FieldLabel>{t('common.fields.level')}</FieldLabel>
+              <FieldLabel>{t('features.sentinel.labels.level')}</FieldLabel>
               <Select
                 onValueChange={field.onChange}
-                options={[{ label: t('common.filters.all'), value: SYSTEM_LOG_FILTER_VALUES.all }, ...toTranslatedOptions(SYSTEM_LOG_LEVEL_OPTIONS, t)]}
+                options={[{ label: t('common.actions.all'), value: SYSTEM_LOG_FILTER_VALUES.all }, ...toTranslatedOptions(SYSTEM_LOG_LEVEL_OPTIONS, t)]}
                 value={field.value}
               />
             </Field>
@@ -165,32 +165,32 @@ export function SystemLogListPage() {
           name="status"
           render={({ field }) => (
             <Field>
-              <FieldLabel>{t('common.fields.status')}</FieldLabel>
+              <FieldLabel>{t('common.labels.status')}</FieldLabel>
               <Select
                 onValueChange={field.onChange}
-                options={[{ label: t('common.filters.all'), value: SYSTEM_LOG_FILTER_VALUES.all }, ...toTranslatedOptions(SYSTEM_LOG_STATUS_OPTIONS, t)]}
+                options={[{ label: t('common.actions.all'), value: SYSTEM_LOG_FILTER_VALUES.all }, ...toTranslatedOptions(SYSTEM_LOG_STATUS_OPTIONS, t)]}
                 value={field.value}
               />
             </Field>
           )}
         />
         <Field>
-          <FieldLabel htmlFor="requestId">{t('common.fields.requestId')}</FieldLabel>
+          <FieldLabel htmlFor="requestId">{t('features.sentinel.labels.requestId')}</FieldLabel>
           <Input id="requestId" {...register('requestId')} />
         </Field>
         <Field>
-          <FieldLabel htmlFor="from">{t('common.fields.from')}</FieldLabel>
+          <FieldLabel htmlFor="from">{t('common.labels.from')}</FieldLabel>
           <Input id="from" required type="datetime-local" {...register('from')} />
         </Field>
         <Field>
-          <FieldLabel htmlFor="to">{t('common.fields.to')}</FieldLabel>
+          <FieldLabel htmlFor="to">{t('common.labels.to')}</FieldLabel>
           <Input id="to" required type="datetime-local" {...register('to')} />
         </Field>
       </FilterToolbar>
       <DataTable
         columns={columns}
         data={result?.items ?? []}
-        emptyText={t('features.sentinel.systemLogs.messages.empty')}
+        emptyText={t('common.states.noResults', { entities: t('app.entities.systemLogs') })}
         isLoading={isLoading}
         loadingText={t('common.states.loading')}
         onSortingChange={setSorting}

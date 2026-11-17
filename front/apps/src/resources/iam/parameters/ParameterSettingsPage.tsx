@@ -56,12 +56,6 @@ function groupParameters(parameters: ParameterLiteDto[]): GroupedParameters {
     }))
 }
 
-function getPageTitleKey(owner: ParameterSettingsOwner) {
-  return owner === 'organization'
-    ? 'features.iam.parameters.pages.organizationSettings'
-    : 'features.iam.parameters.pages.userSettings'
-}
-
 export function ParameterSettingsPage({ embedded = false, owner }: ParameterSettingsPageProps) {
   const t = useTranslate()
   const notifyError = useNotifyError()
@@ -86,7 +80,7 @@ export function ParameterSettingsPage({ embedded = false, owner }: ParameterSett
       setOriginalValues(loadedValues)
       setValues(loadedValues)
     } catch (error) {
-      notifyError(error, t('common.errors.generic'))
+      notifyError(error, t('common.messages.errors.generic'))
     } finally {
       setIsLoading(false)
     }
@@ -120,7 +114,7 @@ export function ParameterSettingsPage({ embedded = false, owner }: ParameterSett
       showSuccess(message)
       await loadParameters()
     } catch (error) {
-      notifyError(error, t('common.errors.generic'))
+      notifyError(error, t('common.messages.errors.generic'))
     } finally {
       setParameterSaving(parameter.id, false)
     }
@@ -138,7 +132,7 @@ export function ParameterSettingsPage({ embedded = false, owner }: ParameterSett
       showSuccess(message)
       await loadParameters()
     } catch (error) {
-      notifyError(error, t('common.errors.generic'))
+      notifyError(error, t('common.messages.errors.generic'))
     } finally {
       setParameterSaving(parameter.id, false)
     }
@@ -153,10 +147,10 @@ export function ParameterSettingsPage({ embedded = false, owner }: ParameterSett
 
   const content = (
     <>
-      {!embedded && <h1 className="page-title">{t(getPageTitleKey(owner))}</h1>}
+      {!embedded && <h1 className="page-title">{t('common.labels.settings')}</h1>}
       {isLoading && <p className="page-subtitle">{t('common.states.loading')}</p>}
       {!isLoading && parameters.length === 0 && (
-        <p className="page-subtitle">{t('features.iam.parameters.messages.empty')}</p>
+        <p className="page-subtitle">{t('common.states.noResults', { entities: t('app.entities.parameters') })}</p>
       )}
       <div className="settings-stack">
         {groupedParameters.map((module) => (

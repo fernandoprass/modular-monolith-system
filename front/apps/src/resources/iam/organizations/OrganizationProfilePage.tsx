@@ -51,7 +51,7 @@ export function OrganizationProfilePage() {
       const loaded = await getOwnOrganization()
       setOrganization(loaded)
     } catch (error) {
-      notifyError(error, t('common.errors.generic'))
+      notifyError(error, t('common.messages.errors.generic'))
     }
   }, [notifyError, t])
 
@@ -62,7 +62,7 @@ export function OrganizationProfilePage() {
   return (
     <main className="page">
       <div className="page-header">
-        <h1 className="page-title">{t('features.iam.organizations.pages.profile')}</h1>
+        <h1 className="page-title">{t('features.iam.labels.organizationProfile')}</h1>
       </div>
       <Card>
         <CardContent>
@@ -117,7 +117,7 @@ function OrganizationProfileFormPanel({
       showSuccess(message)
       await onSaved()
     } catch (error) {
-      notifyError(error, t('common.errors.generic'))
+      notifyError(error, t('common.messages.errors.generic'))
     } finally {
       setIsSaving(false)
     }
@@ -127,11 +127,11 @@ function OrganizationProfileFormPanel({
     <form noValidate className="edit-form" onSubmit={handleSubmit(handleSave)}>
       <FieldGroup>
         <Field data-disabled>
-          <FieldLabel>{t('common.fields.code')}</FieldLabel>
+          <FieldLabel>{t('common.labels.code')}</FieldLabel>
           <Input disabled value={organization.code} />
         </Field>
         <Field data-invalid={errors.name !== undefined}>
-          <FieldLabel htmlFor="name">{t('common.fields.name')}</FieldLabel>
+          <FieldLabel htmlFor="name">{t('common.labels.name')}</FieldLabel>
           <Input
             aria-invalid={errors.name !== undefined}
             aria-describedby={errors.name ? 'OrganizationProfilePage-name-error' : undefined}
@@ -142,7 +142,7 @@ function OrganizationProfileFormPanel({
           <FieldError id="OrganizationProfilePage-name-error">{errors.name?.message}</FieldError>
         </Field>
         <Field data-invalid={errors.description !== undefined}>
-          <FieldLabel htmlFor="description">{t('common.fields.description')}</FieldLabel>
+          <FieldLabel htmlFor="description">{t('common.labels.description')}</FieldLabel>
           <Textarea
             aria-invalid={errors.description !== undefined}
             aria-describedby={errors.description ? 'OrganizationProfilePage-description-error' : undefined}
@@ -157,7 +157,7 @@ function OrganizationProfileFormPanel({
           name="defaultLanguage"
           render={({ field }) => (
             <Field data-invalid={errors.defaultLanguage !== undefined}>
-              <FieldLabel htmlFor="OrganizationProfilePage-defaultLanguage">{t('common.fields.defaultLanguage')}</FieldLabel>
+              <FieldLabel htmlFor="OrganizationProfilePage-defaultLanguage">{t('common.labels.defaultLanguage')}</FieldLabel>
               <Select
                 onBlur={field.onBlur}
                 ref={field.ref}

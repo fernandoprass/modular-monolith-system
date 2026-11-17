@@ -24,25 +24,25 @@ export function createSystemLogTableColumns({
     {
       accessorKey: 'createdAt',
       cell: ({ row }) => formatUserDateTime(row.original.createdAt, locale),
-      header: t('common.fields.createdAt'),
+      header: t('common.labels.createdAt'),
     },
     {
       accessorKey: 'level',
       cell: ({ row }) => getSystemLogLevelEnum(row.original.level, t),
-      header: t('common.fields.level'),
+      header: t('features.sentinel.labels.level'),
     },
     {
       accessorKey: 'status',
       cell: ({ row }) => getSystemLogStatusEnum(row.original.status, t),
-      header: t('common.fields.status'),
+      header: t('common.labels.status'),
     },
     {
       accessorKey: 'module',
-      header: t('common.fields.module'),
+      header: t('common.labels.module'),
     },
     {
       accessorKey: 'message',
-      header: t('common.fields.message'),
+      header: t('common.labels.message'),
     },
     {
       cell: ({ row }) => (
@@ -58,7 +58,7 @@ export function createSystemLogTableColumns({
       ),
       enableHiding: false,
       enableSorting: false,
-      header: t('common.fields.actions'),
+      header: t('common.labels.actions'),
       id: 'actions',
     },
   ]

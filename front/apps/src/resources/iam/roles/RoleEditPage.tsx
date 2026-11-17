@@ -101,9 +101,9 @@ export function RoleEditPage() {
   const [isPermissionSaving, setIsPermissionSaving] = useState(false)
   const isCreate = id === undefined
   const canAssignPermissions = hasPermissionCode(permissions, IAM_PERMISSIONS.permissions.assign)
-  const pageTitle = isCreate ? t('features.iam.roles.pages.create') : t('features.iam.roles.pages.edit')
+  const pageTitle = isCreate ? t('common.pages.create', { entity: t('features.iam.labels.role') }) : t('common.pages.edit', { entity: t('features.iam.labels.role') })
   const permissionModuleOptions = useMemo(() => [
-    { label: t('common.filters.all'), value: PERMISSION_FILTER_VALUES.all },
+    { label: t('common.actions.all'), value: PERMISSION_FILTER_VALUES.all },
     ...toTranslatedOptions(PERMISSION_MODULE_OPTIONS, t),
   ], [t])
   const filteredAvailablePermissions = useMemo(() => {
@@ -127,15 +127,15 @@ export function RoleEditPage() {
   const availablePermissionColumns = useMemo<ColumnDef<PermissionDto>[]>(() => [
     {
       accessorKey: 'module',
-      header: t('common.fields.module'),
+      header: t('common.labels.module'),
     },
     {
       accessorKey: 'resource',
-      header: t('common.fields.resource'),
+      header: t('common.labels.resource'),
     },
     {
       accessorKey: 'title',
-      header: t('common.fields.title'),
+      header: t('common.labels.title'),
     },
     {
       cell: ({ row }) => (
@@ -144,31 +144,31 @@ export function RoleEditPage() {
         </span>
       ),
       enableSorting: false,
-      header: t('common.fields.info'),
+      header: t('common.labels.info'),
       id: 'info',
     },
   ], [t])
   const assignedPermissionColumns = useMemo<ColumnDef<PermissionDto>[]>(() => [
     {
       accessorKey: 'module',
-      header: t('common.fields.module'),
+      header: t('common.labels.module'),
     },
     {
       accessorKey: 'resource',
-      header: t('common.fields.resource'),
+      header: t('common.labels.resource'),
     },
     {
       accessorKey: 'title',
-      header: t('common.fields.title'),
+      header: t('common.labels.title'),
     },
     {
       accessorKey: 'isActive',
       cell: ({ row }) => (
         <Badge variant={row.original.isActive ? 'active' : 'inactive'}>
-          {row.original.isActive ? t('common.status.active') : t('common.status.inactive')}
+          {row.original.isActive ? t('common.states.active') : t('common.states.inactive')}
         </Badge>
       ),
-      header: t('common.fields.isActive'),
+      header: t('common.labels.isActive'),
     },
   ], [t])
   const loadRole = useCallback(async () => {
@@ -180,7 +180,7 @@ export function RoleEditPage() {
       const loaded = await getRole(id)
       setRole(loaded)
     } catch (error) {
-      notifyError(error, t('common.errors.generic'))
+      notifyError(error, t('common.messages.errors.generic'))
     }
   }, [id, isCreate, notifyError, t])
 
@@ -202,7 +202,7 @@ export function RoleEditPage() {
       setAvailableSelection({})
       setRolePermissionSelection({})
     } catch (error) {
-      notifyError(error, t('common.errors.generic'))
+      notifyError(error, t('common.messages.errors.generic'))
     } finally {
       setIsPermissionLoading(false)
     }
@@ -251,7 +251,7 @@ export function RoleEditPage() {
       showSuccess(message)
       await loadPermissions()
     } catch (error) {
-      notifyError(error, t('common.errors.generic'))
+      notifyError(error, t('common.messages.errors.generic'))
     } finally {
       setIsPermissionSaving(false)
     }
@@ -275,7 +275,7 @@ export function RoleEditPage() {
       showSuccess(message)
       await loadPermissions()
     } catch (error) {
-      notifyError(error, t('common.errors.generic'))
+      notifyError(error, t('common.messages.errors.generic'))
     } finally {
       setIsPermissionSaving(false)
     }
@@ -311,10 +311,10 @@ export function RoleEditPage() {
       {!isCreate && canAssignPermissions && (
         <Card>
           <CardContent className="permission-section">
-            <h2 className="card-title">{t('features.iam.permissions.name')}</h2>
+            <h2 className="card-title">{t('features.iam.labels.permissions')}</h2>
             <div className="permission-filter-form">
               <Field>
-                <FieldLabel>{t('common.fields.module')}</FieldLabel>
+                <FieldLabel>{t('common.labels.module')}</FieldLabel>
                 <Select
                   onValueChange={handlePermissionModuleChange}
                   options={permissionModuleOptions}
@@ -322,7 +322,7 @@ export function RoleEditPage() {
                 />
               </Field>
               <Field>
-                <FieldLabel htmlFor="permission-title-filter">{t('common.fields.title')}</FieldLabel>
+                <FieldLabel htmlFor="permission-title-filter">{t('common.labels.title')}</FieldLabel>
                 <Input
                   id="permission-title-filter"
                   onChange={(event) => setPermissionTitleFilter(event.currentTarget.value)}
@@ -332,11 +332,11 @@ export function RoleEditPage() {
             </div>
             <div className="permission-assignment-grid">
               <div className="permission-table-column">
-                <h2 className="card-title">{t('features.iam.roles.labels.availablePermissions')}</h2>
+                <h2 className="card-title">{t('features.iam.labels.availablePermissions')}</h2>
                 <DataTable
                   columns={availablePermissionColumns}
                   data={filteredAvailablePermissions}
-                  emptyText={t('features.iam.permissions.messages.empty')}
+                  emptyText={t('common.states.noResults', { entities: t('app.entities.permissions') })}
                   getRowId={(permission) => permission.id}
                   isLoading={isPermissionLoading}
                   loadingText={t('common.states.loading')}
@@ -366,11 +366,11 @@ export function RoleEditPage() {
                 </Button>
               </div>
               <div className="permission-table-column">
-                <h2 className="card-title">{t('features.iam.roles.labels.assignedPermissions')}</h2>
+                <h2 className="card-title">{t('features.iam.labels.assignedPermissions')}</h2>
                 <DataTable
                   columns={assignedPermissionColumns}
                   data={filteredRolePermissions}
-                  emptyText={t('features.iam.permissions.messages.empty')}
+                  emptyText={t('common.states.noResults', { entities: t('app.entities.permissions') })}
                   getRowId={(permission) => permission.id}
                   isLoading={isPermissionLoading}
                   loadingText={t('common.states.loading')}
@@ -422,7 +422,7 @@ function RoleEditForm({
         await onSaved()
       }
     } catch (error) {
-      notifyError(error, t('common.errors.generic'))
+      notifyError(error, t('common.messages.errors.generic'))
     } finally {
       setIsSaving(false)
     }
@@ -436,7 +436,7 @@ function RoleEditForm({
           name="organizationId"
           render={({ field }) => (
             <Field data-disabled={!isCreate} data-invalid={errors.organizationId !== undefined}>
-              <FieldLabel htmlFor="RoleEditPage-organizationId">{t('common.fields.organization')}</FieldLabel>
+              <FieldLabel htmlFor="RoleEditPage-organizationId">{t('features.iam.labels.organization')}</FieldLabel>
               <OrganizationSelect
                 onBlur={field.onBlur}
                 ref={field.ref}
@@ -454,7 +454,7 @@ function RoleEditForm({
           )}
         />
         <Field data-invalid={errors.name !== undefined}>
-          <FieldLabel htmlFor="name">{t('common.fields.name')}</FieldLabel>
+          <FieldLabel htmlFor="name">{t('common.labels.name')}</FieldLabel>
           <Input
             aria-invalid={errors.name !== undefined}
             aria-describedby={errors.name ? 'RoleEditPage-name-error' : undefined}
@@ -465,7 +465,7 @@ function RoleEditForm({
           <FieldError id="RoleEditPage-name-error">{errors.name?.message}</FieldError>
         </Field>
         <Field data-invalid={errors.description !== undefined}>
-          <FieldLabel htmlFor="description">{t('common.fields.description')}</FieldLabel>
+          <FieldLabel htmlFor="description">{t('common.labels.description')}</FieldLabel>
           <Textarea
             aria-invalid={errors.description !== undefined}
             aria-describedby={errors.description ? 'RoleEditPage-description-error' : undefined}
@@ -481,7 +481,7 @@ function RoleEditForm({
           render={({ field }) => (
             <Checkbox
               checked={field.value}
-              label={t('common.fields.isActive')}
+              label={t('common.labels.isActive')}
               onCheckedChange={field.onChange}
             />
           )}
@@ -492,7 +492,7 @@ function RoleEditForm({
           render={({ field }) => (
             <Checkbox
               checked={field.value}
-              label={t('common.fields.isDefault')}
+              label={t('common.labels.isDefault')}
               onCheckedChange={field.onChange}
             />
           )}

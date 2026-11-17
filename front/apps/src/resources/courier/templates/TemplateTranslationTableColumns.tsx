@@ -19,8 +19,8 @@ function ChannelBadge({ isConfigured, t }: { isConfigured: boolean; t: Translate
   return (
     <Badge variant={isConfigured ? 'active' : 'inactive'}>
       {t(isConfigured
-        ? 'features.courier.templates.channels.configured'
-        : 'features.courier.templates.channels.notConfigured')}
+        ? 'common.states.configured'
+        : 'common.states.notConfigured')}
     </Badge>
   )
 }
@@ -34,21 +34,21 @@ export function createTemplateTranslationColumns({
   return [
     {
       accessorKey: 'language',
-      header: t('common.fields.language'),
+      header: t('common.labels.language'),
     },
     {
       accessorKey: 'name',
-      header: t('common.fields.name'),
+      header: t('common.labels.name'),
     },
     {
       accessorKey: 'email',
       cell: ({ row }) => <ChannelBadge isConfigured={row.original.email !== null} t={t} />,
-      header: t('common.fields.email'),
+      header: t('common.labels.email'),
     },
     {
       accessorKey: 'notification',
       cell: ({ row }) => <ChannelBadge isConfigured={row.original.notification !== null} t={t} />,
-      header: t('features.courier.templates.channels.notification'),
+      header: t('features.courier.labels.notification'),
     },
     {
       cell: ({ row }) => (
@@ -71,7 +71,7 @@ export function createTemplateTranslationColumns({
       ),
       enableHiding: false,
       enableSorting: false,
-      header: t('common.fields.actions'),
+      header: t('common.labels.actions'),
       id: 'actions',
     },
   ]

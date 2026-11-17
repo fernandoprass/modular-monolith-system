@@ -84,7 +84,7 @@ export const InputSelect: React.FC<{
         {children({
           options,
           onValueChange,
-          placeholder: placeholder ?? t('common.lookup.select'),
+          placeholder: placeholder ?? t('common.actions.lookupSelect'),
           clearable,
           disabled,
           selectedValue,
@@ -104,11 +104,11 @@ export const InputSelect: React.FC<{
         <Command shouldFilter={false}>
           <CommandInput
             onValueChange={onSearchChange}
-            placeholder={t('common.lookup.search')}
+            placeholder={t('common.actions.lookupSearch')}
             value={searchValue}
           />
           <CommandList className="max-h-[unset] overflow-y-hidden">
-            <CommandEmpty>{t('common.lookup.empty')}</CommandEmpty>
+            <CommandEmpty>{t('common.messages.lookup.empty')}</CommandEmpty>
             <CommandGroup className="max-h-[16rem] min-h-[10rem] overflow-y-auto">
               {options.map((option) => {
                 const isSelected = selectedValue === option.value;

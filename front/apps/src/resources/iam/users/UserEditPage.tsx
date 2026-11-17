@@ -84,7 +84,7 @@ export function UserEditPage() {
       const loaded = await getUser(id)
       setUser(loaded)
     } catch (error) {
-      notifyError(error, t('common.errors.generic'))
+      notifyError(error, t('common.messages.errors.generic'))
     }
   }, [id, isCreate, notifyError, t])
 
@@ -95,7 +95,7 @@ export function UserEditPage() {
   return (
     <main className="page">
       <div className="page-header">
-        <h1 className="page-title">{isCreate ? t('features.iam.users.pages.create') : t('features.iam.users.pages.edit')}</h1>
+        <h1 className="page-title">{isCreate ? t('common.pages.create', { entity: t('common.labels.user') }) : t('common.pages.edit', { entity: t('common.labels.user') })}</h1>
         <Button onClick={() => navigate(APP_ROUTES.users)} type="button" variant="outline">
           <ArrowLeft data-icon="inline-start" />
           {t('common.actions.back')}
@@ -153,7 +153,7 @@ function UserEditFormPanel({
 
   async function handleSave(value: UserEditForm) {
     if (value.organizationId.trim().length === 0) {
-      showError(t('features.iam.users.messages.organizationRequired'))
+      showError(t('features.iam.messages.users.organizationRequired'))
       return
     }
 
@@ -178,7 +178,7 @@ function UserEditFormPanel({
         await onReload()
       }
     } catch (error) {
-      notifyError(error, t('common.errors.generic'))
+      notifyError(error, t('common.messages.errors.generic'))
     } finally {
       setIsSaving(false)
     }
@@ -193,7 +193,7 @@ function UserEditFormPanel({
             name="organizationId"
             render={({ field }) => (
               <Field data-disabled data-invalid={errors.organizationId !== undefined}>
-                <FieldLabel htmlFor="UserEditPage-organizationId">{t('common.fields.organizationId')}</FieldLabel>
+                <FieldLabel htmlFor="UserEditPage-organizationId">{t('features.iam.labels.organizationId')}</FieldLabel>
                 <OrganizationSelect
                   onBlur={field.onBlur}
                   ref={field.ref}
@@ -210,7 +210,7 @@ function UserEditFormPanel({
             )}
           />
           <Field data-invalid={errors.name !== undefined}>
-            <FieldLabel htmlFor="name">{t('common.fields.name')}</FieldLabel>
+            <FieldLabel htmlFor="name">{t('common.labels.name')}</FieldLabel>
             <Input
               aria-invalid={errors.name !== undefined}
               aria-describedby={errors.name ? 'UserEditPage-name-error' : undefined}
@@ -221,7 +221,7 @@ function UserEditFormPanel({
             <FieldError id="UserEditPage-name-error">{errors.name?.message}</FieldError>
           </Field>
           <Field data-disabled={!isCreate} data-invalid={errors.email !== undefined}>
-            <FieldLabel htmlFor="email">{t('common.fields.email')}</FieldLabel>
+            <FieldLabel htmlFor="email">{t('common.labels.email')}</FieldLabel>
             <Input
               aria-invalid={errors.email !== undefined}
               aria-describedby={errors.email ? 'UserEditPage-email-error' : undefined}
@@ -235,7 +235,7 @@ function UserEditFormPanel({
           </Field>
           {isCreate && (
             <Field data-invalid={errors.password !== undefined}>
-              <FieldLabel htmlFor="password">{t('common.fields.password')}</FieldLabel>
+              <FieldLabel htmlFor="password">{t('features.iam.labels.password')}</FieldLabel>
               <Input
                 aria-invalid={errors.password !== undefined}
                 aria-describedby={errors.password ? 'UserEditPage-password-error' : undefined}
@@ -252,7 +252,7 @@ function UserEditFormPanel({
             name="language"
             render={({ field }) => (
               <Field data-invalid={errors.language !== undefined}>
-                <FieldLabel htmlFor="UserEditPage-language">{t('common.fields.language')}</FieldLabel>
+                <FieldLabel htmlFor="UserEditPage-language">{t('common.labels.language')}</FieldLabel>
                 <Select
                   onBlur={field.onBlur}
                   ref={field.ref}
@@ -273,7 +273,7 @@ function UserEditFormPanel({
             render={({ field }) => (
               <Checkbox
                 checked={field.value}
-                label={t('common.fields.isActive')}
+                label={t('common.labels.isActive')}
                 onCheckedChange={field.onChange}
               />
             )}

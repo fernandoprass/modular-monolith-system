@@ -32,18 +32,18 @@ export const PERMISSION_MODULE_OPTIONS = [
 ] as const
 
 export const PERMISSION_RESOURCE_OPTIONS = [
-  { labelKey: 'resources.iam.users', value: 'users' },
-  { labelKey: 'resources.iam.parameters', value: 'parameters' },
-  { labelKey: 'resources.iam.organizations', value: 'organizations' },
-  { labelKey: 'resources.iam.organizationProfile', value: 'organizationprofile' },
-  { labelKey: 'resources.iam.permissions', value: 'permissions' },
-  { labelKey: 'resources.sentinel.auditLogs', value: 'auditlogs' },
-  { labelKey: 'resources.sentinel.systemLogs', value: 'systemlogs' },
-  { labelKey: 'resources.courier.emails', value: 'emails' },
-  { labelKey: 'resources.courier.emailTemplates', value: 'emailtemplates' },
-  { labelKey: 'resources.courier.templates', value: 'templates' },
-  { labelKey: 'resources.iam.roles', value: 'roles' },
-  { labelKey: 'resources.iam.userProfile', value: 'userprofile' },
+  { labelKey: 'common.labels.users', value: 'users' },
+  { labelKey: 'features.iam.labels.parameters', value: 'parameters' },
+  { labelKey: 'features.iam.labels.organizations', value: 'organizations' },
+  { labelKey: 'features.iam.labels.organizationProfile', value: 'organizationprofile' },
+  { labelKey: 'features.iam.labels.permissions', value: 'permissions' },
+  { labelKey: 'features.sentinel.labels.auditLogs', value: 'auditlogs' },
+  { labelKey: 'features.sentinel.labels.systemLogs', value: 'systemlogs' },
+  { labelKey: 'common.labels.emails', value: 'emails' },
+  { labelKey: 'features.courier.labels.emailTemplates', value: 'emailtemplates' },
+  { labelKey: 'features.courier.labels.templates', value: 'templates' },
+  { labelKey: 'features.iam.labels.roles', value: 'roles' },
+  { labelKey: 'features.iam.labels.userProfile', value: 'userprofile' },
 ] as const
 
 export const PERMISSION_ACTION_OPTIONS = [

@@ -86,7 +86,7 @@ export function NotificationListPage() {
         userId,
       }))
     } catch (error) {
-      notifyError(error, t('common.errors.generic'))
+      notifyError(error, t('common.messages.errors.generic'))
     } finally {
       setIsLoading(false)
     }
@@ -98,7 +98,7 @@ export function NotificationListPage() {
       showSuccess(message)
       await loadNotifications(pageNumber)
     } catch (error) {
-      notifyError(error, t('common.errors.generic'))
+      notifyError(error, t('common.messages.errors.generic'))
     }
   }, [loadNotifications, notifyError, pageNumber, showSuccess, t])
 
@@ -156,7 +156,7 @@ export function NotificationListPage() {
       setNotificationToDelete(null)
       await loadNotifications(pageNumber)
     } catch (error) {
-      notifyError(error, t('common.errors.generic'))
+      notifyError(error, t('common.messages.errors.generic'))
     }
   }
 
@@ -165,7 +165,7 @@ export function NotificationListPage() {
   return (
     <main className="page courier-notification-page">
       <div className="page-header">
-        <h1 className="page-title">{t('features.courier.notifications.pages.list')}</h1>
+        <h1 className="page-title">{t('features.courier.labels.notifications')}</h1>
       </div>
       <FilterToolbar onReset={handleReset} onSubmit={handleSubmit(handleSearch)}>
         <Controller
@@ -173,11 +173,11 @@ export function NotificationListPage() {
           name="module"
           render={({ field }) => (
             <Field>
-              <FieldLabel>{t('common.fields.module')}</FieldLabel>
+              <FieldLabel>{t('common.labels.module')}</FieldLabel>
               <Select
                 onValueChange={field.onChange}
                 options={[
-                  { label: t('common.filters.all'), value: NOTIFICATION_FILTER_VALUES.all },
+                  { label: t('common.actions.all'), value: NOTIFICATION_FILTER_VALUES.all },
                   ...toTranslatedOptions(NOTIFICATION_MODULE_OPTIONS, t),
                 ]}
                 value={field.value}
@@ -190,17 +190,17 @@ export function NotificationListPage() {
           name="status"
           render={({ field }) => (
             <Field>
-              <FieldLabel>{t('common.fields.status')}</FieldLabel>
+              <FieldLabel>{t('common.labels.status')}</FieldLabel>
               <Select
                 onValueChange={field.onChange}
                 options={[
-                  { label: t('common.filters.all'), value: NOTIFICATION_FILTER_VALUES.all },
+                  { label: t('common.actions.all'), value: NOTIFICATION_FILTER_VALUES.all },
                   {
-                    label: t('features.courier.notifications.statuses.unread'),
+                    label: t('features.courier.enums.notificationStatus.unread'),
                     value: NOTIFICATION_STATUSES.unread.toString(),
                   },
                   {
-                    label: t('features.courier.notifications.statuses.read'),
+                    label: t('features.courier.enums.notificationStatus.read'),
                     value: NOTIFICATION_STATUSES.read.toString(),
                   },
                 ]}
@@ -210,22 +210,22 @@ export function NotificationListPage() {
           )}
         />
         <Field>
-          <FieldLabel htmlFor="notification-title">{t('common.fields.title')}</FieldLabel>
+          <FieldLabel htmlFor="notification-title">{t('common.labels.title')}</FieldLabel>
           <Input id="notification-title" {...register('title')} />
         </Field>
         <Field>
-          <FieldLabel htmlFor="notification-date-from">{t('common.fields.dateFrom')}</FieldLabel>
+          <FieldLabel htmlFor="notification-date-from">{t('common.labels.dateFrom')}</FieldLabel>
           <Input id="notification-date-from" required type="datetime-local" {...register('dateFrom')} />
         </Field>
         <Field>
-          <FieldLabel htmlFor="notification-date-to">{t('common.fields.dateTo')}</FieldLabel>
+          <FieldLabel htmlFor="notification-date-to">{t('common.labels.dateTo')}</FieldLabel>
           <Input id="notification-date-to" required type="datetime-local" {...register('dateTo')} />
         </Field>
       </FilterToolbar>
       <DataTable
         columns={columns}
         data={result?.items ?? []}
-        emptyText={t('features.courier.notifications.messages.empty')}
+        emptyText={t('common.states.noResults', { entities: t('app.entities.notifications') })}
         isLoading={isLoading}
         loadingText={t('common.states.loading')}
         onSortingChange={setSorting}
@@ -246,9 +246,9 @@ export function NotificationListPage() {
         onConfirm={() => void handleDelete()}
         onOpenChange={(open) => !open && setNotificationToDelete(null)}
         open={notificationToDelete !== null}
-        title={t('features.courier.notifications.messages.deleteTitle')}
+        title={t('common.actions.delete')}
       >
-        {t('features.courier.notifications.messages.deleteConfirm')}
+        {t('common.messages.confirmations.delete', { entity: t('app.entities.notification') })}
       </ConfirmDialog>
     </main>
   )

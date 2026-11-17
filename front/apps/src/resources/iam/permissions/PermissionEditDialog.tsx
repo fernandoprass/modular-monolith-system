@@ -75,7 +75,7 @@ export function PermissionEditDialog({
       await onSaved()
       onClose()
     } catch (error) {
-      notifyError(error, t('common.errors.generic'))
+      notifyError(error, t('common.messages.errors.generic'))
     } finally {
       setIsSaving(false)
     }
@@ -96,7 +96,7 @@ export function PermissionEditDialog({
               name="module"
               render={({ field }) => (
                 <Field data-invalid={errors.module !== undefined}>
-                  <FieldLabel htmlFor="PermissionEditDialog-module">{t('common.fields.module')}</FieldLabel>
+                  <FieldLabel htmlFor="PermissionEditDialog-module">{t('common.labels.module')}</FieldLabel>
                   <Select
                     onBlur={field.onBlur}
                     ref={field.ref}
@@ -116,7 +116,7 @@ export function PermissionEditDialog({
               name="resource"
               render={({ field }) => (
                 <Field data-invalid={errors.resource !== undefined}>
-                  <FieldLabel htmlFor="PermissionEditDialog-resource">{t('common.fields.resource')}</FieldLabel>
+                  <FieldLabel htmlFor="PermissionEditDialog-resource">{t('common.labels.resource')}</FieldLabel>
                   <Select
                     onBlur={field.onBlur}
                     ref={field.ref}
@@ -132,7 +132,7 @@ export function PermissionEditDialog({
               )}
             />
             <Field data-invalid={errors.action !== undefined}>
-              <FieldLabel htmlFor="action">{t('common.fields.action')}</FieldLabel>
+              <FieldLabel htmlFor="action">{t('common.labels.action')}</FieldLabel>
               <Input
                 aria-invalid={errors.action !== undefined}
                 aria-describedby={errors.action ? 'PermissionEditDialog-action-error' : undefined}
@@ -143,7 +143,7 @@ export function PermissionEditDialog({
               <FieldError id="PermissionEditDialog-action-error">{errors.action?.message}</FieldError>
             </Field>
             <Field data-invalid={errors.title !== undefined}>
-              <FieldLabel htmlFor="title">{t('common.fields.title')}</FieldLabel>
+              <FieldLabel htmlFor="title">{t('common.labels.title')}</FieldLabel>
               <Input
                 aria-invalid={errors.title !== undefined}
                 aria-describedby={errors.title ? 'PermissionEditDialog-title-error' : undefined}
@@ -154,7 +154,7 @@ export function PermissionEditDialog({
               <FieldError id="PermissionEditDialog-title-error">{errors.title?.message}</FieldError>
             </Field>
             <Field data-invalid={errors.description !== undefined}>
-              <FieldLabel htmlFor="description">{t('common.fields.description')}</FieldLabel>
+              <FieldLabel htmlFor="description">{t('common.labels.description')}</FieldLabel>
               <Textarea
                 aria-invalid={errors.description !== undefined}
                 aria-describedby={errors.description ? 'PermissionEditDialog-description-error' : undefined}
@@ -170,7 +170,7 @@ export function PermissionEditDialog({
               render={({ field }) => (
                 <Checkbox
                   checked={field.value}
-                  label={t('common.fields.isActive')}
+                  label={t('common.labels.isActive')}
                   onCheckedChange={field.onChange}
                 />
               )}

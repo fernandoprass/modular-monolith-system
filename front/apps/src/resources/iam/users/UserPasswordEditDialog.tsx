@@ -54,7 +54,7 @@ export function UserPasswordEditDialog({ isOpen, onClose }: UserPasswordEditDial
 
   async function handleSave(value: UserPasswordUpdateForm) {
     if (value.passwordNew !== value.passwordConfirm) {
-      showError(t('features.iam.users.messages.passwordsDoNotMatch'))
+      showError(t('features.iam.messages.users.passwordsDoNotMatch'))
       return
     }
 
@@ -68,7 +68,7 @@ export function UserPasswordEditDialog({ isOpen, onClose }: UserPasswordEditDial
       showSuccess(message)
       onClose()
     } catch (error) {
-      notifyError(error, t('common.errors.generic'))
+      notifyError(error, t('common.messages.errors.generic'))
     } finally {
       setIsSaving(false)
     }
@@ -79,13 +79,13 @@ export function UserPasswordEditDialog({ isOpen, onClose }: UserPasswordEditDial
       backLabel={t('common.actions.back')}
       onOpenChange={(open) => !open && onClose()}
       open={isOpen}
-      title={t('features.iam.users.pages.changePassword')}
+      title={t('features.iam.actions.changePassword')}
     >
       <form noValidate onSubmit={handleSubmit(handleSave)}>
         <div className="dialog-body">
           <FieldGroup>
             <Field data-invalid={errors.passwordOld !== undefined}>
-              <FieldLabel htmlFor="passwordOld">{t('common.fields.currentPassword')}</FieldLabel>
+              <FieldLabel htmlFor="passwordOld">{t('features.iam.labels.currentPassword')}</FieldLabel>
               <Input
                 aria-invalid={errors.passwordOld !== undefined}
                 aria-describedby={errors.passwordOld ? 'UserPasswordEditDialog-passwordOld-error' : undefined}
@@ -99,7 +99,7 @@ export function UserPasswordEditDialog({ isOpen, onClose }: UserPasswordEditDial
               <FieldError id="UserPasswordEditDialog-passwordOld-error">{errors.passwordOld?.message}</FieldError>
             </Field>
             <Field data-invalid={errors.passwordNew !== undefined}>
-              <FieldLabel htmlFor="passwordNew">{t('common.fields.newPassword')}</FieldLabel>
+              <FieldLabel htmlFor="passwordNew">{t('features.iam.labels.newPassword')}</FieldLabel>
               <Input
                 aria-invalid={errors.passwordNew !== undefined}
                 aria-describedby={errors.passwordNew ? 'UserPasswordEditDialog-passwordNew-error' : undefined}
@@ -112,7 +112,7 @@ export function UserPasswordEditDialog({ isOpen, onClose }: UserPasswordEditDial
               <FieldError id="UserPasswordEditDialog-passwordNew-error">{errors.passwordNew?.message}</FieldError>
             </Field>
             <Field data-invalid={errors.passwordConfirm !== undefined}>
-              <FieldLabel htmlFor="passwordConfirm">{t('common.fields.confirmPassword')}</FieldLabel>
+              <FieldLabel htmlFor="passwordConfirm">{t('features.iam.labels.confirmPassword')}</FieldLabel>
               <Input
                 aria-invalid={errors.passwordConfirm !== undefined}
                 aria-describedby={errors.passwordConfirm ? 'UserPasswordEditDialog-passwordConfirm-error' : undefined}

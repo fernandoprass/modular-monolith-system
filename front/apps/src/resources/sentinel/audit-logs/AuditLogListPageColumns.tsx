@@ -23,23 +23,23 @@ export function createAuditLogTableColumns({
     {
       accessorKey: 'createdAt',
       cell: ({ row }) => formatUserDateTime(row.original.createdAt, locale),
-      header: t('common.fields.createdAt'),
+      header: t('common.labels.createdAt'),
     },
     {
       accessorKey: 'module',
-      header: t('common.fields.module'),
+      header: t('common.labels.module'),
     },
     {
       accessorKey: 'feature',
-      header: t('common.fields.feature'),
+      header: t('common.labels.feature'),
     },
     {
       accessorKey: 'action',
-      header: t('common.fields.action'),
+      header: t('common.labels.action'),
     },
     {
       accessorKey: 'description',
-      header: t('common.fields.description'),
+      header: t('common.labels.description'),
     },
     {
       cell: ({ row }) => (
@@ -55,7 +55,7 @@ export function createAuditLogTableColumns({
       ),
       enableHiding: false,
       enableSorting: false,
-      header: t('common.fields.actions'),
+      header: t('common.labels.actions'),
       id: 'actions',
     },
   ]

@@ -62,7 +62,7 @@ export function OrganizationSelect({
           value: organization.id,
         })))
       } catch (error) {
-        notifyError(error, t('common.errors.generic'))
+        notifyError(error, t('common.messages.errors.generic'))
       }
     }
 
@@ -76,7 +76,7 @@ export function OrganizationSelect({
       onSearchChange={setSearch}
       onValueChange={onValueChange}
       options={options}
-      placeholder={t('features.iam.organizations.placeholders.search')}
+      placeholder={t('common.pages.search', { entity: t('features.iam.labels.organization') })}
       searchValue={search}
       value={effectiveValue}
     >

@@ -63,7 +63,7 @@ export function OrganizationEditPage() {
       const loaded = await getOrganization(id)
       setOrganization(loaded)
     } catch (error) {
-      notifyError(error, t('common.errors.generic'))
+      notifyError(error, t('common.messages.errors.generic'))
     }
   }, [id, notifyError, t])
 
@@ -74,7 +74,7 @@ export function OrganizationEditPage() {
   return (
     <main className="page">
       <div className="page-header">
-        <h1 className="page-title">{t('features.iam.organizations.pages.edit')}</h1>
+        <h1 className="page-title">{t('common.pages.edit', { entity: t('features.iam.labels.organization') })}</h1>
         <Button onClick={() => navigate(APP_ROUTES.organizations)} type="button" variant="outline">
           <ArrowLeft data-icon="inline-start" />
           {t('common.actions.back')}
@@ -144,7 +144,7 @@ function OrganizationEditForm({
       showSuccess(message)
       await onSaved()
     } catch (error) {
-      notifyError(error, t('common.errors.generic'))
+      notifyError(error, t('common.messages.errors.generic'))
     } finally {
       setIsSaving(false)
     }
@@ -155,7 +155,7 @@ function OrganizationEditForm({
       <FieldGroup>
         <Field className="code-row" data-disabled>
           <div className="grow-field">
-            <FieldLabel>{t('common.fields.code')}</FieldLabel>
+            <FieldLabel>{t('common.labels.code')}</FieldLabel>
             <Input disabled value={organization.code} />
           </div>
           <Button onClick={onEditCode} type="button" variant="outline">
@@ -164,7 +164,7 @@ function OrganizationEditForm({
           </Button>
         </Field>
         <Field data-invalid={errors.name !== undefined}>
-          <FieldLabel htmlFor="name">{t('common.fields.name')}</FieldLabel>
+          <FieldLabel htmlFor="name">{t('common.labels.name')}</FieldLabel>
           <Input
             aria-invalid={errors.name !== undefined}
             aria-describedby={errors.name ? 'OrganizationEditPage-name-error' : undefined}
@@ -175,7 +175,7 @@ function OrganizationEditForm({
           <FieldError id="OrganizationEditPage-name-error">{errors.name?.message}</FieldError>
         </Field>
         <Field data-invalid={errors.description !== undefined}>
-          <FieldLabel htmlFor="description">{t('common.fields.description')}</FieldLabel>
+          <FieldLabel htmlFor="description">{t('common.labels.description')}</FieldLabel>
           <Textarea
             aria-invalid={errors.description !== undefined}
             aria-describedby={errors.description ? 'OrganizationEditPage-description-error' : undefined}
@@ -190,7 +190,7 @@ function OrganizationEditForm({
           name="defaultLanguage"
           render={({ field }) => (
             <Field data-invalid={errors.defaultLanguage !== undefined}>
-              <FieldLabel htmlFor="OrganizationEditPage-defaultLanguage">{t('common.fields.defaultLanguage')}</FieldLabel>
+              <FieldLabel htmlFor="OrganizationEditPage-defaultLanguage">{t('common.labels.defaultLanguage')}</FieldLabel>
               <Select
                 onBlur={field.onBlur}
                 ref={field.ref}
@@ -211,7 +211,7 @@ function OrganizationEditForm({
           render={({ field }) => (
             <Checkbox
               checked={field.value}
-              label={t('common.fields.isActive')}
+              label={t('common.labels.isActive')}
               onCheckedChange={field.onChange}
             />
           )}

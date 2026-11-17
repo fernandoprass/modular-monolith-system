@@ -142,7 +142,7 @@ export function AppLayout() {
                   {canOpenOrganizationSettings && (
                     <DropdownMenuItem onClick={handleOrganizationSettings}>
                       <Settings data-icon="inline-start" />
-                      {t('navigation.settings')}
+                      {t('common.labels.settings')}
                     </DropdownMenuItem>
                   )}
                 </DropdownMenuGroup>
@@ -176,7 +176,7 @@ export function AppLayout() {
                 <NavItem
                   active={location.pathname.startsWith(APP_ROUTES.organizations)}
                   icon={<Building2 data-icon="inline-start" />}
-                  label={t('features.iam.organizations.name')}
+                  label={t('features.iam.labels.organizations')}
                   to={APP_ROUTES.organizations}
                 />
               )}
@@ -184,7 +184,7 @@ export function AppLayout() {
                 <NavItem
                   active={location.pathname.startsWith(APP_ROUTES.users)}
                   icon={<Users data-icon="inline-start" />}
-                  label={t('features.iam.users.name')}
+                  label={t('common.labels.users')}
                   to={APP_ROUTES.users}
                 />
               )}
@@ -192,7 +192,7 @@ export function AppLayout() {
                 <NavItem
                   active={location.pathname.startsWith(APP_ROUTES.parameters)}
                   icon={<Settings data-icon="inline-start" />}
-                  label={t('features.iam.parameters.name')}
+                  label={t('features.iam.labels.parameters')}
                   to={APP_ROUTES.parameters}
                 />
               )}
@@ -208,7 +208,7 @@ export function AppLayout() {
                   <NavItem
                     active={location.pathname.startsWith(APP_ROUTES.roles)}
                     icon={<UserCog data-icon="inline-start" />}
-                    label={t('features.iam.roles.name')}
+                    label={t('features.iam.labels.roles')}
                     to={APP_ROUTES.roles}
                   />
                 )}
@@ -216,7 +216,7 @@ export function AppLayout() {
                   <NavItem
                     active={location.pathname.startsWith(APP_ROUTES.permissions)}
                     icon={<Key data-icon="inline-start" />}
-                    label={t('features.iam.permissions.name')}
+                    label={t('features.iam.labels.permissions')}
                     to={APP_ROUTES.permissions}
                   />
                 )}
@@ -224,7 +224,7 @@ export function AppLayout() {
                   <NavItem
                     active={location.pathname.startsWith(APP_ROUTES.userAccess)}
                     icon={<ShieldCheck data-icon="inline-start" />}
-                    label={t('features.iam.userAccess.name')}
+                    label={t('features.iam.labels.userAccess')}
                     to={APP_ROUTES.userAccess}
                   />
                 )}
@@ -243,7 +243,7 @@ export function AppLayout() {
                 <NavItem
                   active={location.pathname.startsWith(APP_ROUTES.emails)}
                   icon={<Mail data-icon="inline-start" />}
-                  label={t('features.courier.emails.name')}
+                  label={t('common.labels.emails')}
                   to={APP_ROUTES.emails}
                 />
               )}
@@ -251,7 +251,7 @@ export function AppLayout() {
                 <NavItem
                   active={location.pathname.startsWith(APP_ROUTES.notifications)}
                   icon={<Bell data-icon="inline-start" />}
-                  label={t('features.courier.notifications.name')}
+                  label={t('features.courier.labels.notifications')}
                   to={APP_ROUTES.notifications}
                 />
               )}
@@ -259,7 +259,7 @@ export function AppLayout() {
                 <NavItem
                   active={location.pathname.startsWith(APP_ROUTES.templates)}
                   icon={<FileText data-icon="inline-start" />}
-                  label={t('features.courier.templates.name')}
+                  label={t('features.courier.labels.templates')}
                   to={APP_ROUTES.templates}
                 />
               )}
@@ -276,7 +276,7 @@ export function AppLayout() {
                 <NavItem
                   active={location.pathname.startsWith(APP_ROUTES.auditLogs)}
                   icon={<ScrollText data-icon="inline-start" />}
-                  label={t('features.sentinel.auditLogs.name')}
+                  label={t('features.sentinel.labels.auditLogs')}
                   to={APP_ROUTES.auditLogs}
                 />
               )}
@@ -284,7 +284,7 @@ export function AppLayout() {
                 <NavItem
                   active={location.pathname.startsWith(APP_ROUTES.systemLogs)}
                   icon={<ScrollText data-icon="inline-start" />}
-                  label={t('features.sentinel.systemLogs.name')}
+                  label={t('features.sentinel.labels.systemLogs')}
                   to={APP_ROUTES.systemLogs}
                 />
               )}
@@ -321,7 +321,7 @@ export function AppLayout() {
           <div className="header-right">
             {canOpenNotifications && (
               <Button
-                aria-label={t('features.courier.notifications.pages.list')}
+                aria-label={t('features.courier.labels.notifications')}
                 className="notification-bell-button"
                 onClick={() => navigate(APP_ROUTES.notifications)}
                 size="icon"
@@ -348,15 +348,15 @@ export function AppLayout() {
                 <DropdownMenuGroup>
                   <DropdownMenuItem onClick={handleUserProfile}>
                     <UserRound data-icon="inline-start" />
-                    {t('features.iam.users.pages.profile')}
+                    {t('features.iam.labels.userProfile')}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setIsPasswordDialogOpen(true)}>
                     <LockKeyhole data-icon="inline-start" />
-                    {t('features.iam.users.pages.changePassword')}
+                    {t('features.iam.actions.changePassword')}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={handleLogout}>
                     <LogOut data-icon="inline-start" />
-                    {t('auth.userMenu.logout')}
+                    {t('features.iam.actions.logout')}
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
               </DropdownMenuContent>

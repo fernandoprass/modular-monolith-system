@@ -34,23 +34,23 @@ export function createNotificationTableColumns({
     {
       accessorKey: 'createdAt',
       cell: ({ row }) => formatUserDateTime(row.original.createdAt, language),
-      header: t('common.fields.createdAt'),
+      header: t('common.labels.createdAt'),
     },
     {
       accessorKey: 'module',
-      header: t('common.fields.module'),
+      header: t('common.labels.module'),
     },
     {
       accessorKey: 'feature',
-      header: t('common.fields.feature'),
+      header: t('common.labels.feature'),
     },
     {
       accessorKey: 'title',
-      header: t('common.fields.title'),
+      header: t('common.labels.title'),
     },
     {
       accessorKey: 'message',
-      header: t('common.fields.message'),
+      header: t('common.labels.message'),
     },
     {
       accessorKey: 'status',
@@ -59,12 +59,12 @@ export function createNotificationTableColumns({
           {getNotificationStatusEnum(row.original.status, t)}
         </Badge>
       ),
-      header: t('common.fields.status'),
+      header: t('common.labels.status'),
     },
     {
       accessorKey: 'readAt',
       cell: ({ row }) => row.original.readAt === null ? '' : formatUserDateTime(row.original.readAt, language),
-      header: t('common.fields.readAt'),
+      header: t('features.courier.labels.readAt'),
     },
     {
       cell: ({ row }) => (
@@ -74,14 +74,14 @@ export function createNotificationTableColumns({
               icon: <ExternalLink data-icon="inline-start" />,
               isVisible: row.original.actionLink.length > 0,
               key: 'open',
-              label: t('features.courier.notifications.actions.openLink'),
+              label: t('features.courier.actions.openLink'),
               onClick: () => onOpenLink(row.original),
             },
             {
               icon: <Check data-icon="inline-start" />,
               isVisible: canMarkRead && row.original.status === NOTIFICATION_STATUSES.unread,
               key: 'read',
-              label: t('features.courier.notifications.actions.markRead'),
+              label: t('features.courier.actions.markRead'),
               onClick: () => onMarkRead(row.original),
             },
             {
@@ -95,7 +95,7 @@ export function createNotificationTableColumns({
       ),
       enableHiding: false,
       enableSorting: false,
-      header: t('common.fields.actions'),
+      header: t('common.labels.actions'),
       id: 'actions',
     },
   ]

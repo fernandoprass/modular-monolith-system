@@ -33,7 +33,7 @@ export function UserPreferencePage({ embedded = false }: UserPreferencePageProps
     try {
       setTemplates(await getUserPreference())
     } catch (error) {
-      notifyError(error, t('common.errors.generic'))
+      notifyError(error, t('common.messages.errors.generic'))
     }
   }, [notifyError, t])
 
@@ -45,7 +45,7 @@ export function UserPreferencePage({ embedded = false }: UserPreferencePageProps
     <>
       {!embedded && (
         <div className="page-header">
-          <h1 className="page-title">{t('features.courier.userPreferences.pages.edit')}</h1>
+          <h1 className="page-title">{t('features.courier.labels.preferences')}</h1>
         </div>
       )}
       {templates === null ? (
@@ -110,7 +110,7 @@ function UserPreferenceFormPanel({ templates: initialTemplates, onSaved }: UserP
       showSuccess(message)
       await onSaved()
     } catch (error) {
-      notifyError(error, t('common.errors.generic'))
+      notifyError(error, t('common.messages.errors.generic'))
     } finally {
       setIsSaving(false)
     }
@@ -122,23 +122,23 @@ function UserPreferenceFormPanel({ templates: initialTemplates, onSaved }: UserP
         <CardContent>
           <div className="section-header">
             <div>
-              <h2 className="card-title">{t('features.courier.userPreferences.fields.communications')}</h2>
-              <p className="card-description">{t('features.courier.userPreferences.messages.communicationsHelp')}</p>
+              <h2 className="card-title">{t('features.courier.labels.communications')}</h2>
+              <p className="card-description">{t('features.courier.messages.userPreferences.communicationsHelp')}</p>
             </div>
           </div>
           {templates.length === 0 ? (
-            <p className="page-subtitle">{t('features.courier.userPreferences.messages.empty')}</p>
+            <p className="page-subtitle">{t('common.states.noResults', { entities: t('app.entities.optOutTemplates') })}</p>
           ) : (
             <div className="access-table-wrap user-preference-table-wrap">
               <table className="access-table user-preference-table">
                 <thead>
                   <tr>
-                    <th>{t('common.fields.module')}</th>
-                    <th>{t('common.fields.name')}</th>
+                    <th>{t('common.labels.module')}</th>
+                    <th>{t('common.labels.name')}</th>
                     <th>
                       <div className="user-preference-column-header">
                         <Checkbox
-                          aria-label={t('features.courier.userPreferences.fields.enableAllEmail')}
+                          aria-label={t('features.courier.messages.userPreferences.enableAllEmail')}
                           checked={
                             allEmailEnabled
                               ? true
@@ -148,13 +148,13 @@ function UserPreferenceFormPanel({ templates: initialTemplates, onSaved }: UserP
                           }
                           onCheckedChange={setAllEmailEnabled}
                         />
-                        <span>{t('common.fields.email')}</span>
+                        <span>{t('common.labels.email')}</span>
                       </div>
                     </th>
                     <th>
                       <div className="user-preference-column-header">
                         <Checkbox
-                          aria-label={t('features.courier.userPreferences.fields.enableAllNotification')}
+                          aria-label={t('features.courier.messages.userPreferences.enableAllNotification')}
                           checked={
                             allNotificationsEnabled
                               ? true
@@ -164,7 +164,7 @@ function UserPreferenceFormPanel({ templates: initialTemplates, onSaved }: UserP
                           }
                           onCheckedChange={setAllNotificationsEnabled}
                         />
-                        <span>{t('common.fields.notification')}</span>
+                        <span>{t('features.courier.labels.notification')}</span>
                       </div>
                     </th>
                   </tr>
@@ -180,7 +180,7 @@ function UserPreferenceFormPanel({ templates: initialTemplates, onSaved }: UserP
                           name={`templates.${index}.isEmailEnabled`}
                           render={({ field }) => (
                             <Checkbox
-                              aria-label={t('features.courier.userPreferences.fields.enableEmail')}
+                              aria-label={t('features.courier.messages.userPreferences.enableEmail')}
                               checked={field.value}
                               onCheckedChange={field.onChange}
                             />
@@ -193,7 +193,7 @@ function UserPreferenceFormPanel({ templates: initialTemplates, onSaved }: UserP
                           name={`templates.${index}.isNotificationEnabled`}
                           render={({ field }) => (
                             <Checkbox
-                              aria-label={t('features.courier.userPreferences.fields.enableNotification')}
+                              aria-label={t('features.courier.messages.userPreferences.enableNotification')}
                               checked={field.value}
                               onCheckedChange={field.onChange}
                             />

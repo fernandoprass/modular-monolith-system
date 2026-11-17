@@ -7,9 +7,9 @@ import {
 } from './templateTypes'
 
 const NOTIFICATION_SEVERITY_ENUM_KEYS: Record<NotificationSeverity, PlainTranslationKey> = {
-  [NOTIFICATION_SEVERITIES.information]: 'common.enums.notificationSeverity.information',
-  [NOTIFICATION_SEVERITIES.warning]: 'common.enums.notificationSeverity.warning',
-  [NOTIFICATION_SEVERITIES.critical]: 'common.enums.notificationSeverity.critical',
+  [NOTIFICATION_SEVERITIES.information]: 'features.courier.enums.notificationSeverity.information',
+  [NOTIFICATION_SEVERITIES.warning]: 'features.courier.enums.notificationSeverity.warning',
+  [NOTIFICATION_SEVERITIES.critical]: 'features.courier.enums.notificationSeverity.critical',
 }
 
 const RETENTION_POLICY_ENUM_KEYS: Record<RetentionPolicy, PlainTranslationKey> = {

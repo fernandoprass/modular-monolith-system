@@ -28,16 +28,16 @@ export function createUserTableColumns({
   return [
     {
       accessorKey: 'name',
-      header: t('common.fields.name'),
+      header: t('common.labels.name'),
     },
     {
       accessorKey: 'email',
-      header: t('common.fields.email'),
+      header: t('common.labels.email'),
     },
     {
       accessorKey: 'language',
       cell: ({ row }) => getLanguageLabel(row.original.language, t),
-      header: t('common.fields.language'),
+      header: t('common.labels.language'),
       sortingFn: (left, right) =>
         getLanguageLabel(left.original.language, t).localeCompare(getLanguageLabel(right.original.language, t)),
     },
@@ -45,10 +45,10 @@ export function createUserTableColumns({
       accessorKey: 'isActive',
       cell: ({ row }) => (
         <Badge variant={row.original.isActive ? 'active' : 'inactive'}>
-          {row.original.isActive ? t('common.status.active') : t('common.status.inactive')}
+          {row.original.isActive ? t('common.states.active') : t('common.states.inactive')}
         </Badge>
       ),
-      header: t('common.fields.isActive'),
+      header: t('common.labels.isActive'),
     },
     {
       cell: ({ row }) => (
@@ -77,7 +77,7 @@ export function createUserTableColumns({
       ),
       enableHiding: false,
       enableSorting: false,
-      header: t('common.fields.actions'),
+      header: t('common.labels.actions'),
       id: 'actions',
     },
   ]

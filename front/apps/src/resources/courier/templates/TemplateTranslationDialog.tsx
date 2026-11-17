@@ -43,7 +43,7 @@ function createTranslationSchema(t: Translate) {
     if (!value.emailEnabled && !value.notificationEnabled) {
       context.addIssue({
         code: 'custom',
-        message: t('features.courier.templates.validation.channelRequired'),
+        message: t('features.courier.messages.validation.templates.channelRequired'),
         path: ['emailEnabled'],
       })
     }
@@ -52,7 +52,7 @@ function createTranslationSchema(t: Translate) {
       if (value.emailSubject.trim().length < 10) {
         context.addIssue({
           code: 'custom',
-          message: t('features.courier.templates.validation.emailSubject'),
+          message: t('features.courier.messages.validation.templates.emailSubject'),
           path: ['emailSubject'],
         })
       }
@@ -60,7 +60,7 @@ function createTranslationSchema(t: Translate) {
       if (value.emailBody.trim().length === 0) {
         context.addIssue({
           code: 'custom',
-          message: t('features.courier.templates.validation.emailBody'),
+          message: t('features.courier.messages.validation.templates.emailBody'),
           path: ['emailBody'],
         })
       }
@@ -70,7 +70,7 @@ function createTranslationSchema(t: Translate) {
       if (value.notificationTitle.trim().length === 0) {
         context.addIssue({
           code: 'custom',
-          message: t('features.courier.templates.validation.notificationTitle'),
+          message: t('features.courier.messages.validation.templates.notificationTitle'),
           path: ['notificationTitle'],
         })
       }
@@ -78,7 +78,7 @@ function createTranslationSchema(t: Translate) {
       if (value.notificationMessage.trim().length === 0) {
         context.addIssue({
           code: 'custom',
-          message: t('features.courier.templates.validation.notificationMessage'),
+          message: t('features.courier.messages.validation.templates.notificationMessage'),
           path: ['notificationMessage'],
         })
       }
@@ -161,7 +161,7 @@ export function TemplateTranslationDialog({
       await onSaved()
       onClose()
     } catch (error) {
-      notifyError(error, t('common.errors.generic'))
+      notifyError(error, t('common.messages.errors.generic'))
     } finally {
       setIsSaving(false)
     }
@@ -174,8 +174,8 @@ export function TemplateTranslationDialog({
       onOpenChange={(open) => !open && onClose()}
       open={isOpen}
       title={translation === null
-        ? t('features.courier.templates.actions.addTranslation')
-        : t('features.courier.templates.actions.editTranslation')}
+        ? t('features.courier.actions.addTranslation')
+        : t('common.pages.edit', { entity: t('features.courier.labels.translation') })}
     >
       <form noValidate onSubmit={form.handleSubmit(handleSave)}>
         <div className="dialog-body template-translation-dialog-body">
@@ -185,7 +185,7 @@ export function TemplateTranslationDialog({
               name="language"
               render={({ field }) => (
                 <Field data-invalid={form.formState.errors.language !== undefined}>
-                  <FieldLabel htmlFor="TemplateTranslationDialog-language">{t('common.fields.language')}</FieldLabel>
+                  <FieldLabel htmlFor="TemplateTranslationDialog-language">{t('common.labels.language')}</FieldLabel>
                   <Select
                     onBlur={field.onBlur}
                     ref={field.ref}
@@ -195,7 +195,7 @@ export function TemplateTranslationDialog({
                     disabled={translation !== null}
                     onValueChange={field.onChange}
                     options={toTranslatedOptions(languageOptions, t)}
-                    placeholder={t('features.courier.templates.placeholders.language')}
+                    placeholder={t('common.actions.select', { label: t('common.labels.language') })}
                     value={field.value}
                   />
                   <FieldError id="TemplateTranslationDialog-language-error">{form.formState.errors.language?.message}</FieldError>
@@ -203,7 +203,7 @@ export function TemplateTranslationDialog({
               )}
             />
             <Field data-invalid={form.formState.errors.name !== undefined}>
-              <FieldLabel htmlFor="template-translation-name">{t('common.fields.name')}</FieldLabel>
+              <FieldLabel htmlFor="template-translation-name">{t('common.labels.name')}</FieldLabel>
               <Input
                 aria-invalid={form.formState.errors.name !== undefined}
                 aria-describedby={form.formState.errors.name ? 'TemplateTranslationDialog-name-error' : undefined}
@@ -225,7 +225,7 @@ export function TemplateTranslationDialog({
                     aria-invalid={form.formState.errors.emailEnabled !== undefined}
                     aria-describedby={form.formState.errors.emailEnabled ? 'template-email-enabled-error' : undefined}
                     checked={field.value}
-                    label={t('common.fields.email')}
+                    label={t('common.labels.email')}
                     onCheckedChange={field.onChange}
                   />
                 )}
@@ -233,7 +233,7 @@ export function TemplateTranslationDialog({
               <FieldError id="template-email-enabled-error">{form.formState.errors.emailEnabled?.message}</FieldError>
               <FieldGroup>
                 <Field data-invalid={form.formState.errors.emailSubject !== undefined}>
-                  <FieldLabel htmlFor="template-email-subject">{t('common.fields.subject')}</FieldLabel>
+                  <FieldLabel htmlFor="template-email-subject">{t('features.courier.labels.subject')}</FieldLabel>
                   <Input
                     aria-invalid={form.formState.errors.emailSubject !== undefined}
                     aria-describedby={form.formState.errors.emailSubject ? 'TemplateTranslationDialog-emailSubject-error' : undefined}
@@ -244,7 +244,7 @@ export function TemplateTranslationDialog({
                   <FieldError id="TemplateTranslationDialog-emailSubject-error">{form.formState.errors.emailSubject?.message}</FieldError>
                 </Field>
                 <Field data-invalid={form.formState.errors.emailBody !== undefined}>
-                  <FieldLabel htmlFor="template-email-body">{t('common.fields.body')}</FieldLabel>
+                  <FieldLabel htmlFor="template-email-body">{t('features.courier.labels.body')}</FieldLabel>
                   <Textarea
                     aria-invalid={form.formState.errors.emailBody !== undefined}
                     aria-describedby={form.formState.errors.emailBody ? 'TemplateTranslationDialog-emailBody-error' : undefined}
@@ -256,12 +256,12 @@ export function TemplateTranslationDialog({
                   <FieldError id="TemplateTranslationDialog-emailBody-error">{form.formState.errors.emailBody?.message}</FieldError>
                 </Field>
                 <div className="template-preview-panel">
-                  <span className="detail-label">{t('common.fields.preview')}</span>
+                  <span className="detail-label">{t('common.labels.preview')}</span>
                   <iframe
                     className="template-preview-frame"
                     sandbox=""
                     srcDoc={emailEnabled ? emailBody : ''}
-                    title={t('common.fields.preview')}
+                    title={t('common.labels.preview')}
                   />
                 </div>
               </FieldGroup>
@@ -274,14 +274,14 @@ export function TemplateTranslationDialog({
                 render={({ field }) => (
                   <Checkbox
                     checked={field.value}
-                    label={t('features.courier.templates.channels.notification')}
+                    label={t('features.courier.labels.notification')}
                     onCheckedChange={field.onChange}
                   />
                 )}
               />
               <FieldGroup>
                 <Field data-invalid={form.formState.errors.notificationTitle !== undefined}>
-                  <FieldLabel htmlFor="template-notification-title">{t('common.fields.title')}</FieldLabel>
+                  <FieldLabel htmlFor="template-notification-title">{t('common.labels.title')}</FieldLabel>
                   <Input
                     aria-invalid={form.formState.errors.notificationTitle !== undefined}
                     aria-describedby={form.formState.errors.notificationTitle ? 'TemplateTranslationDialog-notificationTitle-error' : undefined}
@@ -292,7 +292,7 @@ export function TemplateTranslationDialog({
                   <FieldError id="TemplateTranslationDialog-notificationTitle-error">{form.formState.errors.notificationTitle?.message}</FieldError>
                 </Field>
                 <Field data-invalid={form.formState.errors.notificationMessage !== undefined}>
-                  <FieldLabel htmlFor="template-notification-message">{t('common.fields.message')}</FieldLabel>
+                  <FieldLabel htmlFor="template-notification-message">{t('common.labels.message')}</FieldLabel>
                   <Textarea
                     aria-invalid={form.formState.errors.notificationMessage !== undefined}
                     aria-describedby={form.formState.errors.notificationMessage ? 'TemplateTranslationDialog-notificationMessage-error' : undefined}
@@ -305,7 +305,7 @@ export function TemplateTranslationDialog({
                 </Field>
                 <Field data-invalid={form.formState.errors.notificationActionLink !== undefined}>
                   <FieldLabel htmlFor="template-notification-action-link">
-                    {t('features.courier.templates.fields.actionLink')}
+                    {t('features.courier.labels.actionLink')}
                   </FieldLabel>
                   <Input
                     aria-invalid={form.formState.errors.notificationActionLink !== undefined}

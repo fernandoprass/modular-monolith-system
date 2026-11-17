@@ -87,7 +87,7 @@ export function TemplateEditPage() {
     try {
       setTemplate(await getTemplate(id))
     } catch (error) {
-      notifyError(error, t('common.errors.generic'))
+      notifyError(error, t('common.messages.errors.generic'))
     }
   }, [id, notifyError, t])
 
@@ -103,7 +103,7 @@ export function TemplateEditPage() {
     <main className="page courier-template-page">
       <div className="page-header">
         <h1 className="page-title">
-          {t(isCreate ? 'features.courier.templates.pages.create' : 'features.courier.templates.pages.edit')}
+          {t(isCreate ? 'common.pages.create' : 'common.pages.edit', { entity: t('features.courier.labels.template') })}
         </h1>
         <Button onClick={() => navigate(APP_ROUTES.templates)} type="button" variant="outline">
           <ArrowLeft data-icon="inline-start" />
@@ -157,7 +157,7 @@ function TemplateDetailsForm({ onSaved, template }: TemplateDetailsFormProps) {
         await onSaved()
       }
     } catch (error) {
-      notifyError(error, t('common.errors.generic'))
+      notifyError(error, t('common.messages.errors.generic'))
     } finally {
       setIsSaving(false)
     }
@@ -172,7 +172,7 @@ function TemplateDetailsForm({ onSaved, template }: TemplateDetailsFormProps) {
             name="module"
             render={({ field }) => (
               <Field data-invalid={form.formState.errors.module !== undefined}>
-                <FieldLabel htmlFor="TemplateEditPage-module">{t('common.fields.module')}</FieldLabel>
+                <FieldLabel htmlFor="TemplateEditPage-module">{t('common.labels.module')}</FieldLabel>
                 <Select
                   onBlur={field.onBlur}
                   ref={field.ref}
@@ -188,7 +188,7 @@ function TemplateDetailsForm({ onSaved, template }: TemplateDetailsFormProps) {
             )}
           />
           <Field data-invalid={form.formState.errors.key !== undefined}>
-            <FieldLabel htmlFor="template-key">{t('common.fields.key')}</FieldLabel>
+            <FieldLabel htmlFor="template-key">{t('common.labels.key')}</FieldLabel>
             <Input
               aria-invalid={form.formState.errors.key !== undefined}
               aria-describedby={form.formState.errors.key ? 'TemplateEditPage-key-error' : undefined}
@@ -205,7 +205,7 @@ function TemplateDetailsForm({ onSaved, template }: TemplateDetailsFormProps) {
             name="severity"
             render={({ field }) => (
               <Field data-invalid={form.formState.errors.severity !== undefined}>
-                <FieldLabel htmlFor="TemplateEditPage-severity">{t('common.fields.severity')}</FieldLabel>
+                <FieldLabel htmlFor="TemplateEditPage-severity">{t('features.courier.labels.severity')}</FieldLabel>
                 <Select
                   onBlur={field.onBlur}
                   ref={field.ref}
@@ -225,7 +225,7 @@ function TemplateDetailsForm({ onSaved, template }: TemplateDetailsFormProps) {
             name="retentionPolicy"
             render={({ field }) => (
               <Field data-invalid={form.formState.errors.retentionPolicy !== undefined}>
-                <FieldLabel htmlFor="TemplateEditPage-retentionPolicy">{t('common.fields.retentionPolicy')}</FieldLabel>
+                <FieldLabel htmlFor="TemplateEditPage-retentionPolicy">{t('common.labels.retentionPolicy')}</FieldLabel>
                 <Select
                   onBlur={field.onBlur}
                   ref={field.ref}
@@ -247,7 +247,7 @@ function TemplateDetailsForm({ onSaved, template }: TemplateDetailsFormProps) {
           render={({ field }) => (
             <Checkbox
               checked={field.value}
-              label={t('features.courier.templates.fields.allowOptOut')}
+              label={t('features.courier.labels.allowOptOut')}
               onCheckedChange={field.onChange}
             />
           )}
@@ -312,25 +312,25 @@ function TemplateTranslations({ onChanged, template }: TemplateTranslationsProps
       setTranslationToDelete(null)
       await onChanged()
     } catch (error) {
-      notifyError(error, t('common.errors.generic'))
+      notifyError(error, t('common.messages.errors.generic'))
     }
   }
 
   return (
     <section className="template-translations-section">
       <div className="section-header">
-        <h2 className="detail-section-title">{t('features.courier.templates.sections.translations')}</h2>
+        <h2 className="detail-section-title">{t('features.courier.labels.translations')}</h2>
         {canWrite && (
           <Button disabled={!canAddLanguage} onClick={handleAdd} type="button" variant="outline">
             <Plus data-icon="inline-start" />
-            {t('features.courier.templates.actions.addTranslation')}
+            {t('features.courier.actions.addTranslation')}
           </Button>
         )}
       </div>
       <DataTable
         columns={columns}
         data={template.translations}
-        emptyText={t('features.courier.templates.messages.noTranslations')}
+        emptyText={t('common.states.noResults', { entities: t('app.entities.translations') })}
         isLoading={false}
         loadingText={t('common.states.loading')}
         onSortingChange={setSorting}
@@ -351,9 +351,9 @@ function TemplateTranslations({ onChanged, template }: TemplateTranslationsProps
         onConfirm={() => void handleDelete()}
         onOpenChange={(open) => !open && setTranslationToDelete(null)}
         open={translationToDelete !== null}
-        title={t('features.courier.templates.messages.deleteTranslationTitle')}
+        title={t('common.actions.delete')}
       >
-        {t('features.courier.templates.messages.deleteTranslationConfirm')}
+        {t('common.messages.confirmations.delete', { entity: t('app.entities.languageTranslation') })}
       </ConfirmDialog>
     </section>
   )

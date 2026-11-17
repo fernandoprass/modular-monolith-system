@@ -36,7 +36,7 @@ export function UserAccessTabs({ userId }: UserAccessTabsProps) {
         }
       } catch (error) {
         if (isCurrent) {
-          notifyError(error, t('common.errors.generic'))
+          notifyError(error, t('common.messages.errors.generic'))
         }
       } finally {
         if (isCurrent) {
@@ -56,7 +56,7 @@ export function UserAccessTabs({ userId }: UserAccessTabsProps) {
         }
       } catch (error) {
         if (isCurrent) {
-          notifyError(error, t('common.errors.generic'))
+          notifyError(error, t('common.messages.errors.generic'))
         }
       } finally {
         if (isCurrent) {
@@ -76,8 +76,8 @@ export function UserAccessTabs({ userId }: UserAccessTabsProps) {
   return (
     <Tabs defaultValue="roles">
       <TabsList>
-        <TabsTrigger value="roles">{t('features.iam.users.tabs.roles')}</TabsTrigger>
-        <TabsTrigger value="permissions">{t('features.iam.users.tabs.permissions')}</TabsTrigger>
+        <TabsTrigger value="roles">{t('features.iam.labels.roles')}</TabsTrigger>
+        <TabsTrigger value="permissions">{t('features.iam.labels.permissions')}</TabsTrigger>
       </TabsList>
       <TabsContent value="roles">
         <RoleList isLoading={isLoadingRoles} roles={roles} />
@@ -105,7 +105,7 @@ function RoleList({ isLoading, roles }: RoleListProps) {
   if (roles.length === 0) {
     return (
       <Empty>
-        <EmptyDescription>{t('features.iam.users.messages.noRoles')}</EmptyDescription>
+        <EmptyDescription>{t('common.states.noResults', { entities: t('app.entities.roles') })}</EmptyDescription>
       </Empty>
     )
   }
@@ -115,13 +115,13 @@ function RoleList({ isLoading, roles }: RoleListProps) {
       <table className="access-table">
         <thead>
           <tr>
-            <th>{t('common.fields.name')}</th>
-            <th>{t('common.fields.startsAt')}</th>
-            <th>{t('common.fields.expiresAt')}</th>
-            <th>{t('common.fields.assignedBy')}</th>
-            <th>{t('common.fields.assignedAt')}</th>
-            <th>{t('common.fields.isActive')}</th>
-            <th>{t('common.fields.isDefault')}</th>
+            <th>{t('common.labels.name')}</th>
+            <th>{t('common.labels.startsAt')}</th>
+            <th>{t('common.labels.expiresAt')}</th>
+            <th>{t('features.iam.labels.assignedBy')}</th>
+            <th>{t('features.iam.labels.assignedAt')}</th>
+            <th>{t('common.labels.isActive')}</th>
+            <th>{t('common.labels.isDefault')}</th>
           </tr>
         </thead>
         <tbody>
@@ -134,7 +134,7 @@ function RoleList({ isLoading, roles }: RoleListProps) {
               <td>{formatUserDateTime(role.assignedAt, locale)}</td>
               <td>
                 <Badge variant={role.isActive ? 'active' : 'inactive'}>
-                  {role.isActive ? t('common.status.active') : t('common.status.inactive')}
+                  {role.isActive ? t('common.states.active') : t('common.states.inactive')}
                 </Badge>
               </td>
               <td>
@@ -165,7 +165,7 @@ function PermissionList({ isLoading, permissions }: PermissionListProps) {
   if (permissions.length === 0) {
     return (
       <Empty>
-        <EmptyDescription>{t('features.iam.users.messages.noPermissions')}</EmptyDescription>
+        <EmptyDescription>{t('common.states.noResults', { entities: t('app.entities.permissions') })}</EmptyDescription>
       </Empty>
     )
   }
@@ -175,8 +175,8 @@ function PermissionList({ isLoading, permissions }: PermissionListProps) {
       <table className="access-table">
         <thead>
           <tr>
-            <th>{t('common.fields.title')}</th>
-            <th>{t('common.fields.isActive')}</th>
+            <th>{t('common.labels.title')}</th>
+            <th>{t('common.labels.isActive')}</th>
           </tr>
         </thead>
         <tbody>
@@ -185,7 +185,7 @@ function PermissionList({ isLoading, permissions }: PermissionListProps) {
               <td>{permission.title}</td>
               <td>
                 <Badge variant={permission.isActive ? 'active' : 'inactive'}>
-                  {permission.isActive ? t('common.status.active') : t('common.status.inactive')}
+                  {permission.isActive ? t('common.states.active') : t('common.states.inactive')}
                 </Badge>
               </td>
             </tr>

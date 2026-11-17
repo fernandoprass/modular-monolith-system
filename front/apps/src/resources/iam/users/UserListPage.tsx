@@ -81,7 +81,7 @@ export function UserListPage() {
         pageSize,
       }))
     } catch (error) {
-      notifyError(error, t('common.errors.generic'))
+      notifyError(error, t('common.messages.errors.generic'))
     } finally {
       setIsLoading(false)
     }
@@ -118,7 +118,7 @@ export function UserListPage() {
       setDeleteTarget(null)
       await loadUsers(pageNumber)
     } catch (error) {
-      notifyError(error, t('common.errors.generic'))
+      notifyError(error, t('common.messages.errors.generic'))
     }
   }
 
@@ -127,7 +127,7 @@ export function UserListPage() {
   return (
     <main className="page">
       <div className="page-header">
-        <h1 className="page-title">{t('features.iam.users.pages.list')}</h1>
+        <h1 className="page-title">{t('common.labels.users')}</h1>
         {canCreate && (
           <Button onClick={() => navigate(APP_ROUTES.userCreate)} type="button">
             <Plus data-icon="inline-start" />
@@ -137,11 +137,11 @@ export function UserListPage() {
       </div>
       <FilterToolbar onReset={handleReset} onSubmit={handleSubmit(handleSearch)}>
         <Field>
-          <FieldLabel htmlFor="name">{t('common.fields.name')}</FieldLabel>
+          <FieldLabel htmlFor="name">{t('common.labels.name')}</FieldLabel>
           <Input id="name" {...register('name')} />
         </Field>
         <Field>
-          <FieldLabel htmlFor="email">{t('common.fields.email')}</FieldLabel>
+          <FieldLabel htmlFor="email">{t('common.labels.email')}</FieldLabel>
           <Input id="email" {...register('email')} />
         </Field>
         <Controller
@@ -149,13 +149,13 @@ export function UserListPage() {
           name="isActive"
           render={({ field }) => (
             <Field>
-              <FieldLabel>{t('common.fields.isActive')}</FieldLabel>
+              <FieldLabel>{t('common.labels.isActive')}</FieldLabel>
               <Select
                 onValueChange={field.onChange}
                 options={[
-                  { label: t('common.filters.all'), value: USER_FILTER_VALUES.all },
-                  { label: t('common.status.active'), value: 'true' },
-                  { label: t('common.status.inactive'), value: 'false' },
+                  { label: t('common.actions.all'), value: USER_FILTER_VALUES.all },
+                  { label: t('common.states.active'), value: 'true' },
+                  { label: t('common.states.inactive'), value: 'false' },
                 ]}
                 value={field.value}
               />
@@ -167,7 +167,7 @@ export function UserListPage() {
       <DataTable
         columns={columns}
         data={result?.items ?? []}
-        emptyText={t('features.iam.users.messages.empty')}
+        emptyText={t('common.states.noResults', { entities: t('app.entities.users') })}
         isLoading={isLoading}
         loadingText={t('common.states.loading')}
         onSortingChange={setSorting}
@@ -192,7 +192,7 @@ export function UserListPage() {
         open={deleteTarget !== null}
         title={t('common.actions.delete')}
       >
-        <p>{t('features.iam.users.messages.deleteConfirm')}</p>
+        <p>{t('common.messages.confirmations.delete', { entity: t('app.entities.user') })}</p>
       </ConfirmDialog>
     </main>
   )
