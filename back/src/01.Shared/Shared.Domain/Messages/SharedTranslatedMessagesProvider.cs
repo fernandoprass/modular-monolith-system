@@ -4,6 +4,11 @@ namespace Shared.Domain.Messages;
 
 public sealed class SharedTranslatedMessagesProvider : BaseTranslatedMessagesProvider
 {
+   public const string LookupInvalidTranslationsError = nameof(LookupInvalidTranslationsError);
+   public const string LookupInvalidParentError = nameof(LookupInvalidParentError);
+   public const string LookupDuplicateCodeError = nameof(LookupDuplicateCodeError);
+   public const string LookupInvalidSearchError = nameof(LookupInvalidSearchError);
+   public const string LookupInvalidPageError = nameof(LookupInvalidPageError);
    public const string FailedToRecordDataError = nameof(FailedToRecordDataError);
    public const string NotFoundError = nameof(NotFoundError);
    public const string NotFoundDetailedError = nameof(NotFoundDetailedError);
@@ -51,6 +56,26 @@ public sealed class SharedTranslatedMessagesProvider : BaseTranslatedMessagesPro
 
    private void AddErrorMessageTranslations()
    {
+      AddTranslation(LookupInvalidTranslationsError, LanguageOptions.English, "Provide at least one translation, with one entry per language.");
+      AddTranslation(LookupInvalidTranslationsError, LanguageOptions.Spanish, "Indique al menos una traducción, con una entrada por idioma.");
+      AddTranslation(LookupInvalidTranslationsError, LanguageOptions.PortugueseBrazil, "Informe ao menos uma tradução, com uma entrada por idioma.");
+
+      AddTranslation(LookupInvalidParentError, LanguageOptions.English, "The parent must exist in the same organization scope and must not create a cycle.");
+      AddTranslation(LookupInvalidParentError, LanguageOptions.Spanish, "El padre debe existir en el mismo ámbito de organización y no puede crear un ciclo.");
+      AddTranslation(LookupInvalidParentError, LanguageOptions.PortugueseBrazil, "O pai deve existir no mesmo escopo da organização e não pode criar um ciclo.");
+
+      AddTranslation(LookupDuplicateCodeError, LanguageOptions.English, "A translation code already exists for this type, parent, organization and language.");
+      AddTranslation(LookupDuplicateCodeError, LanguageOptions.Spanish, "Ya existe un código de traducción para este tipo, padre, organización e idioma.");
+      AddTranslation(LookupDuplicateCodeError, LanguageOptions.PortugueseBrazil, "Já existe um código de tradução para este tipo, pai, organização e idioma.");
+
+      AddTranslation(LookupInvalidSearchError, LanguageOptions.English, "Root-only searches cannot specify a parent.");
+      AddTranslation(LookupInvalidSearchError, LanguageOptions.Spanish, "Las búsquedas de raíces no pueden especificar un padre.");
+      AddTranslation(LookupInvalidSearchError, LanguageOptions.PortugueseBrazil, "Buscas de raízes não podem especificar um pai.");
+
+      AddTranslation(LookupInvalidPageError, LanguageOptions.English, "The requested page is outside the supported range.");
+      AddTranslation(LookupInvalidPageError, LanguageOptions.Spanish, "La página solicitada está fuera del rango permitido.");
+      AddTranslation(LookupInvalidPageError, LanguageOptions.PortugueseBrazil, "A página solicitada está fora do intervalo permitido.");
+
       AddTranslation(FailedToRecordDataError, LanguageOptions.English, "Failed to record data.");
       AddTranslation(FailedToRecordDataError, LanguageOptions.Spanish, "No se pudieron registrar los datos.");
       AddTranslation(FailedToRecordDataError, LanguageOptions.PortugueseBrazil, "Falha ao registrar os dados.");

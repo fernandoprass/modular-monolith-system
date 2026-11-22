@@ -4,6 +4,7 @@ using IAM.Domain.Entities;
 using IAM.Domain.Interfaces;
 using IAM.Domain.Repositories;
 using Sentinel.Domain;
+using Shared.Domain;
 
 namespace DatabaseSeeder.Authorization;
 
@@ -24,6 +25,10 @@ public class SeederPermissions(
       await AddSentinelPermissions(cancellationToken);
 
       await AddCourierPermissions(cancellationToken);
+      await AddPermissionAsync(SharedPermission.Lookups.Read, "Read Lookups", "Allows reading shared and own organization lookups.", cancellationToken);
+      await AddPermissionAsync(SharedPermission.Lookups.Create, "Create Lookups", "Allows creating lookups in the authorized scope.", cancellationToken);
+      await AddPermissionAsync(SharedPermission.Lookups.Update, "Update Lookups", "Allows updating lookups in the authorized scope.", cancellationToken);
+      await AddPermissionAsync(SharedPermission.Lookups.Delete, "Delete Lookups", "Allows deleting lookup hierarchies in the authorized scope.", cancellationToken);
 
       await iamUnitOfWork.SaveChangesAsync(cancellationToken);
 

@@ -1,0 +1,13 @@
+meta {
+  name: delete hierarchy
+  type: http
+  seq: 5
+}
+delete {
+  url: {{host.shared}}/api/{{version}}/shared/lookups/{{lookupId}}
+  body: none
+  auth: bearer
+}
+auth:bearer {
+  token: {{token}}
+}

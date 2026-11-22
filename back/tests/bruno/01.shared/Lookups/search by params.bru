@@ -1,0 +1,23 @@
+meta {
+  name: search by params
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{host.shared}}/api/{{version}}/shared/lookups?type=country&LanguageCode=pt-BR&IsActive=true
+  body: none
+  auth: bearer
+}
+
+params:query {
+  type: country
+  LanguageCode: pt-BR
+  IsActive: true
+  ~ParentId: 
+  ~RootsOnly: false
+}
+
+auth:bearer {
+  token: {{token}}
+}

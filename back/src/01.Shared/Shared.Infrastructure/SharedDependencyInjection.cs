@@ -28,6 +28,11 @@ public static class SharedDependencyInjection
       ConfigureDbContext(services, configuration, connectionString);
 
       services.AddScoped<ISharedUnitOfWork, SharedUnitOfWork>();
+      services.AddScoped<ILookupRepository, LookupRepository>();
+      services.AddScoped<ILookupQueryRepository, LookupQueryRepository>();
+      services.AddScoped<ILookupService, LookupService>();
+      services.AddScoped<ILookupValidator, LookupValidator>();
+      services.AddScoped<LookupAuditLogger>();
 
       services.AddScoped(typeof(IBaseRepository<,>), typeof(BaseRepository<,>));
       services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));

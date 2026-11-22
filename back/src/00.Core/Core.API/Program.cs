@@ -15,7 +15,8 @@ builder.Services
    .AddControllers()
    .AddApplicationPart(typeof(UserController).Assembly)
    .AddApplicationPart(typeof(LogController).Assembly)
-   .AddApplicationPart(typeof(EmailController).Assembly);
+   .AddApplicationPart(typeof(EmailController).Assembly)
+   .AddApplicationPart(typeof(Shared.API.Controllers.LookupController).Assembly);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

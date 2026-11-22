@@ -449,6 +449,32 @@ var validation = _userValidator.ValidateCreate(request, organizationExists, emai
 - IAM and other modules should publish system log events.
 - Sentinel should persist its own exception logs directly through repository/unit of work.
 
+### GlobalExceptionHandler
+
+- Follow the structure of `IAM.API/Middlewares/GlobalExceptionHandler.cs` and `Courier.API/Middlewares/GlobalExceptionHandler.cs` when adding or updating a module handler.
+- Implement `IExceptionHandler`. Keep the handler internal unless another assembly needs access.
+- Store the logger and service provider in explicit private readonly fields.
+- In `TryHandleAsync`, log the exception, call `ExceptionResponseWriter.WriteAsync`, then call a separate `PublishSystemLogAsync` method and return `true`.
+- Use the log template `An unhandled exception occurred: {Message}` with `exception.Message`.
+- In `PublishSystemLogAsync`, create a DI scope, resolve `IExceptionSystemLogPublisher`, and publish using the module-name constant.
+- Catch publishing failures and log them without replacing the original exception response.
+- Sentinel is the exception: use `SaveSystemLogAsync` and persist directly through its repository/unit of work.
+- Pass cancellation tokens through all calls.
+- Register `AddExceptionHandler<GlobalExceptionHandler>()` and `AddProblemDetails()` in the host. Call `UseExceptionHandler()` before endpoint execution.
+- Core uses its own handler when hosting module controllers. Standalone module hosts register their own handlers.
+
+### BaseController
+
+- Module controllers should inherit their module's `BaseController`. Do not duplicate response helpers such as `Respond` in individual controllers.
+- Use `IAM.API/Controllers/BaseController.cs` and `Shared.API/Controllers/BaseController.cs` as the pattern for new or updated base controllers.
+- Put `[ApiController]` on the base class and inject `IUserContext` for the response language.
+- Provide `OkOrNotFound` overloads for `Result<T>`, `Result`, and plain reference-type values.
+- Translate result messages with `WithLanguage(_userContext.Language)`, preserving `Result<T>.Data`.
+- Follow the existing mapping: a null result/value returns `404`; a result with errors returns `400`; success returns `200`.
+- A `NotFoundError` inside a non-null result therefore returns `400` under this convention. Do not introduce a different mapping in an individual controller.
+- Preserve endpoint-specific success responses such as `201 Created`. Use `Translate(result)` for their response bodies.
+- These helpers handle service results; authentication and authorization middleware retain their own HTTP responses.
+
 ---
 
 ## Date & Time Handling

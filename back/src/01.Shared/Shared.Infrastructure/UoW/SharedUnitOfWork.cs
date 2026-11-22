@@ -11,6 +11,7 @@ internal class SharedUnitOfWork(SharedDbContext dbContext, IUserContext userCont
    : UnitOfWork<SharedDbContext>(dbContext, userContext), ISharedUnitOfWork
 {
    private readonly SharedDbContext _dbContext = dbContext;
+   public ILookupRepository Lookups => new LookupRepository(_dbContext);
 
    public IParameterRepository Parameters => new ParameterRepository(_dbContext);
    public IParameterOverrideRepository ParameterOverrides => new ParameterOverrideRepository(_dbContext);

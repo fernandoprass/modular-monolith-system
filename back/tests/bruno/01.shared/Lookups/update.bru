@@ -1,0 +1,23 @@
+meta {
+  name: update translations
+  type: http
+  seq: 4
+}
+put {
+  url: {{host.shared}}/api/{{version}}/shared/lookups/{{lookupId}}
+  body: json
+  auth: bearer
+}
+auth:bearer {
+  token: {{token}}
+}
+body:json {
+  {
+    "parentId": null,
+    "isActive": true,
+    "translations": [
+      { "languageCode": "en-US", "code": "usa", "value": "United States of America", "description": null, "isActive": true },
+      { "languageCode": "pt-BR", "code": "eua", "value": "Estados Unidos", "description": null, "isActive": true }
+    ]
+  }
+}

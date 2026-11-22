@@ -17,6 +17,7 @@ public static partial class SharedConst
 
    public static class Entity
    {
+      public const string Lookup = nameof(Entities.Lookup);
       public const string Parameter = nameof(Entities.Parameter);
       public const string ParameterOverride = nameof(Entities.ParameterOverride);
    }
@@ -120,12 +121,15 @@ public static partial class SharedConst
    {
       public static class Feature
       {
+         public const string Lookups = "lookups";
          public const string Parameters = "parameters";
          public const string Security = "security";
       }
 
       public static class Action
       {
+         public const string Create = "create";
+         public const string Delete = "delete";
          public const string DeleteOverride = "delete-override";
          public const string SaveOverride = "save-override";
          public const string Update = "update";
@@ -138,6 +142,14 @@ public static partial class SharedConst
       public const int DefaultPageNumber = 1;
       public const int DefaultPageSize = 25;
       public const int MaxPageSize = 200;
+   }
+
+   public static class Lookup
+   {
+      public const int TypeMaxLength = 100;
+      public const int CodeMaxLength = 100;
+      public const int ValueMaxLength = 500;
+      public const int LanguageMaxLength = 35;
    }
 
    public static class Redis

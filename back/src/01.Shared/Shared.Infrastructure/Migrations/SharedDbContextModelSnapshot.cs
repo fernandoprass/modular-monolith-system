@@ -18,10 +18,134 @@ namespace Shared.Infrastructure.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("shared")
-                .HasAnnotation("ProductVersion", "10.0.7")
+                .HasAnnotation("ProductVersion", "10.0.11")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("Shared.Domain.Entities.Lookup", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("code");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<Guid?>("OrganizationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("organization_id");
+
+                    b.Property<Guid?>("ParentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("parent_id");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("type");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_lookups");
+
+                    b.HasIndex("ParentId")
+                        .HasDatabaseName("ix_lookups_parent_id");
+
+                    b.HasIndex("Type", "OrganizationId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_lookups_type_organization_id");
+
+                    b.ToTable("lookups", "shared", t =>
+                        {
+                            t.HasCheckConstraint("ck_lookups_parent", "parent_id IS NULL OR parent_id <> id");
+                        });
+                });
+
+            modelBuilder.Entity("Shared.Domain.Entities.LookupTranslation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("code");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<string>("LanguageCode")
+                        .IsRequired()
+                        .HasMaxLength(35)
+                        .HasColumnType("character varying(35)")
+                        .HasColumnName("language_code");
+
+                    b.Property<Guid>("LookupId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("lookup_id");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("value");
+
+                    b.HasKey("Id")
+                        .HasName("pk_lookup_translations");
+
+                    b.HasIndex("LookupId", "LanguageCode", "Code")
+                        .IsUnique()
+                        .HasDatabaseName("ix_lookup_translations_lookup_id_language_code_code");
+
+                    b.ToTable("lookup_translations", "shared");
+                });
 
             modelBuilder.Entity("Shared.Domain.Entities.Parameter", b =>
                 {
@@ -180,6 +304,29 @@ namespace Shared.Infrastructure.Migrations
                     b.ToTable("parameter_overrides", "shared");
                 });
 
+            modelBuilder.Entity("Shared.Domain.Entities.Lookup", b =>
+                {
+                    b.HasOne("Shared.Domain.Entities.Lookup", "Parent")
+                        .WithMany("Children")
+                        .HasForeignKey("ParentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasConstraintName("fk_lookups_lookups_parent_id");
+
+                    b.Navigation("Parent");
+                });
+
+            modelBuilder.Entity("Shared.Domain.Entities.LookupTranslation", b =>
+                {
+                    b.HasOne("Shared.Domain.Entities.Lookup", "Lookup")
+                        .WithMany("Translations")
+                        .HasForeignKey("LookupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_lookup_translations_lookups_lookup_id");
+
+                    b.Navigation("Lookup");
+                });
+
             modelBuilder.Entity("Shared.Domain.Entities.ParameterOverride", b =>
                 {
                     b.HasOne("Shared.Domain.Entities.Parameter", null)
@@ -188,6 +335,13 @@ namespace Shared.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_parameter_overrides_parameters_parameter_id");
+                });
+
+            modelBuilder.Entity("Shared.Domain.Entities.Lookup", b =>
+                {
+                    b.Navigation("Children");
+
+                    b.Navigation("Translations");
                 });
 
             modelBuilder.Entity("Shared.Domain.Entities.Parameter", b =>

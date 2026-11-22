@@ -4,6 +4,7 @@ using IAM.Domain;
 using IAM.Domain.Interfaces;
 using IAM.Domain.Repositories;
 using Sentinel.Domain;
+using Shared.Domain;
 
 namespace DatabaseSeeder.Authorization;
 
@@ -62,6 +63,7 @@ public class SeederRolePermissions(
       var sysAdminPermissions = GetIamSystemAdminPermissions();
       sysAdminPermissions.AddRange(GetSentinelSystemAdminPermissions());
       sysAdminPermissions.AddRange(GetCourierSystemAdminPermissions());
+      sysAdminPermissions.AddRange(GetSharedLookupPermissions());
 
       return sysAdminPermissions.Distinct().ToList();
    }
@@ -72,6 +74,7 @@ public class SeederRolePermissions(
       var orgAdminPermissions = GetIamOrganizationAdminPermissions();
       orgAdminPermissions.AddRange(GetSentinelOrganizationAdminPermissions());
       orgAdminPermissions.AddRange(GetCourierOrganizationAdminPermissions());
+      orgAdminPermissions.AddRange(GetSharedLookupPermissions());
 
       return orgAdminPermissions.Distinct().ToList();
    }
@@ -82,11 +85,15 @@ public class SeederRolePermissions(
       var userPermissions = GetIamUserPermissions().ToList();
       userPermissions.AddRange(GetSentinelUserPermissions());
       userPermissions.AddRange(GetCourierUserPermissions());
+      userPermissions.Add(SharedPermission.Lookups.Read);
 
       return userPermissions.Distinct().ToList();
    }
 
    #region Sentinel Permissions
+   private static List<string> GetSharedLookupPermissions() =>
+      [SharedPermission.Lookups.Read, SharedPermission.Lookups.Create, SharedPermission.Lookups.Update, SharedPermission.Lookups.Delete];
+
    private static List<string> GetSentinelSystemAdminPermissions()
    {
       var sentinelSytemAdminPermissions = new List<string>
