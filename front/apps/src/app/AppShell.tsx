@@ -40,6 +40,7 @@ import { COURIER_PERMISSIONS } from '../shared/courierConstants'
 import { IAM_PERMISSIONS, IAM_RESOURCES } from '../shared/iamConstants'
 import { hasPermissionCode, hasResourceAccess } from '../shared/permissions'
 import { SENTINEL_PERMISSIONS } from '../shared/sentinelConstants'
+import { SHARED_PERMISSIONS } from '../shared/sharedConstants'
 import { APP_CONSTANTS } from './appConstants'
 import { useTranslate } from './i18n/i18n'
 import { APP_ROUTES } from './routes'
@@ -54,9 +55,11 @@ export function AppLayout() {
   const [isCourierOpen, setIsCourierOpen] = useState(true)
   const [isIamOpen, setIsIamOpen] = useState(true)
   const [isSentinelOpen, setIsSentinelOpen] = useState(true)
+  const [isSettingsOpen, setIsSettingsOpen] = useState(true)
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false)
   const [unreadNotificationCount, setUnreadNotificationCount] = useState(0)
   const { isAuthenticated, logout, permissions, user } = useAuth()
+  const canOpenLookups = user?.isSystemAdmin === true || hasPermissionCode(permissions, SHARED_PERMISSIONS.lookups.read)
   const canOpenOrganizations = hasResourceAccess(permissions, IAM_RESOURCES.organizations)
   const canOpenUsers = hasResourceAccess(permissions, IAM_RESOURCES.users)
   const canOpenParameters = hasResourceAccess(permissions, IAM_RESOURCES.parameters)
@@ -290,6 +293,21 @@ export function AppLayout() {
               )}
             </NavGroup>
           )}
+        {canOpenLookups && (
+          <NavGroup
+            icon={<Settings data-icon="inline-start" />}
+            isOpen={isSettingsOpen}
+            label={t('navigation.groups.settings')}
+            onToggle={() => setIsSettingsOpen(current => !current)}
+          >
+            <NavItem
+              active={location.pathname.startsWith(APP_ROUTES.lookups)}
+              icon={<ScrollText data-icon="inline-start" />}
+              label={t('features.shared.labels.lookups')}
+              to={APP_ROUTES.lookups}
+            />
+          </NavGroup>
+        )}
         </nav>
         <div className="sidebar-footer">
           <span className="shell-current-section">{APP_CONSTANTS.appName}</span>

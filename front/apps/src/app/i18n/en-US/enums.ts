@@ -1,6 +1,11 @@
 // Grouped by backend definition ownership, regardless of where the enum is used.
 
 // 01. Shared
+export const LOOKUP_TYPE_ENUM = {
+  country: 'Country',
+  state: 'State',
+} as const
+
 export const AUDIT_PRIVACY_LEVEL_ENUM = {
   confidential: 'Confidential',
   high: 'High',

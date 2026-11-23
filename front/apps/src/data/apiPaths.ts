@@ -1,4 +1,9 @@
 export const API_PATHS = {
+  shared: {
+    lookups: {
+      list: '/api/v1/shared/lookups',
+    },
+  },
   courier: {
     emails: {
       byId: (id: string | number) => `/api/v1/emails/${id}`,

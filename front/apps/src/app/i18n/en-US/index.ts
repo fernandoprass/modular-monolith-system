@@ -1,5 +1,6 @@
 import { appMessages, MODULE_LABELS } from './app'
 import { commonMessages } from './common'
+import { sharedMessages } from './01.shared'
 import { sentinelMessages } from './02.sentinel'
 import { iamMessages } from './03.iam'
 import { courierMessages } from './04.courier'
@@ -11,6 +12,7 @@ export const enMessages = {
     courier: courierMessages,
     iam: iamMessages,
     sentinel: sentinelMessages,
+    shared: sharedMessages,
   },
   modules: MODULE_LABELS,
 } as const

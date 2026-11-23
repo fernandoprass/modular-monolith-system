@@ -2,6 +2,7 @@ import { useEffect, useMemo, type PropsWithChildren } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 
 import { AuthProvider, useAuth } from '../auth/AuthProvider'
+import { LookupListPage } from '../resources/shared/lookups/LookupListPage'
 import { LoginPage } from '../auth/LoginPage'
 import { EmailCreatePage } from '../resources/courier/emails/EmailCreatePage'
 import { EmailListPage } from '../resources/courier/emails/EmailListPage'
@@ -45,6 +46,7 @@ function App() {
               <Route path={APP_ROUTES.registerOrganization} element={<PublicOrganizationCreatePage />} />
               <Route element={<AppLayout />}>
                 <Route index element={<DashboardPage />} />
+                <Route path={APP_ROUTES.lookups.slice(1)} element={<LookupListPage />} />
                 <Route path={APP_ROUTES.organizationProfile.slice(1)} element={<OrganizationProfilePage />} />
                 <Route path={APP_ROUTES.organizationSettings.slice(1)} element={<ParameterSettingsPage owner="organization" />} />
                 <Route path={APP_ROUTES.organizations.slice(1)} element={<OrganizationListPage />} />
