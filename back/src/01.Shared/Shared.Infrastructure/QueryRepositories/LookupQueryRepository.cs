@@ -9,6 +9,19 @@ namespace Shared.Infrastructure.QueryRepositories;
 
 internal class LookupQueryRepository(SharedDbContext dbContext) : ILookupQueryRepository
 {
+   public async Task<LookupTypeDto?> GetTypeAsync(string type, CancellationToken cancellationToken = default)
+   {
+      cancellationToken.ThrowIfCancellationRequested();
+      if (string.IsNullOrWhiteSpace(type)) return null;
+
+      var normalizedType = type.Trim().ToLowerInvariant();
+      return await dbContext.LookupTypes.AsNoTracking()
+         .Where(x => x.Type == normalizedType)
+         .Select(x => new LookupTypeDto(x.Type, x.AllowTenantEdit, x.CodeFormat,
+            x.CodeMaxLength, x.CodePaddingWidth, x.CodeGenerationMode))
+         .SingleOrDefaultAsync(cancellationToken);
+   }
+
    public async Task<LookupDto?> GetByIdAsync(Guid id, Guid organizationId, CancellationToken cancellationToken = default)
    {
       var lookup = await dbContext.Lookups.AsNoTracking()
@@ -42,6 +55,15 @@ internal class LookupQueryRepository(SharedDbContext dbContext) : ILookupQueryRe
          query = query.Where(x => x.IsActive == request.IsActive);
       }
 
+      if (!string.IsNullOrWhiteSpace(request.Code) || !string.IsNullOrWhiteSpace(request.Value))
+      {
+         var codePattern = string.IsNullOrWhiteSpace(request.Code) ? null : "%" + EscapeLike(request.Code.Trim()) + "%";
+         var valuePattern = string.IsNullOrWhiteSpace(request.Value) ? null : "%" + EscapeLike(request.Value.Trim()) + "%";
+         query = query.Where(x => x.Translations.Any(t => t.IsActive && t.LanguageCode == language &&
+            (codePattern == null || EF.Functions.ILike(t.Code, codePattern, "\\")) &&
+            (valuePattern == null || EF.Functions.ILike(t.Value, valuePattern, "\\"))));
+      }
+
       var pageSize = Math.Min(request.PageSize, SharedConst.Pagination.MaxPageSize);
       var count = await query.LongCountAsync(cancellationToken);
       var items = await query.OrderBy(x => x.Type)
@@ -61,4 +83,7 @@ internal class LookupQueryRepository(SharedDbContext dbContext) : ILookupQueryRe
          .ToListAsync(cancellationToken);
       return new(items, request.PageNumber, pageSize, count, (int)Math.Ceiling(count / (double)pageSize));
    }
+
+   private static string EscapeLike(string value) =>
+      value.Replace("\\", "\\\\").Replace("%", "\\%").Replace("_", "\\_");
 }

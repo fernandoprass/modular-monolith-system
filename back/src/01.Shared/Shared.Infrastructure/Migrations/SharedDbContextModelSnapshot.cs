@@ -147,6 +147,50 @@ namespace Shared.Infrastructure.Migrations
                     b.ToTable("lookup_translations", "shared");
                 });
 
+            modelBuilder.Entity("Shared.Domain.Entities.LookupType", b =>
+                {
+                    b.Property<string>("Type")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("type");
+
+                    b.Property<bool>("AllowTenantEdit")
+                        .HasColumnType("boolean")
+                        .HasColumnName("allow_tenant_edit");
+
+                    b.Property<byte>("CodeFormat")
+                        .HasColumnType("smallint")
+                        .HasColumnName("code_format");
+
+                    b.Property<byte>("CodeGenerationMode")
+                        .HasColumnType("smallint")
+                        .HasColumnName("code_generation_mode");
+
+                    b.Property<int>("CodeMaxLength")
+                        .HasColumnType("integer")
+                        .HasColumnName("code_max_length");
+
+                    b.Property<int?>("CodePaddingWidth")
+                        .HasColumnType("integer")
+                        .HasColumnName("code_padding_width");
+
+                    b.HasKey("Type")
+                        .HasName("pk_lookup_types");
+
+                    b.ToTable("lookup_types", "shared", t =>
+                        {
+                            t.HasCheckConstraint("ck_lookup_types_code_format", "code_format IN (1, 2)");
+
+                            t.HasCheckConstraint("ck_lookup_types_code_generation_mode", "code_generation_mode IN (1, 2, 3)");
+
+                            t.HasCheckConstraint("ck_lookup_types_code_max_length", "code_max_length > 0 AND code_max_length <= 100");
+
+                            t.HasCheckConstraint("ck_lookup_types_code_padding_width", "code_padding_width IS NULL OR (code_padding_width > 0 AND code_padding_width <= code_max_length)");
+
+                            t.HasCheckConstraint("ck_lookup_types_type", "type <> '' AND type = lower(btrim(type))");
+                        });
+                });
+
             modelBuilder.Entity("Shared.Domain.Entities.Parameter", b =>
                 {
                     b.Property<Guid>("Id")

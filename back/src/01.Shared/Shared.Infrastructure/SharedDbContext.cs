@@ -9,6 +9,7 @@ public class SharedDbContext(DbContextOptions<SharedDbContext> options) : DbCont
 {
    internal DbSet<Lookup> Lookups { get; set; }
    internal DbSet<LookupTranslation> LookupTranslations { get; set; }
+   internal DbSet<LookupType> LookupTypes { get; set; }
    public DbSet<Parameter> Parameters { get; set; }
    public DbSet<ParameterOverride> ParameterOverrides { get; set; }
 
@@ -21,6 +22,7 @@ public class SharedDbContext(DbContextOptions<SharedDbContext> options) : DbCont
       modelBuilder.ApplyConfiguration<ParameterOverride>(new ParameterOverrideConfiguration());
       modelBuilder.ApplyConfiguration(new LookupConfiguration());
       modelBuilder.ApplyConfiguration(new LookupTranslationConfiguration());
+      modelBuilder.ApplyConfiguration(new LookupTypeConfiguration());
    }
 
    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)

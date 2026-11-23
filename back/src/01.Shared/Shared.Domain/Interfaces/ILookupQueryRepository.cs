@@ -5,6 +5,7 @@ namespace Shared.Domain.Interfaces;
 
 internal interface ILookupQueryRepository
 {
+   Task<LookupTypeDto?> GetTypeAsync(string type, CancellationToken cancellationToken = default);
    Task<LookupDto?> GetByIdAsync(Guid id, Guid organizationId, CancellationToken cancellationToken = default);
    Task<PagedResultDto<LookupLiteDto>> GetAsync(LookupSearchRequest request, Guid organizationId,
       CancellationToken cancellationToken = default);
